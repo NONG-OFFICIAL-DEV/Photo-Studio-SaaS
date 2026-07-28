@@ -17,12 +17,12 @@ class CustomerActionsTest extends TestCase
         [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
         $customer = Customer::factory()->create(['tenant_id' => $tenant->id]);
 
-        $this->withHeaders($this->authHeader($owner))
+        $this->actingAsUser($owner)
             ->postJson("/api/v1/customers/{$customer->id}/favorite")
             ->assertOk()
             ->assertJsonPath('data.is_favorite', true);
 
-        $this->withHeaders($this->authHeader($owner))
+        $this->actingAsUser($owner)
             ->postJson("/api/v1/customers/{$customer->id}/favorite")
             ->assertOk()
             ->assertJsonPath('data.is_favorite', false);
@@ -33,13 +33,13 @@ class CustomerActionsTest extends TestCase
         [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
         $customer = Customer::factory()->create(['tenant_id' => $tenant->id]);
 
-        $this->withHeaders($this->authHeader($owner))
+        $this->actingAsUser($owner)
             ->postJson("/api/v1/customers/{$customer->id}/blacklist", ['reason' => 'Bounced check'])
             ->assertOk()
             ->assertJsonPath('data.is_blacklisted', true)
             ->assertJsonPath('data.blacklist_reason', 'Bounced check');
 
-        $this->withHeaders($this->authHeader($owner))
+        $this->actingAsUser($owner)
             ->postJson("/api/v1/customers/{$customer->id}/unblacklist")
             ->assertOk()
             ->assertJsonPath('data.is_blacklisted', false)
@@ -51,7 +51,7 @@ class CustomerActionsTest extends TestCase
         [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
         $customer = Customer::factory()->create(['tenant_id' => $tenant->id]);
 
-        $this->withHeaders($this->authHeader($owner))
+        $this->actingAsUser($owner)
             ->postJson("/api/v1/customers/{$customer->id}/blacklist", [])
             ->assertStatus(422);
     }
@@ -61,7 +61,7 @@ class CustomerActionsTest extends TestCase
         [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
         $customer = Customer::factory()->create(['tenant_id' => $tenant->id]);
 
-        $note = $this->withHeaders($this->authHeader($owner))
+        $note = $this->actingAsUser($owner)
             ->postJson("/api/v1/customers/{$customer->id}/notes", ['note' => 'Prefers outdoor shoots'])
             ->assertCreated()
             ->assertJsonPath('data.note', 'Prefers outdoor shoots')
@@ -70,7 +70,7 @@ class CustomerActionsTest extends TestCase
 
         $this->assertDatabaseHas('customer_notes', ['id' => $note['id'], 'customer_id' => $customer->id]);
 
-        $this->withHeaders($this->authHeader($owner))
+        $this->actingAsUser($owner)
             ->deleteJson("/api/v1/customers/{$customer->id}/notes/{$note['id']}")
             ->assertOk();
 
@@ -82,7 +82,7 @@ class CustomerActionsTest extends TestCase
         [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
         $customer = Customer::factory()->create(['tenant_id' => $tenant->id, 'name' => 'Before Name']);
 
-        $this->withHeaders($this->authHeader($owner))
+        $this->actingAsUser($owner)
             ->putJson("/api/v1/customers/{$customer->id}", ['name' => 'After Name']);
 
         $this->assertDatabaseHas('activity_log', [

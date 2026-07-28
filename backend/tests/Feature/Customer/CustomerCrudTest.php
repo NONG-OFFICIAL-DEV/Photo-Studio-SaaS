@@ -16,7 +16,7 @@ class CustomerCrudTest extends TestCase
     {
         [, $owner] = $this->createTenantWithUser(TenantRole::Owner);
 
-        $response = $this->withHeaders($this->authHeader($owner))->postJson('/api/v1/customers', [
+        $response = $this->actingAsUser($owner)->postJson('/api/v1/customers', [
             'name' => 'Sok Pisey',
             'email' => 'pisey@example.test',
             'phone' => '012345678',
@@ -35,7 +35,7 @@ class CustomerCrudTest extends TestCase
     {
         [, $owner] = $this->createTenantWithUser(TenantRole::Owner);
 
-        $this->withHeaders($this->authHeader($owner))
+        $this->actingAsUser($owner)
             ->postJson('/api/v1/customers', ['email' => 'noname@example.test'])
             ->assertStatus(422)
             ->assertJsonPath('meta.errors.name.0', 'The name field is required.');
@@ -46,17 +46,17 @@ class CustomerCrudTest extends TestCase
         [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
         $customer = Customer::factory()->create(['tenant_id' => $tenant->id, 'name' => 'Original Name']);
 
-        $this->withHeaders($this->authHeader($owner))
+        $this->actingAsUser($owner)
             ->getJson("/api/v1/customers/{$customer->id}")
             ->assertOk()
             ->assertJsonPath('data.name', 'Original Name');
 
-        $this->withHeaders($this->authHeader($owner))
+        $this->actingAsUser($owner)
             ->putJson("/api/v1/customers/{$customer->id}", ['name' => 'Updated Name'])
             ->assertOk()
             ->assertJsonPath('data.name', 'Updated Name');
 
-        $this->withHeaders($this->authHeader($owner))
+        $this->actingAsUser($owner)
             ->deleteJson("/api/v1/customers/{$customer->id}")
             ->assertOk();
 
@@ -67,11 +67,11 @@ class CustomerCrudTest extends TestCase
     {
         [, $owner] = $this->createTenantWithUser(TenantRole::Owner);
 
-        $tag = $this->withHeaders($this->authHeader($owner))
+        $tag = $this->actingAsUser($owner)
             ->postJson('/api/v1/customers/tags', ['name' => 'VIP', 'color' => '#FF0000'])
             ->json('data');
 
-        $response = $this->withHeaders($this->authHeader($owner))->postJson('/api/v1/customers', [
+        $response = $this->actingAsUser($owner)->postJson('/api/v1/customers', [
             'name' => 'Tagged Customer',
             'tag_ids' => [$tag['id']],
         ]);

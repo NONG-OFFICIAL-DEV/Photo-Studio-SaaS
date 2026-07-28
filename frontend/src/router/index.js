@@ -23,5 +23,9 @@ router.beforeEach(async (to) => {
     return { name: 'dashboard' }
   }
 
+  if (to.meta.permission && !auth.hasPermission(to.meta.permission)) {
+    return { name: 'dashboard' }
+  }
+
   return true
 })

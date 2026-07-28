@@ -18,7 +18,7 @@ class CustomerSearchFilterTest extends TestCase
         Customer::factory()->create(['tenant_id' => $tenant->id, 'name' => 'Alice Wonderland']);
         Customer::factory()->create(['tenant_id' => $tenant->id, 'name' => 'Bob Builder']);
 
-        $this->withHeaders($this->authHeader($owner))
+        $this->actingAsUser($owner)
             ->getJson('/api/v1/customers?search=Alice')
             ->assertOk()
             ->assertJsonCount(1, 'data')
@@ -31,7 +31,7 @@ class CustomerSearchFilterTest extends TestCase
         Customer::factory()->favorite()->create(['tenant_id' => $tenant->id, 'name' => 'Favorite One']);
         Customer::factory()->create(['tenant_id' => $tenant->id, 'name' => 'Regular One']);
 
-        $this->withHeaders($this->authHeader($owner))
+        $this->actingAsUser($owner)
             ->getJson('/api/v1/customers?is_favorite=1')
             ->assertOk()
             ->assertJsonCount(1, 'data')
@@ -44,7 +44,7 @@ class CustomerSearchFilterTest extends TestCase
         Customer::factory()->blacklisted()->create(['tenant_id' => $tenant->id, 'name' => 'Blacklisted One']);
         Customer::factory()->create(['tenant_id' => $tenant->id, 'name' => 'Clean One']);
 
-        $this->withHeaders($this->authHeader($owner))
+        $this->actingAsUser($owner)
             ->getJson('/api/v1/customers?is_blacklisted=1')
             ->assertOk()
             ->assertJsonCount(1, 'data')
@@ -55,7 +55,7 @@ class CustomerSearchFilterTest extends TestCase
     {
         [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
 
-        $tag = $this->withHeaders($this->authHeader($owner))
+        $tag = $this->actingAsUser($owner)
             ->postJson('/api/v1/customers/tags', ['name' => 'VIP'])
             ->json('data');
 
@@ -63,7 +63,7 @@ class CustomerSearchFilterTest extends TestCase
         $tagged->tags()->attach($tag['id']);
         Customer::factory()->create(['tenant_id' => $tenant->id, 'name' => 'Untagged']);
 
-        $this->withHeaders($this->authHeader($owner))
+        $this->actingAsUser($owner)
             ->getJson("/api/v1/customers?tag_id={$tag['id']}")
             ->assertOk()
             ->assertJsonCount(1, 'data')
@@ -77,7 +77,7 @@ class CustomerSearchFilterTest extends TestCase
         Customer::factory()->create(['tenant_id' => $tenant->id, 'name' => 'Zack']);
         Customer::factory()->create(['tenant_id' => $tenant->id, 'name' => 'Mia']);
 
-        $response = $this->withHeaders($this->authHeader($owner))
+        $response = $this->actingAsUser($owner)
             ->getJson('/api/v1/customers?perPage=2&page=1&sortBy=name&sortDesc=0')
             ->assertOk()
             ->assertJsonPath('meta.total', 3)

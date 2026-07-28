@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { Field } from 'vee-validate'
 import AppForm from '@/components/common/AppForm.vue'
 import { forgotPasswordSchema } from '@/utils/validators'
-import { authService } from '@/services/auth.service'
+import { forgotPasswordApi } from '@/apis/auth.api'
 
 const { t } = useI18n()
 
@@ -18,7 +18,7 @@ async function onSubmit(values) {
   successMessage.value = ''
 
   try {
-    const { data } = await authService.forgotPassword(values)
+    const { data } = await forgotPasswordApi(values)
     successMessage.value = data.message
   } catch (error) {
     errorMessage.value = error.response?.data?.message || 'Something went wrong.'

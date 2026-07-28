@@ -26,6 +26,12 @@ export const routes = [
     meta: { requiresAuth: true },
     children: [
       { path: '', name: 'dashboard', component: () => import('@/pages/Dashboard.vue'), meta: { titleKey: 'menu.dashboard' } },
+      {
+        path: 'customers',
+        name: 'customers',
+        component: () => import('@/pages/customers/CustomersList.vue'),
+        meta: { titleKey: 'menu.customers', permission: 'customers.view' },
+      },
     ],
   },
   {

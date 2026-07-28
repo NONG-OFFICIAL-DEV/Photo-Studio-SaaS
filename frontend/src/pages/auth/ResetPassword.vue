@@ -5,7 +5,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { Field } from 'vee-validate'
 import AppForm from '@/components/common/AppForm.vue'
 import { resetPasswordSchema } from '@/utils/validators'
-import { authService } from '@/services/auth.service'
+import { resetPasswordApi } from '@/apis/auth.api'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -20,7 +20,7 @@ async function onSubmit(values) {
   errorMessage.value = ''
 
   try {
-    await authService.resetPassword({
+    await resetPasswordApi({
       ...values,
       token: route.query.token,
       email: route.query.email,

@@ -15,7 +15,7 @@ import AppToolbar from '@/components/common/AppToolbar.vue'
 import AppStatusChip from '@/components/common/AppStatusChip.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
-import { authService } from '@/services/auth.service'
+import { resendVerificationApi } from '@/apis/auth.api'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Filler)
 
@@ -59,7 +59,7 @@ const chartOptions = { responsive: true, maintainAspectRatio: false, plugins: { 
 async function resendVerification() {
   resendLoading.value = true
   try {
-    const { data } = await authService.resendVerification()
+    const { data } = await resendVerificationApi()
     appStore.notify(data.message)
   } finally {
     resendLoading.value = false

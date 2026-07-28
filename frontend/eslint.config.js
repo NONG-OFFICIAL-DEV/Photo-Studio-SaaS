@@ -18,6 +18,8 @@ export default [
         URL: 'readonly',
         CustomEvent: 'readonly',
         console: 'readonly',
+        Blob: 'readonly',
+        FormData: 'readonly',
       },
     },
     rules: {

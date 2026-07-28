@@ -14,24 +14,21 @@ class CustomerTagTest extends TestCase
     public function test_it_creates_lists_updates_and_deletes_tags(): void
     {
         [, $owner] = $this->createTenantWithUser(TenantRole::Owner);
-        $headers = $this->authHeader($owner);
+        $this->actingAsUser($owner);
 
-        $tag = $this->withHeaders($headers)
-            ->postJson('/api/v1/customers/tags', ['name' => 'VIP', 'color' => '#123456'])
+        $tag = $this->postJson('/api/v1/customers/tags', ['name' => 'VIP', 'color' => '#123456'])
             ->assertCreated()
             ->json('data');
 
-        $this->withHeaders($headers)->getJson('/api/v1/customers/tags')
+        $this->getJson('/api/v1/customers/tags')
             ->assertOk()
             ->assertJsonFragment(['name' => 'VIP']);
 
-        $this->withHeaders($headers)
-            ->putJson("/api/v1/customers/tags/{$tag['id']}", ['name' => 'Super VIP'])
+        $this->putJson("/api/v1/customers/tags/{$tag['id']}", ['name' => 'Super VIP'])
             ->assertOk()
             ->assertJsonPath('data.name', 'Super VIP');
 
-        $this->withHeaders($headers)
-            ->deleteJson("/api/v1/customers/tags/{$tag['id']}")
+        $this->deleteJson("/api/v1/customers/tags/{$tag['id']}")
             ->assertOk();
 
         $this->assertSoftDeleted('customer_tags', ['id' => $tag['id']]);
@@ -40,12 +37,11 @@ class CustomerTagTest extends TestCase
     public function test_tag_names_are_unique_per_tenant(): void
     {
         [, $owner] = $this->createTenantWithUser(TenantRole::Owner);
-        $headers = $this->authHeader($owner);
+        $this->actingAsUser($owner);
 
-        $this->withHeaders($headers)->postJson('/api/v1/customers/tags', ['name' => 'VIP'])->assertCreated();
+        $this->postJson('/api/v1/customers/tags', ['name' => 'VIP'])->assertCreated();
 
-        $this->withHeaders($headers)
-            ->postJson('/api/v1/customers/tags', ['name' => 'VIP'])
+        $this->postJson('/api/v1/customers/tags', ['name' => 'VIP'])
             ->assertStatus(422);
     }
 
@@ -54,11 +50,11 @@ class CustomerTagTest extends TestCase
         [, $ownerA] = $this->createTenantWithUser(TenantRole::Owner);
         [, $ownerB] = $this->createTenantWithUser(TenantRole::Owner);
 
-        $this->withHeaders($this->authHeader($ownerA))
+        $this->actingAsUser($ownerA)
             ->postJson('/api/v1/customers/tags', ['name' => 'VIP'])
             ->assertCreated();
 
-        $this->withHeaders($this->authHeader($ownerB))
+        $this->actingAsUser($ownerB)
             ->postJson('/api/v1/customers/tags', ['name' => 'VIP'])
             ->assertCreated();
     }

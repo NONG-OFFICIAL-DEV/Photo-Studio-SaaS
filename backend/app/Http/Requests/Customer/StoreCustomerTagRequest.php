@@ -14,10 +14,6 @@ class StoreCustomerTagRequest extends FormRequest
 
     public function rules(): array
     {
-        if (app()->environment('testing')) {
-            fwrite(STDERR, 'RULES user_id='.$this->user()?->id.' tenant_id='.$this->user()?->tenant_id."\n");
-        }
-
         return [
             'name' => [
                 'required', 'string', 'max:100',

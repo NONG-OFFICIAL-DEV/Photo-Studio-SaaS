@@ -1,5 +1,4 @@
 import axios from 'axios'
-import { API_ENDPOINTS } from '@/constants/api-endpoints'
 
 const TOKEN_KEY = 'photo_studio_access_token'
 
@@ -15,7 +14,7 @@ export function setToken(token) {
   }
 }
 
-export const http = axios.create({
+const http = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
   headers: { Accept: 'application/json' },
 })
@@ -46,11 +45,11 @@ http.interceptors.response.use(
   async (error) => {
     const { config, response } = error
 
-    if (!response || response.status !== 401 || config?._retry || config?.url?.includes(API_ENDPOINTS.AUTH.REFRESH)) {
+    if (!response || response.status !== 401 || config?._retry || config?.url?.includes('/v1/auth/refresh')) {
       return Promise.reject(error)
     }
 
-    if (config.url?.includes(API_ENDPOINTS.AUTH.LOGIN)) {
+    if (config.url?.includes('/v1/auth/login')) {
       return Promise.reject(error)
     }
 
@@ -68,7 +67,7 @@ http.interceptors.response.use(
     isRefreshing = true
 
     try {
-      const { data } = await http.post(API_ENDPOINTS.AUTH.REFRESH)
+      const { data } = await http.post('/v1/auth/refresh')
       const newToken = data.data.access_token
       setToken(newToken)
       resolveQueue(null, newToken)
@@ -84,3 +83,5 @@ http.interceptors.response.use(
     }
   },
 )
+
+export default http

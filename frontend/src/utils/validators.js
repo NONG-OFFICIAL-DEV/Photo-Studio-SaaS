@@ -37,3 +37,26 @@ export const resetPasswordSchema = yup.object({
     .required()
     .oneOf([yup.ref('password')], 'Passwords must match'),
 })
+
+export const customerSchema = yup.object({
+  name: yup.string().required().max(255),
+  email: yup.string().nullable().email(),
+  phone: yup.string().nullable().max(30),
+  address: yup.string().nullable().max(1000),
+  birthday: yup.string().nullable(),
+  gender: yup.string().nullable().oneOf(['male', 'female', 'other', null, '']),
+  tag_ids: yup.array().of(yup.string()),
+})
+
+export const customerTagSchema = yup.object({
+  name: yup.string().required().max(100),
+  color: yup.string().nullable(),
+})
+
+export const blacklistSchema = yup.object({
+  reason: yup.string().required().max(1000),
+})
+
+export const noteSchema = yup.object({
+  note: yup.string().required().max(2000),
+})

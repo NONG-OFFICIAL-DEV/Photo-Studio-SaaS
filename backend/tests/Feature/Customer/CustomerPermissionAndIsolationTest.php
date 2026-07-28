@@ -16,7 +16,7 @@ class CustomerPermissionAndIsolationTest extends TestCase
     {
         [, $viewer] = $this->createTenantWithUser(TenantRole::Viewer);
 
-        $this->withHeaders($this->authHeader($viewer))
+        $this->actingAsUser($viewer)
             ->postJson('/api/v1/customers', ['name' => 'Should Fail'])
             ->assertForbidden();
     }
@@ -26,7 +26,7 @@ class CustomerPermissionAndIsolationTest extends TestCase
         [$tenant, $viewer] = $this->createTenantWithUser(TenantRole::Viewer);
         Customer::factory()->create(['tenant_id' => $tenant->id]);
 
-        $this->withHeaders($this->authHeader($viewer))
+        $this->actingAsUser($viewer)
             ->getJson('/api/v1/customers')
             ->assertOk();
     }
@@ -36,7 +36,7 @@ class CustomerPermissionAndIsolationTest extends TestCase
         [$tenant, $photographer] = $this->createTenantWithUser(TenantRole::Photographer);
         $customer = Customer::factory()->create(['tenant_id' => $tenant->id]);
 
-        $this->withHeaders($this->authHeader($photographer))
+        $this->actingAsUser($photographer)
             ->deleteJson("/api/v1/customers/{$customer->id}")
             ->assertForbidden();
     }
@@ -45,7 +45,7 @@ class CustomerPermissionAndIsolationTest extends TestCase
     {
         [, $cashier] = $this->createTenantWithUser(TenantRole::Cashier);
 
-        $this->withHeaders($this->authHeader($cashier))
+        $this->actingAsUser($cashier)
             ->get('/api/v1/customers/export')
             ->assertForbidden();
     }
@@ -57,7 +57,7 @@ class CustomerPermissionAndIsolationTest extends TestCase
 
         $customerB = Customer::factory()->create(['tenant_id' => $tenantB->id]);
 
-        $this->withHeaders($this->authHeader($ownerA))
+        $this->actingAsUser($ownerA)
             ->getJson("/api/v1/customers/{$customerB->id}")
             ->assertNotFound();
     }
@@ -69,7 +69,7 @@ class CustomerPermissionAndIsolationTest extends TestCase
 
         $customerB = Customer::factory()->create(['tenant_id' => $tenantB->id, 'name' => 'Original']);
 
-        $this->withHeaders($this->authHeader($ownerA))
+        $this->actingAsUser($ownerA)
             ->putJson("/api/v1/customers/{$customerB->id}", ['name' => 'Hacked'])
             ->assertNotFound();
 
@@ -84,7 +84,7 @@ class CustomerPermissionAndIsolationTest extends TestCase
         Customer::factory()->count(2)->create(['tenant_id' => $tenantA->id]);
         Customer::factory()->count(3)->create(['tenant_id' => $tenantB->id]);
 
-        $this->withHeaders($this->authHeader($ownerA))
+        $this->actingAsUser($ownerA)
             ->getJson('/api/v1/customers')
             ->assertOk()
             ->assertJsonPath('meta.total', 2);
@@ -95,11 +95,11 @@ class CustomerPermissionAndIsolationTest extends TestCase
         [, $ownerA] = $this->createTenantWithUser(TenantRole::Owner);
         [, $ownerB] = $this->createTenantWithUser(TenantRole::Owner);
 
-        $tagB = $this->withHeaders($this->authHeader($ownerB))
+        $tagB = $this->actingAsUser($ownerB)
             ->postJson('/api/v1/customers/tags', ['name' => 'Tenant B Tag'])
             ->json('data');
 
-        $this->withHeaders($this->authHeader($ownerA))
+        $this->actingAsUser($ownerA)
             ->postJson('/api/v1/customers', ['name' => 'Cross Tenant Attempt', 'tag_ids' => [$tagB['id']]])
             ->assertStatus(422);
     }

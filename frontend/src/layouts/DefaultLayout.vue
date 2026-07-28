@@ -19,6 +19,7 @@ const logoutLoading = ref(false)
  */
 const menuItems = computed(() => [
   { title: t('menu.dashboard'), icon: 'mdi-view-dashboard-outline', to: { name: 'dashboard' }, permission: 'dashboard.view' },
+  { title: t('menu.customers'), icon: 'mdi-account-group-outline', to: { name: 'customers' }, permission: 'customers.view' },
 ].filter((item) => !item.permission || auth.hasPermission(item.permission)))
 
 async function handleLogout() {

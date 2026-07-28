@@ -1,7 +1,7 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
-import { authService } from '@/services/auth.service'
-import { getToken, setToken } from '@/services/http'
+import { registerApi, loginApi, logoutApi, meApi } from '@/apis/auth.api'
+import { getToken, setToken } from '@/apis/api'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref(null)
@@ -21,20 +21,20 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function register(payload) {
-    const { data } = await authService.register(payload)
+    const { data } = await registerApi(payload)
     applySession(data.data)
     return data
   }
 
   async function login(payload) {
-    const { data } = await authService.login(payload)
+    const { data } = await loginApi(payload)
     applySession(data.data)
     return data
   }
 
   async function logout() {
     try {
-      await authService.logout()
+      await logoutApi()
     } finally {
       clearSession()
     }
@@ -42,7 +42,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function fetchMe() {
     try {
-      const { data } = await authService.me()
+      const { data } = await meApi()
       user.value = data.data
     } catch {
       clearSession()

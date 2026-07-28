@@ -13,7 +13,7 @@ app.use(router)
 app.use(vuetify)
 app.use(i18n)
 
-// A refresh-token failure anywhere in the app (see services/http.js) ends
+// A refresh-token failure anywhere in the app (see apis/api.js) ends
 // the session and bounces the user back to Login, wherever they were.
 window.addEventListener('auth:session-expired', () => {
   useAuthStore().clearSession()

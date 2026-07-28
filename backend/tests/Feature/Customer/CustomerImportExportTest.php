@@ -18,7 +18,7 @@ class CustomerImportExportTest extends TestCase
         [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
         Customer::factory()->create(['tenant_id' => $tenant->id, 'name' => 'Export Me', 'email' => 'export@example.test']);
 
-        $response = $this->withHeaders($this->authHeader($owner))
+        $response = $this->actingAsUser($owner)
             ->get('/api/v1/customers/export?format=csv');
 
         $response->assertOk();
@@ -34,7 +34,7 @@ class CustomerImportExportTest extends TestCase
         [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
         Customer::factory()->create(['tenant_id' => $tenant->id]);
 
-        $this->withHeaders($this->authHeader($owner))
+        $this->actingAsUser($owner)
             ->get('/api/v1/customers/export')
             ->assertOk()
             ->assertHeader('content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -48,7 +48,7 @@ class CustomerImportExportTest extends TestCase
         Customer::factory()->create(['tenant_id' => $tenantA->id, 'name' => 'Tenant A Customer']);
         Customer::factory()->create(['tenant_id' => $tenantB->id, 'name' => 'Tenant B Customer']);
 
-        $content = $this->withHeaders($this->authHeader($ownerA))
+        $content = $this->actingAsUser($ownerA)
             ->get('/api/v1/customers/export?format=csv')
             ->streamedContent();
 
@@ -67,7 +67,7 @@ class CustomerImportExportTest extends TestCase
 
         $file = UploadedFile::fake()->createWithContent('customers.csv', $csv);
 
-        $response = $this->withHeaders($this->authHeader($owner))
+        $response = $this->actingAsUser($owner)
             ->postJson('/api/v1/customers/import', ['file' => $file]);
 
         $response->assertOk()
@@ -88,7 +88,7 @@ class CustomerImportExportTest extends TestCase
         $csv = "name,email\nImported Person,imported@example.test\n";
         $file = UploadedFile::fake()->createWithContent('customers.csv', $csv);
 
-        $this->withHeaders($this->authHeader($owner))
+        $this->actingAsUser($owner)
             ->postJson('/api/v1/customers/import', ['file' => $file])
             ->assertOk();
 
