@@ -3,9 +3,11 @@
 use App\Http\Controllers\Api\V1\Auth\AuthController;
 use App\Http\Controllers\Api\V1\Auth\EmailVerificationController;
 use App\Http\Controllers\Api\V1\Auth\PasswordResetController;
+use App\Http\Controllers\Api\V1\Booking\BookingController;
 use App\Http\Controllers\Api\V1\Customer\CustomerController;
 use App\Http\Controllers\Api\V1\Customer\CustomerNoteController;
 use App\Http\Controllers\Api\V1\Customer\CustomerTagController;
+use App\Http\Controllers\Api\V1\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/ping', fn () => response()->json([
@@ -44,6 +46,8 @@ Route::prefix('auth')->name('auth.')->group(function () {
  * group in later phases.
  */
 Route::middleware(['auth:api', 'tenant', 'subscription.active'])->group(function () {
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+
     Route::prefix('customers')->name('customers.')->group(function () {
         // Static segments must be registered before {customer} so they
         // aren't swallowed by the wildcard.
@@ -64,5 +68,22 @@ Route::middleware(['auth:api', 'tenant', 'subscription.active'])->group(function
 
         Route::post('/{customer}/notes', [CustomerNoteController::class, 'store']);
         Route::delete('/{customer}/notes/{note}', [CustomerNoteController::class, 'destroy']);
+    });
+
+    Route::prefix('bookings')->name('bookings.')->group(function () {
+        // Static segment before {booking} so it isn't swallowed by the wildcard.
+        Route::get('/calendar', [BookingController::class, 'calendar']);
+
+        Route::get('/', [BookingController::class, 'index']);
+        Route::post('/', [BookingController::class, 'store']);
+        Route::get('/{booking}', [BookingController::class, 'show']);
+        Route::put('/{booking}', [BookingController::class, 'update']);
+        Route::delete('/{booking}', [BookingController::class, 'destroy']);
+
+        Route::post('/{booking}/confirm', [BookingController::class, 'confirm']);
+        Route::post('/{booking}/start', [BookingController::class, 'start']);
+        Route::post('/{booking}/complete', [BookingController::class, 'complete']);
+        Route::post('/{booking}/no-show', [BookingController::class, 'noShow']);
+        Route::post('/{booking}/cancel', [BookingController::class, 'cancel']);
     });
 });

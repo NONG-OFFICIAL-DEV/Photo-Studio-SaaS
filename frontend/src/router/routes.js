@@ -32,6 +32,18 @@ export const routes = [
         component: () => import('@/pages/customers/CustomersList.vue'),
         meta: { titleKey: 'menu.customers', permission: 'customers.view' },
       },
+      {
+        path: 'bookings',
+        name: 'bookings',
+        component: () => import('@/pages/bookings/BookingsList.vue'),
+        meta: { titleKey: 'menu.bookings', permission: 'bookings.view' },
+      },
+      {
+        path: 'bookings/calendar',
+        name: 'bookings-calendar',
+        component: () => import('@/pages/bookings/BookingsCalendarPage.vue'),
+        meta: { titleKey: 'menu.bookings', permission: 'bookings.view' },
+      },
     ],
   },
   {

@@ -48,6 +48,24 @@ trait CreatesTenantUsers
     }
 
     /**
+     * Adds a second (third, ...) user with a given role to an *existing*
+     * tenant — e.g. an Owner plus a Photographer in the same tenant, to
+     * test staff-assignment / conflict-detection scenarios. Roles must
+     * already be provisioned for $tenant (true for any tenant returned by
+     * createTenantWithUser()).
+     */
+    protected function addUserToTenant(Tenant $tenant, TenantRole $role, array $userAttributes = []): User
+    {
+        /** @var User $user */
+        $user = User::factory()->create([...$userAttributes, 'tenant_id' => $tenant->id]);
+
+        app(PermissionRegistrar::class)->setPermissionsTeamId($tenant->id);
+        $user->assignRole($role->value);
+
+        return $user;
+    }
+
+    /**
      * Use this instead of hand-rolling an Authorization header. A real JWT
      * round-trip (mint a token, send it, have the guard parse it back) is
      * already covered by the Auth module's own tests (LoginTest et al) —

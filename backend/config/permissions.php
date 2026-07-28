@@ -20,6 +20,10 @@ return [
             'customers.view', 'customers.create', 'customers.update', 'customers.delete',
             'customers.export', 'customers.import', 'customers.blacklist',
         ],
+        'bookings' => [
+            'bookings.view', 'bookings.create', 'bookings.update', 'bookings.delete',
+            'bookings.assign', 'bookings.cancel',
+        ],
     ],
 
     /*
@@ -35,14 +39,17 @@ return [
             'roles.view', 'tenant.settings.manage',
             'customers.view', 'customers.create', 'customers.update', 'customers.delete',
             'customers.export', 'customers.import', 'customers.blacklist',
+            'bookings.view', 'bookings.create', 'bookings.update', 'bookings.delete',
+            'bookings.assign', 'bookings.cancel',
         ],
-        TenantRole::Photographer->value => ['dashboard.view', 'customers.view'],
-        TenantRole::Editor->value => ['dashboard.view', 'customers.view'],
-        TenantRole::Cashier->value => ['dashboard.view', 'customers.view', 'customers.create'],
+        TenantRole::Photographer->value => ['dashboard.view', 'customers.view', 'bookings.view', 'bookings.update'],
+        TenantRole::Editor->value => ['dashboard.view', 'customers.view', 'bookings.view'],
+        TenantRole::Cashier->value => ['dashboard.view', 'customers.view', 'customers.create', 'bookings.view'],
         TenantRole::Receptionist->value => [
             'dashboard.view', 'users.view',
             'customers.view', 'customers.create', 'customers.update', 'customers.export',
+            'bookings.view', 'bookings.create', 'bookings.update', 'bookings.assign', 'bookings.cancel',
         ],
-        TenantRole::Viewer->value => ['dashboard.view', 'customers.view'],
+        TenantRole::Viewer->value => ['dashboard.view', 'customers.view', 'bookings.view'],
     ],
 ];

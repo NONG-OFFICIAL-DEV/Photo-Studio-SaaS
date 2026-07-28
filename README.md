@@ -179,6 +179,47 @@ speculative — see inline comments at each fix):
   layer), but only as the *second* line of defense, not because it was
   structurally impossible at the query level as the README claims.
 
+## What's implemented (Phase 3 — Booking Management + Calendar)
+
+- Bookings: linked to a Customer, optionally assigned to a staff member,
+  typed (wedding/portrait/family/product/passport/event/other), studio or
+  on-location (with required address), a status lifecycle (pending →
+  confirmed → in_progress → completed, or cancelled/no_show with a
+  required reason), free-text title/notes.
+- Double-booking prevention: creating or rescheduling a booking checks
+  the assigned staff member's existing (non-cancelled) bookings for a
+  time-range overlap and rejects it with a clear validation error.
+  Cancelling/no-showing a booking frees its slot immediately.
+- Row-level authorization nuance: schedulers (`bookings.assign` — Owner/
+  Manager/Receptionist) can update any booking; a Photographer with only
+  `bookings.update` can update just the bookings assigned to them (e.g.
+  mark their own shoot complete), enforced in `BookingPolicy`.
+- Booking History via the same `spatie/laravel-activitylog` pattern as
+  Customer History — status/reschedule changes logged automatically.
+- Calendar range endpoint (`GET /v1/bookings/calendar?start=&end=`) —
+  interval-overlap query against Postgres, tenant-scoped, filterable by
+  status/type/assigned user.
+- New permissions (`bookings.view/create/update/delete/assign/cancel`)
+  added to the RBAC catalog — picked up by existing tenants via the same
+  `permissions:sync-tenants` command from Phase 2, no code changes needed
+  since that command is fully config-driven.
+- Minimal `GET /v1/users` endpoint added (tenant-scoped staff list) to
+  back the "assign photographer" picker — full user management (invite/
+  deactivate/roles UI) is intentionally deferred to a later phase; this
+  is read-only and permission-gated behind `users.view`.
+- Vue: bookings list page (`AppTable` + status/type/assigned filters +
+  inline status-transition buttons), booking form dialog (customer
+  autocomplete, staff picker, date/time pickers, conditional address
+  field), cancel-with-reason dialog, and a **custom month-view calendar**
+  component (`BookingCalendar.vue`) — Vuetify 3 dropped its old
+  `v-calendar`, so this is a small self-built grid rather than a new
+  dependency — with day-agenda drill-down and click-to-edit.
+- 86 total passing backend tests (33 new for this module): CRUD,
+  conflict/double-booking rejection (create and update paths, including
+  a same-booking false-positive check), status transitions, calendar
+  range correctness (including tenant isolation), search/filter/
+  pagination, permission gating per role, and cross-tenant isolation.
+
 ## Getting Started
 
 ### Prerequisites
@@ -256,7 +297,7 @@ Pinia stores, and tests, same as Phase 1.
 
 1. ~~Foundation: multi-tenancy, JWT auth, RBAC, subscription plans, shell~~ ✅
 2. ~~Customer Management~~ ✅
-3. Booking Management + Calendar
+3. ~~Booking Management + Calendar~~ ✅
 4. Photography Services & Pricing
 5. Order Workflow + Editing Queue
 6. Gallery (upload, watermark, customer download, QR)

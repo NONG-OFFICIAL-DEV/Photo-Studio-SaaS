@@ -2,10 +2,12 @@
 
 namespace App\Providers;
 
+use App\Repositories\Contracts\BookingRepositoryInterface;
 use App\Repositories\Contracts\CustomerRepositoryInterface;
 use App\Repositories\Contracts\CustomerTagRepositoryInterface;
 use App\Repositories\Contracts\TenantRepositoryInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
+use App\Repositories\Eloquent\BookingRepository;
 use App\Repositories\Eloquent\CustomerRepository;
 use App\Repositories\Eloquent\CustomerTagRepository;
 use App\Repositories\Eloquent\TenantRepository;
@@ -28,6 +30,7 @@ class RepositoryServiceProvider extends ServiceProvider
         TenantRepositoryInterface::class => TenantRepository::class,
         CustomerRepositoryInterface::class => CustomerRepository::class,
         CustomerTagRepositoryInterface::class => CustomerTagRepository::class,
+        BookingRepositoryInterface::class => BookingRepository::class,
     ];
 
     public function register(): void

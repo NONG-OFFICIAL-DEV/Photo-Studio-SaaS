@@ -60,3 +60,25 @@ export const blacklistSchema = yup.object({
 export const noteSchema = yup.object({
   note: yup.string().required().max(2000),
 })
+
+export const bookingSchema = yup.object({
+  customer_id: yup.string().required('Customer is required'),
+  assigned_user_id: yup.string().nullable(),
+  type: yup.string().required('Type is required'),
+  title: yup.string().nullable().max(255),
+  notes: yup.string().nullable().max(2000),
+  location_type: yup.string().required().oneOf(['studio', 'on_location']),
+  location_address: yup.string().nullable().when('location_type', {
+    is: 'on_location',
+    then: schema => schema.required('Address is required for on-location bookings').max(1000),
+  }),
+  starts_at: yup.string().required('Start date/time is required'),
+  ends_at: yup.string().required('End date/time is required')
+    .test('after-start', 'End must be after start', function (value) {
+      return !value || !this.parent.starts_at || new Date(value) > new Date(this.parent.starts_at)
+    }),
+})
+
+export const cancelBookingSchema = yup.object({
+  reason: yup.string().required().max(1000),
+})
