@@ -1,0 +1,98 @@
+name: photo-studio-saas
+
+x-backend-common: &backend-common
+  build:
+    context: ./backend
+    dockerfile: Dockerfile
+  restart: unless-stopped
+  volumes:
+    - ./backend:/var/www/html
+    - backend_vendor:/var/www/html/vendor
+  env_file:
+    - ./backend/.env
+  # Overrides .env's localhost-oriented values with in-network service
+  # names — .env is written for running the backend directly on the host,
+  # these three make the same file work unmodified inside Compose too.
+  environment:
+    DB_HOST: postgres
+    DB_PORT: 5432
+    REDIS_HOST: redis
+    REDIS_PORT: 6379
+  depends_on:
+    postgres:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-photo_studio_saas}
+      POSTGRES_USER: ${DB_USERNAME:-photo_studio}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secret}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - '${DB_PORT:-5432}:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USERNAME:-photo_studio}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    ports:
+      - '${REDIS_PORT:-6379}:6379'
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    <<: *backend-common
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - '8000:80'
+    volumes:
+      - ./backend:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - backend
+
+  horizon:
+    <<: *backend-common
+    command: php artisan horizon
+
+  scheduler:
+    <<: *backend-common
+    # Laravel's scheduler is designed to run every minute via cron; this
+    # loop reproduces that inside the container without needing host cron.
+    command: >
+      sh -c "while true; do php artisan schedule:run --verbose --no-interaction; sleep 60; done"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${FRONTEND_API_BASE_URL:-http://localhost:8000/api}
+    restart: unless-stopped
+    ports:
+      - '5173:80'
+    depends_on:
+      - nginx
+
+volumes:
+  postgres_data:
+  redis_data:
+  backend_vendor:

@@ -1,0 +1,74 @@
+{
+  "app": {
+    "name": "ប្រព័ន្ធគ្រប់គ្រងស្ទូឌីយោថតរូប"
+  },
+  "common": {
+    "save": "រក្សាទុក",
+    "cancel": "បោះបង់",
+    "delete": "លុប",
+    "edit": "កែសម្រួល",
+    "create": "បង្កើត",
+    "search": "ស្វែងរក",
+    "loading": "កំពុងផ្ទុក...",
+    "noData": "គ្មានទិន្នន័យ",
+    "actions": "សកម្មភាព",
+    "confirm": "បញ្ជាក់",
+    "yes": "បាទ/ចាស",
+    "no": "ទេ",
+    "close": "បិទ",
+    "back": "ត្រឡប់ក្រោយ",
+    "submit": "ដាក់ស្នើ",
+    "welcome": "សូមស្វាគមន៍"
+  },
+  "menu": {
+    "dashboard": "ផ្ទាំងគ្រប់គ្រង",
+    "customers": "អតិថិជន",
+    "bookings": "ការកក់ការងារ",
+    "gallery": "វិចិត្រសាល",
+    "invoices": "វិក្កយបត្រ",
+    "employees": "បុគ្គលិក",
+    "reports": "របាយការណ៍",
+    "settings": "ការកំណត់",
+    "logout": "ចាកចេញ"
+  },
+  "auth": {
+    "login": "ចូលប្រើប្រាស់",
+    "loginTitle": "ចូលទៅកាន់ស្ទូឌីយោរបស់អ្នក",
+    "registerTitle": "ចុះឈ្មោះស្ទូឌីយោថតរូបរបស់អ្នក",
+    "email": "អ៊ីមែល",
+    "password": "ពាក្យសម្ងាត់",
+    "confirmPassword": "បញ្ជាក់ពាក្យសម្ងាត់",
+    "rememberMe": "ចងចាំខ្ញុំ",
+    "forgotPassword": "ភ្លេចពាក្យសម្ងាត់?",
+    "resetPassword": "កំណត់ពាក្យសម្ងាត់ឡើងវិញ",
+    "sendResetLink": "ផ្ញើតំណកំណត់ឡើងវិញ",
+    "studioName": "ឈ្មោះស្ទូឌីយោ",
+    "ownerName": "ឈ្មោះម្ចាស់",
+    "phone": "លេខទូរស័ព្ទ",
+    "createAccount": "បង្កើតគណនី",
+    "alreadyHaveAccount": "មានគណនីរួចហើយ?",
+    "dontHaveAccount": "មិនទាន់មានគណនី?",
+    "loginSuccess": "ចូលប្រើប្រាស់បានជោគជ័យ។",
+    "logoutSuccess": "ចាកចេញបានជោគជ័យ។",
+    "verifyEmailTitle": "បញ្ជាក់អ៊ីមែលរបស់អ្នក",
+    "verifyEmailSuccess": "អ៊ីមែលរបស់អ្នកត្រូវបានបញ្ជាក់។ អ្នកអាចចូលប្រើប្រាស់បាន។",
+    "verifyEmailInvalid": "តំណបញ្ជាក់នេះមិនត្រឹមត្រូវ ឬបានផុតកំណត់។",
+    "resendVerification": "ផ្ញើអ៊ីមែលបញ្ជាក់ម្តងទៀត"
+  },
+  "validation": {
+    "required": "សូមបំពេញព័ត៌មាននេះ។",
+    "email": "សូមបញ្ចូលអ៊ីមែលឱ្យបានត្រឹមត្រូវ។",
+    "minLength": "ត្រូវការយ៉ាងតិច {min} តួអក្សរ។",
+    "passwordMatch": "ពាក្យសម្ងាត់មិនត្រូវគ្នា។",
+    "passwordStrength": "ពាក្យសម្ងាត់ត្រូវមានអក្សរធំ អក្សរតូច និងលេខ។"
+  },
+  "dashboard": {
+    "todayRevenue": "ចំណូលថ្ងៃនេះ",
+    "monthlyRevenue": "ចំណូលប្រចាំខែ",
+    "newCustomers": "អតិថិជនថ្មី",
+    "bookings": "ការកក់ការងារ",
+    "pendingEditing": "រង់ចាំកែសម្រួល",
+    "readyForDelivery": "ត្រៀមប្រគល់",
+    "completedOrders": "ការងារបានបញ្ចប់"
+  }
+}
