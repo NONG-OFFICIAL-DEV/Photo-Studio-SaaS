@@ -32,18 +32,18 @@ class AdminSubscriptionTest extends TestCase
         $response->assertJsonPath('data.plan.id', $newPlan->id);
     }
 
-    public function test_admin_can_still_switch_a_tenant_to_a_free_plan_unlike_self_service(): void
+    public function test_admin_cannot_switch_a_tenant_to_a_free_plan_either(): void
     {
-        // Tenants can't self-service back onto a free plan (see BillingTest)
-        // — an admin override retains full authority, e.g. a goodwill gesture.
+        // Free Trial is a one-time onboarding plan assigned only at
+        // registration — nobody, not even an admin override, can put a
+        // subscription back onto a plan with no real price.
         $superAdmin = $this->superAdmin();
         [$tenant] = $this->createTenantWithUser(TenantRole::Owner);
         $freePlan = Plan::factory()->create(['price_monthly' => 0, 'price_quarterly' => null, 'price_yearly' => null]);
 
         $this->actingAsUser($superAdmin)
             ->putJson("/api/v1/admin/tenants/{$tenant->id}/subscription/plan", ['plan_id' => $freePlan->id])
-            ->assertOk()
-            ->assertJsonPath('data.plan.id', $freePlan->id);
+            ->assertStatus(422);
     }
 
     public function test_admin_can_renew_a_tenants_subscription_and_it_is_recorded_as_admin_action(): void

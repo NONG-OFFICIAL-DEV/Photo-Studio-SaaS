@@ -108,14 +108,12 @@ class SubscriptionService
      * no proration — this is simulated billing, not a real payment
      * processor — the new price simply takes effect on the next renew().
      *
-     * A tenant (actor === null, i.e. self-service — see the class docblock)
-     * cannot switch to a plan with no real price on any cycle (the Free
-     * Trial plan): it's a one-time onboarding plan, not a selectable
-     * ongoing tier, and switching back to it wouldn't shorten a period
-     * already paid for but WOULD be a free way to dodge the next renewal's
-     * charge. An admin can still do this deliberately (e.g. a goodwill
-     * gesture), same as everywhere else admin actions override tenant
-     * self-service limits.
+     * Nobody — tenant self-service or admin override — can switch a
+     * subscription onto a plan with no real price on any cycle (the Free
+     * Trial plan): it's a one-time onboarding plan assigned once at
+     * registration (see AuthService::register()), never a selectable
+     * ongoing tier. Switching back to it wouldn't shorten a period already
+     * paid for, but it WOULD be a way to dodge every future renewal charge.
      */
     public function changePlan(Subscription $subscription, Plan $plan, ?User $actor): Subscription
     {
@@ -123,7 +121,7 @@ class SubscriptionService
             throw new HttpException(422, 'This plan is not available.');
         }
 
-        if ($actor === null && ! $plan->hasPaidPricing()) {
+        if (! $plan->hasPaidPricing()) {
             throw new HttpException(422, "\"{$plan->name}\" is not available to switch to — it's a free onboarding plan, not an ongoing tier.");
         }
 

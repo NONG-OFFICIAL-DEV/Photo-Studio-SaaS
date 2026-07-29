@@ -46,7 +46,21 @@ watch(() => props.modelValue, async (open) => {
       getAdminPlansApi({ perPage: 100 }),
       getAdminSubscriptionPaymentsApi(props.tenant.id),
     ])
-    plans.value = plansData.data.filter(p => p.is_active)
+    // Free Trial (or any plan with no real price on any cycle) is a
+    // one-time onboarding plan — the backend rejects switching a
+    // subscription back onto it regardless of who asks, so don't offer it
+    // as a destination here either.
+    const payablePlans = plansData.data.filter(p => p.is_active && (p.price_monthly > 0 || p.price_quarterly > 0 || p.price_yearly > 0))
+
+    // But the tenant's CURRENT plan (e.g. Free Trial, on any freshly
+    // registered tenant) may itself be one of the excluded ones — if it's
+    // missing from the list, v-select has no item to resolve a title from
+    // for the pre-selected value and falls back to showing the raw plan
+    // id. Always include it so the select always displays a real name.
+    const currentPlan = subscription.value?.plan
+    plans.value = currentPlan && !payablePlans.some(p => p.id === currentPlan.id)
+      ? [currentPlan, ...payablePlans]
+      : payablePlans
     payments.value = paymentsData.data
   } finally {
     loading.value = false
