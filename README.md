@@ -220,6 +220,82 @@ speculative — see inline comments at each fix):
   range correctness (including tenant isolation), search/filter/
   pagination, permission gating per role, and cross-tenant isolation.
 
+## What's implemented (Phase 4 — Photography Services & Pricing)
+
+- The pricing catalog Order Workflow (Phase 5) will consume: Service
+  Categories (simple named groups, e.g. "Wedding Packages"), Services
+  (name, category, price, pricing unit — fixed/per-hour/per-person/
+  per-photo, duration, description, deliverables text, active flag), and
+  standalone Add-ons (name, price) not tied to a specific service.
+  Deliberately self-contained — Bookings aren't retrofitted with a
+  service link yet, since choosing a package + add-ons is really an
+  Order-Workflow concern.
+- Service price/availability history via the same
+  `spatie/laravel-activitylog` pattern as Customer/Booking History —
+  price changes are auditable for quoting disputes.
+- New permissions (`services.view/create/update/delete`) added to the
+  RBAC catalog, picked up by existing tenants via the same
+  `permissions:sync-tenants` command — config-driven, no code changes
+  needed for a third module in a row.
+- Vue: services list page (`AppTable` + category/status filters),
+  service form dialog (category select, pricing unit, duration,
+  deliverables), and lightweight category/add-on manager dialogs (same
+  inline-create-and-list pattern as Phase 2's tag manager).
+- 111 total passing backend tests (25 new for this module): CRUD for
+  services/categories/add-ons, search/filter/pagination, price-change
+  activity log, permission gating per role, and cross-tenant isolation.
+
+## What's implemented (Phase 5 — Order Workflow + Editing Queue)
+
+- Orders tie a Customer (and optionally a Booking) to line items pulled
+  from Phase 4's Service/Add-on catalog — or fully custom, ad-hoc lines.
+  Catalog references snapshot their name and price onto the order item
+  at creation time, so a later price change (or catalog deletion) never
+  rewrites a past order's total. Subtotal/discount/total are computed
+  server-side; a discount larger than the subtotal floors the total at
+  zero rather than going negative.
+- Order status lifecycle enforced server-side, not just in the UI:
+  `pending → confirmed → in_production → ready_for_delivery → delivered`,
+  or `cancelled` (blocked once delivered/already cancelled, reason
+  required). Line items can only be edited while an order is still
+  `pending`/`confirmed` — once production starts they're locked.
+  `start_production` is the hinge: it requires `confirmed` and creates
+  the order's Editing Task in one step.
+- Editing Queue: each order gets at most one Editing Task once
+  production starts, independently tracked through
+  `pending → in_progress → in_review → (revision_requested ↔
+  in_progress) → completed`. An order can't be marked ready for
+  delivery until its editing task is `completed` — verified directly
+  against the DB in tests, not assumed.
+- Row-level authorization mirrors Phase 3's Photographer pattern: an
+  Editor (`editing.update` only) can only transition tasks assigned to
+  them; reassigning who owns a task is a separate `assign` ability
+  gated behind `orders.update` (a manager-level action, not something
+  editors do to themselves).
+- Order/Editing Task History via the same activity-log pattern as every
+  prior module.
+- New permissions (`orders.*`, `editing.*`) added to the RBAC catalog,
+  picked up by existing tenants via the same `permissions:sync-tenants`
+  command — config-driven, no code changes, fourth module running.
+- Found and fixed a real bug while building this: `whenLoaded($rel, $cb)`'s
+  two-argument form returns plain `null` when the relation isn't
+  eager-loaded (not Laravel's `MissingValue` sentinel, which only the
+  one-argument form returns) — so `EditingTaskResource`'s `assigned_user`
+  silently serialized as `null` right after a successful reassignment.
+  Fixed by eager-loading the relation before serializing in every
+  controller action that returns it, with a regression test asserting
+  the assigned editor's id actually appears in the response.
+- Vue: orders list (`AppTable` + status filter), an order form with a
+  line-item builder (add from catalog with live price snapshot preview,
+  or add a fully custom line, running subtotal/total), an order detail
+  view with inline status-transition actions, and an Editing Queue list
+  with its own status actions.
+- 137 total passing backend tests (26 new for this module): line-item
+  snapshotting and total computation, the full status lifecycle
+  (including the production-gate and delivery-gate checks), editing
+  task transitions and row-level permission enforcement, search/filter/
+  pagination, permission gating per role, and cross-tenant isolation.
+
 ## Getting Started
 
 ### Prerequisites
@@ -298,8 +374,8 @@ Pinia stores, and tests, same as Phase 1.
 1. ~~Foundation: multi-tenancy, JWT auth, RBAC, subscription plans, shell~~ ✅
 2. ~~Customer Management~~ ✅
 3. ~~Booking Management + Calendar~~ ✅
-4. Photography Services & Pricing
-5. Order Workflow + Editing Queue
+4. ~~Photography Services & Pricing~~ ✅
+5. ~~Order Workflow + Editing Queue~~ ✅
 6. Gallery (upload, watermark, customer download, QR)
 7. Album Management, Invoicing & Payments
 8. Expense & Inventory

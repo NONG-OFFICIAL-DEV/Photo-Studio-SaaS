@@ -13,17 +13,76 @@
     "noData": "No data available",
     "actions": "Actions",
     "confirm": "Confirm",
+    "confirmMessage": "Are you sure?",
     "yes": "Yes",
     "no": "No",
     "close": "Close",
     "back": "Back",
     "submit": "Submit",
-    "welcome": "Welcome"
+    "welcome": "Welcome",
+    "noItemsFound": "No {item} found",
+    "tryAdjustingFilters": "Try adjusting your search or filters.",
+    "searchPlaceholder": "Search...",
+    "dragDropFiles": "Drag & drop files here, or click to browse",
+    "filesTooLarge": "{count} file(s) exceed {maxSize}MB and were skipped.",
+    "pageNotFound": "Page not found",
+    "goHome": "Go Home",
+    "actionFailed": "Action failed.",
+    "status": {
+      "trial": "Trial",
+      "active": "Active",
+      "expired": "Expired",
+      "suspended": "Suspended",
+      "cancelled": "Cancelled",
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "inProgress": "In Progress",
+      "completed": "Completed",
+      "delivered": "Delivered",
+      "inactive": "Inactive",
+      "locked": "Locked"
+    }
+  },
+  "fields": {
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Address",
+    "birthday": "Birthday",
+    "gender": "Gender",
+    "tags": "Tags",
+    "notes": "Notes",
+    "reason": "Reason",
+    "status": "Status",
+    "customer": "Customer",
+    "type": "Type",
+    "assignedTo": "Assigned To",
+    "title": "Title",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "startTime": "Start time",
+    "endTime": "End time",
+    "location": "Location",
+    "category": "Category",
+    "price": "Price",
+    "duration": "Duration",
+    "description": "Description",
+    "active": "Active",
+    "inactive": "Inactive",
+    "total": "Total",
+    "subtotal": "Subtotal",
+    "discount": "Discount",
+    "quantity": "Qty",
+    "unitPrice": "Unit Price",
+    "order": "Order"
   },
   "menu": {
     "dashboard": "Dashboard",
     "customers": "Customers",
     "bookings": "Bookings",
+    "services": "Services & Pricing",
+    "orders": "Orders",
+    "editingQueue": "Editing Queue",
     "gallery": "Gallery",
     "invoices": "Invoices",
     "employees": "Employees",
@@ -34,13 +93,22 @@
   "auth": {
     "login": "Login",
     "loginTitle": "Sign in to your studio",
+    "loginSubtitle": "Enter your credentials to access your studio dashboard.",
+    "loginError": "Login failed. Please try again.",
     "registerTitle": "Register your photography studio",
+    "registerSubtitle": "Set up your studio in a few minutes — no credit card required.",
+    "registerSuccess": "Studio registered successfully. Please check your email to verify your account.",
+    "registerError": "Registration failed. Please try again.",
     "email": "Email",
     "password": "Password",
     "confirmPassword": "Confirm Password",
     "rememberMe": "Remember me",
     "forgotPassword": "Forgot password?",
     "resetPassword": "Reset Password",
+    "resetPasswordSubtitle": "Choose a new password for your account.",
+    "resetPasswordError": "Unable to reset password. The link may have expired.",
+    "forgotPasswordSubtitle": "Enter your email and we'll send you a link to reset your password.",
+    "forgotPasswordError": "Something went wrong.",
     "sendResetLink": "Send Reset Link",
     "studioName": "Studio Name",
     "ownerName": "Owner Name",
@@ -53,7 +121,16 @@
     "verifyEmailTitle": "Verify your email",
     "verifyEmailSuccess": "Your email has been verified. You can now log in.",
     "verifyEmailInvalid": "This verification link is invalid or has expired.",
-    "resendVerification": "Resend verification email"
+    "verifyEmailPrompt": "Please verify your email address.",
+    "resendVerification": "Resend verification email",
+    "brandHeadline": "Run your entire studio from one place",
+    "brandSubtitle": "Bookings, orders, editing, and customers — all in sync, all in real time.",
+    "features": {
+      "bookings": "Schedule and manage sessions with a visual calendar",
+      "editing": "Track editing jobs from queue to delivery",
+      "orders": "Turn bookings into orders and invoices instantly",
+      "customers": "Keep every client profile, tag, and history in one place"
+    }
   },
   "validation": {
     "required": "This field is required.",
@@ -69,6 +146,219 @@
     "bookings": "Bookings",
     "pendingEditing": "Pending Editing",
     "readyForDelivery": "Ready for Delivery",
-    "completedOrders": "Completed Orders"
+    "completedOrders": "Completed Orders",
+    "topServices": "Top Services",
+    "noDataYet": "No data yet — available once the Bookings module ships."
+  },
+  "customers": {
+    "title": "Customers",
+    "subtitle": "Manage your studio's customer profiles, tags, and history.",
+    "actions": {
+      "addCustomer": "Add Customer",
+      "export": "Export",
+      "import": "Import",
+      "exportCsv": "Export as CSV",
+      "exportExcel": "Export as Excel",
+      "blacklist": "Blacklist"
+    },
+    "filters": {
+      "tag": "Tag",
+      "favoritesOnly": "Favorites only",
+      "blacklistedOnly": "Blacklisted only"
+    },
+    "genderOptions": {
+      "male": "Male",
+      "female": "Female",
+      "other": "Other"
+    },
+    "status": {
+      "blacklisted": "Blacklisted"
+    },
+    "dialogs": {
+      "editTitle": "Edit Customer",
+      "detailsTitle": "Customer Details",
+      "blacklistTitle": "Blacklist Customer",
+      "importTitle": "Import Customers",
+      "importInstructions": "Upload a CSV or Excel file with columns: name, email, phone, address, birthday, gender. Rows with a missing name are skipped and reported below.",
+      "manageTagsTitle": "Manage Tags",
+      "newTagNameLabel": "New tag name",
+      "deleteTagConfirmTitle": "Delete tag?",
+      "deleteTagConfirmMessage": "Remove '{name}' from all customers?",
+      "deleteCustomerConfirmTitle": "Delete customer?",
+      "deleteCustomerConfirmMessage": "This will remove '{name}'. This can be restored by support if needed."
+    },
+    "notes": {
+      "addPlaceholder": "Add a note about this customer...",
+      "empty": "No notes yet."
+    },
+    "messages": {
+      "updatedSuccess": "Customer updated successfully.",
+      "createdSuccess": "Customer created successfully.",
+      "saveError": "Unable to save customer.",
+      "deletedSuccess": "Customer deleted successfully.",
+      "blacklistedSuccess": "Customer blacklisted.",
+      "unblacklistedSuccess": "Customer removed from blacklist.",
+      "importFailed": "Import failed.",
+      "tagCreatedSuccess": "Tag created successfully.",
+      "tagCreateError": "Unable to create tag.",
+      "tagDeletedSuccess": "Tag deleted successfully."
+    },
+    "import": {
+      "resultSummary": "{imported} imported, {failed} failed.",
+      "rowError": "Row {row}: {errors}"
+    }
+  },
+  "bookings": {
+    "subtitle": "Schedule and track photography sessions.",
+    "when": "When",
+    "calendar": "Calendar",
+    "newBooking": "New Booking",
+    "editBooking": "Edit Booking",
+    "calendarTitle": "Booking Calendar",
+    "calendarSubtitle": "Month view of all scheduled sessions.",
+    "listView": "List View",
+    "today": "Today",
+    "addBooking": "Add Booking",
+    "noBookingsOnDay": "No bookings on this day.",
+    "moreCount": "+{count} more",
+    "keepBooking": "Keep Booking",
+    "cancelBooking": "Cancel Booking",
+    "deleteConfirmTitle": "Delete booking?",
+    "deleteConfirmMessage": "This will remove the booking for '{name}'.",
+    "types": {
+      "wedding": "Wedding",
+      "portrait": "Portrait",
+      "family": "Family",
+      "product": "Product",
+      "passport": "Passport",
+      "event": "Event",
+      "other": "Other"
+    },
+    "status": {
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "inProgress": "In Progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "noShow": "No Show"
+    },
+    "locationTypes": {
+      "studio": "Studio",
+      "onLocation": "On Location"
+    },
+    "actions": {
+      "confirm": "Confirm",
+      "start": "Start",
+      "complete": "Complete",
+      "markNoShow": "Mark No-Show"
+    },
+    "messages": {
+      "deletedSuccess": "Booking deleted successfully.",
+      "updatedSuccess": "Booking updated successfully.",
+      "createdSuccess": "Booking created successfully.",
+      "cancelledSuccess": "Booking cancelled.",
+      "saveError": "Unable to save booking."
+    }
+  },
+  "services": {
+    "title": "Services & Pricing",
+    "subtitle": "Manage your photography packages, categories, and add-ons.",
+    "categories": "Categories",
+    "addOns": "Add-ons",
+    "newService": "New Service",
+    "editService": "Edit Service",
+    "pricingUnit": "Pricing Unit",
+    "pricingUnits": {
+      "fixed": "Fixed Price",
+      "perHour": "Per Hour",
+      "perPerson": "Per Person",
+      "perPhoto": "Per Photo"
+    },
+    "pricingUnitSuffix": {
+      "perHour": "/ hour",
+      "perPerson": "/ person",
+      "perPhoto": "/ photo"
+    },
+    "durationMinutes": "Duration (minutes)",
+    "deliverables": "Deliverables",
+    "deliverablesPlaceholder": "e.g. 50 edited photos, 1 printed album",
+    "activeSwitchLabel": "Active (visible for booking/quoting)",
+    "manageCategories": "Manage Categories",
+    "manageAddOns": "Manage Add-ons",
+    "newCategoryName": "New category name",
+    "addOnName": "Add-on name",
+    "deleteServiceTitle": "Delete service?",
+    "deleteServiceMessage": "This will remove '{name}'.",
+    "deleteCategoryTitle": "Delete category?",
+    "deleteCategoryMessage": "Services in '{name}' will become uncategorized.",
+    "deleteAddOnTitle": "Delete add-on?",
+    "deleteAddOnMessage": "Remove '{name}'?",
+    "messages": {
+      "serviceDeleted": "Service deleted successfully.",
+      "serviceUpdated": "Service updated successfully.",
+      "serviceCreated": "Service created successfully.",
+      "serviceSaveError": "Unable to save service.",
+      "categoryCreated": "Category created successfully.",
+      "categoryCreateError": "Unable to create category.",
+      "categoryDeleted": "Category deleted successfully.",
+      "addOnCreated": "Add-on created successfully.",
+      "addOnCreateError": "Unable to create add-on.",
+      "addOnDeleted": "Add-on deleted successfully."
+    }
+  },
+  "orders": {
+    "title": "Orders",
+    "subtitle": "Track customer orders from confirmation through delivery.",
+    "newOrder": "New Order",
+    "createOrder": "Create Order",
+    "orderDetails": "Order Details",
+    "cancelOrder": "Cancel Order",
+    "keepOrder": "Keep Order",
+    "items": "Items",
+    "itemsCount": "{count} item(s)",
+    "addFromCatalog": "Add from catalog",
+    "customItem": "Custom Item",
+    "itemNamePlaceholder": "Item name",
+    "noItemsYet": "No items yet.",
+    "linkedBooking": "Linked Booking (optional)",
+    "assignEditor": "Assign editor (optional)",
+    "startProduction": "Start Production",
+    "markReady": "Mark Ready for Delivery",
+    "deliver": "Deliver",
+    "editingTask": "Editing Task",
+    "assignedToSuffix": " — assigned to {name}",
+    "orderCreated": "Order created successfully.",
+    "orderCancelled": "Order cancelled.",
+    "status": {
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "inProduction": "In Production",
+      "readyForDelivery": "Ready for Delivery",
+      "delivered": "Delivered",
+      "cancelled": "Cancelled"
+    },
+    "errors": {
+      "needsOneItem": "Add at least one item to the order.",
+      "customItemIncomplete": "Every custom item needs a name and a price.",
+      "saveFailed": "Unable to save order."
+    }
+  },
+  "editing": {
+    "title": "Editing Queue",
+    "subtitle": "Track production work on orders currently being edited.",
+    "unassigned": "Unassigned",
+    "status": {
+      "pending": "Pending",
+      "inProgress": "In Progress",
+      "inReview": "In Review",
+      "revisionRequested": "Revision Requested",
+      "completed": "Completed"
+    },
+    "actions": {
+      "start": "Start",
+      "submitForReview": "Submit for Review",
+      "complete": "Complete",
+      "requestRevision": "Request Revision"
+    }
   }
 }

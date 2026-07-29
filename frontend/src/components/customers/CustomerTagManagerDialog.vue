@@ -1,5 +1,6 @@
 <script setup>
 import { ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Field } from 'vee-validate'
 import AppDialog from '@/components/common/AppDialog.vue'
 import AppForm from '@/components/common/AppForm.vue'
@@ -15,6 +16,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
+const { t } = useI18n()
 const appStore = useAppStore()
 const tagsStore = useCustomerTagsStore()
 
@@ -33,9 +35,9 @@ async function onSubmit(values, { resetForm }) {
     resetForm()
     tagsStore.invalidate()
     await tagsStore.fetch(true)
-    appStore.notify('Tag created successfully.')
+    appStore.notify(t('customers.messages.tagCreatedSuccess'))
   } catch (error) {
-    appStore.notify(error.response?.data?.message || 'Unable to create tag.', 'error')
+    appStore.notify(error.response?.data?.message || t('customers.messages.tagCreateError'), 'error')
   } finally {
     loading.value = false
   }
@@ -51,17 +53,17 @@ async function confirmDeleteTag() {
   confirmDelete.value = false
   tagsStore.invalidate()
   await tagsStore.fetch(true)
-  appStore.notify('Tag deleted successfully.')
+  appStore.notify(t('customers.messages.tagDeletedSuccess'))
 }
 </script>
 
 <template>
-  <AppDialog :model-value="modelValue" title="Manage Tags" max-width="480" @update:model-value="emit('update:modelValue', $event)">
+  <AppDialog :model-value="modelValue" :title="t('customers.dialogs.manageTagsTitle')" max-width="480" @update:model-value="emit('update:modelValue', $event)">
     <AppForm :schema="customerTagSchema" :initial-values="{ name: '', color: '#6750A4' }" @submit="onSubmit">
       <template #default="{ errors }">
         <div class="d-flex ga-2 align-start mb-4">
           <Field v-slot="{ field }" name="name">
-            <v-text-field v-bind="field" label="New tag name" density="compact" hide-details :error-messages="errors.name" />
+            <v-text-field v-bind="field" :label="t('customers.dialogs.newTagNameLabel')" density="compact" hide-details :error-messages="errors.name" />
           </Field>
           <Field v-slot="{ field }" name="color">
             <input v-bind="field" type="color" style="width: 40px; height: 40px; border: none; cursor: pointer" >
@@ -85,8 +87,8 @@ async function confirmDeleteTag() {
 
     <AppConfirmDialog
       v-model="confirmDelete"
-      title="Delete tag?"
-      :message="`Remove '${tagToDelete?.name}' from all customers?`"
+      :title="t('customers.dialogs.deleteTagConfirmTitle')"
+      :message="t('customers.dialogs.deleteTagConfirmMessage', { name: tagToDelete?.name })"
       @confirm="confirmDeleteTag"
     />
   </AppDialog>

@@ -42,6 +42,6 @@ const displayText = computed(() => (dateValue.value ? format(dateValue.value, pr
         @click:clear="emit('update:modelValue', null)"
       />
     </template>
-    <v-date-picker v-model="dateValue" show-adjacent-months />
+    <v-date-picker v-model="dateValue" show-adjacent-months hide-header/>
   </v-menu>
 </template>

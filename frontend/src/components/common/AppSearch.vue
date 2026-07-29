@@ -1,16 +1,20 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useDebounceFn } from '@vueuse/core'
+
+const { t } = useI18n()
 
 const props = defineProps({
   modelValue: { type: String, default: '' },
-  placeholder: { type: String, default: 'Search...' },
+  placeholder: { type: String, default: null },
   debounce: { type: Number, default: 350 },
 })
 
 const emit = defineEmits(['update:modelValue'])
 
 const value = ref(props.modelValue)
+const resolvedPlaceholder = computed(() => props.placeholder ?? t('common.searchPlaceholder'))
 
 const emitDebounced = useDebounceFn((val) => emit('update:modelValue', val), props.debounce)
 
@@ -23,7 +27,7 @@ watch(() => props.modelValue, (val) => {
 <template>
   <v-text-field
     v-model="value"
-    :placeholder="placeholder"
+    :placeholder="resolvedPlaceholder"
     prepend-inner-icon="mdi-magnify"
     clearable
     hide-details

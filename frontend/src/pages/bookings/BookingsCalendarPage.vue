@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { format, isSameDay } from 'date-fns'
 import AppToolbar from '@/components/common/AppToolbar.vue'
 import AppDialog from '@/components/common/AppDialog.vue'
@@ -8,16 +9,17 @@ import BookingCalendar from '@/components/bookings/BookingCalendar.vue'
 import BookingFormDialog from '@/components/bookings/BookingFormDialog.vue'
 import { useAuthStore } from '@/stores/auth'
 
+const { t } = useI18n()
 const auth = useAuthStore()
 
-const STATUS_MAP = {
-  pending: { color: 'warning', label: 'Pending' },
-  confirmed: { color: 'info', label: 'Confirmed' },
-  in_progress: { color: 'primary', label: 'In Progress' },
-  completed: { color: 'success', label: 'Completed' },
-  cancelled: { color: 'error', label: 'Cancelled' },
-  no_show: { color: 'error', label: 'No Show' },
-}
+const STATUS_MAP = computed(() => ({
+  pending: { color: 'warning', label: t('bookings.status.pending') },
+  confirmed: { color: 'info', label: t('bookings.status.confirmed') },
+  in_progress: { color: 'primary', label: t('bookings.status.inProgress') },
+  completed: { color: 'success', label: t('bookings.status.completed') },
+  cancelled: { color: 'error', label: t('bookings.status.cancelled') },
+  no_show: { color: 'error', label: t('bookings.status.noShow') },
+}))
 
 const calendarRef = ref(null)
 const dayDialog = ref(false)
@@ -59,9 +61,9 @@ async function onSaved() {
 
 <template>
   <div>
-    <AppToolbar title="Booking Calendar" subtitle="Month view of all scheduled sessions.">
+    <AppToolbar :title="t('bookings.calendarTitle')" :subtitle="t('bookings.calendarSubtitle')">
       <template #actions>
-        <v-btn variant="outlined" prepend-icon="mdi-format-list-bulleted" :to="{ name: 'bookings' }">List View</v-btn>
+        <v-btn variant="outlined" prepend-icon="mdi-format-list-bulleted" :to="{ name: 'bookings' }">{{ t('bookings.listView') }}</v-btn>
       </template>
     </AppToolbar>
 
@@ -70,7 +72,7 @@ async function onSaved() {
     </v-card>
 
     <AppDialog v-model="dayDialog" :title="selectedDay ? format(selectedDay, 'MMMM d, yyyy') : ''" max-width="480">
-      <div v-if="!dayBookings.length" class="text-body-2 text-medium-emphasis mb-4">No bookings on this day.</div>
+      <div v-if="!dayBookings.length" class="text-body-2 text-medium-emphasis mb-4">{{ t('bookings.noBookingsOnDay') }}</div>
 
       <v-list v-else density="compact" class="mb-4">
         <v-list-item
@@ -87,7 +89,7 @@ async function onSaved() {
       </v-list>
 
       <v-btn v-if="canCreate" block color="primary" variant="flat" prepend-icon="mdi-plus" @click="createForSelectedDay">
-        Add Booking
+        {{ t('bookings.addBooking') }}
       </v-btn>
     </AppDialog>
 

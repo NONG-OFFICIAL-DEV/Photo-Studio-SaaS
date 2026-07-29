@@ -1,7 +1,10 @@
 <script setup>
 import { ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import AppSearch from '@/components/common/AppSearch.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
+
+const { t } = useI18n()
 
 /*
  * Every data table in this app is server-driven: pagination, sorting and
@@ -47,7 +50,7 @@ async function load() {
   }
 }
 
-watch(options, load, { deep: true })
+watch(options, load, { deep: true, immediate: true })
 watch(search, () => {
   options.value.page = 1
   load()
@@ -82,7 +85,7 @@ defineExpose({ refresh: load })
       </template>
 
       <template #no-data>
-        <EmptyState :title="`No ${itemLabel} found`" description="Try adjusting your search or filters." />
+        <EmptyState :title="t('common.noItemsFound', { item: itemLabel })" :description="t('common.tryAdjustingFilters')" />
       </template>
     </v-data-table-server>
   </div>

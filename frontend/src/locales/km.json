@@ -13,17 +13,76 @@
     "noData": "គ្មានទិន្នន័យ",
     "actions": "សកម្មភាព",
     "confirm": "បញ្ជាក់",
+    "confirmMessage": "តើអ្នកប្រាកដទេ?",
     "yes": "បាទ/ចាស",
     "no": "ទេ",
     "close": "បិទ",
     "back": "ត្រឡប់ក្រោយ",
     "submit": "ដាក់ស្នើ",
-    "welcome": "សូមស្វាគមន៍"
+    "welcome": "សូមស្វាគមន៍",
+    "noItemsFound": "រកមិនឃើញ {item}",
+    "tryAdjustingFilters": "សូមសាកល្បងកែសម្រួលការស្វែងរក ឬតម្រង។",
+    "searchPlaceholder": "ស្វែងរក...",
+    "dragDropFiles": "អូស និងទម្លាក់ឯកសារនៅទីនេះ ឬចុចដើម្បីរកមើល",
+    "filesTooLarge": "ឯកសារ {count} លើសពី {maxSize}MB ហើយត្រូវបានរំលង។",
+    "pageNotFound": "រកមិនឃើញទំព័រ",
+    "goHome": "ត្រឡប់ទៅទំព័រដើម",
+    "actionFailed": "សកម្មភាពបានបរាជ័យ។",
+    "status": {
+      "trial": "ការសាកល្បង",
+      "active": "កំពុងប្រើ",
+      "expired": "ផុតកំណត់",
+      "suspended": "ផ្អាក",
+      "cancelled": "បានបោះបង់",
+      "pending": "កំពុងរង់ចាំ",
+      "confirmed": "បានបញ្ជាក់",
+      "inProgress": "កំពុងដំណើរការ",
+      "completed": "បានបញ្ចប់",
+      "delivered": "បានប្រគល់ជូន",
+      "inactive": "មិនប្រើ",
+      "locked": "ជាប់សោ"
+    }
+  },
+  "fields": {
+    "name": "ឈ្មោះ",
+    "email": "អ៊ីមែល",
+    "phone": "លេខទូរស័ព្ទ",
+    "address": "អាសយដ្ឋាន",
+    "birthday": "ថ្ងៃខួបកំណើត",
+    "gender": "ភេទ",
+    "tags": "ស្លាក",
+    "notes": "កំណត់ចំណាំ",
+    "reason": "មូលហេតុ",
+    "status": "ស្ថានភាព",
+    "customer": "អតិថិជន",
+    "type": "ប្រភេទ",
+    "assignedTo": "ចាត់តាំងទៅ",
+    "title": "ចំណងជើង",
+    "startDate": "កាលបរិច្ឆេទចាប់ផ្តើម",
+    "endDate": "កាលបរិច្ឆេទបញ្ចប់",
+    "startTime": "ម៉ោងចាប់ផ្តើម",
+    "endTime": "ម៉ោងបញ្ចប់",
+    "location": "ទីតាំង",
+    "category": "ប្រភេទ",
+    "price": "តម្លៃ",
+    "duration": "រយៈពេល",
+    "description": "ការពិពណ៌នា",
+    "active": "កំពុងប្រើ",
+    "inactive": "មិនប្រើ",
+    "total": "សរុប",
+    "subtotal": "សរុបរង",
+    "discount": "បញ្ចុះតម្លៃ",
+    "quantity": "ចំនួន",
+    "unitPrice": "តម្លៃឯកតា",
+    "order": "ការបញ្ជាទិញ"
   },
   "menu": {
     "dashboard": "ផ្ទាំងគ្រប់គ្រង",
     "customers": "អតិថិជន",
     "bookings": "ការកក់ការងារ",
+    "services": "សេវាកម្ម និងតម្លៃ",
+    "orders": "ការបញ្ជាទិញ",
+    "editingQueue": "ជួរកែសម្រួល",
     "gallery": "វិចិត្រសាល",
     "invoices": "វិក្កយបត្រ",
     "employees": "បុគ្គលិក",
@@ -53,6 +112,7 @@
     "verifyEmailTitle": "បញ្ជាក់អ៊ីមែលរបស់អ្នក",
     "verifyEmailSuccess": "អ៊ីមែលរបស់អ្នកត្រូវបានបញ្ជាក់។ អ្នកអាចចូលប្រើប្រាស់បាន។",
     "verifyEmailInvalid": "តំណបញ្ជាក់នេះមិនត្រឹមត្រូវ ឬបានផុតកំណត់។",
+    "verifyEmailPrompt": "សូមផ្ទៀងផ្ទាត់អាសយដ្ឋានអ៊ីមែលរបស់អ្នក។",
     "resendVerification": "ផ្ញើអ៊ីមែលបញ្ជាក់ម្តងទៀត"
   },
   "validation": {
@@ -69,6 +129,219 @@
     "bookings": "ការកក់ការងារ",
     "pendingEditing": "រង់ចាំកែសម្រួល",
     "readyForDelivery": "ត្រៀមប្រគល់",
-    "completedOrders": "ការងារបានបញ្ចប់"
+    "completedOrders": "ការងារបានបញ្ចប់",
+    "topServices": "សេវាកម្មកំពូល",
+    "noDataYet": "មិនទាន់មានទិន្នន័យនៅឡើយទេ — នឹងមានពេលម៉ូឌុលការកក់ដំណើរការ។"
+  },
+  "customers": {
+    "title": "អតិថិជន",
+    "subtitle": "គ្រប់គ្រងទម្រង់អតិថិជន ស្លាក និងប្រវត្តិរបស់ស្ទូឌីយោអ្នក។",
+    "actions": {
+      "addCustomer": "បន្ថែមអតិថិជន",
+      "export": "នាំចេញ",
+      "import": "នាំចូល",
+      "exportCsv": "នាំចេញជា CSV",
+      "exportExcel": "នាំចេញជា Excel",
+      "blacklist": "ដាក់បញ្ជីខ្មៅ"
+    },
+    "filters": {
+      "tag": "ស្លាក",
+      "favoritesOnly": "សំណព្វប៉ុណ្ណោះ",
+      "blacklistedOnly": "ក្នុងបញ្ជីខ្មៅប៉ុណ្ណោះ"
+    },
+    "genderOptions": {
+      "male": "ប្រុស",
+      "female": "ស្រី",
+      "other": "ផ្សេងទៀត"
+    },
+    "status": {
+      "blacklisted": "ក្នុងបញ្ជីខ្មៅ"
+    },
+    "dialogs": {
+      "editTitle": "កែសម្រួលអតិថិជន",
+      "detailsTitle": "ព័ត៌មានលម្អិតអតិថិជន",
+      "blacklistTitle": "ដាក់អតិថិជនក្នុងបញ្ជីខ្មៅ",
+      "importTitle": "នាំចូលអតិថិជន",
+      "importInstructions": "ផ្ទុកឡើងឯកសារ CSV ឬ Excel ដែលមានជួរឈរ៖ ឈ្មោះ អ៊ីមែល លេខទូរស័ព្ទ អាសយដ្ឋាន ថ្ងៃខួបកំណើត ភេទ។ ជួរដេកដែលគ្មានឈ្មោះនឹងត្រូវរំលង ហើយរាយការណ៍ខាងក្រោម។",
+      "manageTagsTitle": "គ្រប់គ្រងស្លាក",
+      "newTagNameLabel": "ឈ្មោះស្លាកថ្មី",
+      "deleteTagConfirmTitle": "លុបស្លាក?",
+      "deleteTagConfirmMessage": "លុប '{name}' ចេញពីអតិថិជនទាំងអស់?",
+      "deleteCustomerConfirmTitle": "លុបអតិថិជន?",
+      "deleteCustomerConfirmMessage": "នេះនឹងលុប '{name}'។ អាចស្តារឡើងវិញដោយក្រុមជំនួយបានប្រសិនបើចាំបាច់។"
+    },
+    "notes": {
+      "addPlaceholder": "បន្ថែមកំណត់ចំណាំអំពីអតិថិជននេះ...",
+      "empty": "មិនទាន់មានកំណត់ចំណាំនៅឡើយទេ។"
+    },
+    "messages": {
+      "updatedSuccess": "ធ្វើបច្ចុប្បន្នភាពអតិថិជនបានជោគជ័យ។",
+      "createdSuccess": "បង្កើតអតិថិជនបានជោគជ័យ។",
+      "saveError": "មិនអាចរក្សាទុកអតិថិជនបានទេ។",
+      "deletedSuccess": "លុបអតិថិជនបានជោគជ័យ។",
+      "blacklistedSuccess": "បានដាក់អតិថិជនក្នុងបញ្ជីខ្មៅ។",
+      "unblacklistedSuccess": "បានដកអតិថិជនចេញពីបញ្ជីខ្មៅ។",
+      "importFailed": "ការនាំចូលបរាជ័យ។",
+      "tagCreatedSuccess": "បង្កើតស្លាកបានជោគជ័យ។",
+      "tagCreateError": "មិនអាចបង្កើតស្លាកបានទេ។",
+      "tagDeletedSuccess": "លុបស្លាកបានជោគជ័យ។"
+    },
+    "import": {
+      "resultSummary": "នាំចូល {imported} ជោគជ័យ បរាជ័យ {failed}។",
+      "rowError": "ជួរដេក {row}៖ {errors}"
+    }
+  },
+  "bookings": {
+    "subtitle": "កំណត់ពេល និងតាមដានវគ្គថតរូប។",
+    "when": "ពេលវេលា",
+    "calendar": "ប្រតិទិន",
+    "newBooking": "ការកក់ថ្មី",
+    "editBooking": "កែសម្រួលការកក់",
+    "calendarTitle": "ប្រតិទិនការកក់",
+    "calendarSubtitle": "ទិដ្ឋភាពប្រចាំខែនៃវគ្គដែលបានកំណត់ពេលទាំងអស់។",
+    "listView": "ទិដ្ឋភាពបញ្ជី",
+    "today": "ថ្ងៃនេះ",
+    "addBooking": "បន្ថែមការកក់",
+    "noBookingsOnDay": "គ្មានការកក់នៅថ្ងៃនេះទេ។",
+    "moreCount": "+{count} ទៀត",
+    "keepBooking": "រក្សាការកក់",
+    "cancelBooking": "បោះបង់ការកក់",
+    "deleteConfirmTitle": "លុបការកក់?",
+    "deleteConfirmMessage": "សកម្មភាពនេះនឹងលុបការកក់សម្រាប់ '{name}'។",
+    "types": {
+      "wedding": "អាពាហ៍ពិពាហ៍",
+      "portrait": "រូបភាពបុគ្គល",
+      "family": "គ្រួសារ",
+      "product": "ផលិតផល",
+      "passport": "លិខិតឆ្លងដែន",
+      "event": "ព្រឹត្តិការណ៍",
+      "other": "ផ្សេងទៀត"
+    },
+    "status": {
+      "pending": "កំពុងរង់ចាំ",
+      "confirmed": "បានបញ្ជាក់",
+      "inProgress": "កំពុងដំណើរការ",
+      "completed": "បានបញ្ចប់",
+      "cancelled": "បានបោះបង់",
+      "noShow": "មិនបានមក"
+    },
+    "locationTypes": {
+      "studio": "ស្ទូឌីយោ",
+      "onLocation": "នៅទីតាំងក្រៅ"
+    },
+    "actions": {
+      "confirm": "បញ្ជាក់",
+      "start": "ចាប់ផ្តើម",
+      "complete": "បញ្ចប់",
+      "markNoShow": "សម្គាល់ថាមិនបានមក"
+    },
+    "messages": {
+      "deletedSuccess": "បានលុបការកក់ដោយជោគជ័យ។",
+      "updatedSuccess": "បានធ្វើបច្ចុប្បន្នភាពការកក់ដោយជោគជ័យ។",
+      "createdSuccess": "បានបង្កើតការកក់ដោយជោគជ័យ។",
+      "cancelledSuccess": "ការកក់ត្រូវបានបោះបង់។",
+      "saveError": "មិនអាចរក្សាទុកការកក់បានទេ។"
+    }
+  },
+  "services": {
+    "title": "សេវាកម្ម និងតម្លៃ",
+    "subtitle": "គ្រប់គ្រងកញ្ចប់សេវាថតរូប ប្រភេទ និងសេវាបន្ថែមរបស់ស្ទូឌីយោអ្នក។",
+    "categories": "ប្រភេទ",
+    "addOns": "សេវាបន្ថែម",
+    "newService": "សេវាថ្មី",
+    "editService": "កែសម្រួលសេវា",
+    "pricingUnit": "ឯកតាតម្លៃ",
+    "pricingUnits": {
+      "fixed": "តម្លៃថេរ",
+      "perHour": "តាមម៉ោង",
+      "perPerson": "តាមមនុស្ស",
+      "perPhoto": "តាមរូបភាព"
+    },
+    "pricingUnitSuffix": {
+      "perHour": "/ ម៉ោង",
+      "perPerson": "/ មនុស្ស",
+      "perPhoto": "/ រូបភាព"
+    },
+    "durationMinutes": "រយៈពេល (នាទី)",
+    "deliverables": "លទ្ធផលដែលទទួលបាន",
+    "deliverablesPlaceholder": "ឧ. រូបភាពកែសម្រួល ៥០សន្លឹក អាល់ប៊ុមបោះពុម្ព ១",
+    "activeSwitchLabel": "កំពុងប្រើ (មើលឃើញសម្រាប់ការកក់/សម្រង់តម្លៃ)",
+    "manageCategories": "គ្រប់គ្រងប្រភេទ",
+    "manageAddOns": "គ្រប់គ្រងសេវាបន្ថែម",
+    "newCategoryName": "ឈ្មោះប្រភេទថ្មី",
+    "addOnName": "ឈ្មោះសេវាបន្ថែម",
+    "deleteServiceTitle": "លុបសេវានេះ?",
+    "deleteServiceMessage": "សកម្មភាពនេះនឹងលុប '{name}' ចេញ។",
+    "deleteCategoryTitle": "លុបប្រភេទនេះ?",
+    "deleteCategoryMessage": "សេវាកម្មនៅក្នុង '{name}' នឹងក្លាយជាគ្មានប្រភេទ។",
+    "deleteAddOnTitle": "លុបសេវាបន្ថែមនេះ?",
+    "deleteAddOnMessage": "លុប '{name}' ចេញ?",
+    "messages": {
+      "serviceDeleted": "លុបសេវាបានជោគជ័យ។",
+      "serviceUpdated": "ធ្វើបច្ចុប្បន្នភាពសេវាបានជោគជ័យ។",
+      "serviceCreated": "បង្កើតសេវាបានជោគជ័យ។",
+      "serviceSaveError": "មិនអាចរក្សាទុកសេវាបានទេ។",
+      "categoryCreated": "បង្កើតប្រភេទបានជោគជ័យ។",
+      "categoryCreateError": "មិនអាចបង្កើតប្រភេទបានទេ។",
+      "categoryDeleted": "លុបប្រភេទបានជោគជ័យ។",
+      "addOnCreated": "បង្កើតសេវាបន្ថែមបានជោគជ័យ។",
+      "addOnCreateError": "មិនអាចបង្កើតសេវាបន្ថែមបានទេ។",
+      "addOnDeleted": "លុបសេវាបន្ថែមបានជោគជ័យ។"
+    }
+  },
+  "orders": {
+    "title": "ការបញ្ជាទិញ",
+    "subtitle": "តាមដានការបញ្ជាទិញរបស់អតិថិជន ចាប់ពីការបញ្ជាក់រហូតដល់ការប្រគល់ជូន។",
+    "newOrder": "ការបញ្ជាទិញថ្មី",
+    "createOrder": "បង្កើតការបញ្ជាទិញ",
+    "orderDetails": "ព័ត៌មានលម្អិតការបញ្ជាទិញ",
+    "cancelOrder": "បោះបង់ការបញ្ជាទិញ",
+    "keepOrder": "រក្សាការបញ្ជាទិញ",
+    "items": "ទំនិញ",
+    "itemsCount": "ទំនិញ {count}",
+    "addFromCatalog": "បន្ថែមពីកាតាឡុក",
+    "customItem": "ទំនិញផ្ទាល់ខ្លួន",
+    "itemNamePlaceholder": "ឈ្មោះទំនិញ",
+    "noItemsYet": "មិនទាន់មានទំនិញនៅឡើយទេ។",
+    "linkedBooking": "ការកក់ភ្ជាប់ (ស្រេចចិត្ត)",
+    "assignEditor": "ចាត់តាំងអ្នកកែសម្រួល (ស្រេចចិត្ត)",
+    "startProduction": "ចាប់ផ្តើមផលិត",
+    "markReady": "កំណត់ថាត្រៀមប្រគល់ជូន",
+    "deliver": "ប្រគល់ជូន",
+    "editingTask": "ការងារកែសម្រួល",
+    "assignedToSuffix": " — ចាត់តាំងទៅ {name}",
+    "orderCreated": "បង្កើតការបញ្ជាទិញបានជោគជ័យ។",
+    "orderCancelled": "ការបញ្ជាទិញត្រូវបានបោះបង់។",
+    "status": {
+      "pending": "កំពុងរង់ចាំ",
+      "confirmed": "បានបញ្ជាក់",
+      "inProduction": "កំពុងផលិត",
+      "readyForDelivery": "ត្រៀមប្រគល់ជូន",
+      "delivered": "បានប្រគល់ជូន",
+      "cancelled": "បានបោះបង់"
+    },
+    "errors": {
+      "needsOneItem": "សូមបន្ថែមទំនិញយ៉ាងតិចមួយទៅក្នុងការបញ្ជាទិញ។",
+      "customItemIncomplete": "ទំនិញផ្ទាល់ខ្លួនត្រូវការឈ្មោះ និងតម្លៃ។",
+      "saveFailed": "មិនអាចរក្សាទុកការបញ្ជាទិញបានទេ។"
+    }
+  },
+  "editing": {
+    "title": "ជួរកែសម្រួល",
+    "subtitle": "តាមដានការងារផលិតលើការបញ្ជាទិញដែលកំពុងកែសម្រួល។",
+    "unassigned": "មិនទាន់ចាត់តាំង",
+    "status": {
+      "pending": "កំពុងរង់ចាំ",
+      "inProgress": "កំពុងដំណើរការ",
+      "inReview": "កំពុងពិនិត្យ",
+      "revisionRequested": "បានស្នើកែប្រែ",
+      "completed": "បានបញ្ចប់"
+    },
+    "actions": {
+      "start": "ចាប់ផ្តើម",
+      "submitForReview": "ដាក់ស្នើសម្រាប់ពិនិត្យ",
+      "complete": "បញ្ចប់",
+      "requestRevision": "ស្នើសុំកែប្រែ"
+    }
   }
 }

@@ -7,6 +7,11 @@ use App\Http\Controllers\Api\V1\Booking\BookingController;
 use App\Http\Controllers\Api\V1\Customer\CustomerController;
 use App\Http\Controllers\Api\V1\Customer\CustomerNoteController;
 use App\Http\Controllers\Api\V1\Customer\CustomerTagController;
+use App\Http\Controllers\Api\V1\Order\EditingTaskController;
+use App\Http\Controllers\Api\V1\Order\OrderController;
+use App\Http\Controllers\Api\V1\Service\ServiceAddOnController;
+use App\Http\Controllers\Api\V1\Service\ServiceCategoryController;
+use App\Http\Controllers\Api\V1\Service\ServiceController;
 use App\Http\Controllers\Api\V1\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -85,5 +90,41 @@ Route::middleware(['auth:api', 'tenant', 'subscription.active'])->group(function
         Route::post('/{booking}/complete', [BookingController::class, 'complete']);
         Route::post('/{booking}/no-show', [BookingController::class, 'noShow']);
         Route::post('/{booking}/cancel', [BookingController::class, 'cancel']);
+    });
+
+    Route::prefix('services')->name('services.')->group(function () {
+        // Static segments before {service} so they aren't swallowed by the wildcard.
+        Route::apiResource('categories', ServiceCategoryController::class)->except(['show']);
+        Route::apiResource('addons', ServiceAddOnController::class)->except(['show']);
+
+        Route::get('/', [ServiceController::class, 'index']);
+        Route::post('/', [ServiceController::class, 'store']);
+        Route::get('/{service}', [ServiceController::class, 'show']);
+        Route::put('/{service}', [ServiceController::class, 'update']);
+        Route::delete('/{service}', [ServiceController::class, 'destroy']);
+    });
+
+    Route::prefix('orders')->name('orders.')->group(function () {
+        Route::get('/', [OrderController::class, 'index']);
+        Route::post('/', [OrderController::class, 'store']);
+        Route::get('/{order}', [OrderController::class, 'show']);
+        Route::put('/{order}', [OrderController::class, 'update']);
+        Route::delete('/{order}', [OrderController::class, 'destroy']);
+
+        Route::post('/{order}/confirm', [OrderController::class, 'confirm']);
+        Route::post('/{order}/start-production', [OrderController::class, 'startProduction']);
+        Route::post('/{order}/ready-for-delivery', [OrderController::class, 'readyForDelivery']);
+        Route::post('/{order}/deliver', [OrderController::class, 'deliver']);
+        Route::post('/{order}/cancel', [OrderController::class, 'cancel']);
+    });
+
+    Route::prefix('editing-tasks')->name('editing-tasks.')->group(function () {
+        Route::get('/', [EditingTaskController::class, 'index']);
+
+        Route::post('/{editingTask}/assign', [EditingTaskController::class, 'assign']);
+        Route::post('/{editingTask}/start', [EditingTaskController::class, 'start']);
+        Route::post('/{editingTask}/in-review', [EditingTaskController::class, 'markInReview']);
+        Route::post('/{editingTask}/request-revision', [EditingTaskController::class, 'requestRevision']);
+        Route::post('/{editingTask}/complete', [EditingTaskController::class, 'complete']);
     });
 });

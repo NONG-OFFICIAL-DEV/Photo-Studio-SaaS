@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Field } from 'vee-validate'
 import AppDialog from '@/components/common/AppDialog.vue'
 import AppForm from '@/components/common/AppForm.vue'
@@ -17,6 +18,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'saved'])
 
+const { t } = useI18n()
 const appStore = useAppStore()
 
 const loading = ref(false)
@@ -26,18 +28,18 @@ const customerOptions = ref([])
 const customerSearchLoading = ref(false)
 const users = ref([])
 
-const BOOKING_TYPES = [
-  { title: 'Wedding', value: 'wedding' },
-  { title: 'Portrait', value: 'portrait' },
-  { title: 'Family', value: 'family' },
-  { title: 'Product', value: 'product' },
-  { title: 'Passport', value: 'passport' },
-  { title: 'Event', value: 'event' },
-  { title: 'Other', value: 'other' },
-]
+const BOOKING_TYPES = computed(() => [
+  { title: t('bookings.types.wedding'), value: 'wedding' },
+  { title: t('bookings.types.portrait'), value: 'portrait' },
+  { title: t('bookings.types.family'), value: 'family' },
+  { title: t('bookings.types.product'), value: 'product' },
+  { title: t('bookings.types.passport'), value: 'passport' },
+  { title: t('bookings.types.event'), value: 'event' },
+  { title: t('bookings.types.other'), value: 'other' },
+])
 
 const isEdit = computed(() => Boolean(props.booking?.id))
-const title = computed(() => (isEdit.value ? 'Edit Booking' : 'New Booking'))
+const title = computed(() => (isEdit.value ? t('bookings.editBooking') : t('bookings.newBooking')))
 
 function splitDateTime(iso) {
   if (!iso) return { date: null, time: '' }
@@ -81,14 +83,35 @@ watch(() => props.modelValue, async (open) => {
 
   if (props.booking?.customer) {
     customerOptions.value = [props.booking.customer]
+  } else {
+    loadInitialCustomers()
   }
 
   const { data } = await getUsersApi()
   users.value = data.data
 })
 
+/**
+ * The autocomplete only searches on typed input (@update:search) — left
+ * on its own that means an empty dropdown with no explanation the first
+ * time the dialog opens, since nothing has been typed yet. Pre-populate
+ * with a first page of customers so there's always something to see and
+ * pick from immediately; typing still narrows it via searchCustomers().
+ */
+async function loadInitialCustomers() {
+  customerSearchLoading.value = true
+  try {
+    const { data } = await getCustomersApi({ perPage: 20 })
+    customerOptions.value = data.data
+  } finally {
+    customerSearchLoading.value = false
+  }
+}
+
 async function searchCustomers(term) {
-  if (!term || term.length < 2) return
+  if (!term) return loadInitialCustomers()
+  if (term.length < 2) return
+
   customerSearchLoading.value = true
   try {
     const { data } = await getCustomersApi({ search: term, perPage: 20 })
@@ -107,15 +130,15 @@ async function onSubmit(values) {
   try {
     if (isEdit.value) {
       await updateBookingApi(props.booking.id, payload)
-      appStore.notify('Booking updated successfully.')
+      appStore.notify(t('bookings.messages.updatedSuccess'))
     } else {
       await createBookingApi(payload)
-      appStore.notify('Booking created successfully.')
+      appStore.notify(t('bookings.messages.createdSuccess'))
     }
     emit('saved')
     emit('update:modelValue', false)
   } catch (error) {
-    errorMessage.value = error.response?.data?.message || 'Unable to save booking.'
+    errorMessage.value = error.response?.data?.message || t('bookings.messages.saveError')
   } finally {
     loading.value = false
   }
@@ -132,7 +155,7 @@ async function onSubmit(values) {
           <v-col cols="12">
             <v-autocomplete
               :model-value="values.customer_id"
-              label="Customer *"
+              :label="`${t('fields.customer')} *`"
               item-title="name"
               item-value="id"
               :items="customerOptions"
@@ -152,7 +175,7 @@ async function onSubmit(values) {
           <v-col cols="12" sm="6">
             <v-select
               :model-value="values.type"
-              label="Type *"
+              :label="`${t('fields.type')} *`"
               :items="BOOKING_TYPES"
               :error-messages="errors.type"
               @update:model-value="setFieldValue('type', $event)"
@@ -162,7 +185,7 @@ async function onSubmit(values) {
           <v-col cols="12" sm="6">
             <v-select
               :model-value="values.assigned_user_id"
-              label="Assign to"
+              :label="t('fields.assignedTo')"
               clearable
               item-title="name"
               item-value="id"
@@ -173,37 +196,37 @@ async function onSubmit(values) {
 
           <v-col cols="12">
             <Field v-slot="{ field }" name="title">
-              <v-text-field v-bind="field" label="Title" :error-messages="errors.title" />
+              <v-text-field v-bind="field" :label="t('fields.title')" :error-messages="errors.title" />
             </Field>
           </v-col>
 
-          <v-col cols="6" sm="3">
+          <v-col cols="6" sm="6">
             <AppDatePicker
               :model-value="startDate"
-              label="Start date *"
+              :label="`${t('fields.startDate')} *`"
               @update:model-value="(val) => { startDate = val; setFieldValue('starts_at', combineDateTime(val, startTime)) }"
             />
           </v-col>
-          <v-col cols="6" sm="3">
+          <v-col cols="6" sm="6">
             <v-text-field
               :model-value="startTime"
               type="time"
-              label="Start time *"
+              :label="`${t('fields.startTime')} *`"
               @update:model-value="(val) => { startTime = val; setFieldValue('starts_at', combineDateTime(startDate, val)) }"
             />
           </v-col>
-          <v-col cols="6" sm="3">
+          <v-col cols="6" sm="6">
             <AppDatePicker
               :model-value="endDate"
-              label="End date *"
+              :label="`${t('fields.endDate')} *`"
               @update:model-value="(val) => { endDate = val; setFieldValue('ends_at', combineDateTime(val, endTime)) }"
             />
           </v-col>
-          <v-col cols="6" sm="3">
+          <v-col cols="6" sm="6">
             <v-text-field
               :model-value="endTime"
               type="time"
-              label="End time *"
+              :label="`${t('fields.endTime')} *`"
               @update:model-value="(val) => { endTime = val; setFieldValue('ends_at', combineDateTime(endDate, val)) }"
             />
           </v-col>
@@ -214,27 +237,27 @@ async function onSubmit(values) {
           <v-col cols="12" sm="6">
             <v-select
               :model-value="values.location_type"
-              label="Location *"
-              :items="[{ title: 'Studio', value: 'studio' }, { title: 'On Location', value: 'on_location' }]"
+              :label="`${t('fields.location')} *`"
+              :items="[{ title: t('bookings.locationTypes.studio'), value: 'studio' }, { title: t('bookings.locationTypes.onLocation'), value: 'on_location' }]"
               @update:model-value="setFieldValue('location_type', $event)"
             />
           </v-col>
           <v-col v-if="values.location_type === 'on_location'" cols="12" sm="6">
             <Field v-slot="{ field }" name="location_address">
-              <v-text-field v-bind="field" label="Address *" :error-messages="errors.location_address" />
+              <v-text-field v-bind="field" :label="`${t('fields.address')} *`" :error-messages="errors.location_address" />
             </Field>
           </v-col>
 
           <v-col cols="12">
             <Field v-slot="{ field }" name="notes">
-              <v-textarea v-bind="field" label="Notes" rows="2" :error-messages="errors.notes" />
+              <v-textarea v-bind="field" :label="t('fields.notes')" rows="2" :error-messages="errors.notes" />
             </Field>
           </v-col>
         </v-row>
 
         <div class="d-flex justify-end ga-2 mt-2">
-          <v-btn variant="text" :disabled="loading" @click="emit('update:modelValue', false)">Cancel</v-btn>
-          <v-btn type="submit" color="primary" variant="flat" :loading="loading">Save</v-btn>
+          <v-btn variant="text" :disabled="loading" @click="emit('update:modelValue', false)">{{ t('common.cancel') }}</v-btn>
+          <v-btn type="submit" color="primary" variant="flat" :loading="loading">{{ t('common.save') }}</v-btn>
         </div>
       </template>
     </AppForm>

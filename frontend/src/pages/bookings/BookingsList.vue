@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import AppToolbar from '@/components/common/AppToolbar.vue'
 import AppTable from '@/components/common/AppTable.vue'
 import AppStatusChip from '@/components/common/AppStatusChip.vue'
@@ -18,6 +19,7 @@ import { getUsersApi } from '@/apis/user.api'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
 
+const { t } = useI18n()
 const auth = useAuthStore()
 const appStore = useAppStore()
 
@@ -25,28 +27,33 @@ const tableRef = ref(null)
 const users = ref([])
 getUsersApi().then(({ data }) => { users.value = data.data })
 
-const STATUS_MAP = {
-  pending: { color: 'warning', label: 'Pending' },
-  confirmed: { color: 'info', label: 'Confirmed' },
-  in_progress: { color: 'primary', label: 'In Progress' },
-  completed: { color: 'success', label: 'Completed' },
-  cancelled: { color: 'error', label: 'Cancelled' },
-  no_show: { color: 'error', label: 'No Show' },
-}
+const STATUS_MAP = computed(() => ({
+  pending: { color: 'warning', label: t('bookings.status.pending') },
+  confirmed: { color: 'info', label: t('bookings.status.confirmed') },
+  in_progress: { color: 'primary', label: t('bookings.status.inProgress') },
+  completed: { color: 'success', label: t('bookings.status.completed') },
+  cancelled: { color: 'error', label: t('bookings.status.cancelled') },
+  no_show: { color: 'error', label: t('bookings.status.noShow') },
+}))
 
-const TYPE_LABELS = {
-  wedding: 'Wedding', portrait: 'Portrait', family: 'Family', product: 'Product',
-  passport: 'Passport', event: 'Event', other: 'Other',
-}
+const TYPE_LABELS = computed(() => ({
+  wedding: t('bookings.types.wedding'),
+  portrait: t('bookings.types.portrait'),
+  family: t('bookings.types.family'),
+  product: t('bookings.types.product'),
+  passport: t('bookings.types.passport'),
+  event: t('bookings.types.event'),
+  other: t('bookings.types.other'),
+}))
 
-const headers = [
-  { title: 'Customer', key: 'customer' },
-  { title: 'Type', key: 'type' },
-  { title: 'When', key: 'when', sortable: false },
-  { title: 'Assigned', key: 'assigned', sortable: false },
-  { title: 'Status', key: 'status', sortable: false },
-  { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
-]
+const headers = computed(() => [
+  { title: t('fields.customer'), key: 'customer' },
+  { title: t('fields.type'), key: 'type' },
+  { title: t('bookings.when'), key: 'when', sortable: false },
+  { title: t('fields.assignedTo'), key: 'assigned', sortable: false },
+  { title: t('fields.status'), key: 'status', sortable: false },
+  { title: t('common.actions'), key: 'actions', sortable: false, align: 'end' },
+])
 
 const filters = ref({ status: null, type: null, assigned_user_id: null })
 
@@ -85,7 +92,7 @@ function askDelete(booking) {
 async function confirmDeleteBooking() {
   await deleteBookingApi(deleteTarget.value.id)
   confirmDelete.value = false
-  appStore.notify('Booking deleted successfully.')
+  appStore.notify(t('bookings.messages.deletedSuccess'))
   tableRef.value?.refresh()
 }
 
@@ -111,12 +118,12 @@ const canCancel = computed(() => auth.hasPermission('bookings.cancel'))
 
 <template>
   <div>
-    <AppToolbar title="Bookings" subtitle="Schedule and track photography sessions.">
+    <AppToolbar :title="t('menu.bookings')" :subtitle="t('bookings.subtitle')">
       <template #actions>
         <v-btn variant="outlined" prepend-icon="mdi-calendar-month-outline" :to="{ name: 'bookings-calendar' }">
-          Calendar
+          {{ t('bookings.calendar') }}
         </v-btn>
-        <v-btn v-if="canCreate" color="primary" prepend-icon="mdi-plus" @click="openCreate">New Booking</v-btn>
+        <v-btn v-if="canCreate" color="primary" prepend-icon="mdi-plus" @click="openCreate">{{ t('bookings.newBooking') }}</v-btn>
       </template>
     </AppToolbar>
 
@@ -124,7 +131,7 @@ const canCancel = computed(() => auth.hasPermission('bookings.cancel'))
       <v-col cols="6" sm="3">
         <v-select
           v-model="filters.status"
-          label="Status"
+          :label="t('fields.status')"
           clearable
           density="compact"
           :items="Object.entries(STATUS_MAP).map(([value, s]) => ({ title: s.label, value }))"
@@ -133,7 +140,7 @@ const canCancel = computed(() => auth.hasPermission('bookings.cancel'))
       <v-col cols="6" sm="3">
         <v-select
           v-model="filters.type"
-          label="Type"
+          :label="t('fields.type')"
           clearable
           density="compact"
           :items="Object.entries(TYPE_LABELS).map(([value, title]) => ({ title, value }))"
@@ -142,7 +149,7 @@ const canCancel = computed(() => auth.hasPermission('bookings.cancel'))
       <v-col cols="6" sm="3">
         <v-select
           v-model="filters.assigned_user_id"
-          label="Assigned To"
+          :label="t('fields.assignedTo')"
           clearable
           density="compact"
           item-title="name"
@@ -183,13 +190,13 @@ const canCancel = computed(() => auth.hasPermission('bookings.cancel'))
 
         <template #[`item.actions`]="{ item }">
           <v-btn v-if="canUpdate && item.status === 'pending'" size="small" variant="tonal" color="info" class="mr-1" @click="runAction('confirm', item)">
-            Confirm
+            {{ t('bookings.actions.confirm') }}
           </v-btn>
           <v-btn v-if="canUpdate && item.status === 'confirmed'" size="small" variant="tonal" color="primary" class="mr-1" @click="runAction('start', item)">
-            Start
+            {{ t('bookings.actions.start') }}
           </v-btn>
           <v-btn v-if="canUpdate && item.status === 'in_progress'" size="small" variant="tonal" color="success" class="mr-1" @click="runAction('complete', item)">
-            Complete
+            {{ t('bookings.actions.complete') }}
           </v-btn>
 
           <v-menu>
@@ -197,20 +204,20 @@ const canCancel = computed(() => auth.hasPermission('bookings.cancel'))
               <v-btn icon="mdi-dots-vertical" size="small" variant="text" v-bind="menuProps" />
             </template>
             <v-list density="compact">
-              <v-list-item v-if="canUpdate" title="Edit" prepend-icon="mdi-pencil-outline" @click="openEdit(item)" />
+              <v-list-item v-if="canUpdate" :title="t('common.edit')" prepend-icon="mdi-pencil-outline" @click="openEdit(item)" />
               <v-list-item
                 v-if="canUpdate && ['pending', 'confirmed'].includes(item.status)"
-                title="Mark No-Show"
+                :title="t('bookings.actions.markNoShow')"
                 prepend-icon="mdi-account-off-outline"
                 @click="runAction('noShow', item)"
               />
               <v-list-item
                 v-if="canCancel && !['cancelled', 'completed', 'no_show'].includes(item.status)"
-                title="Cancel"
+                :title="t('common.cancel')"
                 prepend-icon="mdi-calendar-remove-outline"
                 @click="openCancel(item)"
               />
-              <v-list-item v-if="canDelete" title="Delete" prepend-icon="mdi-delete-outline" @click="askDelete(item)" />
+              <v-list-item v-if="canDelete" :title="t('common.delete')" prepend-icon="mdi-delete-outline" @click="askDelete(item)" />
             </v-list>
           </v-menu>
         </template>
@@ -223,8 +230,8 @@ const canCancel = computed(() => auth.hasPermission('bookings.cancel'))
 
     <AppConfirmDialog
       v-model="confirmDelete"
-      title="Delete booking?"
-      :message="`This will remove the booking for '${deleteTarget?.customer?.name}'.`"
+      :title="t('bookings.deleteConfirmTitle')"
+      :message="t('bookings.deleteConfirmMessage', { name: deleteTarget?.customer?.name })"
       @confirm="confirmDeleteBooking"
     />
   </div>

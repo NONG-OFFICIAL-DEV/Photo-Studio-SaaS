@@ -82,7 +82,7 @@ async function resendVerification() {
       class="mb-4"
     >
       <div class="d-flex align-center justify-space-between flex-wrap ga-2">
-        <span>Please verify your email address.</span>
+        <span>{{ t('auth.verifyEmailPrompt') }}</span>
         <v-btn size="small" variant="tonal" :loading="resendLoading" @click="resendVerification">
           {{ t('auth.resendVerification') }}
         </v-btn>
@@ -116,10 +116,10 @@ async function resendVerification() {
       </v-col>
       <v-col cols="12" md="4">
         <v-card variant="flat" border rounded="lg" height="100%">
-          <v-card-title>Top Services</v-card-title>
+          <v-card-title>{{ t('dashboard.topServices') }}</v-card-title>
           <v-card-text>
             <div class="text-body-2 text-medium-emphasis">
-              No data yet — available once the Bookings module ships.
+              {{ t('dashboard.noDataYet') }}
             </div>
           </v-card-text>
         </v-card>

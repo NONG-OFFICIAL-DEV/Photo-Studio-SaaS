@@ -1,5 +1,8 @@
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 /*
  * Base drag-and-drop file picker. Emits raw File objects — actual chunked
@@ -36,7 +39,7 @@ function handleFiles(fileList) {
   const tooBig = files.filter((f) => f.size > props.maxSizeMb * 1024 * 1024)
 
   if (tooBig.length) {
-    emit('error', `${tooBig.length} file(s) exceed ${props.maxSizeMb}MB and were skipped.`)
+    emit('error', t('common.filesTooLarge', { count: tooBig.length, maxSize: props.maxSizeMb }))
   }
 
   const accepted = files.filter((f) => f.size <= props.maxSizeMb * 1024 * 1024)
@@ -80,7 +83,7 @@ function removeFile(index) {
       >
       <v-icon icon="mdi-cloud-upload-outline" size="40" color="primary" class="mb-2" />
       <div class="text-body-2 text-medium-emphasis">
-        Drag & drop files here, or click to browse
+        {{ t('common.dragDropFiles') }}
       </div>
     </div>
 

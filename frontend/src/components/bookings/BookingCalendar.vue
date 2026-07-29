@@ -1,11 +1,13 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import {
   startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval,
   format, isSameMonth, isSameDay, addMonths, subMonths,
 } from 'date-fns'
 import { getBookingCalendarApi } from '@/apis/booking.api'
 
+const { t } = useI18n()
 const emit = defineEmits(['day-click', 'booking-click'])
 
 const STATUS_COLORS = {
@@ -73,7 +75,7 @@ defineExpose({ refresh: fetchBookings, bookings })
     <div class="d-flex align-center justify-space-between mb-3">
       <div class="text-h6">{{ format(currentMonth, 'MMMM yyyy') }}</div>
       <div class="d-flex ga-1">
-        <v-btn size="small" variant="outlined" @click="goToToday">Today</v-btn>
+        <v-btn size="small" variant="outlined" @click="goToToday">{{ t('bookings.today') }}</v-btn>
         <v-btn icon="mdi-chevron-left" size="small" variant="text" @click="goToPreviousMonth" />
         <v-btn icon="mdi-chevron-right" size="small" variant="text" @click="goToNextMonth" />
       </div>
@@ -105,7 +107,7 @@ defineExpose({ refresh: fetchBookings, bookings })
             {{ format(new Date(booking.starts_at), 'HH:mm') }} {{ booking.customer?.name }}
           </div>
           <div v-if="bookingsForDay(day).length > 3" class="text-caption text-medium-emphasis">
-            +{{ bookingsForDay(day).length - 3 }} more
+            {{ t('bookings.moreCount', { count: bookingsForDay(day).length - 3 }) }}
           </div>
         </div>
       </div>

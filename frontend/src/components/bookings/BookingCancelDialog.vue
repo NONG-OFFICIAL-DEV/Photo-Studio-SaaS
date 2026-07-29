@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Field } from 'vee-validate'
 import AppDialog from '@/components/common/AppDialog.vue'
 import AppForm from '@/components/common/AppForm.vue'
@@ -14,6 +15,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'saved'])
 
+const { t } = useI18n()
 const appStore = useAppStore()
 const loading = ref(false)
 
@@ -21,7 +23,7 @@ async function onSubmit(values) {
   loading.value = true
   try {
     await cancelBookingApi(props.bookingId, values.reason)
-    appStore.notify('Booking cancelled.')
+    appStore.notify(t('bookings.messages.cancelledSuccess'))
     emit('saved')
     emit('update:modelValue', false)
   } finally {
@@ -31,16 +33,16 @@ async function onSubmit(values) {
 </script>
 
 <template>
-  <AppDialog :model-value="modelValue" title="Cancel Booking" max-width="480" @update:model-value="emit('update:modelValue', $event)">
+  <AppDialog :model-value="modelValue" :title="t('bookings.cancelBooking')" max-width="480" @update:model-value="emit('update:modelValue', $event)">
     <AppForm :schema="cancelBookingSchema" :initial-values="{ reason: '' }" @submit="onSubmit">
       <template #default="{ errors }">
         <Field v-slot="{ field }" name="reason">
-          <v-textarea v-bind="field" label="Reason *" rows="3" :error-messages="errors.reason" />
+          <v-textarea v-bind="field" :label="`${t('fields.reason')} *`" rows="3" :error-messages="errors.reason" />
         </Field>
 
         <div class="d-flex justify-end ga-2 mt-2">
-          <v-btn variant="text" :disabled="loading" @click="emit('update:modelValue', false)">Keep Booking</v-btn>
-          <v-btn type="submit" color="error" variant="flat" :loading="loading">Cancel Booking</v-btn>
+          <v-btn variant="text" :disabled="loading" @click="emit('update:modelValue', false)">{{ t('bookings.keepBooking') }}</v-btn>
+          <v-btn type="submit" color="error" variant="flat" :loading="loading">{{ t('bookings.cancelBooking') }}</v-btn>
         </div>
       </template>
     </AppForm>

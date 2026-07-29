@@ -21,7 +21,7 @@ const emit = defineEmits(['submit'])
     v-slot="slotProps"
     :validation-schema="schema"
     :initial-values="initialValues"
-    @submit="(values) => emit('submit', values)"
+    @submit="(values, actions) => emit('submit', values, actions)"
   >
     <slot v-bind="slotProps" />
   </VeeForm>

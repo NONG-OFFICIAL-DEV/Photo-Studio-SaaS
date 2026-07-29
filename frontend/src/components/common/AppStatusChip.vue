@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 /*
  * Generic status badge reused across every module (bookings, orders,
@@ -12,23 +13,25 @@ const props = defineProps({
   size: { type: String, default: 'default' },
 })
 
-const DEFAULT_MAP = {
-  trial: { color: 'info', label: 'Trial' },
-  active: { color: 'success', label: 'Active' },
-  expired: { color: 'error', label: 'Expired' },
-  suspended: { color: 'warning', label: 'Suspended' },
-  cancelled: { color: 'grey', label: 'Cancelled' },
-  pending: { color: 'warning', label: 'Pending' },
-  confirmed: { color: 'info', label: 'Confirmed' },
-  in_progress: { color: 'info', label: 'In Progress' },
-  completed: { color: 'success', label: 'Completed' },
-  delivered: { color: 'success', label: 'Delivered' },
-  inactive: { color: 'grey', label: 'Inactive' },
-  locked: { color: 'error', label: 'Locked' },
-}
+const { t } = useI18n()
+
+const DEFAULT_MAP = computed(() => ({
+  trial: { color: 'info', label: t('common.status.trial') },
+  active: { color: 'success', label: t('common.status.active') },
+  expired: { color: 'error', label: t('common.status.expired') },
+  suspended: { color: 'warning', label: t('common.status.suspended') },
+  cancelled: { color: 'grey', label: t('common.status.cancelled') },
+  pending: { color: 'warning', label: t('common.status.pending') },
+  confirmed: { color: 'info', label: t('common.status.confirmed') },
+  in_progress: { color: 'info', label: t('common.status.inProgress') },
+  completed: { color: 'success', label: t('common.status.completed') },
+  delivered: { color: 'success', label: t('common.status.delivered') },
+  inactive: { color: 'grey', label: t('common.status.inactive') },
+  locked: { color: 'error', label: t('common.status.locked') },
+}))
 
 const resolved = computed(() => {
-  const merged = { ...DEFAULT_MAP, ...props.map }
+  const merged = { ...DEFAULT_MAP.value, ...props.map }
   return merged[props.status] ?? { color: 'grey', label: props.status }
 })
 </script>

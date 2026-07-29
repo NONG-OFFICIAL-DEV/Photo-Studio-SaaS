@@ -21,6 +21,9 @@ const menuItems = computed(() => [
   { title: t('menu.dashboard'), icon: 'mdi-view-dashboard-outline', to: { name: 'dashboard' }, permission: 'dashboard.view' },
   { title: t('menu.customers'), icon: 'mdi-account-group-outline', to: { name: 'customers' }, permission: 'customers.view' },
   { title: t('menu.bookings'), icon: 'mdi-calendar-check-outline', to: { name: 'bookings' }, permission: 'bookings.view' },
+  { title: t('menu.services'), icon: 'mdi-tag-outline', to: { name: 'services' }, permission: 'services.view' },
+  { title: t('menu.orders'), icon: 'mdi-cart-outline', to: { name: 'orders' }, permission: 'orders.view' },
+  { title: t('menu.editingQueue'), icon: 'mdi-image-edit-outline', to: { name: 'editing-queue' }, permission: 'editing.view' },
 ].filter((item) => !item.permission || auth.hasPermission(item.permission)))
 
 async function handleLogout() {
@@ -49,10 +52,17 @@ function toggleLocale() {
     <v-divider />
 
     <v-list nav density="comfortable">
+      <!--
+        exact: dashboard's route has an empty child path (''), so its
+        matched record shares the parent segment with every other item
+        here — without exact, Vuetify's default (non-exact) active check
+        marks Dashboard as active on every page, not just its own.
+      -->
       <v-list-item
         v-for="item in menuItems"
         :key="item.title"
         :to="item.to"
+        exact
         :prepend-icon="item.icon"
         :title="item.title"
         rounded="lg"

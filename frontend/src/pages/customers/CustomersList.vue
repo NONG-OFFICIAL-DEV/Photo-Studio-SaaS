@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import AppToolbar from '@/components/common/AppToolbar.vue'
 import AppTable from '@/components/common/AppTable.vue'
 import AppStatusChip from '@/components/common/AppStatusChip.vue'
@@ -20,6 +21,7 @@ import { useCustomerTagsStore } from '@/stores/customerTags'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
 
+const { t } = useI18n()
 const auth = useAuthStore()
 const appStore = useAppStore()
 const tagsStore = useCustomerTagsStore()
@@ -27,14 +29,14 @@ tagsStore.fetch()
 
 const tableRef = ref(null)
 
-const headers = [
-  { title: 'Name', key: 'name' },
-  { title: 'Phone', key: 'phone' },
-  { title: 'Email', key: 'email' },
-  { title: 'Tags', key: 'tags', sortable: false },
-  { title: 'Status', key: 'status', sortable: false },
-  { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
-]
+const headers = computed(() => [
+  { title: t('fields.name'), key: 'name' },
+  { title: t('fields.phone'), key: 'phone' },
+  { title: t('fields.email'), key: 'email' },
+  { title: t('fields.tags'), key: 'tags', sortable: false },
+  { title: t('fields.status'), key: 'status', sortable: false },
+  { title: t('common.actions'), key: 'actions', sortable: false, align: 'end' },
+])
 
 const filters = ref({ tag_id: null, is_favorite: null, is_blacklisted: null, gender: null })
 
@@ -76,7 +78,7 @@ function openBlacklist(customer) {
 
 async function unblacklist(customer) {
   await unblacklistCustomerApi(customer.id)
-  appStore.notify('Customer removed from blacklist.')
+  appStore.notify(t('customers.messages.unblacklistedSuccess'))
   tableRef.value?.refresh()
 }
 
@@ -93,7 +95,7 @@ function askDelete(customer) {
 async function confirmDeleteCustomer() {
   await deleteCustomerApi(deleteTarget.value.id)
   confirmDelete.value = false
-  appStore.notify('Customer deleted successfully.')
+  appStore.notify(t('customers.messages.deletedSuccess'))
   tableRef.value?.refresh()
 }
 
@@ -116,20 +118,20 @@ const canImport = computed(() => auth.hasPermission('customers.import'))
 
 <template>
   <div>
-    <AppToolbar title="Customers" subtitle="Manage your studio's customer profiles, tags, and history.">
+    <AppToolbar :title="t('customers.title')" :subtitle="t('customers.subtitle')">
       <template #actions>
-        <v-btn v-if="canImport" variant="outlined" prepend-icon="mdi-upload" @click="importDialog = true">Import</v-btn>
+        <v-btn v-if="canImport" variant="outlined" prepend-icon="mdi-upload" @click="importDialog = true">{{ t('customers.actions.import') }}</v-btn>
         <v-menu v-if="canExport">
           <template #activator="{ props: menuProps }">
-            <v-btn variant="outlined" prepend-icon="mdi-download" v-bind="menuProps">Export</v-btn>
+            <v-btn variant="outlined" prepend-icon="mdi-download" v-bind="menuProps">{{ t('customers.actions.export') }}</v-btn>
           </template>
           <v-list>
-            <v-list-item title="Export as CSV" @click="exportCustomers('csv')" />
-            <v-list-item title="Export as Excel" @click="exportCustomers('xlsx')" />
+            <v-list-item :title="t('customers.actions.exportCsv')" @click="exportCustomers('csv')" />
+            <v-list-item :title="t('customers.actions.exportExcel')" @click="exportCustomers('xlsx')" />
           </v-list>
         </v-menu>
-        <v-btn variant="outlined" prepend-icon="mdi-tag-multiple-outline" @click="tagManagerDialog = true">Tags</v-btn>
-        <v-btn v-if="canCreate" color="primary" prepend-icon="mdi-plus" @click="openCreate">Add Customer</v-btn>
+        <v-btn variant="outlined" prepend-icon="mdi-tag-multiple-outline" @click="tagManagerDialog = true">{{ t('fields.tags') }}</v-btn>
+        <v-btn v-if="canCreate" color="primary" prepend-icon="mdi-plus" @click="openCreate">{{ t('customers.actions.addCustomer') }}</v-btn>
       </template>
     </AppToolbar>
 
@@ -137,7 +139,7 @@ const canImport = computed(() => auth.hasPermission('customers.import'))
       <v-col cols="6" sm="3">
         <v-select
           v-model="filters.tag_id"
-          label="Tag"
+          :label="t('customers.filters.tag')"
           clearable
           density="compact"
           item-title="name"
@@ -148,17 +150,21 @@ const canImport = computed(() => auth.hasPermission('customers.import'))
       <v-col cols="6" sm="3">
         <v-select
           v-model="filters.gender"
-          label="Gender"
+          :label="t('fields.gender')"
           clearable
           density="compact"
-          :items="[{ title: 'Male', value: 'male' }, { title: 'Female', value: 'female' }, { title: 'Other', value: 'other' }]"
+          :items="[
+            { title: t('customers.genderOptions.male'), value: 'male' },
+            { title: t('customers.genderOptions.female'), value: 'female' },
+            { title: t('customers.genderOptions.other'), value: 'other' },
+          ]"
         />
       </v-col>
       <v-col cols="6" sm="3">
-        <v-checkbox v-model="filters.is_favorite" label="Favorites only" density="compact" hide-details true-value="1" :false-value="null" />
+        <v-checkbox v-model="filters.is_favorite" :label="t('customers.filters.favoritesOnly')" density="compact" hide-details true-value="1" :false-value="null" />
       </v-col>
       <v-col cols="6" sm="3">
-        <v-checkbox v-model="filters.is_blacklisted" label="Blacklisted only" density="compact" hide-details true-value="1" :false-value="null" />
+        <v-checkbox v-model="filters.is_blacklisted" :label="t('customers.filters.blacklistedOnly')" density="compact" hide-details true-value="1" :false-value="null" />
       </v-col>
     </v-row>
 
@@ -187,7 +193,7 @@ const canImport = computed(() => auth.hasPermission('customers.import'))
           <AppStatusChip
             v-if="item.is_blacklisted"
             status="blacklisted"
-            :map="{ blacklisted: { color: 'error', label: 'Blacklisted' } }"
+            :map="{ blacklisted: { color: 'error', label: t('customers.status.blacklisted') } }"
             size="small"
           />
         </template>
@@ -245,8 +251,8 @@ const canImport = computed(() => auth.hasPermission('customers.import'))
 
     <AppConfirmDialog
       v-model="confirmDelete"
-      title="Delete customer?"
-      :message="`This will remove '${deleteTarget?.name}'. This can be restored by support if needed.`"
+      :title="t('customers.dialogs.deleteCustomerConfirmTitle')"
+      :message="t('customers.dialogs.deleteCustomerConfirmMessage', { name: deleteTarget?.name })"
       @confirm="confirmDeleteCustomer"
     />
   </div>

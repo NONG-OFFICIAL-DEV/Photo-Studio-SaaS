@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Field } from 'vee-validate'
 import AppDialog from '@/components/common/AppDialog.vue'
 import AppForm from '@/components/common/AppForm.vue'
@@ -16,6 +17,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'saved'])
 
+const { t } = useI18n()
 const appStore = useAppStore()
 const tagsStore = useCustomerTagsStore()
 
@@ -23,7 +25,7 @@ const loading = ref(false)
 const errorMessage = ref('')
 
 const isEdit = computed(() => Boolean(props.customer?.id))
-const title = computed(() => (isEdit.value ? 'Edit Customer' : 'Add Customer'))
+const title = computed(() => (isEdit.value ? t('customers.dialogs.editTitle') : t('customers.actions.addCustomer')))
 
 const initialValues = computed(() => ({
   name: props.customer?.name ?? '',
@@ -46,15 +48,15 @@ async function onSubmit(values) {
   try {
     if (isEdit.value) {
       await updateCustomerApi(props.customer.id, values)
-      appStore.notify('Customer updated successfully.')
+      appStore.notify(t('customers.messages.updatedSuccess'))
     } else {
       await createCustomerApi(values)
-      appStore.notify('Customer created successfully.')
+      appStore.notify(t('customers.messages.createdSuccess'))
     }
     emit('saved')
     emit('update:modelValue', false)
   } catch (error) {
-    errorMessage.value = error.response?.data?.message || 'Unable to save customer.'
+    errorMessage.value = error.response?.data?.message || t('customers.messages.saveError')
   } finally {
     loading.value = false
   }
@@ -70,32 +72,36 @@ async function onSubmit(values) {
         <v-row>
           <v-col cols="12" sm="6">
             <Field v-slot="{ field }" name="name">
-              <v-text-field v-bind="field" label="Name *" :error-messages="errors.name" />
+              <v-text-field v-bind="field" :label="`${t('fields.name')} *`" :error-messages="errors.name" />
             </Field>
           </v-col>
           <v-col cols="12" sm="6">
             <Field v-slot="{ field }" name="phone">
-              <v-text-field v-bind="field" label="Phone" :error-messages="errors.phone" />
+              <v-text-field v-bind="field" :label="t('fields.phone')" :error-messages="errors.phone" />
             </Field>
           </v-col>
           <v-col cols="12" sm="6">
             <Field v-slot="{ field }" name="email">
-              <v-text-field v-bind="field" label="Email" type="email" :error-messages="errors.email" />
+              <v-text-field v-bind="field" :label="t('fields.email')" type="email" :error-messages="errors.email" />
             </Field>
           </v-col>
           <v-col cols="12" sm="6">
             <v-select
               :model-value="values.gender"
-              label="Gender"
+              :label="t('fields.gender')"
               clearable
-              :items="[{ title: 'Male', value: 'male' }, { title: 'Female', value: 'female' }, { title: 'Other', value: 'other' }]"
+              :items="[
+                { title: t('customers.genderOptions.male'), value: 'male' },
+                { title: t('customers.genderOptions.female'), value: 'female' },
+                { title: t('customers.genderOptions.other'), value: 'other' },
+              ]"
               @update:model-value="setFieldValue('gender', $event)"
             />
           </v-col>
           <v-col cols="12" sm="6">
             <AppDatePicker
               :model-value="values.birthday"
-              label="Birthday"
+              :label="t('fields.birthday')"
               :error-messages="errors.birthday"
               @update:model-value="setFieldValue('birthday', $event)"
             />
@@ -103,7 +109,7 @@ async function onSubmit(values) {
           <v-col cols="12" sm="6">
             <v-autocomplete
               :model-value="values.tag_ids"
-              label="Tags"
+              :label="t('fields.tags')"
               multiple
               chips
               closable-chips
@@ -115,14 +121,14 @@ async function onSubmit(values) {
           </v-col>
           <v-col cols="12">
             <Field v-slot="{ field }" name="address">
-              <v-textarea v-bind="field" label="Address" rows="2" :error-messages="errors.address" />
+              <v-textarea v-bind="field" :label="t('fields.address')" rows="2" :error-messages="errors.address" />
             </Field>
           </v-col>
         </v-row>
 
         <div class="d-flex justify-end ga-2 mt-2">
-          <v-btn variant="text" :disabled="loading" @click="emit('update:modelValue', false)">Cancel</v-btn>
-          <v-btn type="submit" color="primary" variant="flat" :loading="loading">Save</v-btn>
+          <v-btn variant="text" :disabled="loading" @click="emit('update:modelValue', false)">{{ t('common.cancel') }}</v-btn>
+          <v-btn type="submit" color="primary" variant="flat" :loading="loading">{{ t('common.save') }}</v-btn>
         </div>
       </template>
     </AppForm>

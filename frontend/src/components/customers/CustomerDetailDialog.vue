@@ -1,5 +1,6 @@
 <script setup>
 import { ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import AppDialog from '@/components/common/AppDialog.vue'
 import AppStatusChip from '@/components/common/AppStatusChip.vue'
 import {
@@ -16,6 +17,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'changed'])
 
+const { t } = useI18n()
 const customer = ref(null)
 const loading = ref(false)
 const noteText = ref('')
@@ -63,7 +65,7 @@ async function toggleFavorite() {
 </script>
 
 <template>
-  <AppDialog :model-value="modelValue" title="Customer Details" max-width="640" @update:model-value="emit('update:modelValue', $event)">
+  <AppDialog :model-value="modelValue" :title="t('customers.dialogs.detailsTitle')" max-width="640" @update:model-value="emit('update:modelValue', $event)">
     <div v-if="loading" class="d-flex justify-center py-8">
       <v-progress-circular indeterminate color="primary" />
     </div>
@@ -75,7 +77,7 @@ async function toggleFavorite() {
           <div class="text-body-2 text-medium-emphasis">{{ customer.phone }} <span v-if="customer.email">&middot; {{ customer.email }}</span></div>
         </div>
         <div class="d-flex ga-2">
-          <AppStatusChip v-if="customer.is_blacklisted" status="blacklisted" :map="{ blacklisted: { color: 'error', label: 'Blacklisted' } }" />
+          <AppStatusChip v-if="customer.is_blacklisted" status="blacklisted" :map="{ blacklisted: { color: 'error', label: t('customers.status.blacklisted') } }" />
           <v-btn
             :icon="customer.is_favorite ? 'mdi-star' : 'mdi-star-outline'"
             :color="customer.is_favorite ? 'warning' : undefined"
@@ -97,14 +99,14 @@ async function toggleFavorite() {
 
       <v-divider class="mb-4" />
 
-      <div class="text-subtitle-2 mb-2">Notes</div>
+      <div class="text-subtitle-2 mb-2">{{ t('fields.notes') }}</div>
 
       <div class="d-flex ga-2 mb-4">
-        <v-textarea v-model="noteText" rows="2" auto-grow density="compact" placeholder="Add a note about this customer..." hide-details />
+        <v-textarea v-model="noteText" rows="2" auto-grow density="compact" :placeholder="t('customers.notes.addPlaceholder')" hide-details />
         <v-btn icon="mdi-send" color="primary" :loading="noteLoading" @click="addNote" />
       </div>
 
-      <div v-if="!customer.notes?.length" class="text-body-2 text-medium-emphasis">No notes yet.</div>
+      <div v-if="!customer.notes?.length" class="text-body-2 text-medium-emphasis">{{ t('customers.notes.empty') }}</div>
 
       <v-list v-else density="compact">
         <v-list-item v-for="note in customer.notes" :key="note.id">

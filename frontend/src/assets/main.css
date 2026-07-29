@@ -1,0 +1,22 @@
+/* Vuetify sets its own font-family (Roboto) on .v-application and its
+   text utility classes with high specificity — !important is needed to
+   actually override it app-wide, including inside Vuetify components. */
+:root,
+html,
+body,
+.v-application,
+.v-application .text-h1,
+.v-application .text-h2,
+.v-application .text-h3,
+.v-application .text-h4,
+.v-application .text-h5,
+.v-application .text-h6,
+.v-application .text-subtitle-1,
+.v-application .text-subtitle-2,
+.v-application .text-body-1,
+.v-application .text-body-2,
+.v-application .text-button,
+.v-application .text-caption,
+.v-application .text-overline {
+  font-family: 'Google Sans', serif !important;
+}

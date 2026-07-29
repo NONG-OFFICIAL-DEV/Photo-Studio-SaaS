@@ -82,3 +82,36 @@ export const bookingSchema = yup.object({
 export const cancelBookingSchema = yup.object({
   reason: yup.string().required().max(1000),
 })
+
+export const serviceSchema = yup.object({
+  category_id: yup.string().nullable(),
+  name: yup.string().required().max(255),
+  description: yup.string().nullable().max(2000),
+  deliverables: yup.string().nullable().max(2000),
+  price: yup.number().typeError('Price must be a number').required().min(0),
+  pricing_unit: yup.string().required().oneOf(['fixed', 'per_hour', 'per_person', 'per_photo']),
+  duration_minutes: yup.number().typeError('Must be a number').nullable().min(1),
+  is_active: yup.boolean(),
+})
+
+export const serviceCategorySchema = yup.object({
+  name: yup.string().required().max(255),
+  description: yup.string().nullable().max(1000),
+})
+
+export const serviceAddOnSchema = yup.object({
+  name: yup.string().required().max(255),
+  description: yup.string().nullable().max(1000),
+  price: yup.number().typeError('Price must be a number').required().min(0),
+})
+
+export const orderSchema = yup.object({
+  customer_id: yup.string().required('Customer is required'),
+  booking_id: yup.string().nullable(),
+  discount_amount: yup.number().typeError('Must be a number').nullable().min(0),
+  notes: yup.string().nullable().max(2000),
+})
+
+export const cancelOrderSchema = yup.object({
+  reason: yup.string().required().max(1000),
+})
