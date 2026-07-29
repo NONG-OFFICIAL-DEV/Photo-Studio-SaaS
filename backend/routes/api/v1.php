@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Controllers\Api\V1\Album\AlbumController;
+use App\Http\Controllers\Api\V1\Attendance\AttendanceController;
 use App\Http\Controllers\Api\V1\Auth\AuthController;
 use App\Http\Controllers\Api\V1\Auth\EmailVerificationController;
 use App\Http\Controllers\Api\V1\Auth\PasswordResetController;
 use App\Http\Controllers\Api\V1\Booking\BookingController;
+use App\Http\Controllers\Api\V1\Commission\CommissionEntryController;
 use App\Http\Controllers\Api\V1\Customer\CustomerController;
 use App\Http\Controllers\Api\V1\Customer\CustomerNoteController;
 use App\Http\Controllers\Api\V1\Customer\CustomerTagController;
@@ -17,6 +19,7 @@ use App\Http\Controllers\Api\V1\Invoice\PaymentController;
 use App\Http\Controllers\Api\V1\Order\EditingTaskController;
 use App\Http\Controllers\Api\V1\Order\OrderController;
 use App\Http\Controllers\Api\V1\Package\PackageController;
+use App\Http\Controllers\Api\V1\Payroll\PayrollEntryController;
 use App\Http\Controllers\Api\V1\Service\ServiceAddOnController;
 use App\Http\Controllers\Api\V1\Service\ServiceCategoryController;
 use App\Http\Controllers\Api\V1\Service\ServiceController;
@@ -60,6 +63,7 @@ Route::prefix('auth')->name('auth.')->group(function () {
  */
 Route::middleware(['auth:api', 'tenant', 'subscription.active'])->group(function () {
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
 
     Route::prefix('customers')->name('customers.')->group(function () {
         // Static segments must be registered before {customer} so they
@@ -191,5 +195,34 @@ Route::middleware(['auth:api', 'tenant', 'subscription.active'])->group(function
 
         Route::post('/{inventoryItem}/movements', [InventoryMovementController::class, 'store']);
         Route::delete('/{inventoryItem}/movements/{movement}', [InventoryMovementController::class, 'destroy']);
+    });
+
+    Route::prefix('attendance')->name('attendance.')->group(function () {
+        // Static segments before {attendanceRecord} so they aren't swallowed by the wildcard.
+        Route::get('/today', [AttendanceController::class, 'today']);
+        Route::post('/clock-in', [AttendanceController::class, 'clockIn']);
+        Route::post('/clock-out', [AttendanceController::class, 'clockOut']);
+
+        Route::get('/', [AttendanceController::class, 'index']);
+        Route::post('/', [AttendanceController::class, 'store']);
+        Route::put('/{attendanceRecord}', [AttendanceController::class, 'update']);
+        Route::delete('/{attendanceRecord}', [AttendanceController::class, 'destroy']);
+    });
+
+    Route::prefix('commission-entries')->name('commission-entries.')->group(function () {
+        Route::get('/', [CommissionEntryController::class, 'index']);
+        Route::post('/', [CommissionEntryController::class, 'store']);
+        Route::put('/{commissionEntry}', [CommissionEntryController::class, 'update']);
+        Route::delete('/{commissionEntry}', [CommissionEntryController::class, 'destroy']);
+    });
+
+    Route::prefix('payroll-entries')->name('payroll-entries.')->group(function () {
+        Route::get('/', [PayrollEntryController::class, 'index']);
+        Route::post('/', [PayrollEntryController::class, 'store']);
+        Route::get('/{payrollEntry}', [PayrollEntryController::class, 'show']);
+        Route::put('/{payrollEntry}', [PayrollEntryController::class, 'update']);
+        Route::delete('/{payrollEntry}', [PayrollEntryController::class, 'destroy']);
+
+        Route::post('/{payrollEntry}/pay', [PayrollEntryController::class, 'pay']);
     });
 });

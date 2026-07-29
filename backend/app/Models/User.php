@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Enums\PayType;
 use App\Traits\BelongsToTenant;
 use Database\Factories\UserFactory;
 use Illuminate\Auth\MustVerifyEmail;
 use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -22,6 +24,7 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmailContrac
     protected $fillable = [
         'tenant_id', 'name', 'email', 'phone', 'password', 'avatar_path',
         'locale', 'status', 'is_super_admin', 'last_login_at', 'last_login_ip',
+        'pay_type', 'base_pay', 'commission_rate',
     ];
 
     protected $hidden = [
@@ -35,7 +38,25 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmailContrac
             'last_login_at' => 'datetime',
             'is_super_admin' => 'boolean',
             'password' => 'hashed',
+            'pay_type' => PayType::class,
+            'base_pay' => 'decimal:2',
+            'commission_rate' => 'decimal:2',
         ];
+    }
+
+    public function attendanceRecords(): HasMany
+    {
+        return $this->hasMany(AttendanceRecord::class);
+    }
+
+    public function commissionEntries(): HasMany
+    {
+        return $this->hasMany(CommissionEntry::class);
+    }
+
+    public function payrollEntries(): HasMany
+    {
+        return $this->hasMany(PayrollEntry::class);
     }
 
     public function isActive(): bool

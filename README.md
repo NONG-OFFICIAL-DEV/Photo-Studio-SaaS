@@ -432,6 +432,56 @@ Orders and Invoices alongside individual services.
   low-stock flag against the reorder threshold, permission gating per
   role, and cross-tenant isolation.
 
+## What's implemented (Phase 10 — Employee Management)
+
+Attendance, salary, and commission — not full invite/create-user/role-
+management (that remains deferred, as already noted in
+`UserController`'s pre-existing code comment). Every "employee" here is
+an existing tenant `User`, extended with three new employment fields.
+
+- Attendance is a daily clock in/out log, not shift scheduling. Any
+  staff member clocks themselves in/out (self-service, no target user
+  to pick); a clock-in's time-of-day is compared against a single
+  tenant-wide `config('attendance.expected_start_time')` (default
+  09:00) to auto-set Present vs Late. A manager separately records
+  Absent (or a backdated entry) for someone else — one record per
+  employee per day, enforced by a unique constraint. `hours_worked` is
+  a pure accessor (`clock_out_at − clock_in_at`), never stored.
+- Salary: `User` gained `pay_type` (salary/hourly), `base_pay`, and
+  `commission_rate` — editable via a new employment-only
+  `PUT /users/{user}` endpoint that reuses the existing (previously
+  unimplemented) `users.update` permission.
+- Commission entries are always manually recorded (optionally linked
+  to an Order) — never auto-created on order/booking completion.
+- Payroll entries snapshot `base_pay` (flat for salaried employees, or
+  `hours_worked` summed from that period's attendance × hourly rate)
+  and `commission_total` (summed from that period's commission entries)
+  at creation time — both overridable. This is a one-time computation,
+  not live like Package pricing: editing attendance/commission
+  afterwards never retroactively changes an existing payroll entry.
+  Lifecycle is `draft → paid`; paid entries can no longer be edited or
+  deleted, mirroring Invoice's paid/void lock.
+- New `attendance.*`, `commissions.*`, and `payroll.*` permissions.
+  Manager gets full access to all three (HR/payroll is a manager-level
+  function); Photographer/Editor/Cashier/Receptionist get
+  `attendance.clock` only — they can clock themselves in/out but can't
+  browse the team's attendance, commissions, or payroll.
+- CommissionEntry/PayrollEntry History via the same activity-log
+  pattern as every prior module.
+- Vue: a self-service Clock In/Out card on the Dashboard (visible to
+  anyone with `attendance.clock`), and a single Employees page with
+  Employees/Attendance/Commissions/Payroll tabs (each tab hidden unless
+  the user holds its permission) — pay-profile editing, attendance
+  history + mark-absent, commission recording, and payroll
+  creation/mark-paid.
+- 264 total passing backend tests (36 new for this module): clock-in
+  late-detection and double-clock/clock-before-clock-in guards, manager
+  mark-absent and the duplicate-date guard, payroll's base_pay
+  computation for both salaried and hourly employees (including
+  summing real attendance hours), commission-total summing scoped to
+  the period, the paid/draft edit-and-delete lock, permission gating
+  per role, and cross-tenant isolation.
+
 ## Getting Started
 
 ### Prerequisites
@@ -516,7 +566,7 @@ Pinia stores, and tests, same as Phase 1.
 7. ~~Album Management, Invoicing & Payments~~ ✅ (Albums are metadata-only, pending Phase 6's photo storage)
 8. ~~Package Management~~ ✅ (inserted ahead of the original roadmap — bundles Services/Add-ons from Phase 4 into fixed-price Packages, selectable in Orders/Invoices alongside individual services)
 9. ~~Expense & Inventory~~ ✅ (Inventory tracks consumable stock only, not serialized equipment assets)
-10. Employee Management (attendance, salary, commission)
+10. ~~Employee Management (attendance, salary, commission)~~ ✅ (full invite/create-user/role-management UI remains deferred)
 11. Customer Portal
 12. Notifications (email, in-app, Telegram)
 13. Reports & Exports

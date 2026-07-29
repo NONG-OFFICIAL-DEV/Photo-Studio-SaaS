@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\User\UpdateUserEmploymentRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Traits\ApiResponse;
@@ -25,5 +26,17 @@ class UserController extends Controller
         $users = User::query()->orderBy('name')->get();
 
         return $this->success(UserResource::collection($users));
+    }
+
+    /**
+     * Scoped to employment fields only (pay_type/base_pay/commission_rate)
+     * — Phase 10's Employee Management. Reuses the existing `users.update`
+     * permission; full profile/role editing remains a later phase.
+     */
+    public function update(UpdateUserEmploymentRequest $request, User $user): JsonResponse
+    {
+        $user->update($request->validated());
+
+        return $this->success(new UserResource($user->fresh()), 'Employee profile updated successfully.');
     }
 }

@@ -13,6 +13,7 @@ import {
 } from 'chart.js'
 import AppToolbar from '@/components/common/AppToolbar.vue'
 import AppStatusChip from '@/components/common/AppStatusChip.vue'
+import ClockInOutCard from '@/components/attendance/ClockInOutCard.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
 import { resendVerificationApi } from '@/apis/auth.api'
@@ -88,6 +89,12 @@ async function resendVerification() {
         </v-btn>
       </div>
     </v-alert>
+
+    <v-row v-if="auth.hasPermission('attendance.clock')" class="mb-2">
+      <v-col cols="12" sm="6" md="4" lg="3">
+        <ClockInOutCard />
+      </v-col>
+    </v-row>
 
     <v-row>
       <v-col v-for="stat in stats" :key="stat.title" cols="12" sm="6" md="4" lg="3">

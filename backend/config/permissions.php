@@ -36,6 +36,9 @@ return [
         'payments' => ['payments.record', 'payments.delete'],
         'expenses' => ['expenses.view', 'expenses.create', 'expenses.update', 'expenses.delete'],
         'inventory' => ['inventory.view', 'inventory.create', 'inventory.update', 'inventory.delete', 'inventory.adjust-stock'],
+        'attendance' => ['attendance.view', 'attendance.clock', 'attendance.manage'],
+        'commissions' => ['commissions.view', 'commissions.record', 'commissions.delete'],
+        'payroll' => ['payroll.view', 'payroll.create', 'payroll.update', 'payroll.delete', 'payroll.pay'],
     ],
 
     /*
@@ -63,16 +66,21 @@ return [
             'payments.record', 'payments.delete',
             'expenses.view', 'expenses.create', 'expenses.update', 'expenses.delete',
             'inventory.view', 'inventory.create', 'inventory.update', 'inventory.delete', 'inventory.adjust-stock',
+            'attendance.view', 'attendance.clock', 'attendance.manage',
+            'commissions.view', 'commissions.record', 'commissions.delete',
+            'payroll.view', 'payroll.create', 'payroll.update', 'payroll.delete', 'payroll.pay',
         ],
         TenantRole::Photographer->value => [
             'dashboard.view', 'customers.view', 'bookings.view', 'bookings.update', 'services.view', 'packages.view', 'orders.view',
             'albums.view', 'albums.create', 'albums.update',
             'inventory.view', 'inventory.adjust-stock',
+            'attendance.clock',
         ],
         TenantRole::Editor->value => [
             'dashboard.view', 'customers.view', 'bookings.view', 'services.view', 'packages.view', 'orders.view', 'editing.view', 'editing.update',
             'albums.view', 'albums.update',
             'inventory.view', 'inventory.adjust-stock',
+            'attendance.clock',
         ],
         TenantRole::Cashier->value => [
             'dashboard.view', 'customers.view', 'customers.create', 'bookings.view', 'services.view', 'packages.view', 'orders.view', 'orders.create',
@@ -81,6 +89,7 @@ return [
             'payments.record', 'payments.delete',
             'expenses.view', 'expenses.create', 'expenses.update',
             'inventory.view',
+            'attendance.clock',
         ],
         TenantRole::Receptionist->value => [
             'dashboard.view', 'users.view',
@@ -90,6 +99,7 @@ return [
             'orders.view', 'orders.create', 'orders.update',
             'albums.view', 'invoices.view',
             'inventory.view',
+            'attendance.clock',
         ],
         TenantRole::Viewer->value => [
             'dashboard.view', 'customers.view', 'bookings.view', 'services.view', 'packages.view', 'orders.view', 'editing.view',

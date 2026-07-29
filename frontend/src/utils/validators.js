@@ -133,6 +133,38 @@ export const expenseCategorySchema = yup.object({
   name: yup.string().required().max(255),
 })
 
+export const attendanceSchema = yup.object({
+  user_id: yup.string().required('Employee is required'),
+  date: yup.string().required('Date is required'),
+  status: yup.string().required(),
+  reason: yup.string().nullable().max(1000),
+})
+
+export const commissionEntrySchema = yup.object({
+  user_id: yup.string().required('Employee is required'),
+  order_id: yup.string().nullable(),
+  amount: yup.number().typeError('Must be a number').required().min(0.01),
+  earned_date: yup.string().required('Date is required'),
+  notes: yup.string().nullable().max(2000),
+})
+
+export const payrollEntrySchema = yup.object({
+  user_id: yup.string().required('Employee is required'),
+  period_label: yup.string().required().max(255),
+  period_start: yup.string().required('Start date is required'),
+  period_end: yup.string().required('End date is required'),
+  base_pay: yup.number().typeError('Must be a number').nullable().min(0),
+  commission_total: yup.number().typeError('Must be a number').nullable().min(0),
+  deductions: yup.number().typeError('Must be a number').nullable().min(0),
+  notes: yup.string().nullable().max(2000),
+})
+
+export const employmentSchema = yup.object({
+  pay_type: yup.string().required(),
+  base_pay: yup.number().typeError('Must be a number').nullable().min(0),
+  commission_rate: yup.number().typeError('Must be a number').nullable().min(0).max(100),
+})
+
 export const expenseSchema = yup.object({
   category_id: yup.string().nullable(),
   amount: yup.number().typeError('Must be a number').required().min(0.01),

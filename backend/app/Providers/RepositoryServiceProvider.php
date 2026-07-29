@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Repositories\Contracts\AlbumRepositoryInterface;
+use App\Repositories\Contracts\AttendanceRecordRepositoryInterface;
 use App\Repositories\Contracts\BookingRepositoryInterface;
+use App\Repositories\Contracts\CommissionEntryRepositoryInterface;
 use App\Repositories\Contracts\CustomerRepositoryInterface;
 use App\Repositories\Contracts\CustomerTagRepositoryInterface;
 use App\Repositories\Contracts\EditingTaskRepositoryInterface;
@@ -13,6 +15,7 @@ use App\Repositories\Contracts\InventoryItemRepositoryInterface;
 use App\Repositories\Contracts\InvoiceRepositoryInterface;
 use App\Repositories\Contracts\OrderRepositoryInterface;
 use App\Repositories\Contracts\PackageRepositoryInterface;
+use App\Repositories\Contracts\PayrollEntryRepositoryInterface;
 use App\Repositories\Contracts\PaymentRepositoryInterface;
 use App\Repositories\Contracts\ServiceAddOnRepositoryInterface;
 use App\Repositories\Contracts\ServiceCategoryRepositoryInterface;
@@ -20,7 +23,9 @@ use App\Repositories\Contracts\ServiceRepositoryInterface;
 use App\Repositories\Contracts\TenantRepositoryInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Repositories\Eloquent\AlbumRepository;
+use App\Repositories\Eloquent\AttendanceRecordRepository;
 use App\Repositories\Eloquent\BookingRepository;
+use App\Repositories\Eloquent\CommissionEntryRepository;
 use App\Repositories\Eloquent\CustomerRepository;
 use App\Repositories\Eloquent\CustomerTagRepository;
 use App\Repositories\Eloquent\EditingTaskRepository;
@@ -30,6 +35,7 @@ use App\Repositories\Eloquent\InventoryItemRepository;
 use App\Repositories\Eloquent\InvoiceRepository;
 use App\Repositories\Eloquent\OrderRepository;
 use App\Repositories\Eloquent\PackageRepository;
+use App\Repositories\Eloquent\PayrollEntryRepository;
 use App\Repositories\Eloquent\PaymentRepository;
 use App\Repositories\Eloquent\ServiceAddOnRepository;
 use App\Repositories\Eloquent\ServiceCategoryRepository;
@@ -67,6 +73,9 @@ class RepositoryServiceProvider extends ServiceProvider
         ExpenseCategoryRepositoryInterface::class => ExpenseCategoryRepository::class,
         ExpenseRepositoryInterface::class => ExpenseRepository::class,
         InventoryItemRepositoryInterface::class => InventoryItemRepository::class,
+        AttendanceRecordRepositoryInterface::class => AttendanceRecordRepository::class,
+        CommissionEntryRepositoryInterface::class => CommissionEntryRepository::class,
+        PayrollEntryRepositoryInterface::class => PayrollEntryRepository::class,
     ];
 
     public function register(): void

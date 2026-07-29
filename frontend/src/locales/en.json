@@ -537,5 +537,88 @@
       "deletedSuccess": "Item deleted successfully.",
       "movementRecorded": "Stock movement recorded successfully."
     }
+  },
+  "attendance": {
+    "title": "Attendance",
+    "myAttendanceToday": "My Attendance Today",
+    "clockIn": "Clock In",
+    "clockOut": "Clock Out",
+    "clockedInAt": "Clocked in at {time}",
+    "clockedOutAt": "Clocked out at {time}",
+    "doneForToday": "Done for today.",
+    "newRecord": "New Record",
+    "hoursWorked": "Hours Worked",
+    "deleteConfirmTitle": "Delete attendance record?",
+    "deleteConfirmMessage": "This will remove this attendance record.",
+    "status": {
+      "present": "Present",
+      "late": "Late",
+      "absent": "Absent"
+    },
+    "messages": {
+      "clockedIn": "Clocked in successfully.",
+      "clockedOut": "Clocked out successfully.",
+      "createdSuccess": "Attendance record created successfully.",
+      "saveError": "Unable to save attendance record.",
+      "deletedSuccess": "Attendance record deleted successfully."
+    }
+  },
+  "commissions": {
+    "title": "Commissions",
+    "newEntry": "New Commission",
+    "linkedOrder": "Linked Order (optional)",
+    "earnedDate": "Earned Date",
+    "deleteConfirmTitle": "Delete commission entry?",
+    "deleteConfirmMessage": "This will remove this commission entry.",
+    "messages": {
+      "createdSuccess": "Commission entry recorded successfully.",
+      "saveError": "Unable to save commission entry.",
+      "deletedSuccess": "Commission entry deleted successfully."
+    }
+  },
+  "payroll": {
+    "title": "Payroll",
+    "newEntry": "New Payroll Entry",
+    "autoComputeHint": "Base pay and commission total default to computed values from the employee's pay profile, attendance, and commission records for the period — override only if needed.",
+    "periodLabel": "Period Label",
+    "periodStart": "Period Start",
+    "periodEnd": "Period End",
+    "basePayOverride": "Base Pay (override)",
+    "commissionOverride": "Commission (override)",
+    "deductions": "Deductions",
+    "basePay": "Base Pay",
+    "commissionTotal": "Commission",
+    "netPay": "Net Pay",
+    "markPaid": "Mark Paid",
+    "deleteConfirmTitle": "Delete payroll entry?",
+    "deleteConfirmMessage": "This will remove this payroll entry.",
+    "status": {
+      "draft": "Draft",
+      "paid": "Paid"
+    },
+    "messages": {
+      "createdSuccess": "Payroll entry created successfully.",
+      "saveError": "Unable to save payroll entry.",
+      "deletedSuccess": "Payroll entry deleted successfully.",
+      "paidSuccess": "Payroll entry marked as paid."
+    }
+  },
+  "employees": {
+    "title": "Employees",
+    "subtitle": "Manage staff attendance, commissions, and payroll.",
+    "editPayProfile": "Edit Pay Profile — {name}",
+    "payType": "Pay Type",
+    "hourlyRate": "Hourly Rate",
+    "monthlySalary": "Monthly Salary",
+    "commissionRate": "Commission Rate",
+    "basePay": "Base Pay",
+    "payTypes": {
+      "salary": "Salary",
+      "hourly": "Hourly"
+    },
+    "messages": {
+      "updatedSuccess": "Employee profile updated successfully.",
+      "saveError": "Unable to save employee profile."
+    }
   }
 }

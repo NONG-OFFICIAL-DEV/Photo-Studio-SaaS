@@ -86,6 +86,12 @@ export const routes = [
         component: () => import('@/pages/inventory/InventoryList.vue'),
         meta: { titleKey: 'menu.inventory', permission: 'inventory.view' },
       },
+      {
+        path: 'employees',
+        name: 'employees',
+        component: () => import('@/pages/employees/EmployeesPage.vue'),
+        meta: { titleKey: 'menu.employees', permission: 'users.view' },
+      },
     ],
   },
   {
