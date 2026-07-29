@@ -9,15 +9,17 @@ use App\Models\Package;
 use App\Models\Payment;
 use App\Models\Service;
 use App\Models\ServiceAddOn;
+use App\Models\Tenant;
 use App\Models\User;
 use App\Repositories\Contracts\InvoiceRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class InvoiceService extends BaseService
 {
-    public function __construct(protected InvoiceRepositoryInterface $invoices)
+    public function __construct(protected InvoiceRepositoryInterface $invoices, protected TenantContext $tenantContext)
     {
         parent::__construct($invoices);
     }
@@ -38,7 +40,9 @@ class InvoiceService extends BaseService
         $items = $data['items'] ?? null;
         unset($data['items']);
 
-        return DB::transaction(function () use ($data, $items, $creator) {
+        $tenant = $this->tenantContext->get();
+
+        return DB::transaction(function () use ($data, $items, $creator, $tenant) {
             if ($items === null && ! empty($data['order_id'])) {
                 $order = Order::query()->with('items')->findOrFail($data['order_id']);
                 $data['customer_id'] = $data['customer_id'] ?? $order->customer_id;
@@ -53,14 +57,21 @@ class InvoiceService extends BaseService
 
             $lines = $this->resolveLines($items ?? []);
             $discount = (float) ($data['discount_amount'] ?? 0);
-            $taxRate = (float) ($data['tax_rate'] ?? 0);
+            $taxRate = array_key_exists('tax_rate', $data) && $data['tax_rate'] !== null
+                ? (float) $data['tax_rate']
+                : (float) ($tenant?->setting('default_tax_rate') ?? 0);
             $totals = $this->computeTotals($lines['subtotal'], $discount, $taxRate);
+
+            $issueDate = $data['issue_date'] ?? now()->toDateString();
+            $dueDate = $data['due_date']
+                ?? Carbon::parse($issueDate)->addDays((int) ($tenant?->setting('default_due_days') ?? 14))->toDateString();
 
             /** @var Invoice $invoice */
             $invoice = $this->invoices->create([
                 ...$data,
-                'invoice_number' => $this->nextInvoiceNumber(),
-                'issue_date' => $data['issue_date'] ?? now()->toDateString(),
+                'invoice_number' => $this->nextInvoiceNumber($tenant),
+                'issue_date' => $issueDate,
+                'due_date' => $dueDate,
                 'discount_amount' => $discount,
                 'tax_rate' => $taxRate,
                 'subtotal' => $lines['subtotal'],
@@ -282,10 +293,11 @@ class InvoiceService extends BaseService
         return ['items' => $lines, 'subtotal' => round($subtotal, 2)];
     }
 
-    protected function nextInvoiceNumber(): string
+    protected function nextInvoiceNumber(?Tenant $tenant = null): string
     {
         $count = Invoice::withTrashed()->count();
+        $prefix = $tenant?->setting('invoice_prefix') ?? Tenant::SETTINGS_DEFAULTS['invoice_prefix'];
 
-        return 'INV-'.str_pad((string) ($count + 1), 5, '0', STR_PAD_LEFT);
+        return $prefix.str_pad((string) ($count + 1), 5, '0', STR_PAD_LEFT);
     }
 }

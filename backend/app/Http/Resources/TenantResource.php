@@ -23,6 +23,7 @@ class TenantResource extends JsonResource
             'currency' => $this->currency,
             'locale' => $this->locale,
             'is_active' => $this->is_active,
+            'settings' => $this->settingsWithDefaults(),
             'subscription' => $this->whenLoaded('activeSubscription', fn () => $this->activeSubscription ? [
                 'status' => $this->activeSubscription->status->value,
                 'plan' => $this->activeSubscription->relationLoaded('plan') ? $this->activeSubscription->plan->name : null,

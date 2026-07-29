@@ -23,10 +23,10 @@ const tab = ref('revenue')
     </v-tabs>
 
     <v-window v-model="tab">
-      <v-window-item value="revenue"><RevenueReportTab /></v-window-item>
-      <v-window-item value="bookings"><BookingsReportTab /></v-window-item>
-      <v-window-item value="orders"><OrdersReportTab /></v-window-item>
-      <v-window-item value="expenses"><ExpensesReportTab /></v-window-item>
+      <v-window-item value="revenue" class="mt-2"><RevenueReportTab /></v-window-item>
+      <v-window-item value="bookings" class="mt-2"><BookingsReportTab /></v-window-item>
+      <v-window-item value="orders" class="mt-2"><OrdersReportTab /></v-window-item>
+      <v-window-item value="expenses" class="mt-2"><ExpensesReportTab /></v-window-item>
     </v-window>
   </div>
 </template>

@@ -222,3 +222,23 @@ export const paymentSchema = yup.object({
   reference: yup.string().nullable().max(255),
   notes: yup.string().nullable().max(2000),
 })
+
+const hexColor = yup
+  .string()
+  .nullable()
+  .matches(/^#[0-9A-Fa-f]{6}$/, { excludeEmptyString: true, message: 'Must be a hex color like #6750A4' })
+
+export const settingsSchema = yup.object({
+  name: yup.string().required().max(255),
+  email: yup.string().required().email(),
+  phone: yup.string().nullable().max(50),
+  address: yup.string().nullable().max(1000),
+  currency: yup.string().required().length(3).uppercase(),
+  timezone: yup.string().required().max(100),
+  invoice_prefix: yup.string().nullable().max(20),
+  default_tax_rate: yup.number().typeError('Must be a number').nullable().min(0).max(100),
+  default_due_days: yup.number().typeError('Must be a number').nullable().integer().min(0).max(365),
+  invoice_footer: yup.string().nullable().max(2000),
+  primary_color: hexColor,
+  secondary_color: hexColor,
+})

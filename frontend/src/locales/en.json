@@ -643,5 +643,37 @@
     "totalValue": "Total Value",
     "count": "Count",
     "value": "Value"
+  },
+  "settingsPage": {
+    "title": "Settings",
+    "subtitle": "Company profile, invoice defaults, brand theme, and data export.",
+    "tabs": {
+      "company": "Company",
+      "invoice": "Invoice",
+      "theme": "Theme",
+      "data": "Data"
+    },
+    "fields": {
+      "currency": "Currency",
+      "timezone": "Timezone",
+      "invoicePrefix": "Invoice number prefix",
+      "defaultTaxRate": "Default tax rate",
+      "defaultDueDays": "Default due days",
+      "invoiceFooter": "Invoice footer / terms",
+      "primaryColor": "Primary color",
+      "secondaryColor": "Secondary color"
+    },
+    "actions": {
+      "save": "Save changes",
+      "uploadLogo": "Upload logo",
+      "exportData": "Export all my data"
+    },
+    "themeHint": "These colors replace the default theme across the whole app for your team.",
+    "dataExportHint": "Download a zip of CSV files (customers, orders, invoices, expenses) for backup or migration.",
+    "messages": {
+      "savedSuccess": "Settings saved successfully.",
+      "saveError": "Could not save settings.",
+      "logoUpdated": "Logo updated successfully."
+    }
   }
 }

@@ -38,14 +38,23 @@ async function exportReport(format) {
   <div>
     <v-row dense class="mb-2">
       <v-col cols="6" sm="3">
-        <AppDatePicker v-model="dateFrom" :label="t('reports.dateFrom')" :clearable="false" @update:model-value="load" />
+        <AppDatePicker
+          v-model="dateFrom"
+          :label="t('reports.dateFrom')"
+          :clearable="false"
+          @update:model-value="load"
+        />
       </v-col>
       <v-col cols="6" sm="3">
         <AppDatePicker v-model="dateTo" :label="t('reports.dateTo')" :clearable="false" @update:model-value="load" />
       </v-col>
       <v-col cols="12" sm="6" class="d-flex justify-end ga-2 align-start">
-        <v-btn variant="outlined" prepend-icon="mdi-file-delimited-outline" @click="exportReport('csv')">{{ t('reports.exportCsv') }}</v-btn>
-        <v-btn variant="outlined" prepend-icon="mdi-file-excel-outline" @click="exportReport('xlsx')">{{ t('reports.exportExcel') }}</v-btn>
+        <v-btn variant="outlined" prepend-icon="mdi-file-delimited-outline" @click="exportReport('csv')">{{
+          t('reports.exportCsv')
+        }}</v-btn>
+        <v-btn variant="outlined" prepend-icon="mdi-file-excel-outline" @click="exportReport('xlsx')">{{
+          t('reports.exportExcel')
+        }}</v-btn>
       </v-col>
     </v-row>
 

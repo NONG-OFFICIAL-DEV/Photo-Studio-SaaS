@@ -31,6 +31,7 @@ const menuItems = computed(() => [
   { title: t('menu.inventory'), icon: 'mdi-archive-outline', to: { name: 'inventory' }, permission: 'inventory.view' },
   { title: t('menu.employees'), icon: 'mdi-badge-account-horizontal-outline', to: { name: 'employees' }, permission: 'users.view' },
   { title: t('menu.reports'), icon: 'mdi-chart-box-outline', to: { name: 'reports' }, permission: 'reports.view' },
+  { title: t('menu.settings'), icon: 'mdi-cog-outline', to: { name: 'settings' }, permission: 'tenant.settings.manage' },
 ].filter((item) => !item.permission || auth.hasPermission(item.permission)))
 
 async function handleLogout() {

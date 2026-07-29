@@ -25,6 +25,7 @@ use App\Http\Controllers\Api\V1\Report\ReportController;
 use App\Http\Controllers\Api\V1\Service\ServiceAddOnController;
 use App\Http\Controllers\Api\V1\Service\ServiceCategoryController;
 use App\Http\Controllers\Api\V1\Service\ServiceController;
+use App\Http\Controllers\Api\V1\Settings\TenantSettingsController;
 use App\Http\Controllers\Api\V1\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -239,5 +240,14 @@ Route::middleware(['auth:api', 'tenant', 'subscription.active'])->group(function
         Route::get('/orders/export', [ReportController::class, 'exportOrders']);
         Route::get('/expenses', [ReportController::class, 'expenses']);
         Route::get('/expenses/export', [ReportController::class, 'exportExpenses']);
+    });
+
+    Route::prefix('settings')->name('settings.')->group(function () {
+        // Static segments before '/' so they aren't swallowed unexpectedly.
+        Route::get('/export', [TenantSettingsController::class, 'export']);
+        Route::post('/logo', [TenantSettingsController::class, 'uploadLogo']);
+
+        Route::get('/', [TenantSettingsController::class, 'show']);
+        Route::put('/', [TenantSettingsController::class, 'update']);
     });
 });

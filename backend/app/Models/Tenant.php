@@ -18,6 +18,21 @@ class Tenant extends Model
         'logo_path', 'timezone', 'currency', 'locale', 'is_active', 'settings',
     ];
 
+    /**
+     * Defaults for the free-form `settings` JSONB column's known keys —
+     * invoicing/theme preferences configurable from Settings > Invoicing
+     * and Settings > Theme. Anything not explicitly set by a tenant reads
+     * as these defaults rather than null.
+     */
+    public const SETTINGS_DEFAULTS = [
+        'invoice_prefix' => 'INV-',
+        'default_tax_rate' => 0,
+        'default_due_days' => 14,
+        'invoice_footer' => null,
+        'primary_color' => null,
+        'secondary_color' => null,
+    ];
+
     protected function casts(): array
     {
         return [
@@ -49,5 +64,15 @@ class Tenant extends Model
     public function activeSubscription(): HasOne
     {
         return $this->hasOne(Subscription::class)->latest('current_period_start');
+    }
+
+    public function settingsWithDefaults(): array
+    {
+        return array_merge(self::SETTINGS_DEFAULTS, $this->settings ?? []);
+    }
+
+    public function setting(string $key, mixed $default = null): mixed
+    {
+        return $this->settingsWithDefaults()[$key] ?? $default;
     }
 }

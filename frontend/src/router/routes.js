@@ -98,6 +98,12 @@ export const routes = [
         component: () => import('@/pages/reports/ReportsPage.vue'),
         meta: { titleKey: 'menu.reports', permission: 'reports.view' },
       },
+      {
+        path: 'settings',
+        name: 'settings',
+        component: () => import('@/pages/settings/SettingsPage.vue'),
+        meta: { titleKey: 'menu.settings', permission: 'tenant.settings.manage' },
+      },
     ],
   },
   {
