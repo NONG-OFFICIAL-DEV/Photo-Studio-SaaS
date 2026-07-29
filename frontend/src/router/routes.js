@@ -92,6 +92,12 @@ export const routes = [
         component: () => import('@/pages/employees/EmployeesPage.vue'),
         meta: { titleKey: 'menu.employees', permission: 'users.view' },
       },
+      {
+        path: 'reports',
+        name: 'reports',
+        component: () => import('@/pages/reports/ReportsPage.vue'),
+        meta: { titleKey: 'menu.reports', permission: 'reports.view' },
+      },
     ],
   },
   {

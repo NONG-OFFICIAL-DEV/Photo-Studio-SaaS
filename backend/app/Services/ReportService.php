@@ -1,0 +1,128 @@
+<?php
+
+namespace App\Services;
+
+use App\Enums\BookingStatus;
+use App\Enums\BookingType;
+use App\Enums\OrderStatus;
+use App\Models\Booking;
+use App\Models\Expense;
+use App\Models\Invoice;
+use App\Models\Order;
+use App\Models\Payment;
+use Illuminate\Support\Carbon;
+
+class ReportService
+{
+    public function revenue(string $dateFrom, string $dateTo): array
+    {
+        $totalInvoiced = (float) Invoice::whereBetween('issue_date', [$dateFrom, $dateTo])->sum('total');
+        $totalCollected = (float) Payment::whereBetween('paid_at', [$dateFrom, $dateTo])->sum('amount');
+
+        return [
+            'total_invoiced' => round($totalInvoiced, 2),
+            'total_collected' => round($totalCollected, 2),
+            'outstanding' => round(max(0, $totalInvoiced - $totalCollected), 2),
+            'breakdown' => $this->revenueBreakdown($dateFrom, $dateTo),
+        ];
+    }
+
+    /**
+     * Grouped by day when the range is a month or less (for a readable
+     * daily trend), otherwise by month (so a year-long range doesn't
+     * return hundreds of daily rows).
+     */
+    protected function revenueBreakdown(string $dateFrom, string $dateTo): array
+    {
+        $groupByMonth = Carbon::parse($dateFrom)->diffInDays(Carbon::parse($dateTo)) > 31;
+        $format = $groupByMonth ? 'YYYY-MM' : 'YYYY-MM-DD';
+
+        $invoiced = Invoice::whereBetween('issue_date', [$dateFrom, $dateTo])
+            ->selectRaw("to_char(issue_date, '{$format}') as period, SUM(total) as total")
+            ->groupBy('period')
+            ->pluck('total', 'period');
+
+        $collected = Payment::whereBetween('paid_at', [$dateFrom, $dateTo])
+            ->selectRaw("to_char(paid_at, '{$format}') as period, SUM(amount) as total")
+            ->groupBy('period')
+            ->pluck('total', 'period');
+
+        $periods = collect($invoiced->keys())->merge($collected->keys())->unique()->sort()->values();
+
+        return $periods->map(fn ($period) => [
+            'period' => $period,
+            'invoiced' => round((float) ($invoiced[$period] ?? 0), 2),
+            'collected' => round((float) ($collected[$period] ?? 0), 2),
+        ])->all();
+    }
+
+    public function bookings(string $dateFrom, string $dateTo): array
+    {
+        $rangeEnd = Carbon::parse($dateTo)->endOfDay();
+        $query = Booking::whereBetween('starts_at', [$dateFrom, $rangeEnd]);
+
+        $byType = (clone $query)->selectRaw('type, COUNT(*) as count')->groupBy('type')->pluck('count', 'type');
+        $byStatus = (clone $query)->selectRaw('status, COUNT(*) as count')->groupBy('status')->pluck('count', 'status');
+
+        return [
+            'total' => (clone $query)->count(),
+            'by_type' => collect(BookingType::cases())->map(fn ($case) => [
+                'type' => $case->value,
+                'label' => $case->label(),
+                'count' => (int) ($byType[$case->value] ?? 0),
+            ])->all(),
+            'by_status' => collect(BookingStatus::cases())->map(fn ($case) => [
+                'status' => $case->value,
+                'label' => $case->label(),
+                'count' => (int) ($byStatus[$case->value] ?? 0),
+            ])->all(),
+        ];
+    }
+
+    public function orders(string $dateFrom, string $dateTo): array
+    {
+        $rangeEnd = Carbon::parse($dateTo)->endOfDay();
+        $query = Order::whereBetween('created_at', [$dateFrom, $rangeEnd]);
+
+        $byStatus = (clone $query)
+            ->selectRaw('status, COUNT(*) as count, SUM(total) as value')
+            ->groupBy('status')
+            ->get()
+            ->keyBy('status');
+
+        return [
+            'total_count' => (clone $query)->count(),
+            'total_value' => round((float) (clone $query)->sum('total'), 2),
+            'by_status' => collect(OrderStatus::cases())->map(function ($case) use ($byStatus) {
+                $row = $byStatus->get($case->value);
+
+                return [
+                    'status' => $case->value,
+                    'label' => $case->label(),
+                    'count' => (int) ($row->count ?? 0),
+                    'value' => round((float) ($row->value ?? 0), 2),
+                ];
+            })->all(),
+        ];
+    }
+
+    public function expenses(string $dateFrom, string $dateTo): array
+    {
+        $query = Expense::whereBetween('expense_date', [$dateFrom, $dateTo]);
+
+        $byCategory = (clone $query)
+            ->leftJoin('expense_categories', 'expenses.category_id', '=', 'expense_categories.id')
+            ->selectRaw("COALESCE(expense_categories.name, 'Uncategorized') as category, SUM(expenses.amount) as total")
+            ->groupBy('category')
+            ->orderByDesc('total')
+            ->get();
+
+        return [
+            'total' => round((float) (clone $query)->sum('amount'), 2),
+            'by_category' => $byCategory->map(fn ($row) => [
+                'category' => $row->category,
+                'amount' => round((float) $row->total, 2),
+            ])->all(),
+        ];
+    }
+}

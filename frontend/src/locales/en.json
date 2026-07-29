@@ -620,5 +620,28 @@
       "updatedSuccess": "Employee profile updated successfully.",
       "saveError": "Unable to save employee profile."
     }
+  },
+  "reports": {
+    "title": "Reports",
+    "subtitle": "Revenue, bookings, orders, and expenses — filterable by date range.",
+    "revenue": "Revenue",
+    "bookings": "Bookings",
+    "orders": "Orders",
+    "expenses": "Expenses",
+    "dateFrom": "From",
+    "dateTo": "To",
+    "exportCsv": "Export CSV",
+    "exportExcel": "Export Excel",
+    "totalInvoiced": "Total Invoiced",
+    "totalCollected": "Total Collected",
+    "outstanding": "Outstanding",
+    "period": "Period",
+    "total": "Total",
+    "byType": "By Type",
+    "byStatus": "By Status",
+    "totalCount": "Total Count",
+    "totalValue": "Total Value",
+    "count": "Count",
+    "value": "Value"
   }
 }

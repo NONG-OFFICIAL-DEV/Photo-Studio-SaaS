@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\V1\Commission\CommissionEntryController;
 use App\Http\Controllers\Api\V1\Customer\CustomerController;
 use App\Http\Controllers\Api\V1\Customer\CustomerNoteController;
 use App\Http\Controllers\Api\V1\Customer\CustomerTagController;
+use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\Expense\ExpenseCategoryController;
 use App\Http\Controllers\Api\V1\Expense\ExpenseController;
 use App\Http\Controllers\Api\V1\Inventory\InventoryItemController;
@@ -20,6 +21,7 @@ use App\Http\Controllers\Api\V1\Order\EditingTaskController;
 use App\Http\Controllers\Api\V1\Order\OrderController;
 use App\Http\Controllers\Api\V1\Package\PackageController;
 use App\Http\Controllers\Api\V1\Payroll\PayrollEntryController;
+use App\Http\Controllers\Api\V1\Report\ReportController;
 use App\Http\Controllers\Api\V1\Service\ServiceAddOnController;
 use App\Http\Controllers\Api\V1\Service\ServiceCategoryController;
 use App\Http\Controllers\Api\V1\Service\ServiceController;
@@ -64,6 +66,8 @@ Route::prefix('auth')->name('auth.')->group(function () {
 Route::middleware(['auth:api', 'tenant', 'subscription.active'])->group(function () {
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+
+    Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
 
     Route::prefix('customers')->name('customers.')->group(function () {
         // Static segments must be registered before {customer} so they
@@ -224,5 +228,16 @@ Route::middleware(['auth:api', 'tenant', 'subscription.active'])->group(function
         Route::delete('/{payrollEntry}', [PayrollEntryController::class, 'destroy']);
 
         Route::post('/{payrollEntry}/pay', [PayrollEntryController::class, 'pay']);
+    });
+
+    Route::prefix('reports')->name('reports.')->group(function () {
+        Route::get('/revenue', [ReportController::class, 'revenue']);
+        Route::get('/revenue/export', [ReportController::class, 'exportRevenue']);
+        Route::get('/bookings', [ReportController::class, 'bookings']);
+        Route::get('/bookings/export', [ReportController::class, 'exportBookings']);
+        Route::get('/orders', [ReportController::class, 'orders']);
+        Route::get('/orders/export', [ReportController::class, 'exportOrders']);
+        Route::get('/expenses', [ReportController::class, 'expenses']);
+        Route::get('/expenses/export', [ReportController::class, 'exportExpenses']);
     });
 });

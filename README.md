@@ -482,6 +482,37 @@ an existing tenant `User`, extended with three new employment fields.
   the period, the paid/draft edit-and-delete lock, permission gating
   per role, and cross-tenant isolation.
 
+## What's implemented (Phase 13 — Reports & Exports)
+
+Phases 11 (Customer Portal) and 12 (Notifications) were explicitly
+skipped for now, in that order, at the user's request.
+
+- The Dashboard's stat cards, monthly-revenue chart, and Top Services
+  panel — placeholder zeros since Phase 1 — are now backed by a real
+  `GET /dashboard/stats` aggregation: today/monthly revenue (from
+  Payments), new customers and bookings this month, current pending-
+  editing and ready-for-delivery queue depth, orders delivered this
+  month, the top 5 services by revenue this month, and a 6-month
+  revenue trend for the chart.
+- A new Reports page with four date-range-filterable reports:
+  Revenue (invoiced vs. collected vs. outstanding, broken down by day
+  for ranges under a month or by month for longer ones), Bookings (by
+  type and by status), Orders (count/value by status), and Expenses
+  (by category). All default to the current month.
+- Every report exports as CSV or Excel via the same `maatwebsite/excel`
+  pattern as Phase 2's Customer export — one `FromArray` export class
+  per report, downloading its breakdown table.
+- New `reports.view`/`reports.export` permissions. Given financial
+  reports are sensitive, only Manager and Cashier get them by
+  default (unlike most other view-only permissions, Photographer/
+  Editor/Receptionist/Viewer do **not** get read access here).
+- 287 total passing backend tests (23 new for this module): each
+  report's aggregation correctness against known fixture data
+  (including the day-vs-month breakdown-grouping threshold and
+  per-tenant isolation), the Dashboard stats endpoint, CSV/Excel
+  export downloads (status + content-type) for all four reports, and
+  permission gating per role.
+
 ## Getting Started
 
 ### Prerequisites
@@ -567,8 +598,8 @@ Pinia stores, and tests, same as Phase 1.
 8. ~~Package Management~~ ✅ (inserted ahead of the original roadmap — bundles Services/Add-ons from Phase 4 into fixed-price Packages, selectable in Orders/Invoices alongside individual services)
 9. ~~Expense & Inventory~~ ✅ (Inventory tracks consumable stock only, not serialized equipment assets)
 10. ~~Employee Management (attendance, salary, commission)~~ ✅ (full invite/create-user/role-management UI remains deferred)
-11. Customer Portal
-12. Notifications (email, in-app, Telegram)
-13. Reports & Exports
+11. Customer Portal — skipped for now, at the user's request
+12. Notifications (email, in-app, Telegram) — skipped for now, at the user's request
+13. ~~Reports & Exports~~ ✅
 14. Settings (company, invoice, watermark, theme, backup)
 15. Super Admin Panel (tenants, plans, platform analytics, support tickets)

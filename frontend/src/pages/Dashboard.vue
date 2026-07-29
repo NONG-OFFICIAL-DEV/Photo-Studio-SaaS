@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Line } from 'vue-chartjs'
 import {
@@ -17,6 +17,7 @@ import ClockInOutCard from '@/components/attendance/ClockInOutCard.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
 import { resendVerificationApi } from '@/apis/auth.api'
+import { getDashboardStatsApi } from '@/apis/dashboard.api'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Filler)
 
@@ -25,37 +26,52 @@ const auth = useAuthStore()
 const appStore = useAppStore()
 
 const resendLoading = ref(false)
+const statsData = ref(null)
 
-/*
- * Placeholder figures — real numbers come from the Reporting module
- * (Dashboard aggregation endpoint) once Bookings/Invoices ship. The cards
- * and chart wiring below are the real, reusable shell for that data.
- */
-const stats = computed(() => [
-  { title: t('dashboard.todayRevenue'), value: '$0.00', icon: 'mdi-cash', color: 'success' },
-  { title: t('dashboard.monthlyRevenue'), value: '$0.00', icon: 'mdi-chart-line', color: 'primary' },
-  { title: t('dashboard.newCustomers'), value: '0', icon: 'mdi-account-plus-outline', color: 'info' },
-  { title: t('dashboard.bookings'), value: '0', icon: 'mdi-calendar-check-outline', color: 'secondary' },
-  { title: t('dashboard.pendingEditing'), value: '0', icon: 'mdi-image-edit-outline', color: 'warning' },
-  { title: t('dashboard.readyForDelivery'), value: '0', icon: 'mdi-truck-delivery-outline', color: 'tertiary' },
-  { title: t('dashboard.completedOrders'), value: '0', icon: 'mdi-check-circle-outline', color: 'success' },
-])
+const stats = computed(() => {
+  const d = statsData.value
+  return [
+    { title: t('dashboard.todayRevenue'), value: `$${(d?.today_revenue ?? 0).toFixed(2)}`, icon: 'mdi-cash', color: 'success' },
+    { title: t('dashboard.monthlyRevenue'), value: `$${(d?.monthly_revenue ?? 0).toFixed(2)}`, icon: 'mdi-chart-line', color: 'primary' },
+    { title: t('dashboard.newCustomers'), value: String(d?.new_customers ?? 0), icon: 'mdi-account-plus-outline', color: 'info' },
+    { title: t('dashboard.bookings'), value: String(d?.bookings ?? 0), icon: 'mdi-calendar-check-outline', color: 'secondary' },
+    { title: t('dashboard.pendingEditing'), value: String(d?.pending_editing ?? 0), icon: 'mdi-image-edit-outline', color: 'warning' },
+    { title: t('dashboard.readyForDelivery'), value: String(d?.ready_for_delivery ?? 0), icon: 'mdi-truck-delivery-outline', color: 'tertiary' },
+    { title: t('dashboard.completedOrders'), value: String(d?.completed_orders ?? 0), icon: 'mdi-check-circle-outline', color: 'success' },
+  ]
+})
 
-const chartData = computed(() => ({
-  labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-  datasets: [
-    {
-      label: t('dashboard.monthlyRevenue'),
-      data: [0, 0, 0, 0, 0, 0],
-      borderColor: '#6750A4',
-      backgroundColor: 'rgba(103, 80, 164, 0.15)',
-      fill: true,
-      tension: 0.35,
-    },
-  ],
-}))
+const chartData = computed(() => {
+  const trend = statsData.value?.revenue_trend ?? []
+  return {
+    labels: trend.map(row => row.label),
+    datasets: [
+      {
+        label: t('dashboard.monthlyRevenue'),
+        data: trend.map(row => row.value),
+        borderColor: '#6750A4',
+        backgroundColor: 'rgba(103, 80, 164, 0.15)',
+        fill: true,
+        tension: 0.35,
+      },
+    ],
+  }
+})
+
+const topServices = computed(() => statsData.value?.top_services ?? [])
 
 const chartOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+
+async function loadStats() {
+  try {
+    const { data } = await getDashboardStatsApi()
+    statsData.value = data.data
+  } catch {
+    statsData.value = null
+  }
+}
+
+onMounted(loadStats)
 
 async function resendVerification() {
   resendLoading.value = true
@@ -125,9 +141,16 @@ async function resendVerification() {
         <v-card variant="flat" border rounded="lg" height="100%">
           <v-card-title>{{ t('dashboard.topServices') }}</v-card-title>
           <v-card-text>
-            <div class="text-body-2 text-medium-emphasis">
+            <div v-if="!topServices.length" class="text-body-2 text-medium-emphasis">
               {{ t('dashboard.noDataYet') }}
             </div>
+            <v-list v-else density="compact">
+              <v-list-item v-for="service in topServices" :key="service.name" :title="service.name">
+                <template #append>
+                  <span class="text-body-2">${{ service.revenue.toFixed(2) }}</span>
+                </template>
+              </v-list-item>
+            </v-list>
           </v-card-text>
         </v-card>
       </v-col>

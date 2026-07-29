@@ -620,5 +620,28 @@
       "updatedSuccess": "ធ្វើបច្ចុប្បន្នភាពទម្រង់បុគ្គលិកបានជោគជ័យ។",
       "saveError": "មិនអាចរក្សាទុកទម្រង់បុគ្គលិកបានទេ។"
     }
+  },
+  "reports": {
+    "title": "របាយការណ៍",
+    "subtitle": "ចំណូល ការកក់ ការបញ្ជាទិញ និងចំណាយ — អាចត្រងតាមចន្លោះកាលបរិច្ឆេទ។",
+    "revenue": "ចំណូល",
+    "bookings": "ការកក់ការងារ",
+    "orders": "ការបញ្ជាទិញ",
+    "expenses": "ចំណាយ",
+    "dateFrom": "ពី",
+    "dateTo": "ដល់",
+    "exportCsv": "នាំចេញជា CSV",
+    "exportExcel": "នាំចេញជា Excel",
+    "totalInvoiced": "សរុបបានចេញវិក្កយបត្រ",
+    "totalCollected": "សរុបបានប្រមូល",
+    "outstanding": "នៅសល់",
+    "period": "រយៈពេល",
+    "total": "សរុប",
+    "byType": "តាមប្រភេទ",
+    "byStatus": "តាមស្ថានភាព",
+    "totalCount": "ចំនួនសរុប",
+    "totalValue": "តម្លៃសរុប",
+    "count": "ចំនួន",
+    "value": "តម្លៃ"
   }
 }

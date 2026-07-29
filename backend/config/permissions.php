@@ -39,6 +39,7 @@ return [
         'attendance' => ['attendance.view', 'attendance.clock', 'attendance.manage'],
         'commissions' => ['commissions.view', 'commissions.record', 'commissions.delete'],
         'payroll' => ['payroll.view', 'payroll.create', 'payroll.update', 'payroll.delete', 'payroll.pay'],
+        'reports' => ['reports.view', 'reports.export'],
     ],
 
     /*
@@ -69,6 +70,7 @@ return [
             'attendance.view', 'attendance.clock', 'attendance.manage',
             'commissions.view', 'commissions.record', 'commissions.delete',
             'payroll.view', 'payroll.create', 'payroll.update', 'payroll.delete', 'payroll.pay',
+            'reports.view', 'reports.export',
         ],
         TenantRole::Photographer->value => [
             'dashboard.view', 'customers.view', 'bookings.view', 'bookings.update', 'services.view', 'packages.view', 'orders.view',
@@ -90,6 +92,7 @@ return [
             'expenses.view', 'expenses.create', 'expenses.update',
             'inventory.view',
             'attendance.clock',
+            'reports.view', 'reports.export',
         ],
         TenantRole::Receptionist->value => [
             'dashboard.view', 'users.view',
