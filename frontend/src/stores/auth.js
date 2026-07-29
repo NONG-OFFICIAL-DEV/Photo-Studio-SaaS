@@ -11,6 +11,7 @@ export const useAuthStore = defineStore('auth', () => {
   const roles = computed(() => user.value?.roles ?? [])
   const permissions = computed(() => user.value?.permissions ?? [])
   const tenant = computed(() => user.value?.tenant ?? null)
+  const isSuperAdmin = computed(() => Boolean(user.value?.is_super_admin))
 
   function hasRole(role) {
     return roles.value.includes(role)
@@ -82,6 +83,7 @@ export const useAuthStore = defineStore('auth', () => {
     roles,
     permissions,
     tenant,
+    isSuperAdmin,
     hasRole,
     hasPermission,
     register,

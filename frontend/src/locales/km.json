@@ -675,5 +675,80 @@
       "saveError": "មិនអាចរក្សាទុកការកំណត់បានទេ។",
       "logoUpdated": "បានកែប្រែឡូហ្គោដោយជោគជ័យ។"
     }
+  },
+  "admin": {
+    "panelName": "អ្នកគ្រប់គ្រងវេទិកា",
+    "menu": {
+      "analytics": "ការវិភាគ",
+      "tenants": "ស្ទូឌីយោ",
+      "plans": "គម្រោង"
+    },
+    "analytics": {
+      "title": "ការវិភាគវេទិកា",
+      "subtitle": "ស្ទូឌីយោ ការជាវ និងចំណូលទៀងទាត់ទូទាំងវេទិកា។",
+      "totalTenants": "ស្ទូឌីយោសរុប",
+      "activeTenants": "ស្ទូឌីយោសកម្ម",
+      "suspendedTenants": "ស្ទូឌីយោបានផ្អាក",
+      "mrr": "ចំណូលទៀងទាត់ប្រចាំខែ",
+      "signupsTrend": "ការចុះឈ្មោះ (៦ខែចុងក្រោយ)",
+      "subscriptionsByStatus": "ការជាវតាមស្ថានភាព",
+      "statuses": {
+        "trial": "សាកល្បង",
+        "active": "សកម្ម",
+        "expired": "ផុតកំណត់",
+        "suspended": "បានផ្អាក",
+        "cancelled": "បានលុបចោល"
+      }
+    },
+    "tenants": {
+      "title": "ស្ទូឌីយោ",
+      "subtitle": "ស្ទូឌីយោគ្រប់រូបនៅលើវេទិកា — ផ្អាក ឬបើកឡើងវិញ។",
+      "plan": "គម្រោង",
+      "subscriptionStatus": "ការជាវ",
+      "users": "អ្នកប្រើប្រាស់",
+      "actions": {
+        "suspend": "ផ្អាក",
+        "activate": "បើកឡើងវិញ"
+      },
+      "confirmSuspendTitle": "ផ្អាកស្ទូឌីយោ?",
+      "confirmActivateTitle": "បើកស្ទូឌីយោឡើងវិញ?",
+      "confirmMessage": "សកម្មភាពនេះនឹងប៉ះពាល់អ្នកប្រើប្រាស់ទាំងអស់របស់ \"{name}\"។",
+      "messages": {
+        "suspended": "បានផ្អាកស្ទូឌីយោដោយជោគជ័យ។",
+        "activated": "បានបើកស្ទូឌីយោឡើងវិញដោយជោគជ័យ។"
+      }
+    },
+    "plans": {
+      "title": "គម្រោង",
+      "subtitle": "គម្រោងជាវដែលអាចប្រើបានសម្រាប់ស្ទូឌីយោគ្រប់រូបនៅលើវេទិកា។",
+      "newPlan": "គម្រោងថ្មី",
+      "editPlan": "កែប្រែគម្រោង",
+      "subscriptionsCount": "ការជាវ",
+      "confirmDeleteTitle": "លុបគម្រោង?",
+      "confirmDeleteMessage": "សកម្មភាពនេះនឹងលុប \"{name}\" ជាអចិន្ត្រៃយ៍។",
+      "fields": {
+        "code": "កូដ",
+        "priceMonthly": "តម្លៃប្រចាំខែ",
+        "priceQuarterly": "តម្លៃប្រចាំត្រីមាស",
+        "priceYearly": "តម្លៃប្រចាំឆ្នាំ",
+        "maxUsers": "អ្នកប្រើប្រាស់អតិបរមា",
+        "storageLimitGb": "ដែនកំណត់ទំហំផ្ទុក (GB)",
+        "monthlyOrderLimit": "ដែនកំណត់កម្ម៉ង់ប្រចាំខែ",
+        "trialDays": "ចំនួនថ្ងៃសាកល្បង",
+        "sortOrder": "លំដាប់តម្រៀប",
+        "isActive": "សកម្ម",
+        "hasWatermarkGallery": "វិចិត្រសាលមានស្លាកទឹក",
+        "hasOnlineGallery": "វិចិត្រសាលអនឡាញ",
+        "hasReports": "របាយការណ៍",
+        "hasApiAccess": "ការចូលប្រើ API"
+      },
+      "messages": {
+        "createdSuccess": "បានបង្កើតគម្រោងដោយជោគជ័យ។",
+        "updatedSuccess": "បានកែប្រែគម្រោងដោយជោគជ័យ។",
+        "deletedSuccess": "បានលុបគម្រោងដោយជោគជ័យ។",
+        "saveError": "មិនអាចរក្សាទុកគម្រោងបានទេ។",
+        "deleteError": "មិនអាចលុបគម្រោងបានទេ។"
+      }
+    }
   }
 }

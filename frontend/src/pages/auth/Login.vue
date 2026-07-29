@@ -25,7 +25,8 @@ async function onSubmit(values) {
   try {
     await auth.login(values)
     appStore.notify(t('auth.loginSuccess'))
-    router.push(route.query.redirect || { name: 'dashboard' })
+    const fallback = auth.isSuperAdmin ? { name: 'admin-analytics' } : { name: 'dashboard' }
+    router.push(route.query.redirect || fallback)
   } catch (error) {
     errorMessage.value = error.response?.data?.message || t('auth.loginError')
   } finally {

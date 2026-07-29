@@ -675,5 +675,80 @@
       "saveError": "Could not save settings.",
       "logoUpdated": "Logo updated successfully."
     }
+  },
+  "admin": {
+    "panelName": "Platform Admin",
+    "menu": {
+      "analytics": "Analytics",
+      "tenants": "Tenants",
+      "plans": "Plans"
+    },
+    "analytics": {
+      "title": "Platform Analytics",
+      "subtitle": "Tenants, subscriptions, and recurring revenue across the whole platform.",
+      "totalTenants": "Total Tenants",
+      "activeTenants": "Active Tenants",
+      "suspendedTenants": "Suspended Tenants",
+      "mrr": "MRR",
+      "signupsTrend": "Signups (last 6 months)",
+      "subscriptionsByStatus": "Subscriptions by Status",
+      "statuses": {
+        "trial": "Trial",
+        "active": "Active",
+        "expired": "Expired",
+        "suspended": "Suspended",
+        "cancelled": "Cancelled"
+      }
+    },
+    "tenants": {
+      "title": "Tenants",
+      "subtitle": "Every studio on the platform — suspend or reactivate access.",
+      "plan": "Plan",
+      "subscriptionStatus": "Subscription",
+      "users": "Users",
+      "actions": {
+        "suspend": "Suspend",
+        "activate": "Activate"
+      },
+      "confirmSuspendTitle": "Suspend tenant?",
+      "confirmActivateTitle": "Activate tenant?",
+      "confirmMessage": "This will affect all users of \"{name}\".",
+      "messages": {
+        "suspended": "Tenant suspended successfully.",
+        "activated": "Tenant activated successfully."
+      }
+    },
+    "plans": {
+      "title": "Plans",
+      "subtitle": "Subscription plans available to every tenant on the platform.",
+      "newPlan": "New Plan",
+      "editPlan": "Edit Plan",
+      "subscriptionsCount": "Subscriptions",
+      "confirmDeleteTitle": "Delete plan?",
+      "confirmDeleteMessage": "This will permanently delete \"{name}\".",
+      "fields": {
+        "code": "Code",
+        "priceMonthly": "Monthly Price",
+        "priceQuarterly": "Quarterly Price",
+        "priceYearly": "Yearly Price",
+        "maxUsers": "Max Users",
+        "storageLimitGb": "Storage Limit (GB)",
+        "monthlyOrderLimit": "Monthly Order Limit",
+        "trialDays": "Trial Days",
+        "sortOrder": "Sort Order",
+        "isActive": "Active",
+        "hasWatermarkGallery": "Watermark Gallery",
+        "hasOnlineGallery": "Online Gallery",
+        "hasReports": "Reports",
+        "hasApiAccess": "API Access"
+      },
+      "messages": {
+        "createdSuccess": "Plan created successfully.",
+        "updatedSuccess": "Plan updated successfully.",
+        "deletedSuccess": "Plan deleted successfully.",
+        "saveError": "Could not save plan.",
+        "deleteError": "Could not delete plan."
+      }
+    }
   }
 }

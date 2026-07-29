@@ -242,3 +242,22 @@ export const settingsSchema = yup.object({
   primary_color: hexColor,
   secondary_color: hexColor,
 })
+
+export const planSchema = yup.object({
+  name: yup.string().required().max(255),
+  code: yup.string().required().max(100),
+  description: yup.string().nullable().max(2000),
+  price_monthly: yup.number().typeError('Must be a number').nullable().min(0),
+  price_quarterly: yup.number().typeError('Must be a number').nullable().min(0),
+  price_yearly: yup.number().typeError('Must be a number').nullable().min(0),
+  max_users: yup.number().typeError('Must be a number').nullable().integer().min(1),
+  storage_limit_gb: yup.number().typeError('Must be a number').nullable().integer().min(0),
+  monthly_order_limit: yup.number().typeError('Must be a number').nullable().integer().min(0),
+  trial_days: yup.number().typeError('Must be a number').nullable().integer().min(0),
+  has_watermark_gallery: yup.boolean(),
+  has_online_gallery: yup.boolean(),
+  has_reports: yup.boolean(),
+  has_api_access: yup.boolean(),
+  is_active: yup.boolean(),
+  sort_order: yup.number().typeError('Must be a number').nullable().integer().min(0),
+})

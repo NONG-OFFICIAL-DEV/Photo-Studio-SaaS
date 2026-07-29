@@ -1,0 +1,187 @@
+<script setup>
+import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { Field } from 'vee-validate'
+import AppDialog from '@/components/common/AppDialog.vue'
+import AppForm from '@/components/common/AppForm.vue'
+import { planSchema } from '@/utils/validators'
+import { createAdminPlanApi, updateAdminPlanApi } from '@/apis/admin.api'
+import { useAppStore } from '@/stores/app'
+
+const props = defineProps({
+  modelValue: { type: Boolean, default: false },
+  plan: { type: Object, default: null },
+})
+
+const emit = defineEmits(['update:modelValue', 'saved'])
+
+const { t } = useI18n()
+const appStore = useAppStore()
+
+const loading = ref(false)
+const errorMessage = ref('')
+
+const isEdit = computed(() => Boolean(props.plan?.id))
+const title = computed(() => (isEdit.value ? t('admin.plans.editPlan') : t('admin.plans.newPlan')))
+
+const initialValues = computed(() => ({
+  name: props.plan?.name ?? '',
+  code: props.plan?.code ?? '',
+  description: props.plan?.description ?? '',
+  price_monthly: props.plan?.price_monthly ?? 0,
+  price_quarterly: props.plan?.price_quarterly ?? null,
+  price_yearly: props.plan?.price_yearly ?? null,
+  max_users: props.plan?.max_users ?? null,
+  storage_limit_gb: props.plan?.storage_limit_gb ?? null,
+  monthly_order_limit: props.plan?.monthly_order_limit ?? null,
+  trial_days: props.plan?.trial_days ?? 14,
+  has_watermark_gallery: props.plan?.has_watermark_gallery ?? true,
+  has_online_gallery: props.plan?.has_online_gallery ?? true,
+  has_reports: props.plan?.has_reports ?? false,
+  has_api_access: props.plan?.has_api_access ?? false,
+  is_active: props.plan?.is_active ?? true,
+  sort_order: props.plan?.sort_order ?? 0,
+}))
+
+async function onSubmit(values) {
+  loading.value = true
+  errorMessage.value = ''
+
+  try {
+    if (isEdit.value) {
+      await updateAdminPlanApi(props.plan.id, values)
+      appStore.notify(t('admin.plans.messages.updatedSuccess'))
+    } else {
+      await createAdminPlanApi(values)
+      appStore.notify(t('admin.plans.messages.createdSuccess'))
+    }
+    emit('saved')
+    emit('update:modelValue', false)
+  } catch (error) {
+    errorMessage.value = error.response?.data?.message || t('admin.plans.messages.saveError')
+  } finally {
+    loading.value = false
+  }
+}
+</script>
+
+<template>
+  <AppDialog :model-value="modelValue" :title="title" max-width="720" @update:model-value="emit('update:modelValue', $event)">
+    <v-alert v-if="errorMessage" type="error" variant="tonal" class="mb-4">{{ errorMessage }}</v-alert>
+
+    <AppForm :schema="planSchema" :initial-values="initialValues" @submit="onSubmit">
+      <template #default="{ errors, values, setFieldValue }">
+        <v-row>
+          <v-col cols="12" sm="6">
+            <Field v-slot="{ field }" name="name">
+              <v-text-field v-bind="field" :label="`${t('fields.name')} *`" :error-messages="errors.name" />
+            </Field>
+          </v-col>
+          <v-col cols="12" sm="6">
+            <Field v-slot="{ field }" name="code">
+              <v-text-field v-bind="field" :label="`${t('admin.plans.fields.code')} *`" :error-messages="errors.code" :disabled="isEdit" />
+            </Field>
+          </v-col>
+          <v-col cols="12">
+            <Field v-slot="{ field }" name="description">
+              <v-textarea v-bind="field" :label="t('fields.description')" rows="2" :error-messages="errors.description" />
+            </Field>
+          </v-col>
+
+          <v-col cols="12" sm="4">
+            <Field v-slot="{ field }" name="price_monthly">
+              <v-text-field v-bind="field" type="number" :label="t('admin.plans.fields.priceMonthly')" prefix="$" :error-messages="errors.price_monthly" />
+            </Field>
+          </v-col>
+          <v-col cols="12" sm="4">
+            <Field v-slot="{ field }" name="price_quarterly">
+              <v-text-field v-bind="field" type="number" :label="t('admin.plans.fields.priceQuarterly')" prefix="$" :error-messages="errors.price_quarterly" />
+            </Field>
+          </v-col>
+          <v-col cols="12" sm="4">
+            <Field v-slot="{ field }" name="price_yearly">
+              <v-text-field v-bind="field" type="number" :label="t('admin.plans.fields.priceYearly')" prefix="$" :error-messages="errors.price_yearly" />
+            </Field>
+          </v-col>
+
+          <v-col cols="12" sm="4">
+            <Field v-slot="{ field }" name="max_users">
+              <v-text-field v-bind="field" type="number" :label="t('admin.plans.fields.maxUsers')" :error-messages="errors.max_users" />
+            </Field>
+          </v-col>
+          <v-col cols="12" sm="4">
+            <Field v-slot="{ field }" name="storage_limit_gb">
+              <v-text-field v-bind="field" type="number" :label="t('admin.plans.fields.storageLimitGb')" :error-messages="errors.storage_limit_gb" />
+            </Field>
+          </v-col>
+          <v-col cols="12" sm="4">
+            <Field v-slot="{ field }" name="monthly_order_limit">
+              <v-text-field v-bind="field" type="number" :label="t('admin.plans.fields.monthlyOrderLimit')" :error-messages="errors.monthly_order_limit" />
+            </Field>
+          </v-col>
+
+          <v-col cols="12" sm="4">
+            <Field v-slot="{ field }" name="trial_days">
+              <v-text-field v-bind="field" type="number" :label="t('admin.plans.fields.trialDays')" :error-messages="errors.trial_days" />
+            </Field>
+          </v-col>
+          <v-col cols="12" sm="4">
+            <Field v-slot="{ field }" name="sort_order">
+              <v-text-field v-bind="field" type="number" :label="t('admin.plans.fields.sortOrder')" :error-messages="errors.sort_order" />
+            </Field>
+          </v-col>
+          <v-col cols="12" sm="4" class="d-flex align-center">
+            <v-checkbox
+              :model-value="values.is_active"
+              :label="t('admin.plans.fields.isActive')"
+              hide-details
+              @update:model-value="setFieldValue('is_active', $event)"
+            />
+          </v-col>
+
+          <v-col cols="12">
+            <v-row>
+              <v-col cols="6" sm="3">
+                <v-checkbox
+                  :model-value="values.has_watermark_gallery"
+                  :label="t('admin.plans.fields.hasWatermarkGallery')"
+                  hide-details
+                  @update:model-value="setFieldValue('has_watermark_gallery', $event)"
+                />
+              </v-col>
+              <v-col cols="6" sm="3">
+                <v-checkbox
+                  :model-value="values.has_online_gallery"
+                  :label="t('admin.plans.fields.hasOnlineGallery')"
+                  hide-details
+                  @update:model-value="setFieldValue('has_online_gallery', $event)"
+                />
+              </v-col>
+              <v-col cols="6" sm="3">
+                <v-checkbox
+                  :model-value="values.has_reports"
+                  :label="t('admin.plans.fields.hasReports')"
+                  hide-details
+                  @update:model-value="setFieldValue('has_reports', $event)"
+                />
+              </v-col>
+              <v-col cols="6" sm="3">
+                <v-checkbox
+                  :model-value="values.has_api_access"
+                  :label="t('admin.plans.fields.hasApiAccess')"
+                  hide-details
+                  @update:model-value="setFieldValue('has_api_access', $event)"
+                />
+              </v-col>
+            </v-row>
+          </v-col>
+        </v-row>
+
+        <div class="d-flex justify-end ga-2 mt-2">
+          <v-btn variant="text" @click="emit('update:modelValue', false)">{{ t('common.cancel') }}</v-btn>
+          <v-btn type="submit" color="primary" :loading="loading">{{ t('common.save') }}</v-btn>
+        </div>
+      </template>
+    </AppForm>
+  </AppDialog>
+</template>

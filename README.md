@@ -513,6 +513,84 @@ skipped for now, in that order, at the user's request.
   export downloads (status + content-type) for all four reports, and
   permission gating per role.
 
+## What's implemented (Phase 14 — Settings)
+
+Scoped to Company + Invoice + Theme + data export. A Watermark tab was
+explicitly deferred until Phase 6 (Gallery) ships, since there's
+nothing to watermark yet.
+
+- A new Settings page (Company/Invoice/Theme/Data tabs) backed by
+  `GET/PUT /settings`, reusing the tenant's pre-existing `settings`
+  JSONB column (no new migration needed) — Company covers name, email,
+  phone, address, currency, timezone, plus a logo upload; Invoice
+  covers invoice number prefix, default tax rate, default due-days,
+  and a footer/terms field; Theme covers a primary/secondary brand
+  color pair, applied at runtime to both the light and dark Vuetify
+  themes (`App.vue` watches the tenant's settings and overwrites the
+  theme tokens — no rebuild needed per tenant).
+- `InvoiceService::create()` now resolves its tax rate, due date, and
+  invoice number prefix from the tenant's configured defaults instead
+  of hardcoded values, only when the caller doesn't explicitly pass
+  them.
+- A "backup" / data export feature reinterpreted as a single
+  **Export all my data** button: `GET /settings/export` streams a zip
+  of four CSVs (Customers, Orders, Invoices, Expenses), each generated
+  in-memory via `Excel::raw()` and written straight into a `ZipArchive`
+  — only the final zip ever touches disk, cleaned up after the
+  response via `deleteFileAfterSend`.
+- Gated entirely by the existing `tenant.settings.manage` permission
+  from Phase 1's RBAC catalog (Owner/Manager only) — no new permission
+  was needed.
+- 299 total passing backend tests (12 new for this module): settings
+  read/write (including partial updates preserving untouched keys),
+  color-format validation, per-tenant isolation, the invoice-defaults
+  wiring (including explicit values overriding tenant defaults), the
+  export endpoint's zip content-type, and permission gating per role.
+
+## What's implemented (Phase 15 — Super Admin Panel)
+
+Scoped to Tenant management + Plan management + Platform analytics,
+skipping a support ticket system for now.
+
+- A new `EnsureSuperAdmin` middleware gates a `/api/v1/admin/*` route
+  group registered **outside** the tenant-scoped middleware chain
+  (`auth:api` + `super-admin` only, no `tenant`/`subscription.active`)
+  — super admins have no `tenant_id`, so they can't pass through the
+  tenant-resolution gate other routes require. This composes with
+  `IdentifyTenant`'s existing super-admin exemption from Phase 1.
+- Tenant management: `GET /admin/tenants` (search by name/slug/email/
+  domain, filter by active/suspended, eager-loads each tenant's active
+  subscription + plan + user count), `GET /admin/tenants/{id}`, and
+  `POST /admin/tenants/{id}/suspend` / `/activate` — suspending flips
+  `is_active`, which the pre-existing `IdentifyTenant` middleware
+  already enforces (a suspended tenant's users are locked out of every
+  tenant route immediately, no extra wiring needed).
+- Plan management: full CRUD on the pre-existing `Plan` model
+  (`PlanRepository`/`PlanService`/`AdminPlanController`, following the
+  same Repository/Service pattern as every other module) — deleting a
+  plan is blocked while any tenant still has a `Subscription` against
+  it (deactivate instead).
+- Platform analytics: `GET /admin/analytics` returns total/active/
+  suspended tenant counts, MRR (each Active subscription's charge
+  normalized to a monthly figure by billing cycle, falling back to the
+  plan's list price when the subscription itself has no recorded
+  `amount` yet), a subscription-status breakdown, and a 6-month
+  signups trend.
+- A separate `AdminLayout.vue` (no tenant chip, a fixed 3-item nav:
+  Analytics/Tenants/Plans) mounted at `/admin/*`; the router redirects
+  a super admin away from tenant routes and a tenant user away from
+  `/admin/*` in both directions, and post-login routing checks
+  `is_super_admin` to land on the right home page.
+- 320 total passing backend tests (21 new for this module): the
+  middleware's auth/authorization boundary, cross-tenant visibility in
+  the admin tenant list, search/status filtering, suspend/activate
+  (including that a suspended tenant's own users are locked out), plan
+  CRUD plus the subscription-in-use delete guard, and the analytics
+  endpoint's counts/MRR/breakdown/trend shape.
+- The seeded platform Super Admin (`admin@platform.test` — see
+  "Default login" below) was verified end-to-end against every new
+  endpoint.
+
 ## Getting Started
 
 ### Prerequisites
@@ -601,5 +679,5 @@ Pinia stores, and tests, same as Phase 1.
 11. Customer Portal — skipped for now, at the user's request
 12. Notifications (email, in-app, Telegram) — skipped for now, at the user's request
 13. ~~Reports & Exports~~ ✅
-14. Settings (company, invoice, watermark, theme, backup)
-15. Super Admin Panel (tenants, plans, platform analytics, support tickets)
+14. ~~Settings (company, invoice, theme, backup)~~ ✅ (Watermark tab deferred until Phase 6's Gallery ships)
+15. ~~Super Admin Panel (tenants, plans, platform analytics)~~ ✅ (support ticket system skipped for now, at the user's request)
