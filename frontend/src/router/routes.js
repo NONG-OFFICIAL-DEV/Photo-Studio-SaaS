@@ -74,6 +74,18 @@ export const routes = [
         component: () => import('@/pages/invoices/InvoicesList.vue'),
         meta: { titleKey: 'menu.invoices', permission: 'invoices.view' },
       },
+      {
+        path: 'expenses',
+        name: 'expenses',
+        component: () => import('@/pages/expenses/ExpensesList.vue'),
+        meta: { titleKey: 'menu.expenses', permission: 'expenses.view' },
+      },
+      {
+        path: 'inventory',
+        name: 'inventory',
+        component: () => import('@/pages/inventory/InventoryList.vue'),
+        meta: { titleKey: 'menu.inventory', permission: 'inventory.view' },
+      },
     ],
   },
   {

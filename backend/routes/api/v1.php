@@ -8,6 +8,10 @@ use App\Http\Controllers\Api\V1\Booking\BookingController;
 use App\Http\Controllers\Api\V1\Customer\CustomerController;
 use App\Http\Controllers\Api\V1\Customer\CustomerNoteController;
 use App\Http\Controllers\Api\V1\Customer\CustomerTagController;
+use App\Http\Controllers\Api\V1\Expense\ExpenseCategoryController;
+use App\Http\Controllers\Api\V1\Expense\ExpenseController;
+use App\Http\Controllers\Api\V1\Inventory\InventoryItemController;
+use App\Http\Controllers\Api\V1\Inventory\InventoryMovementController;
 use App\Http\Controllers\Api\V1\Invoice\InvoiceController;
 use App\Http\Controllers\Api\V1\Invoice\PaymentController;
 use App\Http\Controllers\Api\V1\Order\EditingTaskController;
@@ -165,5 +169,27 @@ Route::middleware(['auth:api', 'tenant', 'subscription.active'])->group(function
 
         Route::post('/{invoice}/payments', [PaymentController::class, 'store']);
         Route::delete('/{invoice}/payments/{payment}', [PaymentController::class, 'destroy']);
+    });
+
+    Route::prefix('expenses')->name('expenses.')->group(function () {
+        // Static segment before {expense} so it isn't swallowed by the wildcard.
+        Route::apiResource('categories', ExpenseCategoryController::class)->except(['show']);
+
+        Route::get('/', [ExpenseController::class, 'index']);
+        Route::post('/', [ExpenseController::class, 'store']);
+        Route::get('/{expense}', [ExpenseController::class, 'show']);
+        Route::put('/{expense}', [ExpenseController::class, 'update']);
+        Route::delete('/{expense}', [ExpenseController::class, 'destroy']);
+    });
+
+    Route::prefix('inventory-items')->name('inventory-items.')->group(function () {
+        Route::get('/', [InventoryItemController::class, 'index']);
+        Route::post('/', [InventoryItemController::class, 'store']);
+        Route::get('/{inventoryItem}', [InventoryItemController::class, 'show']);
+        Route::put('/{inventoryItem}', [InventoryItemController::class, 'update']);
+        Route::delete('/{inventoryItem}', [InventoryItemController::class, 'destroy']);
+
+        Route::post('/{inventoryItem}/movements', [InventoryMovementController::class, 'store']);
+        Route::delete('/{inventoryItem}/movements/{movement}', [InventoryMovementController::class, 'destroy']);
     });
 });

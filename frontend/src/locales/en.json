@@ -87,6 +87,8 @@
     "albums": "Albums",
     "gallery": "Gallery",
     "invoices": "Invoices",
+    "expenses": "Expenses",
+    "inventory": "Inventory",
     "employees": "Employees",
     "reports": "Reports",
     "settings": "Settings",
@@ -475,6 +477,65 @@
       "updatedSuccess": "Package updated successfully.",
       "saveError": "Unable to save package.",
       "deletedSuccess": "Package deleted successfully."
+    }
+  },
+  "expenses": {
+    "title": "Expenses",
+    "subtitle": "Track studio costs — rent, utilities, supplies, and more.",
+    "newExpense": "New Expense",
+    "editExpense": "Edit Expense",
+    "expenseDate": "Expense Date",
+    "dateFrom": "From",
+    "dateTo": "To",
+    "vendor": "Vendor",
+    "manageCategories": "Manage Categories",
+    "newCategoryName": "New category name",
+    "deleteCategoryTitle": "Delete category?",
+    "deleteCategoryMessage": "Remove '{name}' from all expenses?",
+    "deleteConfirmTitle": "Delete expense?",
+    "deleteConfirmMessage": "This will remove the expense for '{vendor}'.",
+    "messages": {
+      "createdSuccess": "Expense created successfully.",
+      "updatedSuccess": "Expense updated successfully.",
+      "saveError": "Unable to save expense.",
+      "deletedSuccess": "Expense deleted successfully.",
+      "categoryCreated": "Category created successfully.",
+      "categoryCreateError": "Unable to create category.",
+      "categoryDeleted": "Category deleted successfully."
+    }
+  },
+  "inventory": {
+    "title": "Inventory",
+    "subtitle": "Track consumable stock — paper, ink, albums, and more.",
+    "newItem": "New Item",
+    "editItem": "Edit Item",
+    "itemDetails": "Item Details",
+    "sku": "SKU",
+    "unit": "Unit",
+    "quantityOnHand": "Quantity on Hand",
+    "reorderThreshold": "Reorder Threshold",
+    "lowStock": "Low Stock",
+    "lowStockOnly": "Low stock only",
+    "inStock": "In Stock",
+    "lowStockWarning": "This item is at or below its reorder threshold of {threshold}.",
+    "movements": "Stock Movements",
+    "recordMovement": "Record Movement",
+    "movedAt": "Date",
+    "movementTypes": {
+      "stockIn": "Stock In",
+      "stockOut": "Stock Out"
+    },
+    "deleteConfirmTitle": "Delete item?",
+    "deleteConfirmMessage": "This will remove '{name}'.",
+    "errors": {
+      "quantityRequired": "Enter a quantity greater than zero."
+    },
+    "messages": {
+      "createdSuccess": "Item created successfully.",
+      "updatedSuccess": "Item updated successfully.",
+      "saveError": "Unable to save item.",
+      "deletedSuccess": "Item deleted successfully.",
+      "movementRecorded": "Stock movement recorded successfully."
     }
   }
 }

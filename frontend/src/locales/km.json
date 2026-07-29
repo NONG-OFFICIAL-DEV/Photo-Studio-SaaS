@@ -87,6 +87,8 @@
     "albums": "អាល់ប៊ុម",
     "gallery": "វិចិត្រសាល",
     "invoices": "វិក្កយបត្រ",
+    "expenses": "ចំណាយ",
+    "inventory": "ស្តុកទំនិញ",
     "employees": "បុគ្គលិក",
     "reports": "របាយការណ៍",
     "settings": "ការកំណត់",
@@ -475,6 +477,65 @@
       "updatedSuccess": "ធ្វើបច្ចុប្បន្នភាពកញ្ចប់បានជោគជ័យ។",
       "saveError": "មិនអាចរក្សាទុកកញ្ចប់បានទេ។",
       "deletedSuccess": "លុបកញ្ចប់បានជោគជ័យ។"
+    }
+  },
+  "expenses": {
+    "title": "ចំណាយ",
+    "subtitle": "តាមដានចំណាយស្ទូឌីយោ — ថ្លៃជួល ថ្លៃទឹកភ្លើង សម្ភារៈ និងផ្សេងទៀត។",
+    "newExpense": "ចំណាយថ្មី",
+    "editExpense": "កែសម្រួលចំណាយ",
+    "expenseDate": "កាលបរិច្ឆេទចំណាយ",
+    "dateFrom": "ពី",
+    "dateTo": "ដល់",
+    "vendor": "អ្នកផ្គត់ផ្គង់",
+    "manageCategories": "គ្រប់គ្រងប្រភេទ",
+    "newCategoryName": "ឈ្មោះប្រភេទថ្មី",
+    "deleteCategoryTitle": "លុបប្រភេទនេះ?",
+    "deleteCategoryMessage": "លុប '{name}' ចេញពីចំណាយទាំងអស់?",
+    "deleteConfirmTitle": "លុបចំណាយនេះ?",
+    "deleteConfirmMessage": "សកម្មភាពនេះនឹងលុបចំណាយសម្រាប់ '{vendor}'។",
+    "messages": {
+      "createdSuccess": "បង្កើតចំណាយបានជោគជ័យ។",
+      "updatedSuccess": "ធ្វើបច្ចុប្បន្នភាពចំណាយបានជោគជ័យ។",
+      "saveError": "មិនអាចរក្សាទុកចំណាយបានទេ។",
+      "deletedSuccess": "លុបចំណាយបានជោគជ័យ។",
+      "categoryCreated": "បង្កើតប្រភេទបានជោគជ័យ។",
+      "categoryCreateError": "មិនអាចបង្កើតប្រភេទបានទេ។",
+      "categoryDeleted": "លុបប្រភេទបានជោគជ័យ។"
+    }
+  },
+  "inventory": {
+    "title": "ស្តុកទំនិញ",
+    "subtitle": "តាមដានស្តុកសម្ភារៈប្រើប្រាស់ — ក្រដាស ទឹកខ្មៅ អាល់ប៊ុម និងផ្សេងទៀត។",
+    "newItem": "ទំនិញថ្មី",
+    "editItem": "កែសម្រួលទំនិញ",
+    "itemDetails": "ព័ត៌មានលម្អិតទំនិញ",
+    "sku": "លេខកូដទំនិញ",
+    "unit": "ឯកតា",
+    "quantityOnHand": "ចំនួនក្នុងស្តុក",
+    "reorderThreshold": "កម្រិតបញ្ជាទិញឡើងវិញ",
+    "lowStock": "ស្តុកទាប",
+    "lowStockOnly": "ស្តុកទាបប៉ុណ្ណោះ",
+    "inStock": "មានស្តុក",
+    "lowStockWarning": "ទំនិញនេះស្ថិតនៅត្រឹមឬក្រោមកម្រិតបញ្ជាទិញឡើងវិញ {threshold}។",
+    "movements": "ចលនាស្តុក",
+    "recordMovement": "កត់ត្រាចលនាស្តុក",
+    "movedAt": "កាលបរិច្ឆេទ",
+    "movementTypes": {
+      "stockIn": "ចូលស្តុក",
+      "stockOut": "ចេញស្តុក"
+    },
+    "deleteConfirmTitle": "លុបទំនិញនេះ?",
+    "deleteConfirmMessage": "សកម្មភាពនេះនឹងលុប '{name}' ចេញ។",
+    "errors": {
+      "quantityRequired": "សូមបញ្ចូលចំនួនធំជាងសូន្យ។"
+    },
+    "messages": {
+      "createdSuccess": "បង្កើតទំនិញបានជោគជ័យ។",
+      "updatedSuccess": "ធ្វើបច្ចុប្បន្នភាពទំនិញបានជោគជ័យ។",
+      "saveError": "មិនអាចរក្សាទុកទំនិញបានទេ។",
+      "deletedSuccess": "លុបទំនិញបានជោគជ័យ។",
+      "movementRecorded": "កត់ត្រាចលនាស្តុកបានជោគជ័យ។"
     }
   }
 }

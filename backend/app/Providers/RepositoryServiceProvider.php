@@ -7,6 +7,9 @@ use App\Repositories\Contracts\BookingRepositoryInterface;
 use App\Repositories\Contracts\CustomerRepositoryInterface;
 use App\Repositories\Contracts\CustomerTagRepositoryInterface;
 use App\Repositories\Contracts\EditingTaskRepositoryInterface;
+use App\Repositories\Contracts\ExpenseCategoryRepositoryInterface;
+use App\Repositories\Contracts\ExpenseRepositoryInterface;
+use App\Repositories\Contracts\InventoryItemRepositoryInterface;
 use App\Repositories\Contracts\InvoiceRepositoryInterface;
 use App\Repositories\Contracts\OrderRepositoryInterface;
 use App\Repositories\Contracts\PackageRepositoryInterface;
@@ -21,6 +24,9 @@ use App\Repositories\Eloquent\BookingRepository;
 use App\Repositories\Eloquent\CustomerRepository;
 use App\Repositories\Eloquent\CustomerTagRepository;
 use App\Repositories\Eloquent\EditingTaskRepository;
+use App\Repositories\Eloquent\ExpenseCategoryRepository;
+use App\Repositories\Eloquent\ExpenseRepository;
+use App\Repositories\Eloquent\InventoryItemRepository;
 use App\Repositories\Eloquent\InvoiceRepository;
 use App\Repositories\Eloquent\OrderRepository;
 use App\Repositories\Eloquent\PackageRepository;
@@ -58,6 +64,9 @@ class RepositoryServiceProvider extends ServiceProvider
         InvoiceRepositoryInterface::class => InvoiceRepository::class,
         PaymentRepositoryInterface::class => PaymentRepository::class,
         PackageRepositoryInterface::class => PackageRepository::class,
+        ExpenseCategoryRepositoryInterface::class => ExpenseCategoryRepository::class,
+        ExpenseRepositoryInterface::class => ExpenseRepository::class,
+        InventoryItemRepositoryInterface::class => InventoryItemRepository::class,
     ];
 
     public function register(): void

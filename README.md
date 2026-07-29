@@ -394,6 +394,44 @@ Orders and Invoices alongside individual services.
   (including combining a package with its own optional add-on as a
   separate line).
 
+## What's implemented (Phase 9 — Expense & Inventory)
+
+- Expenses are a standalone ledger — category (tenant-manageable, same
+  inline-create-and-list pattern as Service Categories), amount,
+  expense date, vendor, payment method (reusing Phase 7's
+  `PaymentMethod` enum), notes. No link to Inventory purchases —
+  restocking and logging the cost are two independent manual actions.
+- Inventory tracks consumable stock (paper, ink, albums, ...), not
+  individually-serialized equipment assets. Each item's
+  `quantity_on_hand` is never hand-edited or incremented/decremented
+  directly — it's always *recomputed* from its full movement history
+  (`sum(stock_in) − sum(stock_out)`) every time a movement is recorded
+  or removed, so it can never drift from its own audit trail. A
+  `reorder_threshold` (optional) drives an `is_low_stock` flag and a
+  low-stock list filter.
+- Stock-out is guarded against overdrawing: recording more `stock_out`
+  than the current `quantity_on_hand` is rejected with a 422 rather
+  than allowed to go negative.
+- New `expenses.*` and `inventory.*` (including a distinct
+  `inventory.adjust-stock` ability, separate from full item CRUD)
+  permissions added to the RBAC catalog. Photographer/Editor get
+  `inventory.view` + `inventory.adjust-stock` (they consume supplies
+  day-to-day but don't manage the catalog); Cashier gets `expenses.*`
+  (view/create/update, matching their existing invoicing role) plus
+  `inventory.view`.
+- Expense/InventoryItem History via the same activity-log pattern as
+  every prior module.
+- Vue: an Expenses list with date-range filtering and an inline
+  category manager (mirrors `ServiceCategoryManagerDialog`), and an
+  Inventory list with a low-stock filter and an item detail view
+  showing the full movement ledger plus an inline record-movement form.
+- 228 total passing backend tests (28 new for this module): expense
+  CRUD/date-range filtering, inventory CRUD/low-stock filtering, stock
+  in/out recording and the resulting quantity recomputation (including
+  after a movement is deleted), the overdraw-rejection guard, the
+  low-stock flag against the reorder threshold, permission gating per
+  role, and cross-tenant isolation.
+
 ## Getting Started
 
 ### Prerequisites
@@ -477,7 +515,7 @@ Pinia stores, and tests, same as Phase 1.
 6. Gallery (upload, watermark, customer download, QR) — skipped for now, see Phase 7 note
 7. ~~Album Management, Invoicing & Payments~~ ✅ (Albums are metadata-only, pending Phase 6's photo storage)
 8. ~~Package Management~~ ✅ (inserted ahead of the original roadmap — bundles Services/Add-ons from Phase 4 into fixed-price Packages, selectable in Orders/Invoices alongside individual services)
-9. Expense & Inventory
+9. ~~Expense & Inventory~~ ✅ (Inventory tracks consumable stock only, not serialized equipment assets)
 10. Employee Management (attendance, salary, commission)
 11. Customer Portal
 12. Notifications (email, in-app, Telegram)

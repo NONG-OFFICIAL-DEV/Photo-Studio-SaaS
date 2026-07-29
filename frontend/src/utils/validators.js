@@ -129,6 +129,35 @@ export const packageSchema = yup.object({
   is_active: yup.boolean(),
 })
 
+export const expenseCategorySchema = yup.object({
+  name: yup.string().required().max(255),
+})
+
+export const expenseSchema = yup.object({
+  category_id: yup.string().nullable(),
+  amount: yup.number().typeError('Must be a number').required().min(0.01),
+  expense_date: yup.string().required('Expense date is required'),
+  vendor: yup.string().nullable().max(255),
+  payment_method: yup.string().required(),
+  notes: yup.string().nullable().max(2000),
+})
+
+export const inventoryItemSchema = yup.object({
+  name: yup.string().required().max(255),
+  sku: yup.string().nullable().max(100),
+  unit: yup.string().required().max(50),
+  category: yup.string().nullable().max(100),
+  reorder_threshold: yup.number().typeError('Must be a number').nullable().min(0),
+  is_active: yup.boolean(),
+})
+
+export const inventoryMovementSchema = yup.object({
+  type: yup.string().required(),
+  quantity: yup.number().typeError('Must be a number').required().min(0.01),
+  reason: yup.string().nullable().max(1000),
+  moved_at: yup.string().nullable(),
+})
+
 export const albumSchema = yup.object({
   name: yup.string().required().max(255),
   customer_id: yup.string().nullable(),
