@@ -116,6 +116,19 @@ export const cancelOrderSchema = yup.object({
   reason: yup.string().required().max(1000),
 })
 
+export const packageSchema = yup.object({
+  name: yup.string().required().max(255),
+  description: yup.string().nullable().max(2000),
+  discount_type: yup.string().nullable(),
+  discount_value: yup.number().typeError('Must be a number').nullable().min(0)
+    .when('discount_type', {
+      is: 'percent',
+      then: schema => schema.max(100, 'A percent discount cannot exceed 100'),
+    }),
+  override_price: yup.number().typeError('Must be a number').nullable().min(0),
+  is_active: yup.boolean(),
+})
+
 export const albumSchema = yup.object({
   name: yup.string().required().max(255),
   customer_id: yup.string().nullable(),

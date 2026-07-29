@@ -10,6 +10,7 @@ import { getCustomersApi } from '@/apis/customer.api'
 import { getBookingsApi } from '@/apis/booking.api'
 import { getServicesApi } from '@/apis/service.api'
 import { getServiceAddOnsApi } from '@/apis/service-addon.api'
+import { getPackagesApi } from '@/apis/package.api'
 import { useAppStore } from '@/stores/app'
 
 const props = defineProps({
@@ -38,15 +39,72 @@ const bookingSelectItems = computed(() => bookingOptions.value.map(booking => ({
 })))
 
 async function loadCatalog() {
-  const [servicesRes, addonsRes] = await Promise.all([
+  const [servicesRes, addonsRes, packagesRes] = await Promise.all([
     getServicesApi({ is_active: '1', perPage: 100 }),
     getServiceAddOnsApi(),
+    getPackagesApi({ is_active: '1', perPage: 100 }),
   ])
 
   catalogOptions.value = [
     ...servicesRes.data.data.map(s => ({ key: `service:${s.id}`, type: 'service', id: s.id, name: s.name, price: s.price })),
     ...addonsRes.data.data.filter(a => a.is_active).map(a => ({ key: `addon:${a.id}`, type: 'addon', id: a.id, name: a.name, price: a.price })),
+    ...packagesRes.data.data.map(p => ({
+      key: `package:${p.id}`,
+      type: 'package',
+      id: p.id,
+      name: p.name,
+      price: p.final_price,
+      optionalComponents: (p.components ?? []).filter(c => c.is_optional),
+    })),
   ]
+}
+
+/**
+ * A package's optional add-ons (defined in the Package Builder) become
+ * available as checkboxes once that package is added as a line — checking
+ * one appends it as its own normal addon/service line, unchecking removes
+ * that same line. Deduped across multiple selected packages by catalog ref.
+ */
+const availableOptionalAddons = computed(() => {
+  const selectedPackageIds = items.value.filter(item => item.package_id).map(item => item.package_id)
+  const seen = new Map()
+
+  for (const pkg of catalogOptions.value.filter(c => c.type === 'package' && selectedPackageIds.includes(c.id))) {
+    for (const component of pkg.optionalComponents) {
+      const key = component.service_id ? `service:${component.service_id}` : `addon:${component.addon_id}`
+      if (!seen.has(key)) seen.set(key, component)
+    }
+  }
+
+  return [...seen.values()]
+})
+
+function isOptionalAddonSelected(component) {
+  return items.value.some(item => (
+    (component.service_id && item.service_id === component.service_id)
+    || (component.addon_id && item.addon_id === component.addon_id)
+  ))
+}
+
+function toggleOptionalAddon(component, checked) {
+  if (checked) {
+    items.value.push({
+      service_id: component.service_id,
+      addon_id: component.addon_id,
+      package_id: null,
+      name: component.name,
+      unit_price: component.unit_price,
+      quantity: 1,
+      readonly: true,
+    })
+    return
+  }
+
+  const index = items.value.findIndex(item => (
+    (component.service_id && item.service_id === component.service_id)
+    || (component.addon_id && item.addon_id === component.addon_id)
+  ))
+  if (index !== -1) items.value.splice(index, 1)
 }
 
 watch(() => props.modelValue, (open) => {
@@ -106,6 +164,7 @@ function addCatalogItem() {
   items.value.push({
     service_id: picked.type === 'service' ? picked.id : null,
     addon_id: picked.type === 'addon' ? picked.id : null,
+    package_id: picked.type === 'package' ? picked.id : null,
     name: picked.name,
     unit_price: picked.price,
     quantity: 1,
@@ -115,7 +174,7 @@ function addCatalogItem() {
 }
 
 function addCustomItem() {
-  items.value.push({ service_id: null, addon_id: null, name: '', unit_price: null, quantity: 1, readonly: false })
+  items.value.push({ service_id: null, addon_id: null, package_id: null, name: '', unit_price: null, quantity: 1, readonly: false })
 }
 
 function removeItem(index) {
@@ -151,6 +210,7 @@ async function onSubmit(values) {
       items: items.value.map(item => ({
         service_id: item.service_id,
         addon_id: item.addon_id,
+        package_id: item.package_id,
         name: item.name,
         unit_price: item.unit_price,
         quantity: item.quantity,
@@ -263,6 +323,19 @@ const subtotal = computed(() => computeSubtotal())
             </tr>
           </tbody>
         </v-table>
+
+        <div v-if="availableOptionalAddons.length" class="mb-4">
+          <div class="text-body-2 text-medium-emphasis mb-1">{{ t('packages.optionalAddonsAvailable') }}</div>
+          <v-checkbox
+            v-for="component in availableOptionalAddons"
+            :key="component.service_id || component.addon_id"
+            :model-value="isOptionalAddonSelected(component)"
+            :label="`${component.name} (+$${component.unit_price})`"
+            density="compact"
+            hide-details
+            @update:model-value="toggleOptionalAddon(component, $event)"
+          />
+        </div>
 
         <v-row>
           <v-col cols="12" sm="6">

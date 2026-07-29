@@ -35,6 +35,10 @@ class UpdateInvoiceRequest extends FormRequest
                 'nullable', 'uuid',
                 Rule::exists('service_addons', 'id')->where('tenant_id', $this->user()->tenant_id),
             ],
+            'items.*.package_id' => [
+                'nullable', 'uuid',
+                Rule::exists('packages', 'id')->where('tenant_id', $this->user()->tenant_id),
+            ],
             'items.*.name' => ['nullable', 'string', 'max:255'],
             'items.*.unit_price' => ['nullable', 'numeric', 'min:0'],
             'items.*.quantity' => ['nullable', 'integer', 'min:1', 'max:1000'],
@@ -45,13 +49,13 @@ class UpdateInvoiceRequest extends FormRequest
     {
         $validator->after(function (Validator $validator) {
             foreach ($this->input('items', []) as $index => $item) {
-                $hasCatalogRef = ! empty($item['service_id']) || ! empty($item['addon_id']);
+                $hasCatalogRef = ! empty($item['service_id']) || ! empty($item['addon_id']) || ! empty($item['package_id']);
                 $hasCustomLine = ! empty($item['name']) && isset($item['unit_price']);
 
                 if (! $hasCatalogRef && ! $hasCustomLine) {
                     $validator->errors()->add(
                         "items.{$index}",
-                        'Each item needs either a service_id/addon_id or a custom name and unit_price.'
+                        'Each item needs either a service_id/addon_id/package_id or a custom name and unit_price.'
                     );
                 }
             }

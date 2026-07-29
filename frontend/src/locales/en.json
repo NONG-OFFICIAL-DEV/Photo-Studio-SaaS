@@ -81,6 +81,7 @@
     "customers": "Customers",
     "bookings": "Bookings",
     "services": "Services & Pricing",
+    "packages": "Packages",
     "orders": "Orders",
     "editingQueue": "Editing Queue",
     "albums": "Albums",
@@ -441,6 +442,39 @@
       "saveError": "Unable to save invoice.",
       "voidedSuccess": "Invoice voided.",
       "paymentRecorded": "Payment recorded successfully."
+    }
+  },
+  "packages": {
+    "title": "Packages",
+    "subtitle": "Bundle services and add-ons into fixed-price packages.",
+    "newPackage": "New Package",
+    "editPackage": "Edit Package",
+    "components": "Components",
+    "componentTotal": "Component Total",
+    "finalPrice": "Final Price",
+    "optional": "Optional",
+    "optionalAddonsAvailable": "Optional add-ons available for the selected package(s):",
+    "noComponentsYet": "No components yet.",
+    "discountType": "Discount Type",
+    "discountValue": "Discount Value",
+    "overridePrice": "Override Price",
+    "discountTypes": {
+      "none": "No discount",
+      "percent": "Percent",
+      "fixed": "Fixed Amount"
+    },
+    "dialogs": {
+      "deleteConfirmTitle": "Delete package?",
+      "deleteConfirmMessage": "This will remove '{name}'."
+    },
+    "errors": {
+      "needsOneComponent": "Add at least one component to the package."
+    },
+    "messages": {
+      "createdSuccess": "Package created successfully.",
+      "updatedSuccess": "Package updated successfully.",
+      "saveError": "Unable to save package.",
+      "deletedSuccess": "Package deleted successfully."
     }
   }
 }

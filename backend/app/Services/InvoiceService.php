@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\InvoiceStatus;
 use App\Models\Invoice;
 use App\Models\Order;
+use App\Models\Package;
 use App\Models\Payment;
 use App\Models\Service;
 use App\Models\ServiceAddOn;
@@ -233,9 +234,10 @@ class InvoiceService extends BaseService
 
     /**
      * Resolves each requested line into a name/unit_price snapshot — from
-     * the Service/Add-on catalog if a service_id/addon_id was given, or
-     * taken as-is for a custom (non-catalog) line item. Mirrors
-     * OrderService::resolveLines() for the invoice_items table.
+     * the Service/Add-on/Package catalog if a service_id/addon_id/
+     * package_id was given, or taken as-is for a custom (non-catalog)
+     * line item. Mirrors OrderService::resolveLines() for the
+     * invoice_items table.
      */
     protected function resolveLines(array $items): array
     {
@@ -245,7 +247,11 @@ class InvoiceService extends BaseService
         foreach ($items as $item) {
             $quantity = max(1, (int) ($item['quantity'] ?? 1));
 
-            if (! empty($item['service_id'])) {
+            if (! empty($item['package_id'])) {
+                $package = Package::query()->findOrFail($item['package_id']);
+                $name = $package->name;
+                $unitPrice = $package->final_price;
+            } elseif (! empty($item['service_id'])) {
                 $service = Service::query()->findOrFail($item['service_id']);
                 $name = $service->name;
                 $unitPrice = (float) $service->price;
@@ -265,6 +271,7 @@ class InvoiceService extends BaseService
             $lines[] = [
                 'service_id' => $item['service_id'] ?? null,
                 'addon_id' => $item['addon_id'] ?? null,
+                'package_id' => $item['package_id'] ?? null,
                 'name' => $name,
                 'unit_price' => $unitPrice,
                 'quantity' => $quantity,

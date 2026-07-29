@@ -22,6 +22,7 @@ const menuItems = computed(() => [
   { title: t('menu.customers'), icon: 'mdi-account-group-outline', to: { name: 'customers' }, permission: 'customers.view' },
   { title: t('menu.bookings'), icon: 'mdi-calendar-check-outline', to: { name: 'bookings' }, permission: 'bookings.view' },
   { title: t('menu.services'), icon: 'mdi-tag-outline', to: { name: 'services' }, permission: 'services.view' },
+  { title: t('menu.packages'), icon: 'mdi-package-variant-closed', to: { name: 'packages' }, permission: 'packages.view' },
   { title: t('menu.orders'), icon: 'mdi-cart-outline', to: { name: 'orders' }, permission: 'orders.view' },
   { title: t('menu.editingQueue'), icon: 'mdi-image-edit-outline', to: { name: 'editing-queue' }, permission: 'editing.view' },
   { title: t('menu.albums'), icon: 'mdi-book-open-page-variant-outline', to: { name: 'albums' }, permission: 'albums.view' },

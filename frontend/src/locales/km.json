@@ -81,6 +81,7 @@
     "customers": "អតិថិជន",
     "bookings": "ការកក់ការងារ",
     "services": "សេវាកម្ម និងតម្លៃ",
+    "packages": "កញ្ចប់សេវា",
     "orders": "ការបញ្ជាទិញ",
     "editingQueue": "ជួរកែសម្រួល",
     "albums": "អាល់ប៊ុម",
@@ -441,6 +442,39 @@
       "saveError": "មិនអាចរក្សាទុកវិក្កយបត្របានទេ។",
       "voidedSuccess": "វិក្កយបត្របានលុបចោល។",
       "paymentRecorded": "កត់ត្រាការទូទាត់បានជោគជ័យ។"
+    }
+  },
+  "packages": {
+    "title": "កញ្ចប់សេវា",
+    "subtitle": "បញ្ចូលគ្នានូវសេវាកម្ម និងសេវាបន្ថែមទៅជាកញ្ចប់តម្លៃថេរ។",
+    "newPackage": "កញ្ចប់ថ្មី",
+    "editPackage": "កែសម្រួលកញ្ចប់",
+    "components": "សមាសធាតុ",
+    "componentTotal": "សរុបសមាសធាតុ",
+    "finalPrice": "តម្លៃចុងក្រោយ",
+    "optional": "ស្រេចចិត្ត",
+    "optionalAddonsAvailable": "សេវាបន្ថែមស្រេចចិត្តសម្រាប់កញ្ចប់ដែលបានជ្រើសរើស៖",
+    "noComponentsYet": "មិនទាន់មានសមាសធាតុនៅឡើយទេ។",
+    "discountType": "ប្រភេទបញ្ចុះតម្លៃ",
+    "discountValue": "តម្លៃបញ្ចុះ",
+    "overridePrice": "តម្លៃកំណត់ដោយផ្ទាល់",
+    "discountTypes": {
+      "none": "គ្មានការបញ្ចុះតម្លៃ",
+      "percent": "ភាគរយ",
+      "fixed": "ចំនួនថេរ"
+    },
+    "dialogs": {
+      "deleteConfirmTitle": "លុបកញ្ចប់នេះ?",
+      "deleteConfirmMessage": "សកម្មភាពនេះនឹងលុប '{name}' ចេញ។"
+    },
+    "errors": {
+      "needsOneComponent": "សូមបន្ថែមសមាសធាតុយ៉ាងតិចមួយទៅក្នុងកញ្ចប់។"
+    },
+    "messages": {
+      "createdSuccess": "បង្កើតកញ្ចប់បានជោគជ័យ។",
+      "updatedSuccess": "ធ្វើបច្ចុប្បន្នភាពកញ្ចប់បានជោគជ័យ។",
+      "saveError": "មិនអាចរក្សាទុកកញ្ចប់បានទេ។",
+      "deletedSuccess": "លុបកញ្ចប់បានជោគជ័យ។"
     }
   }
 }

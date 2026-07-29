@@ -344,6 +344,56 @@ storage yet); the photo pipeline is deferred to when Phase 6 ships.
   payment deletion, the overdue sweep command, permission gating per
   role (including the new Cashier checks), and cross-tenant isolation.
 
+## What's implemented (Phase 8 — Package Management)
+
+Not on the original roadmap — inserted ahead of it. Bundles Services/
+Add-ons from Phase 4 into a fixed-price "Package" (e.g. "Wedding
+Package = Photography + Album + optional Makeup"), selectable in
+Orders and Invoices alongside individual services.
+
+- A Package's price is never manually typed as a flat number by
+  default — it's live-computed from its components every time it's
+  read: `component_total` (sum of each INCLUDED component's current
+  Service/Add-on catalog price × quantity) minus an optional
+  `discount_type`/`discount_value` (percent or fixed amount, floored at
+  zero) = `final_price`. An `override_price` can still be set to skip
+  the computed price entirely for a one-off custom quote. Nothing is
+  cached — editing a component's catalog price updates every package
+  that includes it immediately, with no re-save needed.
+- Each component is flagged `is_optional`: `false` means it's baked
+  into `component_total`/`final_price`; `true` means it's offered
+  alongside the package but excluded from its price — e.g. a Wedding
+  Package can include Photography + Album in its price while offering
+  Makeup as an optional extra.
+- Packages plug into the exact same line-item builder Orders and
+  Invoices already had for Services/Add-ons: `order_items`/
+  `invoice_items` gained a nullable `package_id` column, and
+  `OrderService`/`InvoiceService` snapshot a package's live
+  `final_price` at the moment it's added to a line — same
+  never-rewrites-history guarantee as Service/Add-on references. A
+  package's optional components surface as checkboxes once it's added
+  to an order/invoice; checking one just appends it as its own normal
+  Add-on/Service line alongside the package's line.
+- New `packages.*` permissions added to the RBAC catalog — full CRUD
+  for Manager, view-only for every role that already builds Orders/
+  Invoices (Photographer, Editor, Cashier, Receptionist, Viewer), since
+  they all need to see the catalog when adding a package to a line.
+- Package History via the same activity-log pattern as every prior
+  module.
+- Vue: a Packages list with a component builder (add Services/Add-ons
+  with quantity + an optional-extra toggle, live component-total/
+  final-price preview), and both `OrderFormDialog`/`InvoiceFormDialog`
+  catalog pickers now list Packages alongside Services/Add-ons, with
+  optional add-on checkboxes appearing once a package is picked.
+- 200 total passing backend tests (23 new for this module): component
+  validation (exactly one of service_id/addon_id per component),
+  pricing (percent/fixed discount, override precedence, live
+  recomputation when a component's catalog price changes, floored at
+  zero), permission gating per role, cross-tenant isolation, and
+  Order/Invoice line-item snapshotting of a package's name/final_price
+  (including combining a package with its own optional add-on as a
+  separate line).
+
 ## Getting Started
 
 ### Prerequisites
@@ -426,10 +476,11 @@ Pinia stores, and tests, same as Phase 1.
 5. ~~Order Workflow + Editing Queue~~ ✅
 6. Gallery (upload, watermark, customer download, QR) — skipped for now, see Phase 7 note
 7. ~~Album Management, Invoicing & Payments~~ ✅ (Albums are metadata-only, pending Phase 6's photo storage)
-8. Expense & Inventory
-9. Employee Management (attendance, salary, commission)
-10. Customer Portal
-11. Notifications (email, in-app, Telegram)
-12. Reports & Exports
-13. Settings (company, invoice, watermark, theme, backup)
-14. Super Admin Panel (tenants, plans, platform analytics, support tickets)
+8. ~~Package Management~~ ✅ (inserted ahead of the original roadmap — bundles Services/Add-ons from Phase 4 into fixed-price Packages, selectable in Orders/Invoices alongside individual services)
+9. Expense & Inventory
+10. Employee Management (attendance, salary, commission)
+11. Customer Portal
+12. Notifications (email, in-app, Telegram)
+13. Reports & Exports
+14. Settings (company, invoice, watermark, theme, backup)
+15. Super Admin Panel (tenants, plans, platform analytics, support tickets)

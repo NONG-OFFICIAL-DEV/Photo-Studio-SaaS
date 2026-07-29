@@ -45,6 +45,12 @@ export const routes = [
         meta: { titleKey: 'menu.services', permission: 'services.view' },
       },
       {
+        path: 'packages',
+        name: 'packages',
+        component: () => import('@/pages/packages/PackagesList.vue'),
+        meta: { titleKey: 'menu.packages', permission: 'packages.view' },
+      },
+      {
         path: 'orders',
         name: 'orders',
         component: () => import('@/pages/orders/OrdersList.vue'),

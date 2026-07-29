@@ -9,6 +9,7 @@ use App\Repositories\Contracts\CustomerTagRepositoryInterface;
 use App\Repositories\Contracts\EditingTaskRepositoryInterface;
 use App\Repositories\Contracts\InvoiceRepositoryInterface;
 use App\Repositories\Contracts\OrderRepositoryInterface;
+use App\Repositories\Contracts\PackageRepositoryInterface;
 use App\Repositories\Contracts\PaymentRepositoryInterface;
 use App\Repositories\Contracts\ServiceAddOnRepositoryInterface;
 use App\Repositories\Contracts\ServiceCategoryRepositoryInterface;
@@ -22,6 +23,7 @@ use App\Repositories\Eloquent\CustomerTagRepository;
 use App\Repositories\Eloquent\EditingTaskRepository;
 use App\Repositories\Eloquent\InvoiceRepository;
 use App\Repositories\Eloquent\OrderRepository;
+use App\Repositories\Eloquent\PackageRepository;
 use App\Repositories\Eloquent\PaymentRepository;
 use App\Repositories\Eloquent\ServiceAddOnRepository;
 use App\Repositories\Eloquent\ServiceCategoryRepository;
@@ -55,6 +57,7 @@ class RepositoryServiceProvider extends ServiceProvider
         AlbumRepositoryInterface::class => AlbumRepository::class,
         InvoiceRepositoryInterface::class => InvoiceRepository::class,
         PaymentRepositoryInterface::class => PaymentRepository::class,
+        PackageRepositoryInterface::class => PackageRepository::class,
     ];
 
     public function register(): void

@@ -13,7 +13,7 @@ class InvoiceItem extends Model
     use BelongsToTenant, HasFactory, HasUuids;
 
     protected $fillable = [
-        'tenant_id', 'invoice_id', 'service_id', 'addon_id', 'name', 'unit_price', 'quantity', 'line_total',
+        'tenant_id', 'invoice_id', 'service_id', 'addon_id', 'package_id', 'name', 'unit_price', 'quantity', 'line_total',
     ];
 
     protected function casts(): array
@@ -37,5 +37,10 @@ class InvoiceItem extends Model
     public function addon(): BelongsTo
     {
         return $this->belongsTo(ServiceAddOn::class, 'addon_id');
+    }
+
+    public function package(): BelongsTo
+    {
+        return $this->belongsTo(Package::class);
     }
 }

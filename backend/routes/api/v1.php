@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\V1\Invoice\InvoiceController;
 use App\Http\Controllers\Api\V1\Invoice\PaymentController;
 use App\Http\Controllers\Api\V1\Order\EditingTaskController;
 use App\Http\Controllers\Api\V1\Order\OrderController;
+use App\Http\Controllers\Api\V1\Package\PackageController;
 use App\Http\Controllers\Api\V1\Service\ServiceAddOnController;
 use App\Http\Controllers\Api\V1\Service\ServiceCategoryController;
 use App\Http\Controllers\Api\V1\Service\ServiceController;
@@ -105,6 +106,14 @@ Route::middleware(['auth:api', 'tenant', 'subscription.active'])->group(function
         Route::get('/{service}', [ServiceController::class, 'show']);
         Route::put('/{service}', [ServiceController::class, 'update']);
         Route::delete('/{service}', [ServiceController::class, 'destroy']);
+    });
+
+    Route::prefix('packages')->name('packages.')->group(function () {
+        Route::get('/', [PackageController::class, 'index']);
+        Route::post('/', [PackageController::class, 'store']);
+        Route::get('/{package}', [PackageController::class, 'show']);
+        Route::put('/{package}', [PackageController::class, 'update']);
+        Route::delete('/{package}', [PackageController::class, 'destroy']);
     });
 
     Route::prefix('orders')->name('orders.')->group(function () {
