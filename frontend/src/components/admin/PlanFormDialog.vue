@@ -73,9 +73,9 @@ async function onSubmit(values) {
       <template #default="{ errors, values, setFieldValue }">
         <v-row>
           <v-col cols="12" sm="6">
-            <Field v-slot="{ field }" name="name">
-              <v-text-field v-bind="field" :label="`${t('fields.name')} *`" :error-messages="errors.name" />
-            </Field>
+            <!-- <Field v-slot="{ field }" name="name"> -->
+              <v-text-field v-model="values.name" :label="`${t('fields.name')} *`" :error-messages="errors.name" />
+            <!-- </Field> -->
           </v-col>
           <v-col cols="12" sm="6">
             <Field v-slot="{ field }" name="code">

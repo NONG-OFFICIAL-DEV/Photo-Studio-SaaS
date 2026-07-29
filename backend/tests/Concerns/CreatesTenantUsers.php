@@ -9,6 +9,7 @@ use App\Models\Plan;
 use App\Models\Subscription;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Services\TenantContext;
 use Spatie\Permission\PermissionRegistrar;
 
 /**
@@ -81,9 +82,21 @@ trait CreatesTenantUsers
      * actingAs() sidesteps all of it by calling setUser() directly on the
      * guard, so each call — even for a different user — takes effect
      * immediately and correctly for the next request.
+     *
+     * TenantContext (also a container singleton, see App\Services\
+     * TenantContext) has the same class of issue: it's only ever SET by
+     * IdentifyTenant, never cleared, so a route that skips that middleware
+     * (e.g. the Super Admin panel's /admin/* routes) would otherwise
+     * inherit whatever tenant a PRIOR simulated request in the same test
+     * left behind — invisible in production (fresh container per request)
+     * but very real here, since one test method's requests all share one
+     * container. Clearing it here means every actingAsUser() call starts
+     * from the same blank slate a real request would.
      */
     protected function actingAsUser(User $user): static
     {
+        app(TenantContext::class)->clear();
+
         return $this->actingAs($user, 'api');
     }
 }

@@ -41,7 +41,9 @@
       "delivered": "Delivered",
       "inactive": "Inactive",
       "locked": "Locked"
-    }
+    },
+    "toggleLanguage": "Toggle language",
+    "toggleTheme": "Toggle theme"
   },
   "fields": {
     "name": "Name",
@@ -92,7 +94,16 @@
     "employees": "Employees",
     "reports": "Reports",
     "settings": "Settings",
-    "logout": "Logout"
+    "logout": "Logout",
+    "audit": "Audit",
+    "groups": {
+      "sales": "Sales",
+      "catalog": "Catalog",
+      "production": "Production",
+      "finance": "Finance",
+      "team": "Team",
+      "system": "System"
+    }
   },
   "auth": {
     "login": "Login",
@@ -681,7 +692,8 @@
     "menu": {
       "analytics": "Analytics",
       "tenants": "Tenants",
-      "plans": "Plans"
+      "plans": "Plans",
+      "audit": "Audit"
     },
     "analytics": {
       "title": "Platform Analytics",
@@ -750,5 +762,35 @@
         "deleteError": "Could not delete plan."
       }
     }
+  },
+  "auditPage": {
+    "title": "Audit",
+    "subtitle": "Audit log, activity log, login history, API logs, and security events for your studio.",
+    "tabs": {
+      "audit": "Audit Log",
+      "activity": "Activity Log",
+      "login": "Login History",
+      "apiLogs": "API Logs",
+      "security": "Security Events"
+    },
+    "date": "Date",
+    "module": "Module",
+    "outcome": "Outcome",
+    "description": "Description",
+    "causer": "User",
+    "details": "Details",
+    "success": "Success",
+    "failed": "Failed",
+    "unknown": "Unknown",
+    "method": "Method",
+    "path": "Path",
+    "status": "Status",
+    "duration": "Duration",
+    "user": "User",
+    "ip": "IP Address"
+  },
+  "adminAuditPage": {
+    "subtitle": "Audit log, activity log, login history, API logs, and security events across every tenant.",
+    "filterByTenant": "Filter by tenant"
   }
 }

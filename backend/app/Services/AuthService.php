@@ -28,6 +28,7 @@ class AuthService
         protected UserRepositoryInterface $users,
         protected TenantRepositoryInterface $tenants,
         protected ProvisionTenantRolesAction $provisionTenantRoles,
+        protected SecurityEventLogger $securityEvents,
     ) {
     }
 
@@ -100,6 +101,7 @@ class AuthService
         $factory->setTTL($originalTtl);
 
         if (! $token) {
+            $this->securityEvents->loginAttempt($email, User::where('email', $email)->first(), false, 'Invalid credentials', request());
             throw new InvalidCredentialsException;
         }
 
@@ -108,8 +110,11 @@ class AuthService
 
         if (! $user->isActive()) {
             auth('api')->logout();
+            $this->securityEvents->loginAttempt($email, $user, false, 'Account deactivated', request());
             throw new InvalidCredentialsException('This account has been deactivated.');
         }
+
+        $this->securityEvents->loginAttempt($email, $user, true, null, request());
 
         $user->forceFill([
             'last_login_at' => now(),

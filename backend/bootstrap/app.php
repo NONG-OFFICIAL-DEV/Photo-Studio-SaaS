@@ -3,6 +3,9 @@
 use App\Http\Middleware\EnsureSubscriptionActive;
 use App\Http\Middleware\EnsureSuperAdmin;
 use App\Http\Middleware\IdentifyTenant;
+use App\Http\Middleware\LogApiRequest;
+use App\Services\ApiLogRecorder;
+use App\Services\SecurityEventLogger;
 use App\Traits\ApiResponse;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -30,6 +33,14 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Http\Middleware\HandleCors::class,
         ]);
 
+        // Appended (not prepended): runs after routing/auth resolve the
+        // request, so $request->user() is populated when a valid token
+        // was sent, but still fires for every route (login, admin,
+        // tenant-scoped) since it's on the global api group.
+        $middleware->api(append: [
+            LogApiRequest::class,
+        ]);
+
         $middleware->alias([
             'tenant' => IdentifyTenant::class,
             'subscription.active' => EnsureSubscriptionActive::class,
@@ -54,63 +65,83 @@ return Application::configure(basePath: dirname(__DIR__))
         {
             use ApiResponse;
 
-            public function make(string $message, int $status, array $errors = [])
+            /**
+             * Every render() callback below funnels through here, which
+             * doubles as the single choke point for the API Logs tab's
+             * error-response recording — almost every error in this app is
+             * a THROWN exception, so LogApiRequest middleware's normal
+             * post-$next() logging never sees them (see ApiLogRecorder's
+             * docblock). This is the one place that already knows both the
+             * request and the resolved status code for all of them.
+             */
+            public function make(Request $request, string $message, int $status, array $errors = [])
             {
+                app(ApiLogRecorder::class)->recordIfNeeded($request, $status);
+
                 return $this->error($message, $status, $errors);
             }
         };
 
         $exceptions->render(function (ValidationException $e, Request $request) use ($respond) {
             if ($request->is('api/*')) {
-                return $respond->make('The given data was invalid.', 422, $e->errors());
+                return $respond->make($request, 'The given data was invalid.', 422, $e->errors());
             }
         });
 
         $exceptions->render(function (AuthenticationException $e, Request $request) use ($respond) {
             if ($request->is('api/*')) {
-                return $respond->make('Unauthenticated.', 401);
+                return $respond->make($request, 'Unauthenticated.', 401);
             }
         });
 
         $exceptions->render(function (AuthorizationException $e, Request $request) use ($respond) {
             if ($request->is('api/*')) {
-                return $respond->make($e->getMessage() ?: 'This action is unauthorized.', 403);
+                $message = $e->getMessage() ?: 'This action is unauthorized.';
+                app(SecurityEventLogger::class)->permissionDenied($request, $message);
+
+                return $respond->make($request, $message, 403);
             }
         });
 
         $exceptions->render(function (ModelNotFoundException $e, Request $request) use ($respond) {
             if ($request->is('api/*')) {
-                return $respond->make('Resource not found.', 404);
+                return $respond->make($request, 'Resource not found.', 404);
             }
         });
 
         $exceptions->render(function (NotFoundHttpException $e, Request $request) use ($respond) {
             if ($request->is('api/*')) {
-                return $respond->make('Endpoint not found.', 404);
+                return $respond->make($request, 'Endpoint not found.', 404);
             }
         });
 
         $exceptions->render(function (TokenExpiredException $e, Request $request) use ($respond) {
             if ($request->is('api/*')) {
-                return $respond->make('Access token has expired.', 401);
+                return $respond->make($request, 'Access token has expired.', 401);
             }
         });
 
         $exceptions->render(function (TokenInvalidException $e, Request $request) use ($respond) {
             if ($request->is('api/*')) {
-                return $respond->make('Access token is invalid.', 401);
+                return $respond->make($request, 'Access token is invalid.', 401);
             }
         });
 
         $exceptions->render(function (JWTException $e, Request $request) use ($respond) {
             if ($request->is('api/*')) {
-                return $respond->make('Access token is missing.', 401);
+                return $respond->make($request, 'Access token is missing.', 401);
             }
         });
 
         $exceptions->render(function (HttpException $e, Request $request) use ($respond) {
             if ($request->is('api/*')) {
-                return $respond->make($e->getMessage() ?: 'Request failed.', $e->getStatusCode());
+                $message = $e->getMessage() ?: 'Request failed.';
+
+                if ($e->getStatusCode() === 403) {
+                    app(SecurityEventLogger::class)->permissionDenied($request, $message);
+                }
+
+                return $respond->make($request, $message, $e->getStatusCode());
             }
         });
     })->create();

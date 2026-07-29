@@ -40,6 +40,7 @@ return [
         'commissions' => ['commissions.view', 'commissions.record', 'commissions.delete'],
         'payroll' => ['payroll.view', 'payroll.create', 'payroll.update', 'payroll.delete', 'payroll.pay'],
         'reports' => ['reports.view', 'reports.export'],
+        'audit' => ['audit.view'],
     ],
 
     /*
@@ -71,6 +72,7 @@ return [
             'commissions.view', 'commissions.record', 'commissions.delete',
             'payroll.view', 'payroll.create', 'payroll.update', 'payroll.delete', 'payroll.pay',
             'reports.view', 'reports.export',
+            'audit.view',
         ],
         TenantRole::Photographer->value => [
             'dashboard.view', 'customers.view', 'bookings.view', 'bookings.update', 'services.view', 'packages.view', 'orders.view',

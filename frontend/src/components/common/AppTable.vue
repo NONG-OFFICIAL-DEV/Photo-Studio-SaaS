@@ -55,10 +55,14 @@ watch(search, () => {
   options.value.page = 1
   load()
 })
-watch(() => props.filters, () => {
-  options.value.page = 1
-  load()
-}, { deep: true })
+watch(
+  () => props.filters,
+  () => {
+    options.value.page = 1
+    load()
+  },
+  { deep: true },
+)
 
 defineExpose({ refresh: load })
 </script>
@@ -79,13 +83,18 @@ defineExpose({ refresh: load })
       :loading="loading"
       :items-per-page-options="itemsPerPageOptions"
       class="elevation-0"
+      variant="outlined"
+      hover
     >
       <template v-for="(_, slotName) in $slots" #[slotName]="slotProps" :key="slotName">
         <slot :name="slotName" v-bind="slotProps" />
       </template>
 
       <template #no-data>
-        <EmptyState :title="t('common.noItemsFound', { item: itemLabel })" :description="t('common.tryAdjustingFilters')" />
+        <EmptyState
+          :title="t('common.noItemsFound', { item: itemLabel })"
+          :description="t('common.tryAdjustingFilters')"
+        />
       </template>
     </v-data-table-server>
   </div>

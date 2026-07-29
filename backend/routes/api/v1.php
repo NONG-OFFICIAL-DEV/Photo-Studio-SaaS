@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Controllers\Api\V1\Admin\AdminAnalyticsController;
+use App\Http\Controllers\Api\V1\Admin\AdminAuditController;
 use App\Http\Controllers\Api\V1\Admin\AdminPlanController;
 use App\Http\Controllers\Api\V1\Admin\AdminTenantController;
 use App\Http\Controllers\Api\V1\Album\AlbumController;
 use App\Http\Controllers\Api\V1\Attendance\AttendanceController;
+use App\Http\Controllers\Api\V1\Audit\AuditController;
 use App\Http\Controllers\Api\V1\Auth\AuthController;
 use App\Http\Controllers\Api\V1\Auth\EmailVerificationController;
 use App\Http\Controllers\Api\V1\Auth\PasswordResetController;
@@ -253,6 +255,14 @@ Route::middleware(['auth:api', 'tenant', 'subscription.active'])->group(function
         Route::get('/', [TenantSettingsController::class, 'show']);
         Route::put('/', [TenantSettingsController::class, 'update']);
     });
+
+    Route::prefix('audit')->name('audit.')->group(function () {
+        Route::get('/activity', [AuditController::class, 'activityLog']);
+        Route::get('/log', [AuditController::class, 'auditLog']);
+        Route::get('/login-history', [AuditController::class, 'loginHistory']);
+        Route::get('/security-events', [AuditController::class, 'securityEvents']);
+        Route::get('/api-logs', [AuditController::class, 'apiLogs']);
+    });
 });
 
 /*
@@ -276,5 +286,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth:api', 'super-admin'])-
         Route::post('/', [AdminPlanController::class, 'store']);
         Route::put('/{plan}', [AdminPlanController::class, 'update']);
         Route::delete('/{plan}', [AdminPlanController::class, 'destroy']);
+    });
+
+    Route::prefix('audit')->name('audit.')->group(function () {
+        Route::get('/activity', [AdminAuditController::class, 'activityLog']);
+        Route::get('/log', [AdminAuditController::class, 'auditLog']);
+        Route::get('/login-history', [AdminAuditController::class, 'loginHistory']);
+        Route::get('/security-events', [AdminAuditController::class, 'securityEvents']);
+        Route::get('/api-logs', [AdminAuditController::class, 'apiLogs']);
     });
 });

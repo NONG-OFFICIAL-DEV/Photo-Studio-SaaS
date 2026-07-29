@@ -21,12 +21,20 @@ class PlanService extends BaseService
 
     public function create(array $data): Plan
     {
-        return $this->plans->create($data);
+        $plan = $this->plans->create($data);
+
+        activity('audit')->performedOn($plan)->log("Plan \"{$plan->name}\" created");
+
+        return $plan;
     }
 
     public function update(Plan $plan, array $data): Plan
     {
-        return $this->plans->update($plan, $data);
+        $plan = $this->plans->update($plan, $data);
+
+        activity('audit')->performedOn($plan)->withProperties(['changed' => array_keys($data)])->log("Plan \"{$plan->name}\" updated");
+
+        return $plan;
     }
 
     public function delete(Plan $plan): bool
@@ -35,6 +43,11 @@ class PlanService extends BaseService
             throw new HttpException(422, 'This plan has active tenant subscriptions and cannot be deleted — deactivate it instead.');
         }
 
-        return $this->plans->delete($plan);
+        $name = $plan->name;
+        $result = $this->plans->delete($plan);
+
+        activity('audit')->log("Plan \"{$name}\" deleted");
+
+        return $result;
     }
 }

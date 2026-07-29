@@ -25,11 +25,19 @@ class AdminTenantService extends BaseService
 
     public function suspend(Tenant $tenant): Tenant
     {
-        return $this->tenants->update($tenant, ['is_active' => false]);
+        $tenant = $this->tenants->update($tenant, ['is_active' => false]);
+
+        activity('audit')->performedOn($tenant)->tap(fn ($a) => $a->tenant_id = $tenant->id)->log("Tenant \"{$tenant->name}\" suspended");
+
+        return $tenant;
     }
 
     public function activate(Tenant $tenant): Tenant
     {
-        return $this->tenants->update($tenant, ['is_active' => true]);
+        $tenant = $this->tenants->update($tenant, ['is_active' => true]);
+
+        activity('audit')->performedOn($tenant)->tap(fn ($a) => $a->tenant_id = $tenant->id)->log("Tenant \"{$tenant->name}\" activated");
+
+        return $tenant;
     }
 }

@@ -22,6 +22,12 @@ class TenantSettingsService
 
         $tenant->update($companyFields);
 
+        activity('audit')
+            ->performedOn($tenant)
+            ->tap(fn ($a) => $a->tenant_id = $tenant->id)
+            ->withProperties(['changed' => array_keys($companyFields)])
+            ->log('Tenant settings updated');
+
         return $tenant->fresh();
     }
 
@@ -33,6 +39,11 @@ class TenantSettingsService
 
         $path = $file->store("tenants/{$tenant->id}", 'public');
         $tenant->update(['logo_path' => $path]);
+
+        activity('audit')
+            ->performedOn($tenant)
+            ->tap(fn ($a) => $a->tenant_id = $tenant->id)
+            ->log('Tenant logo updated');
 
         return $tenant->fresh();
     }

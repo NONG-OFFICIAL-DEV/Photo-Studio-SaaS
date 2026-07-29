@@ -1,6 +1,5 @@
 const AuthLayout = () => import('@/layouts/AuthLayout.vue')
 const DefaultLayout = () => import('@/layouts/DefaultLayout.vue')
-const AdminLayout = () => import('@/layouts/AdminLayout.vue')
 
 /*
  * IMPORTANT: this array has three top-level route groups that all share
@@ -105,11 +104,17 @@ export const routes = [
         component: () => import('@/pages/settings/SettingsPage.vue'),
         meta: { titleKey: 'menu.settings', permission: 'tenant.settings.manage' },
       },
+      {
+        path: 'audit',
+        name: 'audit',
+        component: () => import('@/pages/audit/AuditPage.vue'),
+        meta: { titleKey: 'menu.audit', permission: 'audit.view' },
+      },
     ],
   },
   {
     path: '/admin',
-    component: AdminLayout,
+    component: DefaultLayout,
     meta: { requiresAuth: true, requiresSuperAdmin: true },
     children: [
       {
@@ -129,6 +134,12 @@ export const routes = [
         name: 'admin-plans',
         component: () => import('@/pages/admin/AdminPlansPage.vue'),
         meta: { titleKey: 'admin.menu.plans' },
+      },
+      {
+        path: 'audit',
+        name: 'admin-audit',
+        component: () => import('@/pages/admin/AdminAuditPage.vue'),
+        meta: { titleKey: 'admin.menu.audit' },
       },
     ],
   },

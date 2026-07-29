@@ -591,6 +591,63 @@ skipping a support ticket system for now.
   "Default login" below) was verified end-to-end against every new
   endpoint.
 
+## What's implemented (Phase 18 — Audit)
+
+Scoped to Audit Log, Activity Log, Login History, API Logs, and Security
+Events (minimal: failed logins + permission denials), each visible both
+tenant-scoped and platform-wide from the Super Admin panel.
+
+- Activity Log runs on infrastructure that was already fully wired since
+  Phase 1: every tenant model (Customer, Booking, Order, Invoice,
+  Payment, Package, Expense, InventoryItem, CommissionEntry,
+  PayrollEntry, Service, Album, EditingTask) already logs its own
+  create/update/delete via `spatie/laravel-activitylog`, tagged with its
+  own `log_name` and a `tapActivity()` hook that stamps `tenant_id` —
+  this phase's only job for that tab was a read API + viewer, no new
+  writes.
+- Audit Log (sensitive admin actions) is a NEW `log_name` ('audit') on
+  the same `activity_log` table: `TenantSettingsService::update()` /
+  `uploadLogo()`, `PlanService::create()`/`update()`/`delete()`, and
+  `AdminTenantService::suspend()`/`activate()` all log here.
+- Login History and Security Events share one more `log_name` pair
+  ('login', 'security') written by a new `SecurityEventLogger` service:
+  every login attempt (success or failure, with reason/IP/user-agent)
+  goes to 'login'; permission-denied (403) responses go to 'security'.
+  Security Events reads BOTH — its own 'security' entries plus 'login'
+  entries where `properties.success = false` — rather than writing
+  failed logins twice.
+- API Logs is a new, separate `api_logs` table (different shape/volume
+  than the activity log, so it doesn't share it) — only mutating
+  requests (POST/PUT/PATCH/DELETE) and error responses (4xx/5xx) are
+  recorded, via a `LogApiRequest` middleware for the success path and
+  `ApiLogRecorder` calls threaded through every exception `render()`
+  callback in `bootstrap/app.php` for the error path. That split exists
+  because almost every error response in this app is a *thrown*
+  exception (`abort_unless`, FormRequest validation, ...), which unwinds
+  straight past a middleware's post-`$next()` code without ever
+  reaching it — a real gap the first version of the middleware had,
+  caught by a test that specifically checked a 404 got logged.
+- New `audit.view` permission (Owner + Manager by default, matching
+  `tenant.settings.manage`'s scope) gates a tenant-scoped `AuditController`
+  (`/audit/*`, always the caller's own tenant) and a parallel
+  `AdminAuditController` (`/admin/audit/*`, optional `?tenant_id=` filter,
+  defaulting to every tenant) sharing one `AuditService` query layer.
+- One Audit page (5 tabs) added to the regular studio app, and a mirrored
+  Audit page added to the Super Admin panel with a tenant filter dropdown.
+- Fixed a latent test-harness bug surfaced along the way: `TenantContext`
+  is a container singleton set only by `IdentifyTenant` and never
+  cleared, so a route that skips that middleware (like `/admin/*`) could
+  inherit a stale tenant from whichever simulated request ran earlier in
+  the same PHPUnit test method — invisible in production (fresh
+  container per real request) but real in tests. Fixed by clearing it
+  in `CreatesTenantUsers::actingAsUser()`, the shared fixture every
+  test in the suite already uses to switch identity.
+- 342 total passing backend tests (22 new for this module): recording
+  and reading all 5 tabs, tenant isolation, permission gating, the
+  Super Admin's cross-tenant view and `?tenant_id=` filter, and the
+  API log middleware/exception-handler split (mutation success, GET
+  success skipped, GET 404 captured).
+
 ## Getting Started
 
 ### Prerequisites
@@ -681,3 +738,5 @@ Pinia stores, and tests, same as Phase 1.
 13. ~~Reports & Exports~~ ✅
 14. ~~Settings (company, invoice, theme, backup)~~ ✅ (Watermark tab deferred until Phase 6's Gallery ships)
 15. ~~Super Admin Panel (tenants, plans, platform analytics)~~ ✅ (support ticket system skipped for now, at the user's request)
+16–17. Not yet defined
+18. ~~Audit (audit log, activity log, login history, API logs, security events)~~ ✅
