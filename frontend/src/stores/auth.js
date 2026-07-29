@@ -22,13 +22,13 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function register(payload) {
     const { data } = await registerApi(payload)
-    applySession(data.data)
+    applySession(data.data, true)
     return data
   }
 
   async function login(payload) {
     const { data } = await loginApi(payload)
-    applySession(data.data)
+    applySession(data.data, Boolean(payload.remember))
     return data
   }
 
@@ -64,8 +64,8 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  function applySession(payload) {
-    setToken(payload.access_token)
+  function applySession(payload, remember = true) {
+    setToken(payload.access_token, remember)
     user.value = payload.user
     initialized.value = true
   }

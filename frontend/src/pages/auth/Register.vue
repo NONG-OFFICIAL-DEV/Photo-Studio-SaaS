@@ -23,10 +23,10 @@ async function onSubmit(values) {
 
   try {
     await auth.register(values)
-    appStore.notify('Studio registered successfully. Please check your email to verify your account.')
+    appStore.notify(t('auth.registerSuccess'))
     router.push({ name: 'dashboard' })
   } catch (error) {
-    errorMessage.value = error.response?.data?.message || 'Registration failed. Please try again.'
+    errorMessage.value = error.response?.data?.message || t('auth.registerError')
   } finally {
     loading.value = false
   }
@@ -35,9 +35,12 @@ async function onSubmit(values) {
 
 <template>
   <div>
-    <h2 class="text-h6 font-weight-bold mb-4">{{ t('auth.registerTitle') }}</h2>
+    <div class="mb-8">
+      <h1 class="text-h4 font-weight-bold mb-2">{{ t('auth.registerTitle') }}</h1>
+      <p class="text-body-2 text-medium-emphasis">{{ t('auth.registerSubtitle') }}</p>
+    </div>
 
-    <v-alert v-if="errorMessage" type="error" variant="tonal" class="mb-4" closable @click:close="errorMessage = ''">
+    <v-alert v-if="errorMessage" type="error" variant="tonal" rounded="lg" class="mb-6" closable @click:close="errorMessage = ''">
       {{ errorMessage }}
     </v-alert>
 
@@ -47,55 +50,101 @@ async function onSubmit(values) {
       @submit="onSubmit"
     >
       <template #default="{ errors }">
-        <Field v-slot="{ field }" name="studio_name">
-          <v-text-field v-bind="field" :label="t('auth.studioName')" prepend-inner-icon="mdi-domain" :error-messages="errors.studio_name" class="mb-2" />
-        </Field>
+        <div class="auth-row-split mb-4">
+          <Field v-slot="{ field }" name="studio_name">
+            <v-text-field v-bind="field" :label="t('auth.studioName')" prepend-inner-icon="mdi-domain" :error-messages="errors.studio_name" hide-details="auto" />
+          </Field>
 
-        <Field v-slot="{ field }" name="owner_name">
-          <v-text-field v-bind="field" :label="t('auth.ownerName')" prepend-inner-icon="mdi-account-outline" :error-messages="errors.owner_name" class="mb-2" />
-        </Field>
+          <Field v-slot="{ field }" name="owner_name">
+            <v-text-field v-bind="field" :label="t('auth.ownerName')" prepend-inner-icon="mdi-account-outline" :error-messages="errors.owner_name" hide-details="auto" />
+          </Field>
+        </div>
 
         <Field v-slot="{ field }" name="email">
-          <v-text-field v-bind="field" :label="t('auth.email')" type="email" prepend-inner-icon="mdi-email-outline" :error-messages="errors.email" class="mb-2" />
-        </Field>
-
-        <Field v-slot="{ field }" name="phone">
-          <v-text-field v-bind="field" :label="t('auth.phone')" prepend-inner-icon="mdi-phone-outline" :error-messages="errors.phone" class="mb-2" />
-        </Field>
-
-        <Field v-slot="{ field }" name="password">
           <v-text-field
             v-bind="field"
-            :label="t('auth.password')"
-            :type="showPassword ? 'text' : 'password'"
-            prepend-inner-icon="mdi-lock-outline"
-            :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
-            :error-messages="errors.password"
-            class="mb-2"
-            @click:append-inner="showPassword = !showPassword"
-          />
-        </Field>
-
-        <Field v-slot="{ field }" name="password_confirmation">
-          <v-text-field
-            v-bind="field"
-            :label="t('auth.confirmPassword')"
-            :type="showPassword ? 'text' : 'password'"
-            prepend-inner-icon="mdi-lock-check-outline"
-            :error-messages="errors.password_confirmation"
+            :label="t('auth.email')"
+            type="email"
+            autocomplete="username"
+            prepend-inner-icon="mdi-email-outline"
+            :error-messages="errors.email"
             class="mb-4"
           />
         </Field>
 
-        <v-btn type="submit" color="primary" block size="large" :loading="loading">
+        <Field v-slot="{ field }" name="phone">
+          <v-text-field v-bind="field" :label="t('auth.phone')" prepend-inner-icon="mdi-phone-outline" :error-messages="errors.phone" class="mb-4" />
+        </Field>
+
+        <div class="auth-row-split mb-4">
+          <Field v-slot="{ field }" name="password">
+            <v-text-field
+              v-bind="field"
+              :label="t('auth.password')"
+              :type="showPassword ? 'text' : 'password'"
+              autocomplete="new-password"
+              prepend-inner-icon="mdi-lock-outline"
+              :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+              :error-messages="errors.password"
+              hide-details="auto"
+              @click:append-inner="showPassword = !showPassword"
+            />
+          </Field>
+
+          <Field v-slot="{ field }" name="password_confirmation">
+            <v-text-field
+              v-bind="field"
+              :label="t('auth.confirmPassword')"
+              :type="showPassword ? 'text' : 'password'"
+              autocomplete="new-password"
+              prepend-inner-icon="mdi-lock-check-outline"
+              :error-messages="errors.password_confirmation"
+              hide-details="auto"
+            />
+          </Field>
+        </div>
+
+        <v-btn type="submit" color="primary" block size="large" :loading="loading" class="auth-submit mt-2">
           {{ t('auth.createAccount') }}
         </v-btn>
 
-        <div class="text-center mt-4 text-body-2">
+        <div class="text-center mt-6 text-body-2 text-medium-emphasis">
           {{ t('auth.alreadyHaveAccount') }}
-          <router-link :to="{ name: 'login' }">{{ t('auth.login') }}</router-link>
+          <router-link :to="{ name: 'login' }" class="font-weight-medium auth-link">{{ t('auth.login') }}</router-link>
         </div>
       </template>
     </AppForm>
   </div>
 </template>
+
+<style scoped>
+.auth-row-split {
+  display: flex;
+  gap: 12px;
+}
+
+.auth-row-split > * {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+@media (max-width: 600px) {
+  .auth-row-split {
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
+.auth-link {
+  color: rgb(var(--v-theme-primary));
+  text-decoration: none;
+}
+
+.auth-link:hover {
+  text-decoration: underline;
+}
+
+.auth-submit {
+  letter-spacing: 0.02em;
+}
+</style>

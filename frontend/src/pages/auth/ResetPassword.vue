@@ -27,7 +27,7 @@ async function onSubmit(values) {
     })
     router.push({ name: 'login' })
   } catch (error) {
-    errorMessage.value = error.response?.data?.message || 'Unable to reset password. The link may have expired.'
+    errorMessage.value = error.response?.data?.message || t('auth.resetPasswordError')
   } finally {
     loading.value = false
   }
@@ -36,9 +36,12 @@ async function onSubmit(values) {
 
 <template>
   <div>
-    <h2 class="text-h6 font-weight-bold mb-4">{{ t('auth.resetPassword') }}</h2>
+    <div class="mb-8">
+      <h1 class="text-h4 font-weight-bold mb-2">{{ t('auth.resetPassword') }}</h1>
+      <p class="text-body-2 text-medium-emphasis">{{ t('auth.resetPasswordSubtitle') }}</p>
+    </div>
 
-    <v-alert v-if="errorMessage" type="error" variant="tonal" class="mb-4">{{ errorMessage }}</v-alert>
+    <v-alert v-if="errorMessage" type="error" variant="tonal" rounded="lg" class="mb-6">{{ errorMessage }}</v-alert>
 
     <AppForm :schema="resetPasswordSchema" :initial-values="{ password: '', password_confirmation: '' }" @submit="onSubmit">
       <template #default="{ errors }">
@@ -47,10 +50,11 @@ async function onSubmit(values) {
             v-bind="field"
             :label="t('auth.password')"
             :type="showPassword ? 'text' : 'password'"
+            autocomplete="new-password"
             prepend-inner-icon="mdi-lock-outline"
             :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
             :error-messages="errors.password"
-            class="mb-2"
+            class="mb-4"
             @click:append-inner="showPassword = !showPassword"
           />
         </Field>
@@ -60,16 +64,23 @@ async function onSubmit(values) {
             v-bind="field"
             :label="t('auth.confirmPassword')"
             :type="showPassword ? 'text' : 'password'"
+            autocomplete="new-password"
             prepend-inner-icon="mdi-lock-check-outline"
             :error-messages="errors.password_confirmation"
-            class="mb-4"
+            class="mb-6"
           />
         </Field>
 
-        <v-btn type="submit" color="primary" block size="large" :loading="loading">
+        <v-btn type="submit" color="primary" block size="large" :loading="loading" class="auth-submit">
           {{ t('auth.resetPassword') }}
         </v-btn>
       </template>
     </AppForm>
   </div>
 </template>
+
+<style scoped>
+.auth-submit {
+  letter-spacing: 0.02em;
+}
+</style>

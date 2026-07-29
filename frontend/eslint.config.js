@@ -15,6 +15,7 @@ export default [
         window: 'readonly',
         document: 'readonly',
         localStorage: 'readonly',
+        sessionStorage: 'readonly',
         URL: 'readonly',
         CustomEvent: 'readonly',
         console: 'readonly',

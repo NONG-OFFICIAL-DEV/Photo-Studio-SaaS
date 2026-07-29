@@ -27,7 +27,7 @@ async function onSubmit(values) {
     appStore.notify(t('auth.loginSuccess'))
     router.push(route.query.redirect || { name: 'dashboard' })
   } catch (error) {
-    errorMessage.value = error.response?.data?.message || 'Login failed. Please try again.'
+    errorMessage.value = error.response?.data?.message || t('auth.loginError')
   } finally {
     loading.value = false
   }
@@ -36,22 +36,26 @@ async function onSubmit(values) {
 
 <template>
   <div>
-    <h2 class="text-h6 font-weight-bold mb-4">{{ t('auth.loginTitle') }}</h2>
+    <div class="mb-8">
+      <h1 class="text-h4 font-weight-bold mb-2">{{ t('auth.loginTitle') }}</h1>
+      <p class="text-body-2 text-medium-emphasis">{{ t('auth.loginSubtitle') }}</p>
+    </div>
 
-    <v-alert v-if="errorMessage" type="error" variant="tonal" class="mb-4" closable @click:close="errorMessage = ''">
+    <v-alert v-if="errorMessage" type="error" variant="tonal" rounded="lg" class="mb-6" closable @click:close="errorMessage = ''">
       {{ errorMessage }}
     </v-alert>
 
     <AppForm :schema="loginSchema" :initial-values="{ email: '', password: '', remember: false }" @submit="onSubmit">
-      <template #default="{ errors }">
+      <template #default="{ errors, values, setFieldValue }">
         <Field v-slot="{ field }" name="email">
           <v-text-field
             v-bind="field"
             :label="t('auth.email')"
             type="email"
+            autocomplete="username"
             prepend-inner-icon="mdi-email-outline"
             :error-messages="errors.email"
-            class="mb-2"
+            class="mb-4"
           />
         </Field>
 
@@ -60,6 +64,7 @@ async function onSubmit(values) {
             v-bind="field"
             :label="t('auth.password')"
             :type="showPassword ? 'text' : 'password'"
+            autocomplete="current-password"
             prepend-inner-icon="mdi-lock-outline"
             :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
             :error-messages="errors.password"
@@ -68,31 +73,44 @@ async function onSubmit(values) {
           />
         </Field>
 
-        <div class="d-flex align-center justify-space-between mb-4">
-          <Field v-slot="{ field, value }" name="remember" type="checkbox">
-            <v-checkbox
-              v-bind="field"
-              :model-value="value"
-              :label="t('auth.rememberMe')"
-              hide-details
-              density="compact"
-            />
-          </Field>
+        <div class="d-flex align-center justify-space-between mb-6">
+          <v-checkbox
+            :model-value="values.remember"
+            :label="t('auth.rememberMe')"
+            hide-details
+            density="compact"
+            @update:model-value="setFieldValue('remember', $event)"
+          />
 
-          <router-link :to="{ name: 'forgot-password' }" class="text-body-2">
+          <router-link :to="{ name: 'forgot-password' }" class="text-body-2 font-weight-medium auth-link">
             {{ t('auth.forgotPassword') }}
           </router-link>
         </div>
 
-        <v-btn type="submit" color="primary" block size="large" :loading="loading">
+        <v-btn type="submit" color="primary" block size="large" :loading="loading" class="auth-submit">
           {{ t('auth.login') }}
         </v-btn>
 
-        <div class="text-center mt-4 text-body-2">
+        <div class="text-center mt-6 text-body-2 text-medium-emphasis">
           {{ t('auth.dontHaveAccount') }}
-          <router-link :to="{ name: 'register' }">{{ t('auth.createAccount') }}</router-link>
+          <router-link :to="{ name: 'register' }" class="font-weight-medium auth-link">{{ t('auth.createAccount') }}</router-link>
         </div>
       </template>
     </AppForm>
   </div>
 </template>
+
+<style scoped>
+.auth-link {
+  color: rgb(var(--v-theme-primary));
+  text-decoration: none;
+}
+
+.auth-link:hover {
+  text-decoration: underline;
+}
+
+.auth-submit {
+  letter-spacing: 0.02em;
+}
+</style>

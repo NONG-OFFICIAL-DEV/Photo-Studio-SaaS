@@ -93,8 +93,10 @@ class AuthService
             $factory->setTTL((int) config('jwt.refresh_ttl'));
         }
 
-        $token = auth('api')->attempt(['email' => $email, 'password' => $password]);
+        $token = auth('api')->claims(['remember' => $remember])
+            ->attempt(['email' => $email, 'password' => $password]);
 
+        $ttlMinutes = $factory->getTTL();
         $factory->setTTL($originalTtl);
 
         if (! $token) {
@@ -114,7 +116,7 @@ class AuthService
             'last_login_ip' => request()->ip(),
         ])->save();
 
-        return $this->tokenPayload($user, $token);
+        return $this->tokenPayload($user, $token, $ttlMinutes);
     }
 
     public function logout(): void
@@ -122,14 +124,33 @@ class AuthService
         auth('api')->logout();
     }
 
+    /**
+     * Refreshing a token normally re-issues it with the default TTL, which
+     * would silently downgrade a "remember me" session back to a short
+     * lifetime on the very first background refresh. Re-apply the extended
+     * TTL here whenever the token being refreshed carries the `remember`
+     * claim (persisted across refreshes via config('jwt.persistent_claims')).
+     */
     public function refresh(): array
     {
+        $remember = (bool) auth('api')->payload()->get('remember', false);
+
+        $factory = auth('api')->factory();
+        $originalTtl = $factory->getTTL();
+
+        if ($remember) {
+            $factory->setTTL((int) config('jwt.refresh_ttl'));
+        }
+
         $token = auth('api')->refresh();
+
+        $ttlMinutes = $factory->getTTL();
+        $factory->setTTL($originalTtl);
 
         /** @var User $user */
         $user = auth('api')->user();
 
-        return $this->tokenPayload($user, $token);
+        return $this->tokenPayload($user, $token, $ttlMinutes);
     }
 
     public function me(): User
@@ -155,13 +176,13 @@ class AuthService
         );
     }
 
-    protected function tokenPayload(User $user, string $token): array
+    protected function tokenPayload(User $user, string $token, ?int $ttlMinutes = null): array
     {
         return [
             'user' => $user,
             'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => auth('api')->factory()->getTTL() * 60,
+            'expires_in' => ($ttlMinutes ?? auth('api')->factory()->getTTL()) * 60,
         ];
     }
 }

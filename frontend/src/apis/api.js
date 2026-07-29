@@ -3,15 +3,31 @@ import axios from 'axios'
 const TOKEN_KEY = 'photo_studio_access_token'
 
 export function getToken() {
-  return localStorage.getItem(TOKEN_KEY)
+  return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY)
 }
 
-export function setToken(token) {
-  if (token) {
-    localStorage.setItem(TOKEN_KEY, token)
-  } else {
+/**
+ * remember=true persists the token across browser restarts (localStorage);
+ * remember=false keeps it only for the current tab session (sessionStorage).
+ * When remember is omitted (e.g. the silent refresh flow), the token is
+ * re-saved to whichever storage already holds it, so a refreshed token
+ * doesn't get "upgraded" to persistent storage on every background refresh.
+ */
+export function setToken(token, remember) {
+  if (!token) {
     localStorage.removeItem(TOKEN_KEY)
+    sessionStorage.removeItem(TOKEN_KEY)
+    return
   }
+
+  if (remember === undefined) {
+    remember = Boolean(localStorage.getItem(TOKEN_KEY))
+  }
+
+  const primary = remember ? localStorage : sessionStorage
+  const secondary = remember ? sessionStorage : localStorage
+  primary.setItem(TOKEN_KEY, token)
+  secondary.removeItem(TOKEN_KEY)
 }
 
 const http = axios.create({
