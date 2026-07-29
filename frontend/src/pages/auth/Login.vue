@@ -2,7 +2,6 @@
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import { Field } from 'vee-validate'
 import AppForm from '@/components/common/AppForm.vue'
 import { loginSchema } from '@/utils/validators'
 import { useAuthStore } from '@/stores/auth'
@@ -48,31 +47,29 @@ async function onSubmit(values) {
 
     <AppForm :schema="loginSchema" :initial-values="{ email: '', password: '', remember: false }" @submit="onSubmit">
       <template #default="{ errors, values, setFieldValue }">
-        <Field v-slot="{ field }" name="email">
-          <v-text-field
-            v-bind="field"
-            :label="t('auth.email')"
-            type="email"
-            autocomplete="username"
-            prepend-inner-icon="mdi-email-outline"
-            :error-messages="errors.email"
-            class="mb-4"
-          />
-        </Field>
+        <v-text-field
+          :model-value="values.email"
+          :label="t('auth.email')"
+          type="email"
+          autocomplete="username"
+          prepend-inner-icon="mdi-email-outline"
+          :error-messages="errors.email"
+          class="mb-4"
+          @update:model-value="setFieldValue('email', $event)"
+        />
 
-        <Field v-slot="{ field }" name="password">
-          <v-text-field
-            v-bind="field"
-            :label="t('auth.password')"
-            :type="showPassword ? 'text' : 'password'"
-            autocomplete="current-password"
-            prepend-inner-icon="mdi-lock-outline"
-            :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
-            :error-messages="errors.password"
-            class="mb-2"
-            @click:append-inner="showPassword = !showPassword"
-          />
-        </Field>
+        <v-text-field
+          :model-value="values.password"
+          :label="t('auth.password')"
+          :type="showPassword ? 'text' : 'password'"
+          autocomplete="current-password"
+          prepend-inner-icon="mdi-lock-outline"
+          :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+          :error-messages="errors.password"
+          class="mb-2"
+          @update:model-value="setFieldValue('password', $event)"
+          @click:append-inner="showPassword = !showPassword"
+        />
 
         <div class="d-flex align-center justify-space-between mb-6">
           <v-checkbox

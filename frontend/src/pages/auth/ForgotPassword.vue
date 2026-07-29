@@ -1,7 +1,6 @@
 <script setup>
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Field } from 'vee-validate'
 import AppForm from '@/components/common/AppForm.vue'
 import { forgotPasswordSchema } from '@/utils/validators'
 import { forgotPasswordApi } from '@/apis/auth.api'
@@ -39,18 +38,17 @@ async function onSubmit(values) {
     <v-alert v-if="successMessage" type="success" variant="tonal" rounded="lg" class="mb-6">{{ successMessage }}</v-alert>
 
     <AppForm :schema="forgotPasswordSchema" :initial-values="{ email: '' }" @submit="onSubmit">
-      <template #default="{ errors }">
-        <Field v-slot="{ field }" name="email">
-          <v-text-field
-            v-bind="field"
-            :label="t('auth.email')"
-            type="email"
-            autocomplete="username"
-            prepend-inner-icon="mdi-email-outline"
-            :error-messages="errors.email"
-            class="mb-6"
-          />
-        </Field>
+      <template #default="{ errors, values, setFieldValue }">
+        <v-text-field
+          :model-value="values.email"
+          :label="t('auth.email')"
+          type="email"
+          autocomplete="username"
+          prepend-inner-icon="mdi-email-outline"
+          :error-messages="errors.email"
+          class="mb-6"
+          @update:model-value="setFieldValue('email', $event)"
+        />
 
         <v-btn type="submit" color="primary" block size="large" :loading="loading" class="auth-submit">
           {{ t('auth.sendResetLink') }}

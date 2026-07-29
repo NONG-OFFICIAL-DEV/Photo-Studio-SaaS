@@ -1,7 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Field } from 'vee-validate'
 import AppDialog from '@/components/common/AppDialog.vue'
 import AppForm from '@/components/common/AppForm.vue'
 import { planSchema } from '@/utils/validators'
@@ -73,62 +72,40 @@ async function onSubmit(values) {
       <template #default="{ errors, values, setFieldValue }">
         <v-row>
           <v-col cols="12" sm="6">
-            <!-- <Field v-slot="{ field }" name="name"> -->
-              <v-text-field v-model="values.name" :label="`${t('fields.name')} *`" :error-messages="errors.name" />
-            <!-- </Field> -->
+            <v-text-field :model-value="values.name" :label="`${t('fields.name')} *`" :error-messages="errors.name" @update:model-value="setFieldValue('name', $event)" />
           </v-col>
           <v-col cols="12" sm="6">
-            <Field v-slot="{ field }" name="code">
-              <v-text-field v-bind="field" :label="`${t('admin.plans.fields.code')} *`" :error-messages="errors.code" :disabled="isEdit" />
-            </Field>
+            <v-text-field :model-value="values.code" :label="`${t('admin.plans.fields.code')} *`" :error-messages="errors.code" :disabled="isEdit" @update:model-value="setFieldValue('code', $event)" />
           </v-col>
           <v-col cols="12">
-            <Field v-slot="{ field }" name="description">
-              <v-textarea v-bind="field" :label="t('fields.description')" rows="2" :error-messages="errors.description" />
-            </Field>
+            <v-textarea :model-value="values.description" :label="t('fields.description')" rows="2" :error-messages="errors.description" @update:model-value="setFieldValue('description', $event)" />
           </v-col>
 
           <v-col cols="12" sm="4">
-            <Field v-slot="{ field }" name="price_monthly">
-              <v-text-field v-bind="field" type="number" :label="t('admin.plans.fields.priceMonthly')" prefix="$" :error-messages="errors.price_monthly" />
-            </Field>
+            <v-text-field :model-value="values.price_monthly" type="number" :label="t('admin.plans.fields.priceMonthly')" prefix="$" :error-messages="errors.price_monthly" @update:model-value="setFieldValue('price_monthly', $event)" />
           </v-col>
           <v-col cols="12" sm="4">
-            <Field v-slot="{ field }" name="price_quarterly">
-              <v-text-field v-bind="field" type="number" :label="t('admin.plans.fields.priceQuarterly')" prefix="$" :error-messages="errors.price_quarterly" />
-            </Field>
+            <v-text-field :model-value="values.price_quarterly" type="number" :label="t('admin.plans.fields.priceQuarterly')" prefix="$" :error-messages="errors.price_quarterly" @update:model-value="setFieldValue('price_quarterly', $event)" />
           </v-col>
           <v-col cols="12" sm="4">
-            <Field v-slot="{ field }" name="price_yearly">
-              <v-text-field v-bind="field" type="number" :label="t('admin.plans.fields.priceYearly')" prefix="$" :error-messages="errors.price_yearly" />
-            </Field>
+            <v-text-field :model-value="values.price_yearly" type="number" :label="t('admin.plans.fields.priceYearly')" prefix="$" :error-messages="errors.price_yearly" @update:model-value="setFieldValue('price_yearly', $event)" />
           </v-col>
 
           <v-col cols="12" sm="4">
-            <Field v-slot="{ field }" name="max_users">
-              <v-text-field v-bind="field" type="number" :label="t('admin.plans.fields.maxUsers')" :error-messages="errors.max_users" />
-            </Field>
+            <v-text-field :model-value="values.max_users" type="number" :label="t('admin.plans.fields.maxUsers')" :error-messages="errors.max_users" @update:model-value="setFieldValue('max_users', $event)" />
           </v-col>
           <v-col cols="12" sm="4">
-            <Field v-slot="{ field }" name="storage_limit_gb">
-              <v-text-field v-bind="field" type="number" :label="t('admin.plans.fields.storageLimitGb')" :error-messages="errors.storage_limit_gb" />
-            </Field>
+            <v-text-field :model-value="values.storage_limit_gb" type="number" :label="t('admin.plans.fields.storageLimitGb')" :error-messages="errors.storage_limit_gb" @update:model-value="setFieldValue('storage_limit_gb', $event)" />
           </v-col>
           <v-col cols="12" sm="4">
-            <Field v-slot="{ field }" name="monthly_order_limit">
-              <v-text-field v-bind="field" type="number" :label="t('admin.plans.fields.monthlyOrderLimit')" :error-messages="errors.monthly_order_limit" />
-            </Field>
+            <v-text-field :model-value="values.monthly_order_limit" type="number" :label="t('admin.plans.fields.monthlyOrderLimit')" :error-messages="errors.monthly_order_limit" @update:model-value="setFieldValue('monthly_order_limit', $event)" />
           </v-col>
 
           <v-col cols="12" sm="4">
-            <Field v-slot="{ field }" name="trial_days">
-              <v-text-field v-bind="field" type="number" :label="t('admin.plans.fields.trialDays')" :error-messages="errors.trial_days" />
-            </Field>
+            <v-text-field :model-value="values.trial_days" type="number" :label="t('admin.plans.fields.trialDays')" :error-messages="errors.trial_days" @update:model-value="setFieldValue('trial_days', $event)" />
           </v-col>
           <v-col cols="12" sm="4">
-            <Field v-slot="{ field }" name="sort_order">
-              <v-text-field v-bind="field" type="number" :label="t('admin.plans.fields.sortOrder')" :error-messages="errors.sort_order" />
-            </Field>
+            <v-text-field :model-value="values.sort_order" type="number" :label="t('admin.plans.fields.sortOrder')" :error-messages="errors.sort_order" @update:model-value="setFieldValue('sort_order', $event)" />
           </v-col>
           <v-col cols="12" sm="4" class="d-flex align-center">
             <v-checkbox

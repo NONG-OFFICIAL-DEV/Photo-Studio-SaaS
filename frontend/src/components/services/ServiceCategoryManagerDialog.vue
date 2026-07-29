@@ -1,7 +1,6 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Field } from 'vee-validate'
 import AppDialog from '@/components/common/AppDialog.vue'
 import AppForm from '@/components/common/AppForm.vue'
 import AppConfirmDialog from '@/components/common/AppConfirmDialog.vue'
@@ -60,11 +59,9 @@ async function confirmDeleteCategory() {
 <template>
   <AppDialog :model-value="modelValue" :title="t('services.manageCategories')" max-width="480" @update:model-value="emit('update:modelValue', $event)">
     <AppForm :schema="serviceCategorySchema" :initial-values="{ name: '', description: '' }" @submit="onSubmit">
-      <template #default="{ errors }">
+      <template #default="{ errors, values, setFieldValue }">
         <div class="d-flex ga-2 align-start mb-4">
-          <Field v-slot="{ field }" name="name">
-            <v-text-field v-bind="field" :label="t('services.newCategoryName')" density="compact" hide-details :error-messages="errors.name" />
-          </Field>
+          <v-text-field :model-value="values.name" :label="t('services.newCategoryName')" density="compact" hide-details :error-messages="errors.name" @update:model-value="setFieldValue('name', $event)" />
           <v-btn type="submit" icon="mdi-plus" color="primary" :loading="loading" />
         </div>
       </template>

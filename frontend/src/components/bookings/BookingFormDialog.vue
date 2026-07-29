@@ -1,7 +1,6 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Field } from 'vee-validate'
 import AppDialog from '@/components/common/AppDialog.vue'
 import AppForm from '@/components/common/AppForm.vue'
 import AppDatePicker from '@/components/common/AppDatePicker.vue'
@@ -195,9 +194,7 @@ async function onSubmit(values) {
           </v-col>
 
           <v-col cols="12">
-            <Field v-slot="{ field }" name="title">
-              <v-text-field v-bind="field" :label="t('fields.title')" :error-messages="errors.title" />
-            </Field>
+            <v-text-field :model-value="values.title" :label="t('fields.title')" :error-messages="errors.title" @update:model-value="setFieldValue('title', $event)" />
           </v-col>
 
           <v-col cols="6" sm="6">
@@ -243,15 +240,11 @@ async function onSubmit(values) {
             />
           </v-col>
           <v-col v-if="values.location_type === 'on_location'" cols="12" sm="6">
-            <Field v-slot="{ field }" name="location_address">
-              <v-text-field v-bind="field" :label="`${t('fields.address')} *`" :error-messages="errors.location_address" />
-            </Field>
+            <v-text-field :model-value="values.location_address" :label="`${t('fields.address')} *`" :error-messages="errors.location_address" @update:model-value="setFieldValue('location_address', $event)" />
           </v-col>
 
           <v-col cols="12">
-            <Field v-slot="{ field }" name="notes">
-              <v-textarea v-bind="field" :label="t('fields.notes')" rows="2" :error-messages="errors.notes" />
-            </Field>
+            <v-textarea :model-value="values.notes" :label="t('fields.notes')" rows="2" :error-messages="errors.notes" @update:model-value="setFieldValue('notes', $event)" />
           </v-col>
         </v-row>
 

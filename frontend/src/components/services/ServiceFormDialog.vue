@@ -1,7 +1,6 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Field } from 'vee-validate'
 import AppDialog from '@/components/common/AppDialog.vue'
 import AppForm from '@/components/common/AppForm.vue'
 import { serviceSchema } from '@/utils/validators'
@@ -78,9 +77,7 @@ async function onSubmit(values) {
       <template #default="{ errors, values, setFieldValue }">
         <v-row>
           <v-col cols="12" sm="6">
-            <Field v-slot="{ field }" name="name">
-              <v-text-field v-bind="field" :label="`${t('fields.name')} *`" :error-messages="errors.name" />
-            </Field>
+            <v-text-field :model-value="values.name" :label="`${t('fields.name')} *`" :error-messages="errors.name" @update:model-value="setFieldValue('name', $event)" />
           </v-col>
           <v-col cols="12" sm="6">
             <v-select
@@ -95,9 +92,7 @@ async function onSubmit(values) {
           </v-col>
 
           <v-col cols="6" sm="4">
-            <Field v-slot="{ field }" name="price">
-              <v-text-field v-bind="field" :label="`${t('fields.price')} *`" type="number" step="0.01" prefix="$" :error-messages="errors.price" />
-            </Field>
+            <v-text-field :model-value="values.price" :label="`${t('fields.price')} *`" type="number" step="0.01" prefix="$" :error-messages="errors.price" @update:model-value="setFieldValue('price', $event)" />
           </v-col>
           <v-col cols="6" sm="4">
             <v-select
@@ -109,20 +104,14 @@ async function onSubmit(values) {
             />
           </v-col>
           <v-col cols="12" sm="4">
-            <Field v-slot="{ field }" name="duration_minutes">
-              <v-text-field v-bind="field" :label="t('services.durationMinutes')" type="number" :error-messages="errors.duration_minutes" />
-            </Field>
+            <v-text-field :model-value="values.duration_minutes" :label="t('services.durationMinutes')" type="number" :error-messages="errors.duration_minutes" @update:model-value="setFieldValue('duration_minutes', $event)" />
           </v-col>
 
           <v-col cols="12">
-            <Field v-slot="{ field }" name="description">
-              <v-textarea v-bind="field" :label="t('fields.description')" rows="2" :error-messages="errors.description" />
-            </Field>
+            <v-textarea :model-value="values.description" :label="t('fields.description')" rows="2" :error-messages="errors.description" @update:model-value="setFieldValue('description', $event)" />
           </v-col>
           <v-col cols="12">
-            <Field v-slot="{ field }" name="deliverables">
-              <v-textarea v-bind="field" :label="t('services.deliverables')" rows="2" :placeholder="t('services.deliverablesPlaceholder')" :error-messages="errors.deliverables" />
-            </Field>
+            <v-textarea :model-value="values.deliverables" :label="t('services.deliverables')" rows="2" :placeholder="t('services.deliverablesPlaceholder')" :error-messages="errors.deliverables" @update:model-value="setFieldValue('deliverables', $event)" />
           </v-col>
 
           <v-col cols="12">

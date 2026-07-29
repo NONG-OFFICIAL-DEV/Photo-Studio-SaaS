@@ -1,7 +1,6 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Field } from 'vee-validate'
 import AppDialog from '@/components/common/AppDialog.vue'
 import AppForm from '@/components/common/AppForm.vue'
 import AppDatePicker from '@/components/common/AppDatePicker.vue'
@@ -70,9 +69,7 @@ async function onSubmit(values) {
           @update:model-value="setFieldValue('user_id', $event)"
         />
 
-        <Field v-slot="{ field }" name="period_label">
-          <v-text-field v-bind="field" :label="`${t('payroll.periodLabel')} *`" :error-messages="errors.period_label" class="mb-2" placeholder="e.g. July 2026" />
-        </Field>
+        <v-text-field :model-value="values.period_label" :label="`${t('payroll.periodLabel')} *`" :error-messages="errors.period_label" class="mb-2" placeholder="e.g. July 2026" @update:model-value="setFieldValue('period_label', $event)" />
 
         <v-row>
           <v-col cols="6">
@@ -97,25 +94,17 @@ async function onSubmit(values) {
 
         <v-row>
           <v-col cols="4">
-            <Field v-slot="{ field }" name="base_pay">
-              <v-text-field v-bind="field" :label="t('payroll.basePayOverride')" type="number" step="0.01" prefix="$" :error-messages="errors.base_pay" />
-            </Field>
+            <v-text-field :model-value="values.base_pay" :label="t('payroll.basePayOverride')" type="number" step="0.01" prefix="$" :error-messages="errors.base_pay" @update:model-value="setFieldValue('base_pay', $event)" />
           </v-col>
           <v-col cols="4">
-            <Field v-slot="{ field }" name="commission_total">
-              <v-text-field v-bind="field" :label="t('payroll.commissionOverride')" type="number" step="0.01" prefix="$" :error-messages="errors.commission_total" />
-            </Field>
+            <v-text-field :model-value="values.commission_total" :label="t('payroll.commissionOverride')" type="number" step="0.01" prefix="$" :error-messages="errors.commission_total" @update:model-value="setFieldValue('commission_total', $event)" />
           </v-col>
           <v-col cols="4">
-            <Field v-slot="{ field }" name="deductions">
-              <v-text-field v-bind="field" :label="t('payroll.deductions')" type="number" step="0.01" prefix="$" :error-messages="errors.deductions" />
-            </Field>
+            <v-text-field :model-value="values.deductions" :label="t('payroll.deductions')" type="number" step="0.01" prefix="$" :error-messages="errors.deductions" @update:model-value="setFieldValue('deductions', $event)" />
           </v-col>
         </v-row>
 
-        <Field v-slot="{ field }" name="notes">
-          <v-textarea v-bind="field" :label="t('fields.notes')" rows="2" :error-messages="errors.notes" />
-        </Field>
+        <v-textarea :model-value="values.notes" :label="t('fields.notes')" rows="2" :error-messages="errors.notes" @update:model-value="setFieldValue('notes', $event)" />
 
         <div class="d-flex justify-end ga-2 mt-2">
           <v-btn variant="text" :disabled="loading" @click="emit('update:modelValue', false)">{{ t('common.cancel') }}</v-btn>

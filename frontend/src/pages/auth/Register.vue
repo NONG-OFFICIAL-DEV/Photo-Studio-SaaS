@@ -2,7 +2,6 @@
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import { Field } from 'vee-validate'
 import AppForm from '@/components/common/AppForm.vue'
 import { registerSchema } from '@/utils/validators'
 import { useAuthStore } from '@/stores/auth'
@@ -49,59 +48,50 @@ async function onSubmit(values) {
       :initial-values="{ studio_name: '', owner_name: '', email: '', phone: '', password: '', password_confirmation: '' }"
       @submit="onSubmit"
     >
-      <template #default="{ errors }">
+      <template #default="{ errors, values, setFieldValue }">
         <div class="auth-row-split mb-4">
-          <Field v-slot="{ field }" name="studio_name">
-            <v-text-field v-bind="field" :label="t('auth.studioName')" prepend-inner-icon="mdi-domain" :error-messages="errors.studio_name" hide-details="auto" />
-          </Field>
+          <v-text-field :model-value="values.studio_name" :label="t('auth.studioName')" prepend-inner-icon="mdi-domain" :error-messages="errors.studio_name" hide-details="auto" @update:model-value="setFieldValue('studio_name', $event)" />
 
-          <Field v-slot="{ field }" name="owner_name">
-            <v-text-field v-bind="field" :label="t('auth.ownerName')" prepend-inner-icon="mdi-account-outline" :error-messages="errors.owner_name" hide-details="auto" />
-          </Field>
+          <v-text-field :model-value="values.owner_name" :label="t('auth.ownerName')" prepend-inner-icon="mdi-account-outline" :error-messages="errors.owner_name" hide-details="auto" @update:model-value="setFieldValue('owner_name', $event)" />
         </div>
 
-        <Field v-slot="{ field }" name="email">
-          <v-text-field
-            v-bind="field"
-            :label="t('auth.email')"
-            type="email"
-            autocomplete="username"
-            prepend-inner-icon="mdi-email-outline"
-            :error-messages="errors.email"
-            class="mb-4"
-          />
-        </Field>
+        <v-text-field
+          :model-value="values.email"
+          :label="t('auth.email')"
+          type="email"
+          autocomplete="username"
+          prepend-inner-icon="mdi-email-outline"
+          :error-messages="errors.email"
+          class="mb-4"
+          @update:model-value="setFieldValue('email', $event)"
+        />
 
-        <Field v-slot="{ field }" name="phone">
-          <v-text-field v-bind="field" :label="t('auth.phone')" prepend-inner-icon="mdi-phone-outline" :error-messages="errors.phone" class="mb-4" />
-        </Field>
+        <v-text-field :model-value="values.phone" :label="t('auth.phone')" prepend-inner-icon="mdi-phone-outline" :error-messages="errors.phone" class="mb-4" @update:model-value="setFieldValue('phone', $event)" />
 
         <div class="auth-row-split mb-4">
-          <Field v-slot="{ field }" name="password">
-            <v-text-field
-              v-bind="field"
-              :label="t('auth.password')"
-              :type="showPassword ? 'text' : 'password'"
-              autocomplete="new-password"
-              prepend-inner-icon="mdi-lock-outline"
-              :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
-              :error-messages="errors.password"
-              hide-details="auto"
-              @click:append-inner="showPassword = !showPassword"
-            />
-          </Field>
+          <v-text-field
+            :model-value="values.password"
+            :label="t('auth.password')"
+            :type="showPassword ? 'text' : 'password'"
+            autocomplete="new-password"
+            prepend-inner-icon="mdi-lock-outline"
+            :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+            :error-messages="errors.password"
+            hide-details="auto"
+            @update:model-value="setFieldValue('password', $event)"
+            @click:append-inner="showPassword = !showPassword"
+          />
 
-          <Field v-slot="{ field }" name="password_confirmation">
-            <v-text-field
-              v-bind="field"
-              :label="t('auth.confirmPassword')"
-              :type="showPassword ? 'text' : 'password'"
-              autocomplete="new-password"
-              prepend-inner-icon="mdi-lock-check-outline"
-              :error-messages="errors.password_confirmation"
-              hide-details="auto"
-            />
-          </Field>
+          <v-text-field
+            :model-value="values.password_confirmation"
+            :label="t('auth.confirmPassword')"
+            :type="showPassword ? 'text' : 'password'"
+            autocomplete="new-password"
+            prepend-inner-icon="mdi-lock-check-outline"
+            :error-messages="errors.password_confirmation"
+            hide-details="auto"
+            @update:model-value="setFieldValue('password_confirmation', $event)"
+          />
         </div>
 
         <v-btn type="submit" color="primary" block size="large" :loading="loading" class="auth-submit mt-2">

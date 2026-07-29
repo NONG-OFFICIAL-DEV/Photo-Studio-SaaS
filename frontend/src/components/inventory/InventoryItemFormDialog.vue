@@ -1,7 +1,6 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Field } from 'vee-validate'
 import AppDialog from '@/components/common/AppDialog.vue'
 import AppForm from '@/components/common/AppForm.vue'
 import { inventoryItemSchema } from '@/utils/validators'
@@ -67,29 +66,19 @@ async function onSubmit(values) {
       <template #default="{ errors, values, setFieldValue }">
         <v-row>
           <v-col cols="12" sm="6">
-            <Field v-slot="{ field }" name="name">
-              <v-text-field v-bind="field" :label="`${t('fields.name')} *`" :error-messages="errors.name" />
-            </Field>
+            <v-text-field :model-value="values.name" :label="`${t('fields.name')} *`" :error-messages="errors.name" @update:model-value="setFieldValue('name', $event)" />
           </v-col>
           <v-col cols="12" sm="6">
-            <Field v-slot="{ field }" name="sku">
-              <v-text-field v-bind="field" :label="t('inventory.sku')" :error-messages="errors.sku" />
-            </Field>
+            <v-text-field :model-value="values.sku" :label="t('inventory.sku')" :error-messages="errors.sku" @update:model-value="setFieldValue('sku', $event)" />
           </v-col>
           <v-col cols="12" sm="4">
-            <Field v-slot="{ field }" name="unit">
-              <v-text-field v-bind="field" :label="`${t('inventory.unit')} *`" :error-messages="errors.unit" />
-            </Field>
+            <v-text-field :model-value="values.unit" :label="`${t('inventory.unit')} *`" :error-messages="errors.unit" @update:model-value="setFieldValue('unit', $event)" />
           </v-col>
           <v-col cols="12" sm="4">
-            <Field v-slot="{ field }" name="category">
-              <v-text-field v-bind="field" :label="t('fields.category')" :error-messages="errors.category" />
-            </Field>
+            <v-text-field :model-value="values.category" :label="t('fields.category')" :error-messages="errors.category" @update:model-value="setFieldValue('category', $event)" />
           </v-col>
           <v-col cols="12" sm="4">
-            <Field v-slot="{ field }" name="reorder_threshold">
-              <v-text-field v-bind="field" :label="t('inventory.reorderThreshold')" type="number" step="0.01" :error-messages="errors.reorder_threshold" />
-            </Field>
+            <v-text-field :model-value="values.reorder_threshold" :label="t('inventory.reorderThreshold')" type="number" step="0.01" :error-messages="errors.reorder_threshold" @update:model-value="setFieldValue('reorder_threshold', $event)" />
           </v-col>
           <v-col cols="12">
             <v-switch

@@ -1,7 +1,6 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Field } from 'vee-validate'
 import AppDialog from '@/components/common/AppDialog.vue'
 import AppForm from '@/components/common/AppForm.vue'
 import { orderSchema } from '@/utils/validators'
@@ -339,14 +338,10 @@ const subtotal = computed(() => computeSubtotal())
 
         <v-row>
           <v-col cols="12" sm="6">
-            <Field v-slot="{ field }" name="notes">
-              <v-textarea v-bind="field" :label="t('fields.notes')" rows="2" :error-messages="errors.notes" />
-            </Field>
+            <v-textarea :model-value="values.notes" :label="t('fields.notes')" rows="2" :error-messages="errors.notes" @update:model-value="setFieldValue('notes', $event)" />
           </v-col>
           <v-col cols="12" sm="6">
-            <Field v-slot="{ field }" name="discount_amount">
-              <v-text-field v-bind="field" :label="t('fields.discount')" type="number" step="0.01" prefix="$" :error-messages="errors.discount_amount" />
-            </Field>
+            <v-text-field :model-value="values.discount_amount" :label="t('fields.discount')" type="number" step="0.01" prefix="$" :error-messages="errors.discount_amount" @update:model-value="setFieldValue('discount_amount', $event)" />
             <div class="text-body-2 d-flex justify-space-between">
               <span>{{ t('fields.subtotal') }}</span><span>${{ subtotal.toFixed(2) }}</span>
             </div>

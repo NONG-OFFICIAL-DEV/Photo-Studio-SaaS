@@ -1,7 +1,6 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Field } from 'vee-validate'
 import AppDialog from '@/components/common/AppDialog.vue'
 import AppForm from '@/components/common/AppForm.vue'
 import { employmentSchema } from '@/utils/validators'
@@ -68,21 +67,18 @@ async function onSubmit(values) {
           @update:model-value="setFieldValue('pay_type', $event)"
         />
 
-        <Field v-slot="{ field }" name="base_pay">
-          <v-text-field
-            v-bind="field"
-            :label="values.pay_type === 'hourly' ? t('employees.hourlyRate') : t('employees.monthlySalary')"
-            type="number"
-            step="0.01"
-            prefix="$"
-            :error-messages="errors.base_pay"
-            class="mb-2"
-          />
-        </Field>
+        <v-text-field
+          :model-value="values.base_pay"
+          :label="values.pay_type === 'hourly' ? t('employees.hourlyRate') : t('employees.monthlySalary')"
+          type="number"
+          step="0.01"
+          prefix="$"
+          :error-messages="errors.base_pay"
+          class="mb-2"
+          @update:model-value="setFieldValue('base_pay', $event)"
+        />
 
-        <Field v-slot="{ field }" name="commission_rate">
-          <v-text-field v-bind="field" :label="t('employees.commissionRate')" type="number" step="0.01" suffix="%" :error-messages="errors.commission_rate" />
-        </Field>
+        <v-text-field :model-value="values.commission_rate" :label="t('employees.commissionRate')" type="number" step="0.01" suffix="%" :error-messages="errors.commission_rate" @update:model-value="setFieldValue('commission_rate', $event)" />
 
         <div class="d-flex justify-end ga-2 mt-4">
           <v-btn variant="text" :disabled="loading" @click="emit('update:modelValue', false)">{{ t('common.cancel') }}</v-btn>

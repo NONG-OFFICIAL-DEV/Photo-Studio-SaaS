@@ -1,7 +1,6 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Field } from 'vee-validate'
 import AppDialog from '@/components/common/AppDialog.vue'
 import AppForm from '@/components/common/AppForm.vue'
 import AppDatePicker from '@/components/common/AppDatePicker.vue'
@@ -80,9 +79,7 @@ async function onSubmit(values) {
       <template #default="{ errors, values, setFieldValue }">
         <v-row>
           <v-col cols="12" sm="6">
-            <Field v-slot="{ field }" name="amount">
-              <v-text-field v-bind="field" :label="`${t('fields.total')} *`" type="number" step="0.01" prefix="$" :error-messages="errors.amount" />
-            </Field>
+            <v-text-field :model-value="values.amount" :label="`${t('fields.total')} *`" type="number" step="0.01" prefix="$" :error-messages="errors.amount" @update:model-value="setFieldValue('amount', $event)" />
           </v-col>
           <v-col cols="12" sm="6">
             <AppDatePicker
@@ -114,14 +111,10 @@ async function onSubmit(values) {
             />
           </v-col>
           <v-col cols="12" sm="6">
-            <Field v-slot="{ field }" name="vendor">
-              <v-text-field v-bind="field" :label="t('expenses.vendor')" :error-messages="errors.vendor" />
-            </Field>
+            <v-text-field :model-value="values.vendor" :label="t('expenses.vendor')" :error-messages="errors.vendor" @update:model-value="setFieldValue('vendor', $event)" />
           </v-col>
           <v-col cols="12">
-            <Field v-slot="{ field }" name="notes">
-              <v-textarea v-bind="field" :label="t('fields.notes')" rows="2" :error-messages="errors.notes" />
-            </Field>
+            <v-textarea :model-value="values.notes" :label="t('fields.notes')" rows="2" :error-messages="errors.notes" @update:model-value="setFieldValue('notes', $event)" />
           </v-col>
         </v-row>
 

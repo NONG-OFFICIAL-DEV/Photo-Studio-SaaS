@@ -1,7 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Field } from 'vee-validate'
 import AppToolbar from '@/components/common/AppToolbar.vue'
 import AppForm from '@/components/common/AppForm.vue'
 import { settingsSchema } from '@/utils/validators'
@@ -149,39 +148,28 @@ async function exportData() {
 
                   <v-row>
                     <v-col cols="12" sm="6">
-                      <Field v-slot="{ field }" name="name">
-                        <v-text-field v-bind="field" :label="`${t('fields.name')} *`" :error-messages="errors.name" />
-                      </Field>
+                      <v-text-field :model-value="values.name" :label="`${t('fields.name')} *`" :error-messages="errors.name" @update:model-value="setFieldValue('name', $event)" />
                     </v-col>
                     <v-col cols="12" sm="6">
-                      <Field v-slot="{ field }" name="email">
-                        <v-text-field v-bind="field" :label="`${t('fields.email')} *`" type="email" :error-messages="errors.email" />
-                      </Field>
+                      <v-text-field :model-value="values.email" :label="`${t('fields.email')} *`" type="email" :error-messages="errors.email" @update:model-value="setFieldValue('email', $event)" />
                     </v-col>
                     <v-col cols="12" sm="6">
-                      <Field v-slot="{ field }" name="phone">
-                        <v-text-field v-bind="field" :label="t('fields.phone')" :error-messages="errors.phone" />
-                      </Field>
+                      <v-text-field :model-value="values.phone" :label="t('fields.phone')" :error-messages="errors.phone" @update:model-value="setFieldValue('phone', $event)" />
                     </v-col>
                     <v-col cols="12" sm="6">
-                      <Field v-slot="{ field }" name="currency">
-                        <v-text-field
-                          v-bind="field"
-                          :label="`${t('settingsPage.fields.currency')} *`"
-                          :error-messages="errors.currency"
-                          maxlength="3"
-                        />
-                      </Field>
+                      <v-text-field
+                        :model-value="values.currency"
+                        :label="`${t('settingsPage.fields.currency')} *`"
+                        :error-messages="errors.currency"
+                        maxlength="3"
+                        @update:model-value="setFieldValue('currency', $event)"
+                      />
                     </v-col>
                     <v-col cols="12" sm="6">
-                      <Field v-slot="{ field }" name="timezone">
-                        <v-text-field v-bind="field" :label="`${t('settingsPage.fields.timezone')} *`" :error-messages="errors.timezone" />
-                      </Field>
+                      <v-text-field :model-value="values.timezone" :label="`${t('settingsPage.fields.timezone')} *`" :error-messages="errors.timezone" @update:model-value="setFieldValue('timezone', $event)" />
                     </v-col>
                     <v-col cols="12">
-                      <Field v-slot="{ field }" name="address">
-                        <v-textarea v-bind="field" :label="t('fields.address')" rows="2" :error-messages="errors.address" />
-                      </Field>
+                      <v-textarea :model-value="values.address" :label="t('fields.address')" rows="2" :error-messages="errors.address" @update:model-value="setFieldValue('address', $event)" />
                     </v-col>
                   </v-row>
                 </v-card-text>
@@ -193,44 +181,40 @@ async function exportData() {
                 <v-card-text>
                   <v-row>
                     <v-col cols="12" sm="4">
-                      <Field v-slot="{ field }" name="invoice_prefix">
-                        <v-text-field
-                          v-bind="field"
-                          :label="t('settingsPage.fields.invoicePrefix')"
-                          :error-messages="errors.invoice_prefix"
-                        />
-                      </Field>
+                      <v-text-field
+                        :model-value="values.invoice_prefix"
+                        :label="t('settingsPage.fields.invoicePrefix')"
+                        :error-messages="errors.invoice_prefix"
+                        @update:model-value="setFieldValue('invoice_prefix', $event)"
+                      />
                     </v-col>
                     <v-col cols="12" sm="4">
-                      <Field v-slot="{ field }" name="default_tax_rate">
-                        <v-text-field
-                          v-bind="field"
-                          type="number"
-                          :label="t('settingsPage.fields.defaultTaxRate')"
-                          suffix="%"
-                          :error-messages="errors.default_tax_rate"
-                        />
-                      </Field>
+                      <v-text-field
+                        :model-value="values.default_tax_rate"
+                        type="number"
+                        :label="t('settingsPage.fields.defaultTaxRate')"
+                        suffix="%"
+                        :error-messages="errors.default_tax_rate"
+                        @update:model-value="setFieldValue('default_tax_rate', $event)"
+                      />
                     </v-col>
                     <v-col cols="12" sm="4">
-                      <Field v-slot="{ field }" name="default_due_days">
-                        <v-text-field
-                          v-bind="field"
-                          type="number"
-                          :label="t('settingsPage.fields.defaultDueDays')"
-                          :error-messages="errors.default_due_days"
-                        />
-                      </Field>
+                      <v-text-field
+                        :model-value="values.default_due_days"
+                        type="number"
+                        :label="t('settingsPage.fields.defaultDueDays')"
+                        :error-messages="errors.default_due_days"
+                        @update:model-value="setFieldValue('default_due_days', $event)"
+                      />
                     </v-col>
                     <v-col cols="12">
-                      <Field v-slot="{ field }" name="invoice_footer">
-                        <v-textarea
-                          v-bind="field"
-                          :label="t('settingsPage.fields.invoiceFooter')"
-                          rows="3"
-                          :error-messages="errors.invoice_footer"
-                        />
-                      </Field>
+                      <v-textarea
+                        :model-value="values.invoice_footer"
+                        :label="t('settingsPage.fields.invoiceFooter')"
+                        rows="3"
+                        :error-messages="errors.invoice_footer"
+                        @update:model-value="setFieldValue('invoice_footer', $event)"
+                      />
                     </v-col>
                   </v-row>
                 </v-card-text>
@@ -249,16 +233,15 @@ async function exportData() {
                           style="width: 40px; height: 40px; border: none; padding: 0; background: none"
                           @input="setFieldValue('primary_color', $event.target.value)"
                         />
-                        <Field v-slot="{ field }" name="primary_color">
-                          <v-text-field
-                            v-bind="field"
-                            class="flex-grow-1"
-                            :label="t('settingsPage.fields.primaryColor')"
-                            :error-messages="errors.primary_color"
-                            placeholder="#6750A4"
-                            clearable
-                          />
-                        </Field>
+                        <v-text-field
+                          :model-value="values.primary_color"
+                          class="flex-grow-1"
+                          :label="t('settingsPage.fields.primaryColor')"
+                          :error-messages="errors.primary_color"
+                          placeholder="#6750A4"
+                          clearable
+                          @update:model-value="setFieldValue('primary_color', $event)"
+                        />
                       </div>
                     </v-col>
                     <v-col cols="12" sm="6">
@@ -269,16 +252,15 @@ async function exportData() {
                           style="width: 40px; height: 40px; border: none; padding: 0; background: none"
                           @input="setFieldValue('secondary_color', $event.target.value)"
                         />
-                        <Field v-slot="{ field }" name="secondary_color">
-                          <v-text-field
-                            v-bind="field"
-                            class="flex-grow-1"
-                            :label="t('settingsPage.fields.secondaryColor')"
-                            :error-messages="errors.secondary_color"
-                            placeholder="#625B71"
-                            clearable
-                          />
-                        </Field>
+                        <v-text-field
+                          :model-value="values.secondary_color"
+                          class="flex-grow-1"
+                          :label="t('settingsPage.fields.secondaryColor')"
+                          :error-messages="errors.secondary_color"
+                          placeholder="#625B71"
+                          clearable
+                          @update:model-value="setFieldValue('secondary_color', $event)"
+                        />
                       </div>
                     </v-col>
                   </v-row>

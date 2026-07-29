@@ -2,7 +2,6 @@
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import { Field } from 'vee-validate'
 import AppForm from '@/components/common/AppForm.vue'
 import { resetPasswordSchema } from '@/utils/validators'
 import { resetPasswordApi } from '@/apis/auth.api'
@@ -44,32 +43,30 @@ async function onSubmit(values) {
     <v-alert v-if="errorMessage" type="error" variant="tonal" rounded="lg" class="mb-6">{{ errorMessage }}</v-alert>
 
     <AppForm :schema="resetPasswordSchema" :initial-values="{ password: '', password_confirmation: '' }" @submit="onSubmit">
-      <template #default="{ errors }">
-        <Field v-slot="{ field }" name="password">
-          <v-text-field
-            v-bind="field"
-            :label="t('auth.password')"
-            :type="showPassword ? 'text' : 'password'"
-            autocomplete="new-password"
-            prepend-inner-icon="mdi-lock-outline"
-            :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
-            :error-messages="errors.password"
-            class="mb-4"
-            @click:append-inner="showPassword = !showPassword"
-          />
-        </Field>
+      <template #default="{ errors, values, setFieldValue }">
+        <v-text-field
+          :model-value="values.password"
+          :label="t('auth.password')"
+          :type="showPassword ? 'text' : 'password'"
+          autocomplete="new-password"
+          prepend-inner-icon="mdi-lock-outline"
+          :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+          :error-messages="errors.password"
+          class="mb-4"
+          @update:model-value="setFieldValue('password', $event)"
+          @click:append-inner="showPassword = !showPassword"
+        />
 
-        <Field v-slot="{ field }" name="password_confirmation">
-          <v-text-field
-            v-bind="field"
-            :label="t('auth.confirmPassword')"
-            :type="showPassword ? 'text' : 'password'"
-            autocomplete="new-password"
-            prepend-inner-icon="mdi-lock-check-outline"
-            :error-messages="errors.password_confirmation"
-            class="mb-6"
-          />
-        </Field>
+        <v-text-field
+          :model-value="values.password_confirmation"
+          :label="t('auth.confirmPassword')"
+          :type="showPassword ? 'text' : 'password'"
+          autocomplete="new-password"
+          prepend-inner-icon="mdi-lock-check-outline"
+          :error-messages="errors.password_confirmation"
+          class="mb-6"
+          @update:model-value="setFieldValue('password_confirmation', $event)"
+        />
 
         <v-btn type="submit" color="primary" block size="large" :loading="loading" class="auth-submit">
           {{ t('auth.resetPassword') }}

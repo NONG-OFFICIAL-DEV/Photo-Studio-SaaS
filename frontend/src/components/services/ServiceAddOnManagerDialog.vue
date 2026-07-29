@@ -1,7 +1,6 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Field } from 'vee-validate'
 import AppDialog from '@/components/common/AppDialog.vue'
 import AppForm from '@/components/common/AppForm.vue'
 import AppConfirmDialog from '@/components/common/AppConfirmDialog.vue'
@@ -61,14 +60,10 @@ async function confirmDeleteAddOn() {
 <template>
   <AppDialog :model-value="modelValue" :title="t('services.manageAddOns')" max-width="480" @update:model-value="emit('update:modelValue', $event)">
     <AppForm :schema="serviceAddOnSchema" :initial-values="{ name: '', price: null }" @submit="onSubmit">
-      <template #default="{ errors }">
+      <template #default="{ errors, values, setFieldValue }">
         <div class="d-flex ga-2 align-start mb-4">
-          <Field v-slot="{ field }" name="name">
-            <v-text-field v-bind="field" :label="t('services.addOnName')" density="compact" hide-details :error-messages="errors.name" />
-          </Field>
-          <Field v-slot="{ field }" name="price">
-            <v-text-field v-bind="field" :label="t('fields.price')" type="number" step="0.01" prefix="$" density="compact" hide-details style="max-width: 120px" :error-messages="errors.price" />
-          </Field>
+          <v-text-field :model-value="values.name" :label="t('services.addOnName')" density="compact" hide-details :error-messages="errors.name" @update:model-value="setFieldValue('name', $event)" />
+          <v-text-field :model-value="values.price" :label="t('fields.price')" type="number" step="0.01" prefix="$" density="compact" hide-details style="max-width: 120px" :error-messages="errors.price" @update:model-value="setFieldValue('price', $event)" />
           <v-btn type="submit" icon="mdi-plus" color="primary" :loading="loading" />
         </div>
       </template>

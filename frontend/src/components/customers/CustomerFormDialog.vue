@@ -1,7 +1,6 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Field } from 'vee-validate'
 import AppDialog from '@/components/common/AppDialog.vue'
 import AppForm from '@/components/common/AppForm.vue'
 import AppDatePicker from '@/components/common/AppDatePicker.vue'
@@ -71,19 +70,13 @@ async function onSubmit(values) {
       <template #default="{ errors, values, setFieldValue }">
         <v-row>
           <v-col cols="12" sm="6">
-            <Field v-slot="{ field }" name="name">
-              <v-text-field v-bind="field" :label="`${t('fields.name')} *`" :error-messages="errors.name" />
-            </Field>
+            <v-text-field :model-value="values.name" :label="`${t('fields.name')} *`" :error-messages="errors.name" @update:model-value="setFieldValue('name', $event)" />
           </v-col>
           <v-col cols="12" sm="6">
-            <Field v-slot="{ field }" name="phone">
-              <v-text-field v-bind="field" :label="t('fields.phone')" :error-messages="errors.phone" />
-            </Field>
+            <v-text-field :model-value="values.phone" :label="t('fields.phone')" :error-messages="errors.phone" @update:model-value="setFieldValue('phone', $event)" />
           </v-col>
           <v-col cols="12" sm="6">
-            <Field v-slot="{ field }" name="email">
-              <v-text-field v-bind="field" :label="t('fields.email')" type="email" :error-messages="errors.email" />
-            </Field>
+            <v-text-field :model-value="values.email" :label="t('fields.email')" type="email" :error-messages="errors.email" @update:model-value="setFieldValue('email', $event)" />
           </v-col>
           <v-col cols="12" sm="6">
             <v-select
@@ -120,9 +113,7 @@ async function onSubmit(values) {
             />
           </v-col>
           <v-col cols="12">
-            <Field v-slot="{ field }" name="address">
-              <v-textarea v-bind="field" :label="t('fields.address')" rows="2" :error-messages="errors.address" />
-            </Field>
+            <v-textarea :model-value="values.address" :label="t('fields.address')" rows="2" :error-messages="errors.address" @update:model-value="setFieldValue('address', $event)" />
           </v-col>
         </v-row>
 

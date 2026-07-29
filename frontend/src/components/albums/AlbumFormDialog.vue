@@ -1,7 +1,6 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Field } from 'vee-validate'
 import AppDialog from '@/components/common/AppDialog.vue'
 import AppForm from '@/components/common/AppForm.vue'
 import { albumSchema } from '@/utils/validators'
@@ -94,9 +93,7 @@ async function onSubmit(values) {
       <template #default="{ errors, values, setFieldValue }">
         <v-row>
           <v-col cols="12" sm="6">
-            <Field v-slot="{ field }" name="name">
-              <v-text-field v-bind="field" :label="`${t('fields.name')} *`" :error-messages="errors.name" />
-            </Field>
+            <v-text-field :model-value="values.name" :label="`${t('fields.name')} *`" :error-messages="errors.name" @update:model-value="setFieldValue('name', $event)" />
           </v-col>
           <v-col cols="12" sm="6">
             <v-autocomplete
@@ -117,14 +114,10 @@ async function onSubmit(values) {
             </v-autocomplete>
           </v-col>
           <v-col cols="12" sm="6">
-            <Field v-slot="{ field }" name="expected_photo_count">
-              <v-text-field v-bind="field" :label="t('albums.expectedPhotoCount')" type="number" :error-messages="errors.expected_photo_count" />
-            </Field>
+            <v-text-field :model-value="values.expected_photo_count" :label="t('albums.expectedPhotoCount')" type="number" :error-messages="errors.expected_photo_count" @update:model-value="setFieldValue('expected_photo_count', $event)" />
           </v-col>
           <v-col cols="12">
-            <Field v-slot="{ field }" name="description">
-              <v-textarea v-bind="field" :label="t('fields.description')" rows="3" :error-messages="errors.description" />
-            </Field>
+            <v-textarea :model-value="values.description" :label="t('fields.description')" rows="3" :error-messages="errors.description" @update:model-value="setFieldValue('description', $event)" />
           </v-col>
         </v-row>
 

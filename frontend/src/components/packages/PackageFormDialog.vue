@@ -1,7 +1,6 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Field } from 'vee-validate'
 import AppDialog from '@/components/common/AppDialog.vue'
 import AppForm from '@/components/common/AppForm.vue'
 import { packageSchema } from '@/utils/validators'
@@ -158,9 +157,7 @@ async function onSubmit(values) {
       <template #default="{ errors, values, setFieldValue }">
         <v-row>
           <v-col cols="12" sm="6">
-            <Field v-slot="{ field }" name="name">
-              <v-text-field v-bind="field" :label="`${t('fields.name')} *`" :error-messages="errors.name" />
-            </Field>
+            <v-text-field :model-value="values.name" :label="`${t('fields.name')} *`" :error-messages="errors.name" @update:model-value="setFieldValue('name', $event)" />
           </v-col>
           <v-col cols="12" sm="6">
             <v-switch
@@ -172,9 +169,7 @@ async function onSubmit(values) {
             />
           </v-col>
           <v-col cols="12">
-            <Field v-slot="{ field }" name="description">
-              <v-textarea v-bind="field" :label="t('fields.description')" rows="2" :error-messages="errors.description" />
-            </Field>
+            <v-textarea :model-value="values.description" :label="t('fields.description')" rows="2" :error-messages="errors.description" @update:model-value="setFieldValue('description', $event)" />
           </v-col>
         </v-row>
 
@@ -241,21 +236,18 @@ async function onSubmit(values) {
             />
           </v-col>
           <v-col cols="12" sm="4">
-            <Field v-slot="{ field }" name="discount_value">
-              <v-text-field
-                v-bind="field"
-                :label="t('packages.discountValue')"
-                type="number"
-                step="0.01"
-                :disabled="!values.discount_type"
-                :error-messages="errors.discount_value"
-              />
-            </Field>
+            <v-text-field
+              :model-value="values.discount_value"
+              :label="t('packages.discountValue')"
+              type="number"
+              step="0.01"
+              :disabled="!values.discount_type"
+              :error-messages="errors.discount_value"
+              @update:model-value="setFieldValue('discount_value', $event)"
+            />
           </v-col>
           <v-col cols="12" sm="4">
-            <Field v-slot="{ field }" name="override_price">
-              <v-text-field v-bind="field" :label="t('packages.overridePrice')" type="number" step="0.01" prefix="$" :error-messages="errors.override_price" />
-            </Field>
+            <v-text-field :model-value="values.override_price" :label="t('packages.overridePrice')" type="number" step="0.01" prefix="$" :error-messages="errors.override_price" @update:model-value="setFieldValue('override_price', $event)" />
           </v-col>
         </v-row>
 

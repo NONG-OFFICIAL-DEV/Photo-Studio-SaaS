@@ -1,7 +1,6 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Field } from 'vee-validate'
 import AppDialog from '@/components/common/AppDialog.vue'
 import AppForm from '@/components/common/AppForm.vue'
 import AppDatePicker from '@/components/common/AppDatePicker.vue'
@@ -109,9 +108,7 @@ async function onSubmit(values) {
           @update:model-value="setFieldValue('order_id', $event)"
         />
 
-        <Field v-slot="{ field }" name="amount">
-          <v-text-field v-bind="field" :label="`${t('invoices.amount')} *`" type="number" step="0.01" prefix="$" :error-messages="errors.amount" class="mb-2" />
-        </Field>
+        <v-text-field :model-value="values.amount" :label="`${t('invoices.amount')} *`" type="number" step="0.01" prefix="$" :error-messages="errors.amount" class="mb-2" @update:model-value="setFieldValue('amount', $event)" />
 
         <AppDatePicker
           :model-value="values.earned_date"
@@ -122,9 +119,7 @@ async function onSubmit(values) {
           @update:model-value="setFieldValue('earned_date', $event)"
         />
 
-        <Field v-slot="{ field }" name="notes">
-          <v-textarea v-bind="field" :label="t('fields.notes')" rows="2" :error-messages="errors.notes" />
-        </Field>
+        <v-textarea :model-value="values.notes" :label="t('fields.notes')" rows="2" :error-messages="errors.notes" @update:model-value="setFieldValue('notes', $event)" />
 
         <div class="d-flex justify-end ga-2 mt-2">
           <v-btn variant="text" :disabled="loading" @click="emit('update:modelValue', false)">{{ t('common.cancel') }}</v-btn>
