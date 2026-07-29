@@ -12,9 +12,13 @@ use Symfony\Component\HttpFoundation\Response;
  * Gates tenant-scoped routes behind an in-effect subscription.
  * Runs after IdentifyTenant. Super admins bypass this check entirely.
  *
- * Checked against real dates rather than only the stored `status` column,
- * since the daily scheduler job (Phase: Subscriptions) that flips
- * trial/active -> expired may not have run yet at the exact expiry instant.
+ * Checked against real dates (below) rather than only the stored `status`
+ * column, since the `subscriptions:expire` scheduled command (runs daily,
+ * see routes/console.php) that flips trial/active -> expired may not have
+ * run yet at the exact expiry instant. Suspended/Cancelled/Expired are
+ * still checked directly here too, for whenever the column IS already
+ * accurate (e.g. right after that command runs, or an admin's explicit
+ * suspend/cancel action).
  */
 class EnsureSubscriptionActive
 {
@@ -34,7 +38,7 @@ class EnsureSubscriptionActive
             return $this->error('No subscription found for this studio. Please contact support.', 402);
         }
 
-        if (in_array($subscription->status, [SubscriptionStatus::Suspended, SubscriptionStatus::Cancelled], true)) {
+        if (in_array($subscription->status, [SubscriptionStatus::Suspended, SubscriptionStatus::Cancelled, SubscriptionStatus::Expired], true)) {
             return $this->error(
                 "Your subscription is {$subscription->status->value}. Please renew to continue.",
                 402,

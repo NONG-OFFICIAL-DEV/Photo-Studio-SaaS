@@ -5,6 +5,7 @@ import AppToolbar from '@/components/common/AppToolbar.vue'
 import AppTable from '@/components/common/AppTable.vue'
 import AppStatusChip from '@/components/common/AppStatusChip.vue'
 import AppConfirmDialog from '@/components/common/AppConfirmDialog.vue'
+import AdminSubscriptionDialog from '@/components/admin/AdminSubscriptionDialog.vue'
 import {
   getAdminTenantsApi,
   suspendAdminTenantApi,
@@ -37,6 +38,14 @@ const confirmDialog = ref(false)
 const confirmTarget = ref(null)
 const confirmAction = ref(null)
 const actionLoading = ref(false)
+
+const subscriptionDialog = ref(false)
+const subscriptionTarget = ref(null)
+
+function openSubscriptionDialog(tenant) {
+  subscriptionTarget.value = tenant
+  subscriptionDialog.value = true
+}
 
 function askSuspend(tenant) {
   confirmTarget.value = tenant
@@ -108,6 +117,14 @@ async function confirmToggle() {
 
         <template #[`item.actions`]="{ item }">
           <v-btn
+            size="small"
+            variant="text"
+            prepend-icon="mdi-credit-card-outline"
+            @click="openSubscriptionDialog(item)"
+          >
+            {{ t('admin.tenants.actions.manageSubscription') }}
+          </v-btn>
+          <v-btn
             v-if="item.is_active"
             size="small"
             variant="text"
@@ -138,6 +155,12 @@ async function confirmToggle() {
       :color="confirmAction === 'suspend' ? 'error' : 'success'"
       :loading="actionLoading"
       @confirm="confirmToggle"
+    />
+
+    <AdminSubscriptionDialog
+      v-model="subscriptionDialog"
+      :tenant="subscriptionTarget"
+      @changed="tableRef?.refresh()"
     />
   </div>
 </template>

@@ -110,6 +110,12 @@ export const routes = [
         component: () => import('@/pages/audit/AuditPage.vue'),
         meta: { titleKey: 'menu.audit', permission: 'audit.view' },
       },
+      {
+        path: 'billing',
+        name: 'billing',
+        component: () => import('@/pages/billing/BillingPage.vue'),
+        meta: { titleKey: 'menu.billing', permission: 'tenant.billing.manage' },
+      },
     ],
   },
   {

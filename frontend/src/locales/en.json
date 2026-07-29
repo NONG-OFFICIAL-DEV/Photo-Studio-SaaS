@@ -76,7 +76,8 @@
     "discount": "Discount",
     "quantity": "Qty",
     "unitPrice": "Unit Price",
-    "order": "Order"
+    "order": "Order",
+    "plan": "Plan"
   },
   "menu": {
     "dashboard": "Dashboard",
@@ -103,7 +104,8 @@
       "finance": "Finance",
       "team": "Team",
       "system": "System"
-    }
+    },
+    "billing": "Billing"
   },
   "auth": {
     "login": "Login",
@@ -720,7 +722,8 @@
       "users": "Users",
       "actions": {
         "suspend": "Suspend",
-        "activate": "Activate"
+        "activate": "Activate",
+        "manageSubscription": "Manage Subscription"
       },
       "confirmSuspendTitle": "Suspend tenant?",
       "confirmActivateTitle": "Activate tenant?",
@@ -728,6 +731,23 @@
       "messages": {
         "suspended": "Tenant suspended successfully.",
         "activated": "Tenant activated successfully."
+      },
+      "subscriptionDialog": {
+        "title": "Subscription — {name}",
+        "changePlan": "Change Plan",
+        "recordPayment": "Record Payment (Renew)",
+        "renew": "Record & Renew",
+        "suspend": "Suspend Subscription",
+        "reactivate": "Reactivate",
+        "cancelledNotice": "This subscription is scheduled to cancel at the end of the current period.",
+        "messages": {
+          "planChanged": "Plan changed successfully.",
+          "renewed": "Payment recorded and subscription renewed.",
+          "cancelled": "Subscription cancellation scheduled.",
+          "resumed": "Subscription cancellation reversed.",
+          "suspended": "Subscription suspended.",
+          "reactivated": "Subscription reactivated."
+        }
       }
     },
     "plans": {
@@ -792,5 +812,52 @@
   "adminAuditPage": {
     "subtitle": "Audit log, activity log, login history, API logs, and security events across every tenant.",
     "filterByTenant": "Filter by tenant"
+  },
+  "billingPage": {
+    "title": "Billing & Subscription",
+    "subtitle": "Your plan, usage, and payment history.",
+    "currentPlan": "Current Plan",
+    "usage": "Usage",
+    "paymentHistory": "Payment History",
+    "paidAt": "Paid",
+    "cycle": "Cycle",
+    "recordedBy": "Recorded By",
+    "self": "Self-service",
+    "trialEnds": "Your trial ends on {date}.",
+    "periodEnds": "Current period ends on {date}.",
+    "cancelledNotice": "Your subscription is scheduled to cancel on {date}.",
+    "renewHint": "Choose a billing cycle to simulate a payment and extend your subscription.",
+    "confirmCancelTitle": "Cancel subscription?",
+    "confirmCancelMessage": "Your studio will keep full access until {date}, then your subscription will end.",
+    "confirmResumeTitle": "Resume subscription?",
+    "confirmResumeMessage": "This reverses the scheduled cancellation — your subscription will continue as normal.",
+    "cycles": {
+      "monthly": "Monthly",
+      "quarterly": "Quarterly",
+      "yearly": "Yearly"
+    },
+    "limits": {
+      "maxUsers": "Users ({count} max)",
+      "storage": "Storage ({count} GB)",
+      "orders": "Orders this month ({count} max)"
+    },
+    "actions": {
+      "renew": "Renew",
+      "changePlan": "Change Plan",
+      "cancel": "Cancel Subscription",
+      "resume": "Resume Subscription",
+      "selectPlan": "Select Plan",
+      "confirmPay": "Confirm Payment"
+    },
+    "messages": {
+      "renewed": "Subscription renewed successfully.",
+      "renewError": "Could not renew subscription.",
+      "planChanged": "Plan changed successfully.",
+      "planChangeError": "Could not change plan.",
+      "cancelled": "Subscription cancellation scheduled.",
+      "resumed": "Subscription cancellation reversed."
+    },
+    "freePlanHint": "This is a free plan and has nothing to renew. Choose a paid plan to enable billing.",
+    "pendingPaymentHint": "Choose a plan below — you'll be asked to confirm payment next."
   }
 }

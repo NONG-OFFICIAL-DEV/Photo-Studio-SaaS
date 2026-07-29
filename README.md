@@ -648,6 +648,60 @@ tenant-scoped and platform-wide from the Super Admin panel.
   API log middleware/exception-handler split (mutation success, GET
   success skipped, GET 404 captured).
 
+## What's implemented (Phase 19 — Subscription Lifecycle)
+
+The `Plan`/`Subscription` data model and the `tenant.billing.manage`
+permission had existed since Phase 1, but nothing ever used them — no
+billing page, no way to renew/upgrade/downgrade/cancel a subscription,
+and no automatic expiry. This phase closes that gap on both sides: a
+tenant-facing Billing page and a Super Admin override panel.
+
+- No real payment gateway is integrated — "paying" is simulated: a
+  `SubscriptionPayment` ledger row (amount, billing cycle, period
+  covered, `paid_at`, nullable `recorded_by`) is created immediately
+  and the subscription's `current_period_ends_at` is extended, whether
+  the tenant does it themselves or an admin does it on their behalf.
+- Tenant self-service (`/api/v1/billing/*`, gated by the
+  previously-unused `tenant.billing.manage` permission — Owner only by
+  default): view current plan + usage vs. plan limits (users, monthly
+  orders) + payment history; **renew** (extends from the existing
+  period end if not yet lapsed, not from "now", so paying early never
+  loses time); **change plan** (no proration — new price just applies
+  on the next renewal); **cancel** (cancels at period end — access
+  continues via the untouched `isUsable()` check until the scheduled
+  sweep transitions it); **resume** (undo a pending cancellation before
+  the period actually ends).
+- Deliberately architectural: the Billing routes sit in their own route
+  group with only `['auth:api', 'tenant']` — **outside**
+  `subscription.active` — because a tenant whose subscription has
+  already lapsed must still be able to reach Billing to fix it, or the
+  gate that blocks them would also block the only way out.
+- Super Admin override (`/api/v1/admin/tenants/{tenant}/subscription/*`):
+  everything a tenant can do to their own subscription, plus
+  `suspend`/`reactivate` — a subscription-level block (distinct from
+  the tenant-level `is_active` suspend from Phase 15) for things like
+  payment disputes, without touching the whole tenant account.
+  `reactivate` recomputes status from the actual dates rather than
+  blindly restoring Active, so it can never grant more access than the
+  tenant's real trial/paid period justifies.
+- New `subscriptions:expire` scheduled command (daily, alongside the
+  existing `invoices:mark-overdue`) sweeps every Trial/Active
+  subscription past its period end into Expired — or Cancelled, if a
+  cancellation was already pending — tenant-agnostic, matching
+  `InvoiceService::markOverdue()`'s existing pattern.
+- Fixed a real, previously-latent bug surfaced by building this:
+  `EnsureSubscriptionActive` checked for `Suspended`/`Cancelled`
+  status directly but never `Expired` itself — harmless before, since
+  nothing had ever set that literal status, but the new scheduled
+  command does exactly that. Added `Expired` to the blocked-statuses
+  check.
+- 365 total passing backend tests (23 new for this module): tenant renew/change-plan/cancel/resume and
+  permission gating, Billing's reachability during a lapsed
+  subscription (contrasted with a regular route correctly 402'ing),
+  admin override actions including suspend/reactivate and the
+  reactivate-from-dates recomputation, and the expiry command's
+  sweep/cancel-vs-expire branching/tenant-agnostic behavior.
+
 ## Getting Started
 
 ### Prerequisites
@@ -740,3 +794,4 @@ Pinia stores, and tests, same as Phase 1.
 15. ~~Super Admin Panel (tenants, plans, platform analytics)~~ ✅ (support ticket system skipped for now, at the user's request)
 16–17. Not yet defined
 18. ~~Audit (audit log, activity log, login history, API logs, security events)~~ ✅
+19. ~~Subscription Lifecycle (tenant billing self-service + Super Admin override, simulated payments, auto-expiry)~~ ✅

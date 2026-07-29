@@ -23,9 +23,12 @@ const loading = ref(false)
 const confirmDelete = ref(false)
 const tagToDelete = ref(null)
 
-watch(() => props.modelValue, (open) => {
-  if (open) tagsStore.fetch(true)
-})
+watch(
+  () => props.modelValue,
+  (open) => {
+    if (open) tagsStore.fetch(true)
+  },
+)
 
 async function onSubmit(values, { resetForm }) {
   loading.value = true
@@ -57,17 +60,29 @@ async function confirmDeleteTag() {
 </script>
 
 <template>
-  <AppDialog :model-value="modelValue" :title="t('customers.dialogs.manageTagsTitle')" max-width="480" @update:model-value="emit('update:modelValue', $event)">
+  <AppDialog
+    :model-value="modelValue"
+    :title="t('customers.dialogs.manageTagsTitle')"
+    max-width="480"
+    @update:model-value="emit('update:modelValue', $event)"
+  >
     <AppForm :schema="customerTagSchema" :initial-values="{ name: '', color: '#6750A4' }" @submit="onSubmit">
       <template #default="{ errors, values, setFieldValue }">
         <div class="d-flex ga-2 align-start mb-4">
-          <v-text-field :model-value="values.name" :label="t('customers.dialogs.newTagNameLabel')" density="compact" hide-details :error-messages="errors.name" @update:model-value="setFieldValue('name', $event)" />
+          <v-text-field
+            :model-value="values.name"
+            :label="t('customers.dialogs.newTagNameLabel')"
+            density="compact"
+            hide-details
+            :error-messages="errors.name"
+            @update:model-value="setFieldValue('name', $event)"
+          />
           <input
             :value="values.color"
             type="color"
             style="width: 40px; height: 40px; border: none; cursor: pointer"
             @input="setFieldValue('color', $event.target.value)"
-          >
+          />
           <v-btn type="submit" icon="mdi-plus" color="primary" :loading="loading" />
         </div>
       </template>

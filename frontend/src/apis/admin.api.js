@@ -10,6 +10,22 @@ export const suspendAdminTenantApi = id => http.post(`/v1/admin/tenants/${id}/su
 
 export const activateAdminTenantApi = id => http.post(`/v1/admin/tenants/${id}/activate`)
 
+export const changeAdminSubscriptionPlanApi = (tenantId, planId) =>
+  http.put(`/v1/admin/tenants/${tenantId}/subscription/plan`, { plan_id: planId })
+
+export const renewAdminSubscriptionApi = (tenantId, billingCycle) =>
+  http.post(`/v1/admin/tenants/${tenantId}/subscription/renew`, { billing_cycle: billingCycle })
+
+export const cancelAdminSubscriptionApi = tenantId => http.post(`/v1/admin/tenants/${tenantId}/subscription/cancel`)
+
+export const resumeAdminSubscriptionApi = tenantId => http.post(`/v1/admin/tenants/${tenantId}/subscription/resume`)
+
+export const suspendAdminSubscriptionApi = tenantId => http.post(`/v1/admin/tenants/${tenantId}/subscription/suspend`)
+
+export const reactivateAdminSubscriptionApi = tenantId => http.post(`/v1/admin/tenants/${tenantId}/subscription/reactivate`)
+
+export const getAdminSubscriptionPaymentsApi = tenantId => http.get(`/v1/admin/tenants/${tenantId}/subscription/payments`)
+
 export const getAdminPlansApi = params => http.get('/v1/admin/plans', { params })
 
 export const createAdminPlanApi = payload => http.post('/v1/admin/plans', payload)

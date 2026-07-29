@@ -128,6 +128,7 @@ const tenantMenuGroups = computed(() => [
         permission: 'tenant.settings.manage',
       },
       { title: t('menu.audit'), icon: 'mdi-shield-search', to: { name: 'audit' }, permission: 'audit.view' },
+      { title: t('menu.billing'), icon: 'mdi-credit-card-outline', to: { name: 'billing' }, permission: 'tenant.billing.manage' },
     ],
   },
 ])
@@ -292,11 +293,11 @@ function toggleLocale() {
           <!-- Quick Actions & Links -->
           <v-list density="comfortable" class="py-1">
             <v-list-item
-              prepend-icon="mdi-account-outline"
-              :title="t('common.profile')"
+              prepend-icon="mdi-cash-multiple"
+              :title="t('common.billing')"
               rounded="md"
               class="mx-1 my-1"
-              to="/profile"
+              to="/billing"
             />
 
             <v-divider class="my-1" />

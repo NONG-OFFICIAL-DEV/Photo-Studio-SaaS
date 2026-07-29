@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\Album\AlbumController;
 use App\Http\Controllers\Api\V1\Attendance\AttendanceController;
 use App\Http\Controllers\Api\V1\Audit\AuditController;
 use App\Http\Controllers\Api\V1\Auth\AuthController;
+use App\Http\Controllers\Api\V1\Billing\BillingController;
 use App\Http\Controllers\Api\V1\Auth\EmailVerificationController;
 use App\Http\Controllers\Api\V1\Auth\PasswordResetController;
 use App\Http\Controllers\Api\V1\Booking\BookingController;
@@ -266,6 +267,24 @@ Route::middleware(['auth:api', 'tenant', 'subscription.active'])->group(function
 });
 
 /*
+ * Tenant self-service billing. Deliberately OUTSIDE `subscription.active` —
+ * a tenant whose subscription has lapsed must still be able to reach this
+ * to renew, or the middleware that blocks them would also block the only
+ * way to fix it. `tenant` middleware still applies (a tenant deactivated
+ * outright by the platform, is_active=false, is a separate, more severe
+ * gate that correctly still blocks billing too).
+ */
+Route::middleware(['auth:api', 'tenant'])->prefix('billing')->name('billing.')->group(function () {
+    Route::get('/', [BillingController::class, 'show']);
+    Route::get('/plans', [BillingController::class, 'plans']);
+    Route::get('/payments', [BillingController::class, 'payments']);
+    Route::post('/renew', [BillingController::class, 'renew']);
+    Route::put('/plan', [BillingController::class, 'changePlan']);
+    Route::post('/cancel', [BillingController::class, 'cancel']);
+    Route::post('/resume', [BillingController::class, 'resume']);
+});
+
+/*
  * Platform admin panel. Deliberately OUTSIDE the tenant-scoped group above —
  * super admins have no tenant_id and operate across every tenant, so this
  * group runs behind only auth:api + super-admin (see EnsureSuperAdmin and
@@ -279,6 +298,16 @@ Route::prefix('admin')->name('admin.')->middleware(['auth:api', 'super-admin'])-
         Route::get('/{tenant}', [AdminTenantController::class, 'show']);
         Route::post('/{tenant}/suspend', [AdminTenantController::class, 'suspend']);
         Route::post('/{tenant}/activate', [AdminTenantController::class, 'activate']);
+
+        Route::prefix('{tenant}/subscription')->name('subscription.')->group(function () {
+            Route::put('/plan', [AdminTenantController::class, 'changePlan']);
+            Route::post('/renew', [AdminTenantController::class, 'renewSubscription']);
+            Route::post('/cancel', [AdminTenantController::class, 'cancelSubscription']);
+            Route::post('/resume', [AdminTenantController::class, 'resumeSubscription']);
+            Route::post('/suspend', [AdminTenantController::class, 'suspendSubscription']);
+            Route::post('/reactivate', [AdminTenantController::class, 'reactivateSubscription']);
+            Route::get('/payments', [AdminTenantController::class, 'subscriptionPayments']);
+        });
     });
 
     Route::prefix('plans')->name('plans.')->group(function () {

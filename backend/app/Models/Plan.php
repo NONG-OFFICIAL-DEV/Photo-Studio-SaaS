@@ -38,4 +38,18 @@ class Plan extends Model
     {
         return $this->hasMany(Subscription::class);
     }
+
+    /**
+     * True if any billing cycle actually charges something. False for the
+     * seeded Free Trial plan (price_monthly = 0, no quarterly/yearly price
+     * at all) — used to keep it out of the tenant self-service "change
+     * plan" picker, since it's a one-time onboarding plan, not an ongoing
+     * tier a paying tenant should be able to switch back to.
+     */
+    public function hasPaidPricing(): bool
+    {
+        return (float) $this->price_monthly > 0
+            || (float) ($this->price_quarterly ?? 0) > 0
+            || (float) ($this->price_yearly ?? 0) > 0;
+    }
 }

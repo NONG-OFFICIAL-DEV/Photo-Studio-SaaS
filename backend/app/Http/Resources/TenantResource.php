@@ -24,12 +24,9 @@ class TenantResource extends JsonResource
             'locale' => $this->locale,
             'is_active' => $this->is_active,
             'settings' => $this->settingsWithDefaults(),
-            'subscription' => $this->whenLoaded('activeSubscription', fn () => $this->activeSubscription ? [
-                'status' => $this->activeSubscription->status->value,
-                'plan' => $this->activeSubscription->relationLoaded('plan') ? $this->activeSubscription->plan->name : null,
-                'trial_ends_at' => $this->activeSubscription->trial_ends_at,
-                'current_period_ends_at' => $this->activeSubscription->current_period_ends_at,
-            ] : null),
+            'subscription' => $this->whenLoaded('activeSubscription', fn () => $this->activeSubscription
+                ? new SubscriptionResource($this->activeSubscription)
+                : null),
             'created_at' => $this->created_at,
         ];
     }

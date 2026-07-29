@@ -1,0 +1,275 @@
+<?php
+
+namespace App\Services;
+
+use App\Enums\BillingCycle;
+use App\Enums\SubscriptionStatus;
+use App\Models\Order;
+use App\Models\Plan;
+use App\Models\Subscription;
+use App\Models\SubscriptionPayment;
+use App\Models\Tenant;
+use App\Models\User;
+use Illuminate\Support\Collection;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+
+/**
+ * Subscription lifecycle for both the tenant self-service Billing page and
+ * the Super Admin's override actions on a tenant's subscription — every
+ * method here optionally takes the acting admin ($actor), null meaning
+ * "the tenant did this to their own subscription".
+ *
+ * No real payment gateway is integrated (see the create_subscription_payments
+ * migration docblock): renew() simulates a successful payment immediately.
+ */
+class SubscriptionService
+{
+    public function usage(Tenant $tenant): array
+    {
+        return [
+            'users_count' => User::query()->where('tenant_id', $tenant->id)->count(),
+            'orders_this_month_count' => Order::query()
+                ->where('tenant_id', $tenant->id)
+                ->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])
+                ->count(),
+        ];
+    }
+
+    public function paymentHistory(Tenant $tenant): Collection
+    {
+        return SubscriptionPayment::query()
+            ->where('tenant_id', $tenant->id)
+            ->with(['plan', 'recordedBy'])
+            ->latest('paid_at')
+            ->get();
+    }
+
+    /**
+     * Simulates a successful payment for one billing cycle: extends the
+     * period (from "now" if already lapsed, otherwise from the current
+     * period's end so paying early doesn't lose remaining time), snapshots
+     * a SubscriptionPayment row, and reactivates the subscription —
+     * including reversing a pending cancellation, since paying again is an
+     * unambiguous signal the tenant wants to continue.
+     *
+     * Deliberately refuses to "renew" a plan with no real price on the
+     * requested cycle (the seeded Free Trial plan is exactly this: a $0
+     * price_monthly, no quarterly/yearly price at all) — without this
+     * check, a tenant could click Renew forever on a free plan, flipping
+     * status to Active and never actually converting to a paid one.
+     */
+    public function renew(Subscription $subscription, ?BillingCycle $cycle, ?User $actor): Subscription
+    {
+        $plan = $subscription->plan ?? $subscription->plan()->firstOrFail();
+        $cycle ??= $subscription->billing_cycle ?? BillingCycle::Monthly;
+        $amount = $this->priceForCycle($plan, $cycle);
+
+        if ($amount === null) {
+            throw new HttpException(422, "\"{$plan->name}\" isn't available on a {$cycle->value} billing cycle.");
+        }
+
+        if ($amount <= 0) {
+            throw new HttpException(422, "\"{$plan->name}\" is a free plan and has nothing to renew — choose a paid plan first.");
+        }
+
+        $periodStart = $subscription->current_period_ends_at?->isFuture()
+            ? $subscription->current_period_ends_at
+            : now();
+        $periodEnd = $periodStart->copy()->addMonths($cycle->months());
+
+        $subscription->update([
+            'status' => SubscriptionStatus::Active,
+            'billing_cycle' => $cycle,
+            'current_period_start' => $periodStart,
+            'current_period_ends_at' => $periodEnd,
+            'amount' => $amount,
+            'cancelled_at' => null,
+        ]);
+
+        SubscriptionPayment::create([
+            'tenant_id' => $subscription->tenant_id,
+            'subscription_id' => $subscription->id,
+            'plan_id' => $plan->id,
+            'amount' => $amount,
+            'billing_cycle' => $cycle,
+            'period_start' => $periodStart,
+            'period_end' => $periodEnd,
+            'paid_at' => now(),
+            'recorded_by' => $actor?->id,
+        ]);
+
+        $this->logAudit($subscription, $actor, "Subscription renewed (\"{$plan->name}\", \${$amount})");
+
+        return $subscription->fresh('plan');
+    }
+
+    /**
+     * Switches which plan the subscription is billed against. Deliberately
+     * no proration — this is simulated billing, not a real payment
+     * processor — the new price simply takes effect on the next renew().
+     *
+     * A tenant (actor === null, i.e. self-service — see the class docblock)
+     * cannot switch to a plan with no real price on any cycle (the Free
+     * Trial plan): it's a one-time onboarding plan, not a selectable
+     * ongoing tier, and switching back to it wouldn't shorten a period
+     * already paid for but WOULD be a free way to dodge the next renewal's
+     * charge. An admin can still do this deliberately (e.g. a goodwill
+     * gesture), same as everywhere else admin actions override tenant
+     * self-service limits.
+     */
+    public function changePlan(Subscription $subscription, Plan $plan, ?User $actor): Subscription
+    {
+        if (! $plan->is_active) {
+            throw new HttpException(422, 'This plan is not available.');
+        }
+
+        if ($actor === null && ! $plan->hasPaidPricing()) {
+            throw new HttpException(422, "\"{$plan->name}\" is not available to switch to — it's a free onboarding plan, not an ongoing tier.");
+        }
+
+        $oldPlanName = $subscription->plan?->name ?? 'previous plan';
+        $cycle = $subscription->billing_cycle ?? BillingCycle::Monthly;
+
+        $subscription->update([
+            'plan_id' => $plan->id,
+            'amount' => $this->priceForCycle($plan, $cycle),
+        ]);
+
+        $this->logAudit($subscription, $actor, "Plan changed from \"{$oldPlanName}\" to \"{$plan->name}\"");
+
+        return $subscription->fresh('plan');
+    }
+
+    /**
+     * Cancel-at-period-end: access continues (isUsable() is untouched)
+     * until the scheduled expireDue() sweep sees the period has actually
+     * ended, at which point it transitions to Cancelled (not Expired)
+     * because cancelled_at is set.
+     */
+    public function cancel(Subscription $subscription, ?User $actor): Subscription
+    {
+        if (! $subscription->status->isUsable()) {
+            throw new HttpException(422, 'Only an active or trial subscription can be cancelled.');
+        }
+
+        if ($subscription->cancelled_at) {
+            throw new HttpException(422, 'This subscription is already scheduled for cancellation.');
+        }
+
+        $subscription->update(['cancelled_at' => now()]);
+
+        $this->logAudit($subscription, $actor, 'Subscription cancellation scheduled for period end');
+
+        return $subscription->fresh('plan');
+    }
+
+    public function resume(Subscription $subscription, ?User $actor): Subscription
+    {
+        if (! $subscription->cancelled_at) {
+            throw new HttpException(422, 'This subscription is not scheduled for cancellation.');
+        }
+
+        $endsAt = $subscription->status === SubscriptionStatus::Trial
+            ? $subscription->trial_ends_at
+            : $subscription->current_period_ends_at;
+
+        if ($endsAt && $endsAt->isPast()) {
+            throw new HttpException(422, 'This subscription has already ended and cannot be resumed — renew instead.');
+        }
+
+        $subscription->update(['cancelled_at' => null]);
+
+        $this->logAudit($subscription, $actor, 'Subscription cancellation reversed');
+
+        return $subscription->fresh('plan');
+    }
+
+    /**
+     * Admin-only: blocks access regardless of dates (e.g. a payment
+     * dispute) without touching the tenant's own is_active flag, which is
+     * a separate, more severe admin action (see AdminTenantService).
+     */
+    public function suspend(Subscription $subscription, User $actor): Subscription
+    {
+        $subscription->update(['status' => SubscriptionStatus::Suspended]);
+
+        $this->logAudit($subscription, $actor, 'Subscription suspended');
+
+        return $subscription->fresh('plan');
+    }
+
+    /**
+     * Reverses suspend() by recomputing the correct status from the dates
+     * alone, so un-suspending never grants more access than the tenant's
+     * actual trial/paid period justifies.
+     */
+    public function reactivate(Subscription $subscription, User $actor): Subscription
+    {
+        if ($subscription->status !== SubscriptionStatus::Suspended) {
+            throw new HttpException(422, 'Only a suspended subscription can be reactivated this way.');
+        }
+
+        $status = $this->statusFromDates($subscription);
+
+        $subscription->update(['status' => $status]);
+
+        $this->logAudit($subscription, $actor, "Subscription reactivated as \"{$status->label()}\"");
+
+        return $subscription->fresh('plan');
+    }
+
+    /**
+     * The scheduled sweep (see app/Console/Commands and routes/console.php)
+     * — tenant-agnostic by design, same as InvoiceService::markOverdue().
+     */
+    public function expireDue(): int
+    {
+        $due = Subscription::query()
+            ->where(function ($query) {
+                $query->where(fn ($q) => $q->where('status', SubscriptionStatus::Trial->value)->whereNotNull('trial_ends_at')->where('trial_ends_at', '<', now()))
+                    ->orWhere(fn ($q) => $q->where('status', SubscriptionStatus::Active->value)->whereNotNull('current_period_ends_at')->where('current_period_ends_at', '<', now()));
+            })
+            ->get();
+
+        foreach ($due as $subscription) {
+            $subscription->update([
+                'status' => $subscription->cancelled_at ? SubscriptionStatus::Cancelled : SubscriptionStatus::Expired,
+            ]);
+        }
+
+        return $due->count();
+    }
+
+    protected function statusFromDates(Subscription $subscription): SubscriptionStatus
+    {
+        if ($subscription->trial_ends_at?->isFuture()) {
+            return SubscriptionStatus::Trial;
+        }
+
+        if ($subscription->current_period_ends_at?->isFuture()) {
+            return SubscriptionStatus::Active;
+        }
+
+        return $subscription->cancelled_at ? SubscriptionStatus::Cancelled : SubscriptionStatus::Expired;
+    }
+
+    protected function priceForCycle(Plan $plan, BillingCycle $cycle): ?float
+    {
+        $price = match ($cycle) {
+            BillingCycle::Monthly => $plan->price_monthly,
+            BillingCycle::Quarterly => $plan->price_quarterly,
+            BillingCycle::Yearly => $plan->price_yearly,
+        };
+
+        return $price !== null ? (float) $price : null;
+    }
+
+    protected function logAudit(Subscription $subscription, ?User $actor, string $description): void
+    {
+        activity('audit')
+            ->performedOn($subscription)
+            ->causedBy($actor)
+            ->tap(fn ($a) => $a->tenant_id = $subscription->tenant_id)
+            ->log($description);
+    }
+}
