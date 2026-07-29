@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureSubscriptionActive;
+use App\Http\Middleware\EnsureSuperAdmin;
 use App\Http\Middleware\IdentifyTenant;
 use App\Traits\ApiResponse;
 use Illuminate\Auth\AuthenticationException;
@@ -32,6 +33,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'tenant' => IdentifyTenant::class,
             'subscription.active' => EnsureSubscriptionActive::class,
+            'super-admin' => EnsureSuperAdmin::class,
         ]);
 
         // IdentifyTenant must run before SubstituteBindings — otherwise

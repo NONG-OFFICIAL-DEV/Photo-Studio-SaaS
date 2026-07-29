@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Api\V1\Admin\AdminAnalyticsController;
+use App\Http\Controllers\Api\V1\Admin\AdminPlanController;
+use App\Http\Controllers\Api\V1\Admin\AdminTenantController;
 use App\Http\Controllers\Api\V1\Album\AlbumController;
 use App\Http\Controllers\Api\V1\Attendance\AttendanceController;
 use App\Http\Controllers\Api\V1\Auth\AuthController;
@@ -249,5 +252,29 @@ Route::middleware(['auth:api', 'tenant', 'subscription.active'])->group(function
 
         Route::get('/', [TenantSettingsController::class, 'show']);
         Route::put('/', [TenantSettingsController::class, 'update']);
+    });
+});
+
+/*
+ * Platform admin panel. Deliberately OUTSIDE the tenant-scoped group above —
+ * super admins have no tenant_id and operate across every tenant, so this
+ * group runs behind only auth:api + super-admin (see EnsureSuperAdmin and
+ * IdentifyTenant's super-admin exemption).
+ */
+Route::prefix('admin')->name('admin.')->middleware(['auth:api', 'super-admin'])->group(function () {
+    Route::get('/analytics', [AdminAnalyticsController::class, 'stats']);
+
+    Route::prefix('tenants')->name('tenants.')->group(function () {
+        Route::get('/', [AdminTenantController::class, 'index']);
+        Route::get('/{tenant}', [AdminTenantController::class, 'show']);
+        Route::post('/{tenant}/suspend', [AdminTenantController::class, 'suspend']);
+        Route::post('/{tenant}/activate', [AdminTenantController::class, 'activate']);
+    });
+
+    Route::prefix('plans')->name('plans.')->group(function () {
+        Route::get('/', [AdminPlanController::class, 'index']);
+        Route::post('/', [AdminPlanController::class, 'store']);
+        Route::put('/{plan}', [AdminPlanController::class, 'update']);
+        Route::delete('/{plan}', [AdminPlanController::class, 'destroy']);
     });
 });
