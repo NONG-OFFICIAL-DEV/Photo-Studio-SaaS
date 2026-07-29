@@ -27,6 +27,12 @@ return [
         'services' => ['services.view', 'services.create', 'services.update', 'services.delete'],
         'orders' => ['orders.view', 'orders.create', 'orders.update', 'orders.delete'],
         'editing' => ['editing.view', 'editing.update'],
+        'albums' => ['albums.view', 'albums.create', 'albums.update', 'albums.delete'],
+        'invoices' => [
+            'invoices.view', 'invoices.create', 'invoices.update', 'invoices.delete',
+            'invoices.send', 'invoices.void',
+        ],
+        'payments' => ['payments.record', 'payments.delete'],
     ],
 
     /*
@@ -47,17 +53,36 @@ return [
             'services.view', 'services.create', 'services.update', 'services.delete',
             'orders.view', 'orders.create', 'orders.update', 'orders.delete',
             'editing.view', 'editing.update',
+            'albums.view', 'albums.create', 'albums.update', 'albums.delete',
+            'invoices.view', 'invoices.create', 'invoices.update', 'invoices.delete',
+            'invoices.send', 'invoices.void',
+            'payments.record', 'payments.delete',
         ],
-        TenantRole::Photographer->value => ['dashboard.view', 'customers.view', 'bookings.view', 'bookings.update', 'services.view', 'orders.view'],
-        TenantRole::Editor->value => ['dashboard.view', 'customers.view', 'bookings.view', 'services.view', 'orders.view', 'editing.view', 'editing.update'],
-        TenantRole::Cashier->value => ['dashboard.view', 'customers.view', 'customers.create', 'bookings.view', 'services.view', 'orders.view', 'orders.create'],
+        TenantRole::Photographer->value => [
+            'dashboard.view', 'customers.view', 'bookings.view', 'bookings.update', 'services.view', 'orders.view',
+            'albums.view', 'albums.create', 'albums.update',
+        ],
+        TenantRole::Editor->value => [
+            'dashboard.view', 'customers.view', 'bookings.view', 'services.view', 'orders.view', 'editing.view', 'editing.update',
+            'albums.view', 'albums.update',
+        ],
+        TenantRole::Cashier->value => [
+            'dashboard.view', 'customers.view', 'customers.create', 'bookings.view', 'services.view', 'orders.view', 'orders.create',
+            'albums.view',
+            'invoices.view', 'invoices.create', 'invoices.update', 'invoices.send', 'invoices.void',
+            'payments.record', 'payments.delete',
+        ],
         TenantRole::Receptionist->value => [
             'dashboard.view', 'users.view',
             'customers.view', 'customers.create', 'customers.update', 'customers.export',
             'bookings.view', 'bookings.create', 'bookings.update', 'bookings.assign', 'bookings.cancel',
             'services.view',
             'orders.view', 'orders.create', 'orders.update',
+            'albums.view', 'invoices.view',
         ],
-        TenantRole::Viewer->value => ['dashboard.view', 'customers.view', 'bookings.view', 'services.view', 'orders.view', 'editing.view'],
+        TenantRole::Viewer->value => [
+            'dashboard.view', 'customers.view', 'bookings.view', 'services.view', 'orders.view', 'editing.view',
+            'albums.view', 'invoices.view',
+        ],
     ],
 ];

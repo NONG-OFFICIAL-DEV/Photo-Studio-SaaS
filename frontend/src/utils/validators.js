@@ -115,3 +115,36 @@ export const orderSchema = yup.object({
 export const cancelOrderSchema = yup.object({
   reason: yup.string().required().max(1000),
 })
+
+export const albumSchema = yup.object({
+  name: yup.string().required().max(255),
+  customer_id: yup.string().nullable(),
+  order_id: yup.string().nullable(),
+  description: yup.string().nullable().max(2000),
+  expected_photo_count: yup.number().typeError('Must be a number').nullable().min(0),
+})
+
+export const invoiceSchema = yup.object({
+  customer_id: yup.string().nullable().when('order_id', {
+    is: val => !val,
+    then: schema => schema.required('Customer is required unless created from an order'),
+  }),
+  order_id: yup.string().nullable(),
+  issue_date: yup.string().nullable(),
+  due_date: yup.string().nullable(),
+  discount_amount: yup.number().typeError('Must be a number').nullable().min(0),
+  tax_rate: yup.number().typeError('Must be a number').nullable().min(0).max(100),
+  notes: yup.string().nullable().max(2000),
+})
+
+export const voidInvoiceSchema = yup.object({
+  reason: yup.string().required().max(1000),
+})
+
+export const paymentSchema = yup.object({
+  amount: yup.number().typeError('Must be a number').required().min(0.01),
+  method: yup.string().required(),
+  paid_at: yup.string().nullable(),
+  reference: yup.string().nullable().max(255),
+  notes: yup.string().nullable().max(2000),
+})

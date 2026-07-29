@@ -24,6 +24,8 @@ const menuItems = computed(() => [
   { title: t('menu.services'), icon: 'mdi-tag-outline', to: { name: 'services' }, permission: 'services.view' },
   { title: t('menu.orders'), icon: 'mdi-cart-outline', to: { name: 'orders' }, permission: 'orders.view' },
   { title: t('menu.editingQueue'), icon: 'mdi-image-edit-outline', to: { name: 'editing-queue' }, permission: 'editing.view' },
+  { title: t('menu.albums'), icon: 'mdi-book-open-page-variant-outline', to: { name: 'albums' }, permission: 'albums.view' },
+  { title: t('menu.invoices'), icon: 'mdi-receipt-text-outline', to: { name: 'invoices' }, permission: 'invoices.view' },
 ].filter((item) => !item.permission || auth.hasPermission(item.permission)))
 
 async function handleLogout() {

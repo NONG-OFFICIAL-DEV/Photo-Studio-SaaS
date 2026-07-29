@@ -56,6 +56,16 @@ class Order extends Model
         return $this->hasOne(EditingTask::class);
     }
 
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
+    public function albums(): HasMany
+    {
+        return $this->hasMany(Album::class);
+    }
+
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');

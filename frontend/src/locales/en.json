@@ -83,6 +83,7 @@
     "services": "Services & Pricing",
     "orders": "Orders",
     "editingQueue": "Editing Queue",
+    "albums": "Albums",
     "gallery": "Gallery",
     "invoices": "Invoices",
     "employees": "Employees",
@@ -359,6 +360,87 @@
       "submitForReview": "Submit for Review",
       "complete": "Complete",
       "requestRevision": "Request Revision"
+    }
+  },
+  "albums": {
+    "title": "Albums",
+    "subtitle": "Track photo album progress from draft through delivery.",
+    "newAlbum": "New Album",
+    "editAlbum": "Edit Album",
+    "expectedPhotoCount": "Expected Photo Count",
+    "status": {
+      "draft": "Draft",
+      "inProgress": "In Progress",
+      "ready": "Ready",
+      "delivered": "Delivered",
+      "archived": "Archived"
+    },
+    "actions": {
+      "start": "Start",
+      "markReady": "Mark Ready",
+      "deliver": "Deliver",
+      "archive": "Archive"
+    },
+    "dialogs": {
+      "deleteConfirmTitle": "Delete album?",
+      "deleteConfirmMessage": "This will remove '{name}'."
+    },
+    "messages": {
+      "createdSuccess": "Album created successfully.",
+      "updatedSuccess": "Album updated successfully.",
+      "saveError": "Unable to save album.",
+      "deletedSuccess": "Album deleted successfully."
+    }
+  },
+  "invoices": {
+    "title": "Invoices",
+    "subtitle": "Bill customers and track payments from draft through paid.",
+    "newInvoice": "New Invoice",
+    "createInvoice": "Create Invoice",
+    "invoiceNumber": "Invoice #",
+    "invoiceDetails": "Invoice Details",
+    "createFromOrder": "Create from an existing order",
+    "linkedOrder": "Order",
+    "itemsFromOrder": "Items (copied from the selected order)",
+    "selectOrderPrompt": "Select an order to preview its items.",
+    "issueDate": "Issue Date",
+    "dueDate": "Due Date",
+    "taxRate": "Tax Rate",
+    "taxAmount": "Tax",
+    "amount": "Amount",
+    "amountPaid": "Amount Paid",
+    "balanceDue": "Balance Due",
+    "payments": "Payments",
+    "recordPayment": "Record Payment",
+    "paidAt": "Paid On",
+    "reference": "Reference",
+    "methodLabel": "Method",
+    "send": "Send",
+    "voidInvoice": "Void Invoice",
+    "methods": {
+      "cash": "Cash",
+      "bankTransfer": "Bank Transfer",
+      "card": "Card",
+      "other": "Other"
+    },
+    "status": {
+      "draft": "Draft",
+      "sent": "Sent",
+      "partiallyPaid": "Partially Paid",
+      "paid": "Paid",
+      "overdue": "Overdue",
+      "void": "Void"
+    },
+    "errors": {
+      "needsOneItem": "Add at least one item to the invoice.",
+      "customItemIncomplete": "Every custom item needs a name and a price.",
+      "amountRequired": "Enter a payment amount greater than zero."
+    },
+    "messages": {
+      "createdSuccess": "Invoice created successfully.",
+      "saveError": "Unable to save invoice.",
+      "voidedSuccess": "Invoice voided.",
+      "paymentRecorded": "Payment recorded successfully."
     }
   }
 }

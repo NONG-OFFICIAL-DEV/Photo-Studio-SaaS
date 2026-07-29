@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\Album\AlbumController;
 use App\Http\Controllers\Api\V1\Auth\AuthController;
 use App\Http\Controllers\Api\V1\Auth\EmailVerificationController;
 use App\Http\Controllers\Api\V1\Auth\PasswordResetController;
@@ -7,6 +8,8 @@ use App\Http\Controllers\Api\V1\Booking\BookingController;
 use App\Http\Controllers\Api\V1\Customer\CustomerController;
 use App\Http\Controllers\Api\V1\Customer\CustomerNoteController;
 use App\Http\Controllers\Api\V1\Customer\CustomerTagController;
+use App\Http\Controllers\Api\V1\Invoice\InvoiceController;
+use App\Http\Controllers\Api\V1\Invoice\PaymentController;
 use App\Http\Controllers\Api\V1\Order\EditingTaskController;
 use App\Http\Controllers\Api\V1\Order\OrderController;
 use App\Http\Controllers\Api\V1\Service\ServiceAddOnController;
@@ -126,5 +129,32 @@ Route::middleware(['auth:api', 'tenant', 'subscription.active'])->group(function
         Route::post('/{editingTask}/in-review', [EditingTaskController::class, 'markInReview']);
         Route::post('/{editingTask}/request-revision', [EditingTaskController::class, 'requestRevision']);
         Route::post('/{editingTask}/complete', [EditingTaskController::class, 'complete']);
+    });
+
+    Route::prefix('albums')->name('albums.')->group(function () {
+        Route::get('/', [AlbumController::class, 'index']);
+        Route::post('/', [AlbumController::class, 'store']);
+        Route::get('/{album}', [AlbumController::class, 'show']);
+        Route::put('/{album}', [AlbumController::class, 'update']);
+        Route::delete('/{album}', [AlbumController::class, 'destroy']);
+
+        Route::post('/{album}/start', [AlbumController::class, 'start']);
+        Route::post('/{album}/ready', [AlbumController::class, 'markReady']);
+        Route::post('/{album}/deliver', [AlbumController::class, 'deliver']);
+        Route::post('/{album}/archive', [AlbumController::class, 'archive']);
+    });
+
+    Route::prefix('invoices')->name('invoices.')->group(function () {
+        Route::get('/', [InvoiceController::class, 'index']);
+        Route::post('/', [InvoiceController::class, 'store']);
+        Route::get('/{invoice}', [InvoiceController::class, 'show']);
+        Route::put('/{invoice}', [InvoiceController::class, 'update']);
+        Route::delete('/{invoice}', [InvoiceController::class, 'destroy']);
+
+        Route::post('/{invoice}/send', [InvoiceController::class, 'send']);
+        Route::post('/{invoice}/void', [InvoiceController::class, 'void']);
+
+        Route::post('/{invoice}/payments', [PaymentController::class, 'store']);
+        Route::delete('/{invoice}/payments/{payment}', [PaymentController::class, 'destroy']);
     });
 });

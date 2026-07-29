@@ -2,21 +2,27 @@
 
 namespace App\Providers;
 
+use App\Repositories\Contracts\AlbumRepositoryInterface;
 use App\Repositories\Contracts\BookingRepositoryInterface;
 use App\Repositories\Contracts\CustomerRepositoryInterface;
 use App\Repositories\Contracts\CustomerTagRepositoryInterface;
 use App\Repositories\Contracts\EditingTaskRepositoryInterface;
+use App\Repositories\Contracts\InvoiceRepositoryInterface;
 use App\Repositories\Contracts\OrderRepositoryInterface;
+use App\Repositories\Contracts\PaymentRepositoryInterface;
 use App\Repositories\Contracts\ServiceAddOnRepositoryInterface;
 use App\Repositories\Contracts\ServiceCategoryRepositoryInterface;
 use App\Repositories\Contracts\ServiceRepositoryInterface;
 use App\Repositories\Contracts\TenantRepositoryInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
+use App\Repositories\Eloquent\AlbumRepository;
 use App\Repositories\Eloquent\BookingRepository;
 use App\Repositories\Eloquent\CustomerRepository;
 use App\Repositories\Eloquent\CustomerTagRepository;
 use App\Repositories\Eloquent\EditingTaskRepository;
+use App\Repositories\Eloquent\InvoiceRepository;
 use App\Repositories\Eloquent\OrderRepository;
+use App\Repositories\Eloquent\PaymentRepository;
 use App\Repositories\Eloquent\ServiceAddOnRepository;
 use App\Repositories\Eloquent\ServiceCategoryRepository;
 use App\Repositories\Eloquent\ServiceRepository;
@@ -46,6 +52,9 @@ class RepositoryServiceProvider extends ServiceProvider
         ServiceAddOnRepositoryInterface::class => ServiceAddOnRepository::class,
         OrderRepositoryInterface::class => OrderRepository::class,
         EditingTaskRepositoryInterface::class => EditingTaskRepository::class,
+        AlbumRepositoryInterface::class => AlbumRepository::class,
+        InvoiceRepositoryInterface::class => InvoiceRepository::class,
+        PaymentRepositoryInterface::class => PaymentRepository::class,
     ];
 
     public function register(): void

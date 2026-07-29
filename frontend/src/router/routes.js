@@ -56,6 +56,18 @@ export const routes = [
         component: () => import('@/pages/editing/EditingQueueList.vue'),
         meta: { titleKey: 'menu.editingQueue', permission: 'editing.view' },
       },
+      {
+        path: 'albums',
+        name: 'albums',
+        component: () => import('@/pages/albums/AlbumsList.vue'),
+        meta: { titleKey: 'menu.albums', permission: 'albums.view' },
+      },
+      {
+        path: 'invoices',
+        name: 'invoices',
+        component: () => import('@/pages/invoices/InvoicesList.vue'),
+        meta: { titleKey: 'menu.invoices', permission: 'invoices.view' },
+      },
     ],
   },
   {

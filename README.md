@@ -296,6 +296,54 @@ speculative — see inline comments at each fix):
   task transitions and row-level permission enforcement, search/filter/
   pagination, permission gating per role, and cross-tenant isolation.
 
+## What's implemented (Phase 7 — Album Management, Invoicing & Payments)
+
+Phase 6 (Gallery: upload, watermark, customer download, QR) is
+deliberately skipped for now — Albums below are metadata-only (no photo
+storage yet); the photo pipeline is deferred to when Phase 6 ships.
+
+- Albums are a lightweight tracking record — name, optional Customer/
+  Order link, description, expected photo count — moving through
+  `draft → in_progress → ready → delivered`, or `archived` from any
+  non-archived state. No file storage is attached yet.
+- Invoices bill a Customer either from scratch (its own catalog/custom
+  line items, same snapshotting pattern as Orders) or generated from an
+  existing Order by copying that order's line items verbatim. Totals
+  (`subtotal`, `discount_amount`, `tax_rate` → `tax_amount` → `total`)
+  are always computed server-side.
+- Invoice status lifecycle: `draft → sent → (partially_paid | paid)`,
+  or `overdue` (past due date, swept daily by the
+  `invoices:mark-overdue` scheduled command across every tenant), or
+  `void` (blocked once `paid`, requires a reason). Line items,
+  discount, and tax can only change while still `draft`; only `draft`
+  invoices can be deleted outright — anything further along is voided
+  instead, preserving the record.
+- Payments are recorded manually against a `sent`/`partially_paid`/
+  `overdue` invoice (cash, bank transfer, card, or other) — never
+  exceeding the remaining balance — and recompute the invoice's
+  `amount_paid`/status on every record or delete, self-healing the
+  status (including re-deriving `overdue` vs `sent` if a payment is
+  removed). No payment gateway integration — manual bookkeeping only.
+- New permissions (`albums.*`, `invoices.*`, `payments.record`,
+  `payments.delete`) added to the RBAC catalog. The existing `Cashier`
+  role (defined since Phase 1 but unused until now) is the first role
+  to get full invoice/payment rights without order deletion or
+  catalog-management access; Editor/Photographer get album view/update
+  rights fitting their production role.
+- Album/Invoice/Payment History via the same activity-log pattern as
+  every prior module.
+- Vue: an Albums list with inline lifecycle actions, an Invoices list
+  with a create-from-order-or-from-scratch form (order selection
+  previews and copies its line items live), an invoice detail view with
+  send/void actions and an inline payment ledger + record-payment form.
+- 177 total passing backend tests (38 new for this module): invoice
+  total computation (discount + tax), order-to-invoice item
+  snapshotting, the full status lifecycle including the
+  draft-only-editing and paid/void guards, payment recording
+  (full/partial/over-the-balance-rejected) and status recalculation on
+  payment deletion, the overdue sweep command, permission gating per
+  role (including the new Cashier checks), and cross-tenant isolation.
+
 ## Getting Started
 
 ### Prerequisites
@@ -376,8 +424,8 @@ Pinia stores, and tests, same as Phase 1.
 3. ~~Booking Management + Calendar~~ ✅
 4. ~~Photography Services & Pricing~~ ✅
 5. ~~Order Workflow + Editing Queue~~ ✅
-6. Gallery (upload, watermark, customer download, QR)
-7. Album Management, Invoicing & Payments
+6. Gallery (upload, watermark, customer download, QR) — skipped for now, see Phase 7 note
+7. ~~Album Management, Invoicing & Payments~~ ✅ (Albums are metadata-only, pending Phase 6's photo storage)
 8. Expense & Inventory
 9. Employee Management (attendance, salary, commission)
 10. Customer Portal
