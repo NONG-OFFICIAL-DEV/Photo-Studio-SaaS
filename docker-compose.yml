@@ -18,6 +18,8 @@ services:
     image: nongdev/photo-studio-webserver:latest
     container_name: photo_studio_webserver
     restart: always
+    ports:
+      - "85:80"
     volumes:
       - photo_studio_storage:/var/www/html/storage
     networks:
