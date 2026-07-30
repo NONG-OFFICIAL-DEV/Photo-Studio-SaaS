@@ -177,6 +177,9 @@ const adminMenuItems = [
  * modern sidebar wants. Rolling this by hand (a toggle + v-expand-transition)
  * gives full control over the submenu's indent (see .nav-submenu below).
  */
+// Clicking a group header just toggles that group (you can browse several
+// open at once). Only an actual navigation — clicking a submenu link — snaps
+// this back down to a single group, closing whatever else was left open.
 const openGroups = ref([])
 
 function isGroupOpen(value) {
@@ -191,16 +194,11 @@ function isGroupActive(group) {
   return group.items.some((item) => item.to.name === route.name)
 }
 
-// Keeps the submenu open when the current page belongs to it, so a direct
-// link (or a page refresh) still shows the user which section they're in.
 watch(
   () => route.name,
   () => {
     const activeGroup = visibleTenantGroups.value.find((group) => isGroupActive(group))
-
-    if (activeGroup && !isGroupOpen(activeGroup.value)) {
-      openGroups.value = [...openGroups.value, activeGroup.value]
-    }
+    openGroups.value = activeGroup ? [activeGroup.value] : []
   },
   { immediate: true },
 )
