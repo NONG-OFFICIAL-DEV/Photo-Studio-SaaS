@@ -3,7 +3,7 @@ FROM php:8.4-fpm-alpine
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 
 RUN apk add --no-cache bash git curl zip unzip \
-    && install-php-extensions pdo_pgsql pgsql zip gd bcmath intl opcache redis
+    && install-php-extensions pdo_pgsql pgsql zip gd bcmath intl opcache pcntl redis
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
