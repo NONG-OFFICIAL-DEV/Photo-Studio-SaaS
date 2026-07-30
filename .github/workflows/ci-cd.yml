@@ -1,0 +1,92 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_BACKEND: ${{ secrets.DOCKERHUB_USERNAME }}/photo-studio-backend
+      IMAGE_WEBSERVER: ${{ secrets.DOCKERHUB_USERNAME }}/photo-studio-webserver
+      IMAGE_FRONTEND: ${{ secrets.DOCKERHUB_USERNAME }}/photo-studio-frontend
+      IMAGE_TAG: ${{ github.sha }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Docker login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build & Push backend
+        run: |
+          docker build \
+            -t $IMAGE_BACKEND:latest \
+            -t $IMAGE_BACKEND:$IMAGE_TAG \
+            ./backend
+          docker push $IMAGE_BACKEND:latest
+          docker push $IMAGE_BACKEND:$IMAGE_TAG
+
+      - name: Build & Push webserver (nginx)
+        run: |
+          docker build -f docker/nginx/Dockerfile \
+            -t $IMAGE_WEBSERVER:latest \
+            -t $IMAGE_WEBSERVER:$IMAGE_TAG \
+            .
+          docker push $IMAGE_WEBSERVER:latest
+          docker push $IMAGE_WEBSERVER:$IMAGE_TAG
+
+      - name: Build & Push frontend
+        run: |
+          docker build \
+            --build-arg VITE_API_BASE_URL=${{ secrets.APP_API_BASE_URL }} \
+            -t $IMAGE_FRONTEND:latest \
+            -t $IMAGE_FRONTEND:$IMAGE_TAG \
+            ./frontend
+          docker push $IMAGE_FRONTEND:latest
+          docker push $IMAGE_FRONTEND:$IMAGE_TAG
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-push
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Copy docker-compose.yml to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ubuntu
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          source: "docker-compose.yml"
+          target: "~/photo-studio-saas"
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ubuntu
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            set -e
+            cd ~/photo-studio-saas
+
+            echo ">>> Pulling latest images"
+            docker compose pull
+
+            echo ">>> Starting containers"
+            docker compose up -d --remove-orphans
+
+            echo ">>> Running migrations"
+            docker exec photo_studio_backend php artisan migrate --force
+
+            echo ">>> Clearing cache"
+            docker exec photo_studio_backend php artisan config:cache
+            docker exec photo_studio_backend php artisan route:cache
