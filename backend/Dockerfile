@@ -3,13 +3,15 @@ FROM php:8.4-fpm-alpine
 RUN apk add --no-cache \
         bash git curl libzip-dev zip unzip \
         postgresql-dev libpng-dev libjpeg-turbo-dev freetype-dev \
-        icu-dev oniguruma-dev linux-headers \
+        icu-dev oniguruma-dev \
+    && apk add --no-cache --virtual .build-deps \
+        autoconf linux-headers \
     && docker-php-ext-configure gd --with-jpeg --with-freetype \
     && docker-php-ext-install -j$(nproc) \
         pdo_pgsql pgsql zip gd bcmath intl opcache \
     && pecl install redis \
     && docker-php-ext-enable redis \
-    && apk del linux-headers
+    && apk del .build-deps
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
