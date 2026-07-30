@@ -12,6 +12,7 @@ export const useAuthStore = defineStore('auth', () => {
   const permissions = computed(() => user.value?.permissions ?? [])
   const tenant = computed(() => user.value?.tenant ?? null)
   const isSuperAdmin = computed(() => Boolean(user.value?.is_super_admin))
+  const plan = computed(() => tenant.value?.subscription?.plan ?? null)
 
   function hasRole(role) {
     return roles.value.includes(role)
@@ -19,6 +20,10 @@ export const useAuthStore = defineStore('auth', () => {
 
   function hasPermission(permission) {
     return permissions.value.includes(permission)
+  }
+
+  function hasFeature(feature) {
+    return Boolean(plan.value?.[feature])
   }
 
   async function register(payload) {
@@ -84,8 +89,10 @@ export const useAuthStore = defineStore('auth', () => {
     permissions,
     tenant,
     isSuperAdmin,
+    plan,
     hasRole,
     hasPermission,
+    hasFeature,
     register,
     login,
     logout,

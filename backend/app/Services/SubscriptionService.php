@@ -45,6 +45,26 @@ class SubscriptionService
     }
 
     /**
+     * Guards User::create() for a new employee — the plan's max_users is
+     * otherwise pure display metadata (see Plan model), so this is the only
+     * place it's actually enforced. A null max_users means unlimited.
+     */
+    public function assertCanAddUser(Tenant $tenant): void
+    {
+        $maxUsers = $tenant->activeSubscription?->plan?->max_users;
+
+        if ($maxUsers === null) {
+            return;
+        }
+
+        $currentCount = User::query()->where('tenant_id', $tenant->id)->count();
+
+        if ($currentCount >= $maxUsers) {
+            throw new HttpException(422, "Your plan allows up to {$maxUsers} users. Upgrade your plan to add more employees.");
+        }
+    }
+
+    /**
      * Simulates a successful payment for one billing cycle: extends the
      * period (from "now" if already lapsed, otherwise from the current
      * period's end so paying early doesn't lose remaining time), snapshots

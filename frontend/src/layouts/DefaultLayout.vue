@@ -113,7 +113,13 @@ const tenantMenuGroups = computed(() => [
         to: { name: 'employees' },
         permission: 'users.view',
       },
-      { title: t('menu.reports'), icon: 'mdi-chart-box-outline', to: { name: 'reports' }, permission: 'reports.view' },
+      {
+        title: t('menu.reports'),
+        icon: 'mdi-chart-box-outline',
+        to: { name: 'reports' },
+        permission: 'reports.view',
+        planFeature: 'has_reports',
+      },
     ],
   },
   {
@@ -137,7 +143,11 @@ const visibleTenantGroups = computed(() =>
   tenantMenuGroups.value
     .map((group) => ({
       ...group,
-      items: group.items.filter((item) => !item.permission || auth.hasPermission(item.permission)),
+      items: group.items.filter(
+        (item) =>
+          (!item.permission || auth.hasPermission(item.permission)) &&
+          (!item.planFeature || auth.hasFeature(item.planFeature)),
+      ),
     }))
     .filter((group) => group.items.length > 0),
 )

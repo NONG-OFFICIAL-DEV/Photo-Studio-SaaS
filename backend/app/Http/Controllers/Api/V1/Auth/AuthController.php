@@ -78,7 +78,10 @@ class AuthController extends Controller
 
     /**
      * Ensures roles/permissions in the response reflect the user's own
-     * tenant team scope, then eager loads them for the resource.
+     * tenant team scope, then eager loads them for the resource. Also
+     * loads the tenant's active subscription/plan so the frontend can read
+     * plan feature flags (has_reports, ...) straight off the auth session
+     * without a separate request.
      */
     protected function loadUserRoleContext(User $user): void
     {
@@ -86,6 +89,6 @@ class AuthController extends Controller
             app(PermissionRegistrar::class)->setPermissionsTeamId($user->tenant_id);
         }
 
-        $user->load(['roles', 'tenant']);
+        $user->load(['roles', 'tenant.activeSubscription.plan']);
     }
 }

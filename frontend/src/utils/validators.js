@@ -179,6 +179,17 @@ export const employmentSchema = yup.object({
   commission_rate: yup.number().typeError('Must be a number').nullable().min(0).max(100),
 })
 
+export const employeeSchema = yup.object({
+  name: yup.string().required().max(255),
+  email: yup.string().required().email(),
+  phone: yup.string().nullable().max(30),
+  password: passwordRule,
+  role: yup.string().required(),
+  pay_type: yup.string().required(),
+  base_pay: yup.number().typeError('Must be a number').nullable().min(0),
+  commission_rate: yup.number().typeError('Must be a number').nullable().min(0).max(100),
+})
+
 export const expenseSchema = yup.object({
   category_id: yup.string().nullable(),
   amount: yup.number().typeError('Must be a number').required().min(0.01),

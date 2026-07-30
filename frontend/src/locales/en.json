@@ -620,20 +620,39 @@
   "employees": {
     "title": "Employees",
     "subtitle": "Manage staff attendance, commissions, and payroll.",
+    "newEmployee": "New Employee",
+    "role": "Role",
     "editPayProfile": "Edit Pay Profile — {name}",
     "payType": "Pay Type",
     "hourlyRate": "Hourly Rate",
     "monthlySalary": "Monthly Salary",
     "commissionRate": "Commission Rate",
     "basePay": "Base Pay",
+    "passwordHint": "The employee will use this password to log in — share it with them directly.",
     "payTypes": {
       "salary": "Salary",
       "hourly": "Hourly"
     },
+    "roles": {
+      "owner": "Owner",
+      "manager": "Manager",
+      "photographer": "Photographer",
+      "editor": "Editor",
+      "cashier": "Cashier",
+      "receptionist": "Receptionist",
+      "viewer": "Viewer"
+    },
     "messages": {
       "updatedSuccess": "Employee profile updated successfully.",
-      "saveError": "Unable to save employee profile."
+      "saveError": "Unable to save employee profile.",
+      "createdSuccess": "Employee created successfully.",
+      "createError": "Unable to create employee."
     }
+  },
+  "planLimits": {
+    "reached": "You've reached your plan's {resource} limit ({current}/{limit}).",
+    "upgradePlan": "Upgrade Plan",
+    "askOwner": "Ask your studio owner to upgrade the plan."
   },
   "reports": {
     "title": "Reports",

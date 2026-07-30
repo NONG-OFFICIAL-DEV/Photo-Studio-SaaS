@@ -1,18 +1,27 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppToolbar from '@/components/common/AppToolbar.vue'
 import AppTable from '@/components/common/AppTable.vue'
 import AppStatusChip from '@/components/common/AppStatusChip.vue'
+import PlanLimitAlert from '@/components/common/PlanLimitAlert.vue'
 import OrderFormDialog from '@/components/orders/OrderFormDialog.vue'
 import OrderDetailDialog from '@/components/orders/OrderDetailDialog.vue'
 import OrderCancelDialog from '@/components/orders/OrderCancelDialog.vue'
 import { getOrdersApi } from '@/apis/order.api'
+import { getPlanLimitsApi } from '@/apis/plan-limit.api'
 import { useAuthStore } from '@/stores/auth'
 
 const { t } = useI18n()
 const auth = useAuthStore()
 const tableRef = ref(null)
+
+const limits = ref({ monthly_order_limit: null, orders_this_month_count: 0 })
+
+onMounted(async () => {
+  const { data } = await getPlanLimitsApi()
+  limits.value = data.data
+})
 
 const STATUS_MAP = computed(() => ({
   pending: { color: 'warning', label: t('orders.status.pending') },
@@ -65,6 +74,8 @@ const canCreate = computed(() => auth.hasPermission('orders.create'))
         <v-btn v-if="canCreate" color="primary" prepend-icon="mdi-plus" @click="formDialog = true">{{ t('orders.newOrder') }}</v-btn>
       </template>
     </AppToolbar>
+
+    <PlanLimitAlert :current="limits.orders_this_month_count" :limit="limits.monthly_order_limit" :resource="t('orders.title').toLowerCase()" />
 
     <v-row class="mb-2" dense>
       <v-col cols="6" sm="3">

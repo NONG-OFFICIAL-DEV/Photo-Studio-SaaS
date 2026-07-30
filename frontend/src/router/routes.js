@@ -96,7 +96,7 @@ export const routes = [
         path: 'reports',
         name: 'reports',
         component: () => import('@/pages/reports/ReportsPage.vue'),
-        meta: { titleKey: 'menu.reports', permission: 'reports.view' },
+        meta: { titleKey: 'menu.reports', permission: 'reports.view', planFeature: 'has_reports' },
       },
       {
         path: 'settings',

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsurePlanFeature;
 use App\Http\Middleware\EnsureSubscriptionActive;
 use App\Http\Middleware\EnsureSuperAdmin;
 use App\Http\Middleware\IdentifyTenant;
@@ -45,6 +46,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'tenant' => IdentifyTenant::class,
             'subscription.active' => EnsureSubscriptionActive::class,
             'super-admin' => EnsureSuperAdmin::class,
+            'plan.feature' => EnsurePlanFeature::class,
         ]);
 
         // IdentifyTenant must run before SubstituteBindings — otherwise

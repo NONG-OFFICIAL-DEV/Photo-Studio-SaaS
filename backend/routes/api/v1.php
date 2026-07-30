@@ -27,6 +27,7 @@ use App\Http\Controllers\Api\V1\Order\EditingTaskController;
 use App\Http\Controllers\Api\V1\Order\OrderController;
 use App\Http\Controllers\Api\V1\Package\PackageController;
 use App\Http\Controllers\Api\V1\Payroll\PayrollEntryController;
+use App\Http\Controllers\Api\V1\PlanLimitController;
 use App\Http\Controllers\Api\V1\Report\ReportController;
 use App\Http\Controllers\Api\V1\Service\ServiceAddOnController;
 use App\Http\Controllers\Api\V1\Service\ServiceCategoryController;
@@ -72,7 +73,10 @@ Route::prefix('auth')->name('auth.')->group(function () {
  */
 Route::middleware(['auth:api', 'tenant', 'subscription.active'])->group(function () {
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::post('/users', [UserController::class, 'store'])->name('users.store');
     Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+
+    Route::get('/plan-limits', [PlanLimitController::class, 'show'])->name('plan-limits.show');
 
     Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
 
@@ -237,7 +241,7 @@ Route::middleware(['auth:api', 'tenant', 'subscription.active'])->group(function
         Route::post('/{payrollEntry}/pay', [PayrollEntryController::class, 'pay']);
     });
 
-    Route::prefix('reports')->name('reports.')->group(function () {
+    Route::prefix('reports')->name('reports.')->middleware('plan.feature:has_reports')->group(function () {
         Route::get('/revenue', [ReportController::class, 'revenue']);
         Route::get('/revenue/export', [ReportController::class, 'exportRevenue']);
         Route::get('/bookings', [ReportController::class, 'bookings']);

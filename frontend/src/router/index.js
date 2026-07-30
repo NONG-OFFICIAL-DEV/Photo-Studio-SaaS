@@ -40,5 +40,9 @@ router.beforeEach(async (to) => {
     return { name: 'dashboard' }
   }
 
+  if (to.meta.planFeature && !auth.hasFeature(to.meta.planFeature)) {
+    return { name: 'dashboard' }
+  }
+
   return true
 })
