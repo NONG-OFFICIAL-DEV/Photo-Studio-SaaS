@@ -15,6 +15,10 @@ import { useAppStore } from '@/stores/app'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
+  // Full booking object (with nested customer) when opened via a booking's
+  // "Create Order" action — seeds customer_id/booking_id directly instead
+  // of making the user pick them again, since both are already known.
+  presetBooking: { type: Object, default: null },
 })
 
 const emit = defineEmits(['update:modelValue', 'saved'])
@@ -107,13 +111,26 @@ function toggleOptionalAddon(component, checked) {
   if (index !== -1) items.value.splice(index, 1)
 }
 
+const initialValues = computed(() => ({
+  customer_id: props.presetBooking?.customer?.id ?? null,
+  booking_id: props.presetBooking?.id ?? null,
+  discount_amount: 0,
+  notes: '',
+}))
+
 watch(() => props.modelValue, (open) => {
   if (open) {
     items.value = []
     catalogPick.value = null
     errorMessage.value = ''
     loadCatalog()
-    loadInitialCustomers()
+
+    if (props.presetBooking) {
+      customerOptions.value = [props.presetBooking.customer]
+      bookingOptions.value = [props.presetBooking]
+    } else {
+      loadInitialCustomers()
+    }
   }
 })
 
@@ -233,8 +250,12 @@ const subtotal = computed(() => computeSubtotal())
   <AppDialog :model-value="modelValue" :title="t('orders.newOrder')" max-width="720" @update:model-value="emit('update:modelValue', $event)">
     <v-alert v-if="errorMessage" type="error" variant="tonal" class="mb-4">{{ errorMessage }}</v-alert>
 
-    <AppForm :schema="orderSchema" :initial-values="{ customer_id: null, booking_id: null, discount_amount: 0, notes: '' }" @submit="onSubmit">
+    <AppForm :schema="orderSchema" :initial-values="initialValues" @submit="onSubmit">
       <template #default="{ errors, values, setFieldValue }">
+        <v-alert v-if="presetBooking" type="info" variant="tonal" density="compact" class="mb-4">
+          {{ t('orders.creatingFromBooking', { name: presetBooking.customer?.name }) }}
+        </v-alert>
+
         <v-row>
           <v-col cols="12" sm="6">
             <v-autocomplete
@@ -245,6 +266,7 @@ const subtotal = computed(() => computeSubtotal())
               :items="customerOptions"
               :loading="customerSearchLoading"
               :error-messages="errors.customer_id"
+              :disabled="Boolean(presetBooking)"
               no-filter
               @update:search="searchCustomers"
               @update:model-value="(val) => { setFieldValue('customer_id', val); loadBookingsForCustomer(val, setFieldValue) }"
@@ -259,7 +281,7 @@ const subtotal = computed(() => computeSubtotal())
               :model-value="values.booking_id"
               :label="t('orders.linkedBooking')"
               clearable
-              :disabled="!bookingOptions.length"
+              :disabled="!bookingOptions.length || Boolean(presetBooking)"
               item-title="label"
               item-value="id"
               :items="bookingSelectItems"
@@ -290,7 +312,7 @@ const subtotal = computed(() => computeSubtotal())
           <v-btn variant="outlined" prepend-icon="mdi-pencil-plus-outline" @click="addCustomItem">{{ t('orders.customItem') }}</v-btn>
         </div>
 
-        <v-table density="compact" class="mb-4">
+        <v-table  class="mb-4">
           <thead>
             <tr>
               <th>{{ t('fields.name') }}</th>

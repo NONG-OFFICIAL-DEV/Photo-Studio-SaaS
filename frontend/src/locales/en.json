@@ -338,7 +338,8 @@
       "confirm": "Confirm",
       "start": "Start",
       "complete": "Complete",
-      "markNoShow": "Mark No-Show"
+      "markNoShow": "Mark No-Show",
+      "createOrder": "Create Order"
     },
     "messages": {
       "deletedSuccess": "Booking deleted successfully.",
@@ -409,6 +410,8 @@
     "itemNamePlaceholder": "Item name",
     "noItemsYet": "No items yet.",
     "linkedBooking": "Linked Booking (optional)",
+    "creatingFromBooking": "Creating an order for {name}'s booking.",
+    "createInvoice": "Create Invoice",
     "assignEditor": "Assign editor (optional)",
     "startProduction": "Start Production",
     "markReady": "Mark Ready for Delivery",
@@ -487,6 +490,7 @@
     "invoiceNumber": "Invoice #",
     "invoiceDetails": "Invoice Details",
     "createFromOrder": "Create from an existing order",
+    "creatingFromOrder": "Creating an invoice for {name}'s order.",
     "linkedOrder": "Order",
     "itemsFromOrder": "Items (copied from the selected order)",
     "selectOrderPrompt": "Select an order to preview its items.",

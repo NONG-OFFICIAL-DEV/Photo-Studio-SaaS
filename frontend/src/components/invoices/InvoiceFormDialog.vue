@@ -16,6 +16,10 @@ import { translateApiMessage } from '@/utils/apiMessages'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
+  // Full order object (with nested customer/items) when opened via an
+  // order's "Create Invoice" action — seeds order_id/customer_id directly
+  // and skips the order picker, since the order is already known.
+  presetOrder: { type: Object, default: null },
 })
 
 const emit = defineEmits(['update:modelValue', 'saved'])
@@ -43,16 +47,31 @@ const orderSelectItems = computed(() => orderOptions.value.map(order => ({
   total: order.total,
 })))
 
+const initialValues = computed(() => ({
+  customer_id: props.presetOrder?.customer?.id ?? null,
+  order_id: props.presetOrder?.id ?? null,
+  issue_date: null,
+  due_date: null,
+  discount_amount: 0,
+  tax_rate: 0,
+  notes: '',
+}))
+
 watch(() => props.modelValue, (open) => {
   if (open) {
-    fromOrder.value = false
+    fromOrder.value = Boolean(props.presetOrder)
     items.value = []
     catalogPick.value = null
-    orderPreview.value = null
+    orderPreview.value = props.presetOrder ?? null
     errorMessage.value = ''
     loadCatalog()
-    loadInitialCustomers()
-    loadInitialOrders()
+
+    if (props.presetOrder) {
+      orderOptions.value = [props.presetOrder]
+    } else {
+      loadInitialCustomers()
+      loadInitialOrders()
+    }
   }
 })
 
@@ -283,10 +302,15 @@ async function onSubmit(values) {
 
     <AppForm
       :schema="invoiceSchema"
-      :initial-values="{ customer_id: null, order_id: null, issue_date: null, due_date: null, discount_amount: 0, tax_rate: 0, notes: '' }"
+      :initial-values="initialValues"
       @submit="onSubmit"
     >
       <template #default="{ errors, values, setFieldValue }">
+        <v-alert v-if="presetOrder" type="info" variant="tonal" density="compact" class="mb-4">
+          {{ t('invoices.creatingFromOrder', { name: presetOrder.customer?.name }) }}
+        </v-alert>
+
+        <!-- v-if="!presetOrder" -->
         <v-switch
           :model-value="fromOrder"
           :label="t('invoices.createFromOrder')"
@@ -306,6 +330,7 @@ async function onSubmit(values) {
               :items="orderSelectItems"
               :loading="orderSearchLoading"
               :error-messages="errors.order_id"
+              :disabled="Boolean(presetOrder)"
               no-filter
               @update:search="searchOrders"
               @update:model-value="selectOrder($event, setFieldValue)"

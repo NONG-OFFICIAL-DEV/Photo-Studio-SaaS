@@ -20,7 +20,7 @@ const props = defineProps({
   orderId: { type: String, default: null },
 })
 
-const emit = defineEmits(['update:modelValue', 'changed', 'cancel-requested'])
+const emit = defineEmits(['update:modelValue', 'changed', 'cancel-requested', 'create-invoice-requested'])
 
 const { t } = useI18n()
 const auth = useAuthStore()
@@ -78,6 +78,7 @@ async function runAction(action) {
 
 const canUpdate = computed(() => auth.hasPermission('orders.update'))
 const canCancel = computed(() => order.value && !['delivered', 'cancelled'].includes(order.value.status))
+const canCreateInvoice = computed(() => auth.hasPermission('invoices.create') && order.value && order.value.status !== 'cancelled')
 
 const EDITING_STATUS_LABELS = computed(() => ({
   pending: t('editing.status.pending'),
@@ -173,6 +174,10 @@ const EDITING_STATUS_LABELS = computed(() => ({
 
         <v-btn v-if="order.status === 'ready_for_delivery'" color="success" variant="flat" :loading="actionLoading" @click="runAction('deliver')">
           {{ t('orders.deliver') }}
+        </v-btn>
+
+        <v-btn v-if="canCreateInvoice" color="primary" variant="tonal" prepend-icon="mdi-receipt-text-plus-outline" @click="emit('create-invoice-requested', order)">
+          {{ t('orders.createInvoice') }}
         </v-btn>
 
         <v-btn v-if="canCancel" color="error" variant="text" @click="emit('cancel-requested', order.id)">

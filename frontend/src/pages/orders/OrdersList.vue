@@ -8,6 +8,7 @@ import PlanLimitAlert from '@/components/common/PlanLimitAlert.vue'
 import OrderFormDialog from '@/components/orders/OrderFormDialog.vue'
 import OrderDetailDialog from '@/components/orders/OrderDetailDialog.vue'
 import OrderCancelDialog from '@/components/orders/OrderCancelDialog.vue'
+import InvoiceFormDialog from '@/components/invoices/InvoiceFormDialog.vue'
 import { getOrdersApi } from '@/apis/order.api'
 import { getPlanLimitsApi } from '@/apis/plan-limit.api'
 import { useAuthStore } from '@/stores/auth'
@@ -52,6 +53,8 @@ const detailDialog = ref(false)
 const selectedOrderId = ref(null)
 const cancelDialog = ref(false)
 const cancelTargetId = ref(null)
+const invoiceDialog = ref(false)
+const invoicePresetOrder = ref(null)
 
 function openDetail(order) {
   selectedOrderId.value = order.id
@@ -62,6 +65,12 @@ function onCancelRequested(orderId) {
   detailDialog.value = false
   cancelTargetId.value = orderId
   cancelDialog.value = true
+}
+
+function onCreateInvoiceRequested(order) {
+  detailDialog.value = false
+  invoicePresetOrder.value = order
+  invoiceDialog.value = true
 }
 
 const canCreate = computed(() => auth.hasPermission('orders.create'))
@@ -126,8 +135,11 @@ const canCreate = computed(() => auth.hasPermission('orders.create'))
       :order-id="selectedOrderId"
       @changed="tableRef?.refresh()"
       @cancel-requested="onCancelRequested"
+      @create-invoice-requested="onCreateInvoiceRequested"
     />
 
     <OrderCancelDialog v-model="cancelDialog" :order-id="cancelTargetId" @saved="tableRef?.refresh()" />
+
+    <InvoiceFormDialog v-model="invoiceDialog" :preset-order="invoicePresetOrder" />
   </div>
 </template>

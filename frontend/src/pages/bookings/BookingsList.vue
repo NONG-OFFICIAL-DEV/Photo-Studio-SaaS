@@ -7,6 +7,7 @@ import AppStatusChip from '@/components/common/AppStatusChip.vue'
 import AppConfirmDialog from '@/components/common/AppConfirmDialog.vue'
 import BookingFormDialog from '@/components/bookings/BookingFormDialog.vue'
 import BookingCancelDialog from '@/components/bookings/BookingCancelDialog.vue'
+import OrderFormDialog from '@/components/orders/OrderFormDialog.vue'
 import {
   getBookingsApi,
   deleteBookingApi,
@@ -68,6 +69,8 @@ const cancelDialog = ref(false)
 const cancelTargetId = ref(null)
 const confirmDelete = ref(false)
 const deleteTarget = ref(null)
+const orderDialog = ref(false)
+const orderPresetBooking = ref(null)
 
 function openCreate() {
   editingBooking.value = null
@@ -87,6 +90,11 @@ function openCancel(booking) {
 function askDelete(booking) {
   deleteTarget.value = booking
   confirmDelete.value = true
+}
+
+function openCreateOrder(booking) {
+  orderPresetBooking.value = booking
+  orderDialog.value = true
 }
 
 async function confirmDeleteBooking() {
@@ -114,6 +122,7 @@ const canCreate = computed(() => auth.hasPermission('bookings.create'))
 const canUpdate = computed(() => auth.hasPermission('bookings.update'))
 const canDelete = computed(() => auth.hasPermission('bookings.delete'))
 const canCancel = computed(() => auth.hasPermission('bookings.cancel'))
+const canCreateOrder = computed(() => auth.hasPermission('orders.create'))
 </script>
 
 <template>
@@ -206,6 +215,12 @@ const canCancel = computed(() => auth.hasPermission('bookings.cancel'))
             <v-list density="compact">
               <v-list-item v-if="canUpdate" :title="t('common.edit')" prepend-icon="mdi-pencil-outline" @click="openEdit(item)" />
               <v-list-item
+                v-if="canCreateOrder && !['cancelled', 'no_show'].includes(item.status)"
+                :title="t('bookings.actions.createOrder')"
+                prepend-icon="mdi-cart-plus"
+                @click="openCreateOrder(item)"
+              />
+              <v-list-item
                 v-if="canUpdate && ['pending', 'confirmed'].includes(item.status)"
                 :title="t('bookings.actions.markNoShow')"
                 prepend-icon="mdi-account-off-outline"
@@ -227,6 +242,8 @@ const canCancel = computed(() => auth.hasPermission('bookings.cancel'))
     <BookingFormDialog v-model="formDialog" :booking="editingBooking" @saved="tableRef?.refresh()" />
 
     <BookingCancelDialog v-model="cancelDialog" :booking-id="cancelTargetId" @saved="tableRef?.refresh()" />
+
+    <OrderFormDialog v-model="orderDialog" :preset-booking="orderPresetBooking" />
 
     <AppConfirmDialog
       v-model="confirmDelete"
