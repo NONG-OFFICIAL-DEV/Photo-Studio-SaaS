@@ -22,7 +22,7 @@ class EnsureSuperAdmin
         $user = $request->user();
 
         if (! $user || ! $user->is_super_admin) {
-            return $this->error('This action is restricted to platform administrators.', 403);
+            return $this->error('This action is restricted to platform administrators.', 403, [], 'SUPER_ADMIN_ONLY');
         }
 
         return $next($request);

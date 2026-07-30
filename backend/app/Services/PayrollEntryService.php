@@ -4,13 +4,13 @@ namespace App\Services;
 
 use App\Enums\PayrollStatus;
 use App\Enums\PayType;
+use App\Exceptions\ApiException;
 use App\Models\AttendanceRecord;
 use App\Models\CommissionEntry;
 use App\Models\PayrollEntry;
 use App\Models\User;
 use App\Repositories\Contracts\PayrollEntryRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class PayrollEntryService extends BaseService
 {
@@ -63,7 +63,7 @@ class PayrollEntryService extends BaseService
     public function update(PayrollEntry $entry, array $data): PayrollEntry
     {
         if ($entry->status === PayrollStatus::Paid) {
-            throw new HttpException(422, 'A paid payroll entry can no longer be edited.');
+            throw new ApiException(422, 'A paid payroll entry can no longer be edited.', 'PAYROLL_ENTRY_EDIT_LOCKED');
         }
 
         $basePay = round((float) ($data['base_pay'] ?? $entry->base_pay), 2);
@@ -85,7 +85,7 @@ class PayrollEntryService extends BaseService
     public function delete(PayrollEntry $entry): bool
     {
         if ($entry->status === PayrollStatus::Paid) {
-            throw new HttpException(422, 'A paid payroll entry can no longer be deleted.');
+            throw new ApiException(422, 'A paid payroll entry can no longer be deleted.', 'PAYROLL_ENTRY_DELETE_LOCKED');
         }
 
         return $this->payroll->delete($entry);
@@ -94,7 +94,7 @@ class PayrollEntryService extends BaseService
     public function markPaid(PayrollEntry $entry): PayrollEntry
     {
         if ($entry->status === PayrollStatus::Paid) {
-            throw new HttpException(422, 'This payroll entry has already been paid.');
+            throw new ApiException(422, 'This payroll entry has already been paid.', 'PAYROLL_ENTRY_ALREADY_PAID');
         }
 
         $entry->update(['status' => PayrollStatus::Paid, 'paid_at' => now()]);

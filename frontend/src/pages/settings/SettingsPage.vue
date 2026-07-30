@@ -12,6 +12,7 @@ import {
 } from '@/apis/settings.api'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
+import { translateApiMessage } from '@/utils/apiMessages'
 
 const { t } = useI18n()
 const auth = useAuthStore()
@@ -63,7 +64,7 @@ async function onSubmit(values) {
     await auth.fetchMe()
     appStore.notify(t('settingsPage.messages.savedSuccess'))
   } catch (error) {
-    errorMessage.value = error.response?.data?.message || t('settingsPage.messages.saveError')
+    errorMessage.value = translateApiMessage(error, 'settingsPage.messages.saveError')
   } finally {
     saving.value = false
   }

@@ -6,6 +6,7 @@ import AppForm from '@/components/common/AppForm.vue'
 import { loginSchema } from '@/utils/validators'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
+import { translateApiMessage } from '@/utils/apiMessages'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -27,7 +28,7 @@ async function onSubmit(values) {
     const fallback = auth.isSuperAdmin ? { name: 'admin-analytics' } : { name: 'dashboard' }
     router.push(route.query.redirect || fallback)
   } catch (error) {
-    errorMessage.value = error.response?.data?.message || t('auth.loginError')
+    errorMessage.value = translateApiMessage(error, 'auth.loginError')
   } finally {
     loading.value = false
   }

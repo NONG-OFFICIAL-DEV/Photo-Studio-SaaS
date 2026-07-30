@@ -5,6 +5,7 @@ import { useRoute, useRouter } from 'vue-router'
 import AppForm from '@/components/common/AppForm.vue'
 import { resetPasswordSchema } from '@/utils/validators'
 import { resetPasswordApi } from '@/apis/auth.api'
+import { translateApiMessage } from '@/utils/apiMessages'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -26,7 +27,7 @@ async function onSubmit(values) {
     })
     router.push({ name: 'login' })
   } catch (error) {
-    errorMessage.value = error.response?.data?.message || t('auth.resetPasswordError')
+    errorMessage.value = translateApiMessage(error, 'auth.resetPasswordError')
   } finally {
     loading.value = false
   }

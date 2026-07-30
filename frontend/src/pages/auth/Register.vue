@@ -6,6 +6,7 @@ import AppForm from '@/components/common/AppForm.vue'
 import { registerSchema } from '@/utils/validators'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
+import { translateApiMessage } from '@/utils/apiMessages'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -25,7 +26,7 @@ async function onSubmit(values) {
     appStore.notify(t('auth.registerSuccess'))
     router.push({ name: 'dashboard' })
   } catch (error) {
-    errorMessage.value = error.response?.data?.message || t('auth.registerError')
+    errorMessage.value = translateApiMessage(error, 'auth.registerError')
   } finally {
     loading.value = false
   }

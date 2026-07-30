@@ -16,6 +16,7 @@ import {
 } from '@/apis/album.api'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
+import { translateApiMessage } from '@/utils/apiMessages'
 
 const { t } = useI18n()
 const auth = useAuthStore()
@@ -84,7 +85,7 @@ async function runAction(action, album) {
     await actions[action](album.id)
     tableRef.value?.refresh()
   } catch (error) {
-    appStore.notify(error.response?.data?.message || t('common.actionFailed'), 'error')
+    appStore.notify(translateApiMessage(error, 'common.actionFailed'), 'error')
   }
 }
 

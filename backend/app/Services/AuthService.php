@@ -111,7 +111,7 @@ class AuthService
         if (! $user->isActive()) {
             auth('api')->logout();
             $this->securityEvents->loginAttempt($email, $user, false, 'Account deactivated', request());
-            throw new InvalidCredentialsException('This account has been deactivated.');
+            throw new InvalidCredentialsException('This account has been deactivated.', 'ACCOUNT_DEACTIVATED');
         }
 
         $this->securityEvents->loginAttempt($email, $user, true, null, request());

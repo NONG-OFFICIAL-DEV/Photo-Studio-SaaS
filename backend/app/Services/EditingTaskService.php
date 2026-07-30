@@ -3,10 +3,10 @@
 namespace App\Services;
 
 use App\Enums\EditingStatus;
+use App\Exceptions\ApiException;
 use App\Models\EditingTask;
 use App\Repositories\Contracts\EditingTaskRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class EditingTaskService extends BaseService
 {
@@ -63,7 +63,7 @@ class EditingTaskService extends BaseService
     {
         if (! in_array($task->status, $allowed, true)) {
             $allowedLabels = implode(', ', array_map(fn ($s) => $s->label(), $allowed));
-            throw new HttpException(422, "This action requires the task to be one of: {$allowedLabels} (currently \"{$task->status->label()}\").");
+            throw new ApiException(422, "This action requires the task to be one of: {$allowedLabels} (currently \"{$task->status->label()}\").", 'EDITING_TASK_INVALID_STATUS_TRANSITION', ['allowed' => $allowedLabels, 'current' => $task->status->label()]);
         }
     }
 }

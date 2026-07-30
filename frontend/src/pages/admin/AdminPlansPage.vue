@@ -8,6 +8,7 @@ import AppConfirmDialog from '@/components/common/AppConfirmDialog.vue'
 import PlanFormDialog from '@/components/admin/PlanFormDialog.vue'
 import { getAdminPlansApi, deleteAdminPlanApi } from '@/apis/admin.api'
 import { useAppStore } from '@/stores/app'
+import { translateApiMessage } from '@/utils/apiMessages'
 
 const { t } = useI18n()
 const appStore = useAppStore()
@@ -57,7 +58,7 @@ async function confirmDeletePlan() {
     confirmDelete.value = false
     tableRef.value?.refresh()
   } catch (error) {
-    appStore.notify(error.response?.data?.message || t('admin.plans.messages.deleteError'), 'error')
+    appStore.notify(translateApiMessage(error, 'admin.plans.messages.deleteError'), 'error')
     confirmDelete.value = false
   } finally {
     deleteLoading.value = false

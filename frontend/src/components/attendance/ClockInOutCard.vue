@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import AppStatusChip from '@/components/common/AppStatusChip.vue'
 import { getTodayAttendanceApi, clockInApi, clockOutApi } from '@/apis/attendance.api'
 import { useAppStore } from '@/stores/app'
+import { translateApiMessage } from '@/utils/apiMessages'
 
 const { t } = useI18n()
 const appStore = useAppStore()
@@ -37,7 +38,7 @@ async function clockIn() {
     record.value = data.data
     appStore.notify(t('attendance.messages.clockedIn'))
   } catch (error) {
-    appStore.notify(error.response?.data?.message || t('common.actionFailed'), 'error')
+    appStore.notify(translateApiMessage(error, 'common.actionFailed'), 'error')
   } finally {
     actionLoading.value = false
   }
@@ -50,7 +51,7 @@ async function clockOut() {
     record.value = data.data
     appStore.notify(t('attendance.messages.clockedOut'))
   } catch (error) {
-    appStore.notify(error.response?.data?.message || t('common.actionFailed'), 'error')
+    appStore.notify(translateApiMessage(error, 'common.actionFailed'), 'error')
   } finally {
     actionLoading.value = false
   }

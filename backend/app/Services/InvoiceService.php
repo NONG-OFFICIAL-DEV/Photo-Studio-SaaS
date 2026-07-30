@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\InvoiceStatus;
+use App\Exceptions\ApiException;
 use App\Models\Invoice;
 use App\Models\Order;
 use App\Models\Package;
@@ -15,7 +16,6 @@ use App\Repositories\Contracts\InvoiceRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class InvoiceService extends BaseService
 {
@@ -89,7 +89,7 @@ class InvoiceService extends BaseService
     public function update(Invoice $invoice, array $data): Invoice
     {
         if ($invoice->status === InvoiceStatus::Void) {
-            throw new HttpException(422, 'A voided invoice can no longer be edited.');
+            throw new ApiException(422, 'A voided invoice can no longer be edited.', 'INVOICE_VOIDED_LOCKED');
         }
 
         $items = $data['items'] ?? null;
@@ -100,7 +100,7 @@ class InvoiceService extends BaseService
             || array_key_exists('tax_rate', $data);
 
         if ($changingTotals && $invoice->status !== InvoiceStatus::Draft) {
-            throw new HttpException(422, 'Line items, discount, and tax can only be changed while the invoice is still a draft.');
+            throw new ApiException(422, 'Line items, discount, and tax can only be changed while the invoice is still a draft.', 'INVOICE_NOT_DRAFT_LOCKED');
         }
 
         return DB::transaction(function () use ($invoice, $data, $items) {
@@ -131,7 +131,7 @@ class InvoiceService extends BaseService
     public function delete(Invoice $invoice): bool
     {
         if ($invoice->status !== InvoiceStatus::Draft) {
-            throw new HttpException(422, 'Only draft invoices can be deleted — void it instead.');
+            throw new ApiException(422, 'Only draft invoices can be deleted — void it instead.', 'INVOICE_NOT_DRAFT_DELETE');
         }
 
         return $this->invoices->delete($invoice);
@@ -148,7 +148,7 @@ class InvoiceService extends BaseService
     public function void(Invoice $invoice, string $reason): Invoice
     {
         if (in_array($invoice->status, [InvoiceStatus::Paid, InvoiceStatus::Void], true)) {
-            throw new HttpException(422, 'A paid or already-voided invoice cannot be voided.');
+            throw new ApiException(422, 'A paid or already-voided invoice cannot be voided.', 'INVOICE_ALREADY_VOIDED_OR_PAID');
         }
 
         $invoice->update(['status' => InvoiceStatus::Void, 'voided_reason' => $reason]);
@@ -159,7 +159,7 @@ class InvoiceService extends BaseService
     public function recordPayment(Invoice $invoice, array $data, ?User $recorder = null): Invoice
     {
         if (in_array($invoice->status, [InvoiceStatus::Draft, InvoiceStatus::Void], true)) {
-            throw new HttpException(422, 'Payments can only be recorded against a sent invoice.');
+            throw new ApiException(422, 'Payments can only be recorded against a sent invoice.', 'INVOICE_NOT_SENT');
         }
 
         return DB::transaction(function () use ($invoice, $data, $recorder) {
@@ -167,7 +167,7 @@ class InvoiceService extends BaseService
             $remaining = round((float) $invoice->total - (float) $invoice->amount_paid, 2);
 
             if ($amount > $remaining) {
-                throw new HttpException(422, "Payment of {$amount} exceeds the remaining balance of {$remaining}.");
+                throw new ApiException(422, "Payment of {$amount} exceeds the remaining balance of {$remaining}.", 'PAYMENT_EXCEEDS_BALANCE', ['amount' => $amount, 'remaining' => $remaining]);
             }
 
             $invoice->payments()->create([
@@ -188,7 +188,7 @@ class InvoiceService extends BaseService
     public function deletePayment(Invoice $invoice, Payment $payment): Invoice
     {
         if ($payment->invoice_id !== $invoice->id) {
-            throw new HttpException(404, 'Payment not found for this invoice.');
+            throw new ApiException(404, 'Payment not found for this invoice.', 'PAYMENT_NOT_FOUND');
         }
 
         return DB::transaction(function () use ($invoice, $payment) {
@@ -231,7 +231,7 @@ class InvoiceService extends BaseService
     protected function assertStatus(Invoice $invoice, InvoiceStatus $expected): void
     {
         if ($invoice->status !== $expected) {
-            throw new HttpException(422, "This action requires the invoice to be \"{$expected->label()}\" (currently \"{$invoice->status->label()}\").");
+            throw new ApiException(422, "This action requires the invoice to be \"{$expected->label()}\" (currently \"{$invoice->status->label()}\").", 'INVOICE_INVALID_STATUS_TRANSITION', ['expected' => $expected->label(), 'current' => $invoice->status->label()]);
         }
     }
 

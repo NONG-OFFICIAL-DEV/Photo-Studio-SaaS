@@ -14,6 +14,7 @@ import {
   getAdminSubscriptionPaymentsApi,
 } from '@/apis/admin.api'
 import { useAppStore } from '@/stores/app'
+import { translateApiMessage } from '@/utils/apiMessages'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -78,7 +79,7 @@ async function runAction(fn, successMessage) {
     appStore.notify(successMessage)
     emit('changed')
   } catch (error) {
-    appStore.notify(error.response?.data?.message || t('common.actionFailed'), 'error')
+    appStore.notify(translateApiMessage(error, 'common.actionFailed'), 'error')
   } finally {
     actionLoading.value = false
   }

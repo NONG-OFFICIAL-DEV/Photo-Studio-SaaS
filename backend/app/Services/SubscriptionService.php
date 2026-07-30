@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\BillingCycle;
 use App\Enums\SubscriptionStatus;
+use App\Exceptions\ApiException;
 use App\Models\Order;
 use App\Models\Plan;
 use App\Models\Subscription;
@@ -11,7 +12,6 @@ use App\Models\SubscriptionPayment;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Support\Collection;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * Subscription lifecycle for both the tenant self-service Billing page and
@@ -60,7 +60,7 @@ class SubscriptionService
         $currentCount = User::query()->where('tenant_id', $tenant->id)->count();
 
         if ($currentCount >= $maxUsers) {
-            throw new HttpException(422, "Your plan allows up to {$maxUsers} users. Upgrade your plan to add more employees.");
+            throw new ApiException(422, "Your plan allows up to {$maxUsers} users. Upgrade your plan to add more employees.", 'USER_LIMIT_REACHED', ['maxUsers' => $maxUsers]);
         }
     }
 
@@ -85,11 +85,11 @@ class SubscriptionService
         $amount = $this->priceForCycle($plan, $cycle);
 
         if ($amount === null) {
-            throw new HttpException(422, "\"{$plan->name}\" isn't available on a {$cycle->value} billing cycle.");
+            throw new ApiException(422, "\"{$plan->name}\" isn't available on a {$cycle->value} billing cycle.", 'BILLING_CYCLE_NOT_AVAILABLE', ['plan' => $plan->name, 'cycle' => $cycle->value]);
         }
 
         if ($amount <= 0) {
-            throw new HttpException(422, "\"{$plan->name}\" is a free plan and has nothing to renew — choose a paid plan first.");
+            throw new ApiException(422, "\"{$plan->name}\" is a free plan and has nothing to renew — choose a paid plan first.", 'PLAN_HAS_NOTHING_TO_RENEW', ['plan' => $plan->name]);
         }
 
         $periodStart = $subscription->current_period_ends_at?->isFuture()
@@ -138,11 +138,11 @@ class SubscriptionService
     public function changePlan(Subscription $subscription, Plan $plan, ?User $actor): Subscription
     {
         if (! $plan->is_active) {
-            throw new HttpException(422, 'This plan is not available.');
+            throw new ApiException(422, 'This plan is not available.', 'PLAN_NOT_AVAILABLE');
         }
 
         if (! $plan->hasPaidPricing()) {
-            throw new HttpException(422, "\"{$plan->name}\" is not available to switch to — it's a free onboarding plan, not an ongoing tier.");
+            throw new ApiException(422, "\"{$plan->name}\" is not available to switch to — it's a free onboarding plan, not an ongoing tier.", 'PLAN_NOT_SWITCHABLE', ['plan' => $plan->name]);
         }
 
         $oldPlanName = $subscription->plan?->name ?? 'previous plan';
@@ -167,11 +167,11 @@ class SubscriptionService
     public function cancel(Subscription $subscription, ?User $actor): Subscription
     {
         if (! $subscription->status->isUsable()) {
-            throw new HttpException(422, 'Only an active or trial subscription can be cancelled.');
+            throw new ApiException(422, 'Only an active or trial subscription can be cancelled.', 'SUBSCRIPTION_NOT_CANCELLABLE');
         }
 
         if ($subscription->cancelled_at) {
-            throw new HttpException(422, 'This subscription is already scheduled for cancellation.');
+            throw new ApiException(422, 'This subscription is already scheduled for cancellation.', 'SUBSCRIPTION_ALREADY_CANCELLING');
         }
 
         $subscription->update(['cancelled_at' => now()]);
@@ -184,7 +184,7 @@ class SubscriptionService
     public function resume(Subscription $subscription, ?User $actor): Subscription
     {
         if (! $subscription->cancelled_at) {
-            throw new HttpException(422, 'This subscription is not scheduled for cancellation.');
+            throw new ApiException(422, 'This subscription is not scheduled for cancellation.', 'SUBSCRIPTION_NOT_SCHEDULED_FOR_CANCELLATION');
         }
 
         $endsAt = $subscription->status === SubscriptionStatus::Trial
@@ -192,7 +192,7 @@ class SubscriptionService
             : $subscription->current_period_ends_at;
 
         if ($endsAt && $endsAt->isPast()) {
-            throw new HttpException(422, 'This subscription has already ended and cannot be resumed — renew instead.');
+            throw new ApiException(422, 'This subscription has already ended and cannot be resumed — renew instead.', 'SUBSCRIPTION_ALREADY_ENDED');
         }
 
         $subscription->update(['cancelled_at' => null]);
@@ -224,7 +224,7 @@ class SubscriptionService
     public function reactivate(Subscription $subscription, User $actor): Subscription
     {
         if ($subscription->status !== SubscriptionStatus::Suspended) {
-            throw new HttpException(422, 'Only a suspended subscription can be reactivated this way.');
+            throw new ApiException(422, 'Only a suspended subscription can be reactivated this way.', 'SUBSCRIPTION_NOT_SUSPENDED');
         }
 
         $status = $this->statusFromDates($subscription);

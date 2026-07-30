@@ -134,7 +134,12 @@ const tenantMenuGroups = computed(() => [
         permission: 'tenant.settings.manage',
       },
       { title: t('menu.audit'), icon: 'mdi-shield-search', to: { name: 'audit' }, permission: 'audit.view' },
-      { title: t('menu.billing'), icon: 'mdi-credit-card-outline', to: { name: 'billing' }, permission: 'tenant.billing.manage' },
+      {
+        title: t('menu.billing'),
+        icon: 'mdi-credit-card-outline',
+        to: { name: 'billing' },
+        permission: 'tenant.billing.manage',
+      },
     ],
   },
 ])
@@ -245,7 +250,14 @@ function toggleLocale() {
       >
         {{ t('admin.panelName') }}
       </v-chip>
-      <v-chip v-else-if="auth.tenant" variant="tonal" color="primary" size="small" prepend-icon="mdi-domain" rounded="lg">
+      <v-chip
+        v-else-if="auth.tenant"
+        variant="tonal"
+        class="bg-primary"
+        size="small"
+        prepend-icon="mdi-domain"
+        rounded="lg"
+      >
         {{ auth.tenant.name }}
       </v-chip>
 
@@ -313,28 +325,28 @@ function toggleLocale() {
             <v-divider class="my-1" />
 
             <!-- Language Selector Toggle -->
-            <v-list-item rounded="md" class="mx-1 my-1" @click="toggleLocale">
-              <template #prepend>
-                <v-icon icon="mdi-translate" size="20" class="mr-2" />
-              </template>
-              <v-list-item-title class="text-body-2">{{ t('common.toggleLanguage') }}</v-list-item-title>
+            <v-list-item
+              rounded="md"
+              class="mx-1 my-1"
+              :title="t('common.toggleLanguage')"
+              @click="toggleLocale"
+              prepend-icon="mdi-translate"
+            >
               <template #append>
-                <v-chip size="x-small" variant="tonal" class="font-weight-bold">
+                <v-chip size="x-small" variant="tonal" class="font-weight-bold bg-primary">
                   {{ appStore.locale.toUpperCase() }}
                 </v-chip>
               </template>
             </v-list-item>
 
             <!-- Theme Toggle -->
-            <v-list-item rounded="md" class="mx-1 my-1" @click="appStore.toggleTheme">
-              <template #prepend>
-                <v-icon
-                  :icon="appStore.theme === 'light' ? 'mdi-weather-night' : 'mdi-white-balance-sunny'"
-                  size="20"
-                  class="mr-2"
-                />
-              </template>
-              <v-list-item-title class="text-body-2">{{ t('common.toggleTheme') }}</v-list-item-title>
+            <v-list-item
+              rounded="md"
+              class="mx-1 my-1"
+              @click="appStore.toggleTheme"
+              :title="t('common.toggleTheme')"
+              prepend-icon="mdi-theme-light-dark"
+            >
               <template #append>
                 <v-switch
                   :model-value="appStore.theme === 'dark'"
@@ -360,7 +372,7 @@ function toggleLocale() {
               <template #prepend>
                 <v-icon icon="mdi-logout" size="20" color="error" class="mr-2" />
               </template>
-              <v-list-item-title class="text-body-2 font-weight-medium">
+              <v-list-item-title class="font-weight-medium">
                 {{ t('menu.logout') }}
               </v-list-item-title>
             </v-list-item>

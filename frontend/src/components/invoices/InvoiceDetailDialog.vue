@@ -12,6 +12,7 @@ import {
 } from '@/apis/invoice.api'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
+import { translateApiMessage } from '@/utils/apiMessages'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -73,7 +74,7 @@ async function sendNow() {
     await load()
     emit('changed')
   } catch (error) {
-    appStore.notify(error.response?.data?.message || t('common.actionFailed'), 'error')
+    appStore.notify(translateApiMessage(error, 'common.actionFailed'), 'error')
   } finally {
     actionLoading.value = false
   }
@@ -94,7 +95,7 @@ async function recordPayment() {
     emit('changed')
     appStore.notify(t('invoices.messages.paymentRecorded'))
   } catch (error) {
-    paymentError.value = error.response?.data?.message || t('common.actionFailed')
+    paymentError.value = translateApiMessage(error, 'common.actionFailed')
   } finally {
     actionLoading.value = false
   }
@@ -107,7 +108,7 @@ async function removePayment(paymentId) {
     await load()
     emit('changed')
   } catch (error) {
-    appStore.notify(error.response?.data?.message || t('common.actionFailed'), 'error')
+    appStore.notify(translateApiMessage(error, 'common.actionFailed'), 'error')
   } finally {
     actionLoading.value = false
   }

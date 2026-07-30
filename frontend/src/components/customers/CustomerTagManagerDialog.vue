@@ -8,6 +8,7 @@ import { customerTagSchema } from '@/utils/validators'
 import { createCustomerTagApi, deleteCustomerTagApi } from '@/apis/customer-tag.api'
 import { useCustomerTagsStore } from '@/stores/customerTags'
 import { useAppStore } from '@/stores/app'
+import { translateApiMessage } from '@/utils/apiMessages'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -39,7 +40,7 @@ async function onSubmit(values, { resetForm }) {
     await tagsStore.fetch(true)
     appStore.notify(t('customers.messages.tagCreatedSuccess'))
   } catch (error) {
-    appStore.notify(error.response?.data?.message || t('customers.messages.tagCreateError'), 'error')
+    appStore.notify(translateApiMessage(error, 'customers.messages.tagCreateError'), 'error')
   } finally {
     loading.value = false
   }

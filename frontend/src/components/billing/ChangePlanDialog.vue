@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import AppDialog from '@/components/common/AppDialog.vue'
 import { getBillingPlansApi, changeBillingPlanApi } from '@/apis/billing.api'
 import { useAppStore } from '@/stores/app'
+import { translateApiMessage } from '@/utils/apiMessages'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -44,7 +45,7 @@ async function selectPlan(plan) {
     emit('changed')
     emit('update:modelValue', false)
   } catch (error) {
-    errorMessage.value = error.response?.data?.message || t('billingPage.messages.planChangeError')
+    errorMessage.value = translateApiMessage(error, 'billingPage.messages.planChangeError')
   } finally {
     changing.value = false
   }

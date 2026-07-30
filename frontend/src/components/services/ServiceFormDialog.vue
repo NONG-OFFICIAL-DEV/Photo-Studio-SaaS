@@ -6,6 +6,7 @@ import AppForm from '@/components/common/AppForm.vue'
 import { serviceSchema } from '@/utils/validators'
 import { createServiceApi, updateServiceApi } from '@/apis/service.api'
 import { useServiceCategoriesStore } from '@/stores/serviceCategories'
+import { translateApiMessage } from '@/utils/apiMessages'
 import { useAppStore } from '@/stores/app'
 
 const props = defineProps({
@@ -62,7 +63,7 @@ async function onSubmit(values) {
     emit('saved')
     emit('update:modelValue', false)
   } catch (error) {
-    errorMessage.value = error.response?.data?.message || t('services.messages.serviceSaveError')
+    errorMessage.value = translateApiMessage(error, 'services.messages.serviceSaveError')
   } finally {
     loading.value = false
   }

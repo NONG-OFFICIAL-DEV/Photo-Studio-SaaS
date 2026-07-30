@@ -5,6 +5,7 @@ import AppDialog from '@/components/common/AppDialog.vue'
 import AppUploader from '@/components/common/AppUploader.vue'
 import { importCustomersApi } from '@/apis/customer.api'
 import { useAppStore } from '@/stores/app'
+import { translateApiMessage } from '@/utils/apiMessages'
 
 defineProps({
   modelValue: { type: Boolean, default: false },
@@ -31,7 +32,7 @@ async function runImport() {
       emit('imported')
     }
   } catch (error) {
-    appStore.notify(error.response?.data?.message || t('customers.messages.importFailed'), 'error')
+    appStore.notify(translateApiMessage(error, 'customers.messages.importFailed'), 'error')
   } finally {
     loading.value = false
   }

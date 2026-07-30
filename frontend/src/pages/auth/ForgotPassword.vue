@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import AppForm from '@/components/common/AppForm.vue'
 import { forgotPasswordSchema } from '@/utils/validators'
 import { forgotPasswordApi } from '@/apis/auth.api'
+import { translateApiMessage } from '@/utils/apiMessages'
 
 const { t } = useI18n()
 
@@ -18,9 +19,9 @@ async function onSubmit(values) {
 
   try {
     const { data } = await forgotPasswordApi(values)
-    successMessage.value = data.message
+    successMessage.value = translateApiMessage({ response: { data } }, '')
   } catch (error) {
-    errorMessage.value = error.response?.data?.message || t('auth.forgotPasswordError')
+    errorMessage.value = translateApiMessage(error, 'auth.forgotPasswordError')
   } finally {
     loading.value = false
   }

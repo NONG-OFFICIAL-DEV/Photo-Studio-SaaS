@@ -9,6 +9,7 @@ import { createCommissionEntryApi } from '@/apis/commission.api'
 import { getUsersApi } from '@/apis/user.api'
 import { getOrdersApi } from '@/apis/order.api'
 import { useAppStore } from '@/stores/app'
+import { translateApiMessage } from '@/utils/apiMessages'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -67,7 +68,7 @@ async function onSubmit(values) {
     emit('saved')
     emit('update:modelValue', false)
   } catch (error) {
-    errorMessage.value = error.response?.data?.message || t('commissions.messages.saveError')
+    errorMessage.value = translateApiMessage(error, 'commissions.messages.saveError')
   } finally {
     loading.value = false
   }

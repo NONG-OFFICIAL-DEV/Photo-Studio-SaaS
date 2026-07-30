@@ -8,6 +8,7 @@ import { expenseCategorySchema } from '@/utils/validators'
 import { createExpenseCategoryApi, deleteExpenseCategoryApi } from '@/apis/expense-category.api'
 import { useExpenseCategoriesStore } from '@/stores/expenseCategories'
 import { useAppStore } from '@/stores/app'
+import { translateApiMessage } from '@/utils/apiMessages'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -36,7 +37,7 @@ async function onSubmit(values, { resetForm }) {
     await categoriesStore.fetch(true)
     appStore.notify(t('expenses.messages.categoryCreated'))
   } catch (error) {
-    appStore.notify(error.response?.data?.message || t('expenses.messages.categoryCreateError'), 'error')
+    appStore.notify(translateApiMessage(error, 'expenses.messages.categoryCreateError'), 'error')
   } finally {
     loading.value = false
   }

@@ -6,6 +6,7 @@ import AppForm from '@/components/common/AppForm.vue'
 import { planSchema } from '@/utils/validators'
 import { createAdminPlanApi, updateAdminPlanApi } from '@/apis/admin.api'
 import { useAppStore } from '@/stores/app'
+import { translateApiMessage } from '@/utils/apiMessages'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -57,7 +58,7 @@ async function onSubmit(values) {
     emit('saved')
     emit('update:modelValue', false)
   } catch (error) {
-    errorMessage.value = error.response?.data?.message || t('admin.plans.messages.saveError')
+    errorMessage.value = translateApiMessage(error, 'admin.plans.messages.saveError')
   } finally {
     loading.value = false
   }

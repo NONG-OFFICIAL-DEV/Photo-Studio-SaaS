@@ -35,27 +35,29 @@ class EnsureSubscriptionActive
         $subscription = $user->tenant?->activeSubscription;
 
         if (! $subscription) {
-            return $this->error('No subscription found for this studio. Please contact support.', 402);
+            return $this->error('No subscription found for this studio. Please contact support.', 402, [], 'NO_SUBSCRIPTION_FOUND');
         }
 
         if (in_array($subscription->status, [SubscriptionStatus::Suspended, SubscriptionStatus::Cancelled, SubscriptionStatus::Expired], true)) {
             return $this->error(
                 "Your subscription is {$subscription->status->value}. Please renew to continue.",
                 402,
-                ['subscription_status' => $subscription->status->value]
+                ['subscription_status' => $subscription->status->value],
+                'SUBSCRIPTION_STATUS_BLOCKED',
+                ['status' => $subscription->status->value]
             );
         }
 
         if ($subscription->status === SubscriptionStatus::Trial && $subscription->trial_ends_at?->isPast()) {
             return $this->error('Your free trial has ended. Please choose a plan to continue.', 402, [
                 'subscription_status' => SubscriptionStatus::Expired->value,
-            ]);
+            ], 'TRIAL_ENDED');
         }
 
         if ($subscription->status === SubscriptionStatus::Active && $subscription->current_period_ends_at?->isPast()) {
             return $this->error('Your subscription has expired. Please renew to continue.', 402, [
                 'subscription_status' => SubscriptionStatus::Expired->value,
-            ]);
+            ], 'SUBSCRIPTION_EXPIRED');
         }
 
         return $next($request);

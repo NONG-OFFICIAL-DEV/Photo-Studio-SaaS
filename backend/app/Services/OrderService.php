@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\EditingStatus;
 use App\Enums\OrderStatus;
+use App\Exceptions\ApiException;
 use App\Models\Order;
 use App\Models\Package;
 use App\Models\Service;
@@ -12,7 +13,6 @@ use App\Models\User;
 use App\Repositories\Contracts\OrderRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class OrderService extends BaseService
 {
@@ -58,7 +58,7 @@ class OrderService extends BaseService
 
             if ($items !== null) {
                 if ($order->status !== OrderStatus::Pending && $order->status !== OrderStatus::Confirmed) {
-                    throw new HttpException(422, 'Line items can no longer be changed once an order has entered production.');
+                    throw new ApiException(422, 'Line items can no longer be changed once an order has entered production.', 'LINE_ITEMS_LOCKED_IN_PRODUCTION');
                 }
 
                 $lines = $this->resolveLines($items);
@@ -113,7 +113,7 @@ class OrderService extends BaseService
         $task = $order->editingTask;
 
         if (! $task || $task->status !== EditingStatus::Completed) {
-            throw new HttpException(422, 'The editing task must be completed before this order can be marked ready for delivery.');
+            throw new ApiException(422, 'The editing task must be completed before this order can be marked ready for delivery.', 'EDITING_TASK_NOT_COMPLETE');
         }
 
         $order->update(['status' => OrderStatus::ReadyForDelivery]);
@@ -132,7 +132,7 @@ class OrderService extends BaseService
     public function cancel(Order $order, string $reason): Order
     {
         if (in_array($order->status, [OrderStatus::Delivered, OrderStatus::Cancelled], true)) {
-            throw new HttpException(422, 'This order can no longer be cancelled.');
+            throw new ApiException(422, 'This order can no longer be cancelled.', 'ORDER_CANNOT_BE_CANCELLED');
         }
 
         $order->update(['status' => OrderStatus::Cancelled, 'cancelled_reason' => $reason]);
@@ -143,7 +143,7 @@ class OrderService extends BaseService
     protected function assertStatus(Order $order, OrderStatus $expected): void
     {
         if ($order->status !== $expected) {
-            throw new HttpException(422, "This action requires the order to be \"{$expected->label()}\" (currently \"{$order->status->label()}\").");
+            throw new ApiException(422, "This action requires the order to be \"{$expected->label()}\" (currently \"{$order->status->label()}\").", 'ORDER_INVALID_STATUS_TRANSITION', ['expected' => $expected->label(), 'current' => $order->status->label()]);
         }
     }
 

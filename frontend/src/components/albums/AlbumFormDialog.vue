@@ -7,6 +7,7 @@ import { albumSchema } from '@/utils/validators'
 import { createAlbumApi, updateAlbumApi } from '@/apis/album.api'
 import { getCustomersApi } from '@/apis/customer.api'
 import { useAppStore } from '@/stores/app'
+import { translateApiMessage } from '@/utils/apiMessages'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -78,7 +79,7 @@ async function onSubmit(values) {
     emit('saved')
     emit('update:modelValue', false)
   } catch (error) {
-    errorMessage.value = error.response?.data?.message || t('albums.messages.saveError')
+    errorMessage.value = translateApiMessage(error, 'albums.messages.saveError')
   } finally {
     loading.value = false
   }

@@ -6,6 +6,7 @@ import AppForm from '@/components/common/AppForm.vue'
 import AppConfirmDialog from '@/components/common/AppConfirmDialog.vue'
 import { serviceAddOnSchema } from '@/utils/validators'
 import { getServiceAddOnsApi, createServiceAddOnApi, deleteServiceAddOnApi } from '@/apis/service-addon.api'
+import { translateApiMessage } from '@/utils/apiMessages'
 import { useAppStore } from '@/stores/app'
 
 const props = defineProps({
@@ -38,7 +39,7 @@ async function onSubmit(values, { resetForm }) {
     await loadAddOns()
     appStore.notify(t('services.messages.addOnCreated'))
   } catch (error) {
-    appStore.notify(error.response?.data?.message || t('services.messages.addOnCreateError'), 'error')
+    appStore.notify(translateApiMessage(error, 'services.messages.addOnCreateError'), 'error')
   } finally {
     loading.value = false
   }

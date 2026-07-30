@@ -7,6 +7,7 @@ import { packageSchema } from '@/utils/validators'
 import { createPackageApi, updatePackageApi } from '@/apis/package.api'
 import { getServicesApi } from '@/apis/service.api'
 import { getServiceAddOnsApi } from '@/apis/service-addon.api'
+import { translateApiMessage } from '@/utils/apiMessages'
 import { useAppStore } from '@/stores/app'
 
 const props = defineProps({
@@ -142,7 +143,7 @@ async function onSubmit(values) {
     emit('saved')
     emit('update:modelValue', false)
   } catch (error) {
-    errorMessage.value = error.response?.data?.message || t('packages.messages.saveError')
+    errorMessage.value = translateApiMessage(error, 'packages.messages.saveError')
   } finally {
     loading.value = false
   }

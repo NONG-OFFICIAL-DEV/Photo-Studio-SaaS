@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDialog from '@/components/common/AppDialog.vue'
 import { renewBillingApi } from '@/apis/billing.api'
+import { translateApiMessage } from '@/utils/apiMessages'
 import { useAppStore } from '@/stores/app'
 
 const props = defineProps({
@@ -53,7 +54,7 @@ async function confirmRenew() {
     emit('renewed')
     emit('update:modelValue', false)
   } catch (error) {
-    errorMessage.value = error.response?.data?.message || t('billingPage.messages.renewError')
+    errorMessage.value = translateApiMessage(error, 'billingPage.messages.renewError')
   } finally {
     loading.value = false
   }

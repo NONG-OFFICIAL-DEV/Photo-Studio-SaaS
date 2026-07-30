@@ -3,11 +3,11 @@
 namespace App\Services;
 
 use App\Enums\AlbumStatus;
+use App\Exceptions\ApiException;
 use App\Models\Album;
 use App\Models\User;
 use App\Repositories\Contracts\AlbumRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class AlbumService extends BaseService
 {
@@ -71,7 +71,7 @@ class AlbumService extends BaseService
     public function archive(Album $album): Album
     {
         if ($album->status === AlbumStatus::Archived) {
-            throw new HttpException(422, 'This album is already archived.');
+            throw new ApiException(422, 'This album is already archived.', 'ALBUM_ALREADY_ARCHIVED');
         }
 
         $album->update(['status' => AlbumStatus::Archived]);
@@ -82,7 +82,7 @@ class AlbumService extends BaseService
     protected function assertStatus(Album $album, AlbumStatus $expected): void
     {
         if ($album->status !== $expected) {
-            throw new HttpException(422, "This action requires the album to be \"{$expected->label()}\" (currently \"{$album->status->label()}\").");
+            throw new ApiException(422, "This action requires the album to be \"{$expected->label()}\" (currently \"{$album->status->label()}\").", 'ALBUM_INVALID_STATUS_TRANSITION', ['expected' => $expected->label(), 'current' => $album->status->label()]);
         }
     }
 }

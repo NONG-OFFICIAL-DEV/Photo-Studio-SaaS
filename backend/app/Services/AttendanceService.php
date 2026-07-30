@@ -3,12 +3,12 @@
 namespace App\Services;
 
 use App\Enums\AttendanceStatus;
+use App\Exceptions\ApiException;
 use App\Models\AttendanceRecord;
 use App\Models\User;
 use App\Repositories\Contracts\AttendanceRecordRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class AttendanceService extends BaseService
 {
@@ -28,7 +28,7 @@ class AttendanceService extends BaseService
         $record = AttendanceRecord::where('user_id', $user->id)->whereDate('date', $today)->first();
 
         if ($record && $record->clock_in_at) {
-            throw new HttpException(422, 'You have already clocked in today.');
+            throw new ApiException(422, 'You have already clocked in today.', 'ALREADY_CLOCKED_IN');
         }
 
         $now = now();
@@ -57,11 +57,11 @@ class AttendanceService extends BaseService
         $record = AttendanceRecord::where('user_id', $user->id)->whereDate('date', $today)->first();
 
         if (! $record || ! $record->clock_in_at) {
-            throw new HttpException(422, 'You must clock in before you can clock out.');
+            throw new ApiException(422, 'You must clock in before you can clock out.', 'NOT_CLOCKED_IN');
         }
 
         if ($record->clock_out_at) {
-            throw new HttpException(422, 'You have already clocked out today.');
+            throw new ApiException(422, 'You have already clocked out today.', 'ALREADY_CLOCKED_OUT');
         }
 
         $record->update(['clock_out_at' => now()]);
@@ -78,7 +78,7 @@ class AttendanceService extends BaseService
         $existing = AttendanceRecord::where('user_id', $data['user_id'])->whereDate('date', $data['date'])->first();
 
         if ($existing) {
-            throw new HttpException(422, 'An attendance record already exists for this employee on this date.');
+            throw new ApiException(422, 'An attendance record already exists for this employee on this date.', 'ATTENDANCE_RECORD_EXISTS');
         }
 
         $record = $this->attendance->create([

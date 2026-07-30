@@ -6,6 +6,7 @@ import AppForm from '@/components/common/AppForm.vue'
 import { employmentSchema } from '@/utils/validators'
 import { updateUserEmploymentApi } from '@/apis/user.api'
 import { useAppStore } from '@/stores/app'
+import { translateApiMessage } from '@/utils/apiMessages'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -45,7 +46,7 @@ async function onSubmit(values) {
     emit('saved')
     emit('update:modelValue', false)
   } catch (error) {
-    errorMessage.value = error.response?.data?.message || t('employees.messages.saveError')
+    errorMessage.value = translateApiMessage(error, 'employees.messages.saveError')
   } finally {
     loading.value = false
   }

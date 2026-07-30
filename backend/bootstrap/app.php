@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\ApiException;
 use App\Http\Middleware\EnsurePlanFeature;
 use App\Http\Middleware\EnsureSubscriptionActive;
 use App\Http\Middleware\EnsureSuperAdmin;
@@ -76,23 +77,23 @@ return Application::configure(basePath: dirname(__DIR__))
              * docblock). This is the one place that already knows both the
              * request and the resolved status code for all of them.
              */
-            public function make(Request $request, string $message, int $status, array $errors = [])
+            public function make(Request $request, string $message, int $status, array $errors = [], ?string $code = null, array $params = [])
             {
                 app(ApiLogRecorder::class)->recordIfNeeded($request, $status);
 
-                return $this->error($message, $status, $errors);
+                return $this->error($message, $status, $errors, $code, $params);
             }
         };
 
         $exceptions->render(function (ValidationException $e, Request $request) use ($respond) {
             if ($request->is('api/*')) {
-                return $respond->make($request, 'The given data was invalid.', 422, $e->errors());
+                return $respond->make($request, 'The given data was invalid.', 422, $e->errors(), 'VALIDATION_ERROR');
             }
         });
 
         $exceptions->render(function (AuthenticationException $e, Request $request) use ($respond) {
             if ($request->is('api/*')) {
-                return $respond->make($request, 'Unauthenticated.', 401);
+                return $respond->make($request, 'Unauthenticated.', 401, [], 'UNAUTHENTICATED');
             }
         });
 
@@ -101,37 +102,37 @@ return Application::configure(basePath: dirname(__DIR__))
                 $message = $e->getMessage() ?: 'This action is unauthorized.';
                 app(SecurityEventLogger::class)->permissionDenied($request, $message);
 
-                return $respond->make($request, $message, 403);
+                return $respond->make($request, $message, 403, [], 'FORBIDDEN');
             }
         });
 
         $exceptions->render(function (ModelNotFoundException $e, Request $request) use ($respond) {
             if ($request->is('api/*')) {
-                return $respond->make($request, 'Resource not found.', 404);
+                return $respond->make($request, 'Resource not found.', 404, [], 'NOT_FOUND');
             }
         });
 
         $exceptions->render(function (NotFoundHttpException $e, Request $request) use ($respond) {
             if ($request->is('api/*')) {
-                return $respond->make($request, 'Endpoint not found.', 404);
+                return $respond->make($request, 'Endpoint not found.', 404, [], 'ENDPOINT_NOT_FOUND');
             }
         });
 
         $exceptions->render(function (TokenExpiredException $e, Request $request) use ($respond) {
             if ($request->is('api/*')) {
-                return $respond->make($request, 'Access token has expired.', 401);
+                return $respond->make($request, 'Access token has expired.', 401, [], 'TOKEN_EXPIRED');
             }
         });
 
         $exceptions->render(function (TokenInvalidException $e, Request $request) use ($respond) {
             if ($request->is('api/*')) {
-                return $respond->make($request, 'Access token is invalid.', 401);
+                return $respond->make($request, 'Access token is invalid.', 401, [], 'TOKEN_INVALID');
             }
         });
 
         $exceptions->render(function (JWTException $e, Request $request) use ($respond) {
             if ($request->is('api/*')) {
-                return $respond->make($request, 'Access token is missing.', 401);
+                return $respond->make($request, 'Access token is missing.', 401, [], 'TOKEN_MISSING');
             }
         });
 
@@ -143,7 +144,10 @@ return Application::configure(basePath: dirname(__DIR__))
                     app(SecurityEventLogger::class)->permissionDenied($request, $message);
                 }
 
-                return $respond->make($request, $message, $e->getStatusCode());
+                $code = $e instanceof ApiException ? $e->errorCode : null;
+                $params = $e instanceof ApiException ? $e->params : [];
+
+                return $respond->make($request, $message, $e->getStatusCode(), [], $code, $params);
             }
         });
     })->create();

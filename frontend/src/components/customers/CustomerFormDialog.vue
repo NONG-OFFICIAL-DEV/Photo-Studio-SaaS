@@ -8,6 +8,7 @@ import { customerSchema } from '@/utils/validators'
 import { createCustomerApi, updateCustomerApi } from '@/apis/customer.api'
 import { useCustomerTagsStore } from '@/stores/customerTags'
 import { useAppStore } from '@/stores/app'
+import { translateApiMessage } from '@/utils/apiMessages'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -55,7 +56,7 @@ async function onSubmit(values) {
     emit('saved')
     emit('update:modelValue', false)
   } catch (error) {
-    errorMessage.value = error.response?.data?.message || t('customers.messages.saveError')
+    errorMessage.value = translateApiMessage(error, 'customers.messages.saveError')
   } finally {
     loading.value = false
   }

@@ -8,6 +8,7 @@ import { expenseSchema } from '@/utils/validators'
 import { createExpenseApi, updateExpenseApi } from '@/apis/expense.api'
 import { useExpenseCategoriesStore } from '@/stores/expenseCategories'
 import { useAppStore } from '@/stores/app'
+import { translateApiMessage } from '@/utils/apiMessages'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -64,7 +65,7 @@ async function onSubmit(values) {
     emit('saved')
     emit('update:modelValue', false)
   } catch (error) {
-    errorMessage.value = error.response?.data?.message || t('expenses.messages.saveError')
+    errorMessage.value = translateApiMessage(error, 'expenses.messages.saveError')
   } finally {
     loading.value = false
   }

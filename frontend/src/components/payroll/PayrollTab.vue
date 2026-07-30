@@ -6,6 +6,7 @@ import AppStatusChip from '@/components/common/AppStatusChip.vue'
 import AppConfirmDialog from '@/components/common/AppConfirmDialog.vue'
 import PayrollFormDialog from '@/components/payroll/PayrollFormDialog.vue'
 import { getPayrollEntriesApi, deletePayrollEntryApi, payPayrollEntryApi } from '@/apis/payroll.api'
+import { translateApiMessage } from '@/utils/apiMessages'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
 
@@ -60,7 +61,7 @@ async function markPaid(entry) {
     appStore.notify(t('payroll.messages.paidSuccess'))
     tableRef.value?.refresh()
   } catch (error) {
-    appStore.notify(error.response?.data?.message || t('common.actionFailed'), 'error')
+    appStore.notify(translateApiMessage(error, 'common.actionFailed'), 'error')
   } finally {
     actionLoading.value = false
   }

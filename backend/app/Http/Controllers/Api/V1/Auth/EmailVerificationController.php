@@ -41,11 +41,11 @@ class EmailVerificationController extends Controller
         $user = $request->user();
 
         if ($user->hasVerifiedEmail()) {
-            return $this->success(null, 'Email already verified.');
+            return $this->success(null, 'Email already verified.', 200, [], 'EMAIL_ALREADY_VERIFIED');
         }
 
         $user->sendEmailVerificationNotification();
 
-        return $this->success(null, 'Verification link sent.');
+        return $this->success(null, 'Verification link sent.', 200, [], 'VERIFICATION_LINK_SENT');
     }
 }

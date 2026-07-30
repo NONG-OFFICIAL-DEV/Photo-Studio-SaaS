@@ -13,6 +13,7 @@ import {
 } from '@/apis/editing-task.api'
 import { getUsersApi } from '@/apis/user.api'
 import { useAppStore } from '@/stores/app'
+import { translateApiMessage } from '@/utils/apiMessages'
 
 const { t } = useI18n()
 const appStore = useAppStore()
@@ -54,7 +55,7 @@ async function runAction(action, task) {
     await actions[action](task.id)
     tableRef.value?.refresh()
   } catch (error) {
-    appStore.notify(error.response?.data?.message || t('common.actionFailed'), 'error')
+    appStore.notify(translateApiMessage(error, 'common.actionFailed'), 'error')
   }
 }
 </script>

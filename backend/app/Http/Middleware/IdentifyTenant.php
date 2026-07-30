@@ -31,7 +31,7 @@ class IdentifyTenant
         $user = $request->user();
 
         if (! $user) {
-            return $this->error('Unauthenticated.', 401);
+            return $this->error('Unauthenticated.', 401, [], 'UNAUTHENTICATED');
         }
 
         if ($user->is_super_admin) {
@@ -39,11 +39,11 @@ class IdentifyTenant
         }
 
         if (! $user->tenant_id || ! $user->tenant) {
-            return $this->error('No tenant associated with this account.', 403);
+            return $this->error('No tenant associated with this account.', 403, [], 'NO_TENANT_ASSOCIATED');
         }
 
         if (! $user->tenant->is_active) {
-            return $this->error('This studio account has been suspended by the platform.', 403);
+            return $this->error('This studio account has been suspended by the platform.', 403, [], 'TENANT_SUSPENDED');
         }
 
         app(TenantContext::class)->set($user->tenant);

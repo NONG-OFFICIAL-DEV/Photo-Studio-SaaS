@@ -28,7 +28,7 @@ class EnsurePlanFeature
         $plan = $user->tenant?->activeSubscription?->plan;
 
         if (! $plan || ! $plan->{$feature}) {
-            return $this->error("This feature isn't included in your current plan. Upgrade to unlock it.", 403);
+            return $this->error("This feature isn't included in your current plan. Upgrade to unlock it.", 403, [], 'PLAN_FEATURE_NOT_INCLUDED');
         }
 
         return $next($request);

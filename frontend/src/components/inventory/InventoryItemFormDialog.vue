@@ -6,6 +6,7 @@ import AppForm from '@/components/common/AppForm.vue'
 import { inventoryItemSchema } from '@/utils/validators'
 import { createInventoryItemApi, updateInventoryItemApi } from '@/apis/inventory.api'
 import { useAppStore } from '@/stores/app'
+import { translateApiMessage } from '@/utils/apiMessages'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -51,7 +52,7 @@ async function onSubmit(values) {
     emit('saved')
     emit('update:modelValue', false)
   } catch (error) {
-    errorMessage.value = error.response?.data?.message || t('inventory.messages.saveError')
+    errorMessage.value = translateApiMessage(error, 'inventory.messages.saveError')
   } finally {
     loading.value = false
   }

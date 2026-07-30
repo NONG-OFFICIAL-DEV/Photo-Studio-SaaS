@@ -10,6 +10,7 @@ import {
 } from '@/apis/inventory.api'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
+import { translateApiMessage } from '@/utils/apiMessages'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -68,7 +69,7 @@ async function recordMovement() {
     emit('changed')
     appStore.notify(t('inventory.messages.movementRecorded'))
   } catch (error) {
-    movementError.value = error.response?.data?.message || t('common.actionFailed')
+    movementError.value = translateApiMessage(error, 'common.actionFailed')
   } finally {
     actionLoading.value = false
   }
@@ -81,7 +82,7 @@ async function removeMovement(movementId) {
     item.value = data.data
     emit('changed')
   } catch (error) {
-    appStore.notify(error.response?.data?.message || t('common.actionFailed'), 'error')
+    appStore.notify(translateApiMessage(error, 'common.actionFailed'), 'error')
   } finally {
     actionLoading.value = false
   }

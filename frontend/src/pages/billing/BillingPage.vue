@@ -50,10 +50,7 @@ async function onPlanChanged() {
 async function load() {
   loading.value = true
   try {
-    const [{ data: billing }, { data: paymentsData }] = await Promise.all([
-      getBillingApi(),
-      getBillingPaymentsApi(),
-    ])
+    const [{ data: billing }, { data: paymentsData }] = await Promise.all([getBillingApi(), getBillingPaymentsApi()])
     subscription.value = billing.data.subscription
     usage.value = billing.data.usage
     payments.value = paymentsData.data
@@ -66,7 +63,10 @@ onMounted(load)
 
 const isCancelled = computed(() => Boolean(subscription.value?.cancelled_at))
 const endsAtLabel = computed(() => {
-  const date = subscription.value?.status === 'trial' ? subscription.value?.trial_ends_at : subscription.value?.current_period_ends_at
+  const date =
+    subscription.value?.status === 'trial'
+      ? subscription.value?.trial_ends_at
+      : subscription.value?.current_period_ends_at
   return date ? new Date(date).toLocaleDateString() : '—'
 })
 
@@ -112,7 +112,7 @@ async function confirmResumeSubscription() {
       </v-alert>
 
       <v-row>
-        <v-col cols="12" md="6">
+        <v-col cols="12" md="7">
           <v-card variant="flat" border rounded="lg" class="h-100">
             <v-card-title class="d-flex align-center justify-space-between">
               {{ subscription.plan?.name }}
@@ -121,16 +121,32 @@ async function confirmResumeSubscription() {
             <v-card-text>
               <div v-if="subscription.amount" class="text-h5 font-weight-bold mb-2">
                 ${{ Number(subscription.amount).toFixed(2) }}
-                <span class="text-caption text-medium-emphasis">/ {{ t(`billingPage.cycles.${subscription.billing_cycle}`) }}</span>
+                <span class="text-caption text-medium-emphasis"
+                  >/ {{ t(`billingPage.cycles.${subscription.billing_cycle}`) }}</span
+                >
               </div>
               <p class="text-body-2 text-medium-emphasis mb-1">
-                {{ subscription.status === 'trial' ? t('billingPage.trialEnds', { date: endsAtLabel }) : t('billingPage.periodEnds', { date: endsAtLabel }) }}
+                {{
+                  subscription.status === 'trial'
+                    ? t('billingPage.trialEnds', { date: endsAtLabel })
+                    : t('billingPage.periodEnds', { date: endsAtLabel })
+                }}
               </p>
 
               <div class="d-flex flex-wrap ga-2 mt-4">
-                <v-btn color="primary" prepend-icon="mdi-cash-check" @click="renewDialog = true">{{ t('billingPage.actions.renew') }}</v-btn>
-                <v-btn variant="outlined" prepend-icon="mdi-swap-horizontal" @click="openChangePlan()">{{ t('billingPage.actions.changePlan') }}</v-btn>
-                <v-btn v-if="!isCancelled" variant="text" color="error" prepend-icon="mdi-close-circle-outline" @click="confirmCancel = true">
+                <v-btn color="primary" prepend-icon="mdi-cash-check" @click="renewDialog = true">{{
+                  t('billingPage.actions.renew')
+                }}</v-btn>
+                <v-btn variant="outlined" prepend-icon="mdi-swap-horizontal" @click="openChangePlan()">{{
+                  t('billingPage.actions.changePlan')
+                }}</v-btn>
+                <v-btn
+                  v-if="!isCancelled"
+                  variant="outlined"
+                  color="error"
+                  prepend-icon="mdi-close-circle-outline"
+                  @click="confirmCancel = true"
+                >
                   {{ t('billingPage.actions.cancel') }}
                 </v-btn>
                 <v-btn v-else variant="text" color="success" prepend-icon="mdi-refresh" @click="confirmResume = true">
@@ -141,7 +157,7 @@ async function confirmResumeSubscription() {
           </v-card>
         </v-col>
 
-        <v-col cols="12" md="6">
+        <v-col cols="12" md="5">
           <v-card variant="flat" border rounded="lg" class="h-100">
             <v-card-title>{{ t('billingPage.usage') }}</v-card-title>
             <v-card-text>
@@ -150,14 +166,26 @@ async function confirmResumeSubscription() {
                   <span>{{ t('billingPage.limits.maxUsers', { count: subscription.plan?.max_users ?? '∞' }) }}</span>
                   <span>{{ usage.users_count }} / {{ subscription.plan?.max_users ?? '∞' }}</span>
                 </div>
-                <v-progress-linear :model-value="usagePercent(usage.users_count, subscription.plan?.max_users)" height="8" rounded color="primary" />
+                <v-progress-linear
+                  :model-value="usagePercent(usage.users_count, subscription.plan?.max_users)"
+                  height="8"
+                  rounded
+                  color="primary"
+                />
               </div>
               <div>
                 <div class="d-flex justify-space-between text-body-2 mb-1">
-                  <span>{{ t('billingPage.limits.orders', { count: subscription.plan?.monthly_order_limit ?? '∞' }) }}</span>
+                  <span>{{
+                    t('billingPage.limits.orders', { count: subscription.plan?.monthly_order_limit ?? '∞' })
+                  }}</span>
                   <span>{{ usage.orders_this_month_count }} / {{ subscription.plan?.monthly_order_limit ?? '∞' }}</span>
                 </div>
-                <v-progress-linear :model-value="usagePercent(usage.orders_this_month_count, subscription.plan?.monthly_order_limit)" height="8" rounded color="primary" />
+                <v-progress-linear
+                  :model-value="usagePercent(usage.orders_this_month_count, subscription.plan?.monthly_order_limit)"
+                  height="8"
+                  rounded
+                  color="primary"
+                />
               </div>
             </v-card-text>
           </v-card>

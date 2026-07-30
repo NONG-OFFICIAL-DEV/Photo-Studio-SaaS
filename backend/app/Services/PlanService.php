@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
+use App\Exceptions\ApiException;
 use App\Models\Plan;
 use App\Repositories\Contracts\PlanRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class PlanService extends BaseService
 {
@@ -40,7 +40,7 @@ class PlanService extends BaseService
     public function delete(Plan $plan): bool
     {
         if ($plan->subscriptions()->exists()) {
-            throw new HttpException(422, 'This plan has active tenant subscriptions and cannot be deleted — deactivate it instead.');
+            throw new ApiException(422, 'This plan has active tenant subscriptions and cannot be deleted — deactivate it instead.', 'PLAN_HAS_ACTIVE_SUBSCRIPTIONS');
         }
 
         $name = $plan->name;

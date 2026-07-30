@@ -3,13 +3,13 @@
 namespace App\Services;
 
 use App\Enums\MovementType;
+use App\Exceptions\ApiException;
 use App\Models\InventoryItem;
 use App\Models\InventoryMovement;
 use App\Models\User;
 use App\Repositories\Contracts\InventoryItemRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class InventoryItemService extends BaseService
 {
@@ -52,7 +52,7 @@ class InventoryItemService extends BaseService
         $quantity = round((float) $data['quantity'], 2);
 
         if ($type === MovementType::StockOut && $quantity > (float) $item->quantity_on_hand) {
-            throw new HttpException(422, "Cannot remove {$quantity} {$item->unit} — only {$item->quantity_on_hand} {$item->unit} in stock.");
+            throw new ApiException(422, "Cannot remove {$quantity} {$item->unit} — only {$item->quantity_on_hand} {$item->unit} in stock.", 'INSUFFICIENT_STOCK', ['quantity' => $quantity, 'unit' => $item->unit, 'available' => $item->quantity_on_hand]);
         }
 
         return DB::transaction(function () use ($item, $data, $type, $quantity, $recorder) {
@@ -73,7 +73,7 @@ class InventoryItemService extends BaseService
     public function deleteMovement(InventoryItem $item, InventoryMovement $movement): InventoryItem
     {
         if ($movement->inventory_item_id !== $item->id) {
-            throw new HttpException(404, 'Movement not found for this item.');
+            throw new ApiException(404, 'Movement not found for this item.', 'MOVEMENT_NOT_FOUND');
         }
 
         return DB::transaction(function () use ($item, $movement) {

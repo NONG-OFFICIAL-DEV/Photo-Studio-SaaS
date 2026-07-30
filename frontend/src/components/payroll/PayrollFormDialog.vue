@@ -7,6 +7,7 @@ import AppDatePicker from '@/components/common/AppDatePicker.vue'
 import { payrollEntrySchema } from '@/utils/validators'
 import { createPayrollEntryApi } from '@/apis/payroll.api'
 import { getUsersApi } from '@/apis/user.api'
+import { translateApiMessage } from '@/utils/apiMessages'
 import { useAppStore } from '@/stores/app'
 
 const props = defineProps({
@@ -40,7 +41,7 @@ async function onSubmit(values) {
     emit('saved')
     emit('update:modelValue', false)
   } catch (error) {
-    errorMessage.value = error.response?.data?.message || t('payroll.messages.saveError')
+    errorMessage.value = translateApiMessage(error, 'payroll.messages.saveError')
   } finally {
     loading.value = false
   }

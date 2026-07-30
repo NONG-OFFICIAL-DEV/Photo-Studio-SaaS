@@ -12,6 +12,7 @@ import { getServicesApi } from '@/apis/service.api'
 import { getServiceAddOnsApi } from '@/apis/service-addon.api'
 import { getPackagesApi } from '@/apis/package.api'
 import { useAppStore } from '@/stores/app'
+import { translateApiMessage } from '@/utils/apiMessages'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -269,7 +270,7 @@ async function onSubmit(values) {
     emit('saved')
     emit('update:modelValue', false)
   } catch (error) {
-    errorMessage.value = error.response?.data?.message || t('invoices.messages.saveError')
+    errorMessage.value = translateApiMessage(error, 'invoices.messages.saveError')
   } finally {
     loading.value = false
   }

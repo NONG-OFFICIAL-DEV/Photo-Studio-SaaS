@@ -10,6 +10,7 @@ import { getBookingsApi } from '@/apis/booking.api'
 import { getServicesApi } from '@/apis/service.api'
 import { getServiceAddOnsApi } from '@/apis/service-addon.api'
 import { getPackagesApi } from '@/apis/package.api'
+import { translateApiMessage } from '@/utils/apiMessages'
 import { useAppStore } from '@/stores/app'
 
 const props = defineProps({
@@ -219,7 +220,7 @@ async function onSubmit(values) {
     emit('saved')
     emit('update:modelValue', false)
   } catch (error) {
-    errorMessage.value = error.response?.data?.message || t('orders.errors.saveFailed')
+    errorMessage.value = translateApiMessage(error, 'orders.errors.saveFailed')
   } finally {
     loading.value = false
   }

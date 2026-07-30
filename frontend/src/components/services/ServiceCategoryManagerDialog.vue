@@ -7,6 +7,7 @@ import AppConfirmDialog from '@/components/common/AppConfirmDialog.vue'
 import { serviceCategorySchema } from '@/utils/validators'
 import { createServiceCategoryApi, deleteServiceCategoryApi } from '@/apis/service-category.api'
 import { useServiceCategoriesStore } from '@/stores/serviceCategories'
+import { translateApiMessage } from '@/utils/apiMessages'
 import { useAppStore } from '@/stores/app'
 
 const props = defineProps({
@@ -36,7 +37,7 @@ async function onSubmit(values, { resetForm }) {
     await categoriesStore.fetch(true)
     appStore.notify(t('services.messages.categoryCreated'))
   } catch (error) {
-    appStore.notify(error.response?.data?.message || t('services.messages.categoryCreateError'), 'error')
+    appStore.notify(translateApiMessage(error, 'services.messages.categoryCreateError'), 'error')
   } finally {
     loading.value = false
   }
