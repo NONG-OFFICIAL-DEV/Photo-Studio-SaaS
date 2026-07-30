@@ -81,18 +81,18 @@ async function onSubmit(values) {
             @update:model-value="setFieldValue('password', $event)"
             @click:append-inner="showPassword = !showPassword"
           />
-
-          <v-text-field
-            :model-value="values.password_confirmation"
-            :label="t('auth.confirmPassword')"
-            :type="showPassword ? 'text' : 'password'"
-            autocomplete="new-password"
-            prepend-inner-icon="mdi-lock-check-outline"
-            :error-messages="errors.password_confirmation"
-            hide-details="auto"
-            @update:model-value="setFieldValue('password_confirmation', $event)"
-          />
         </div>
+
+        <v-text-field
+          :model-value="values.password_confirmation"
+          :label="t('auth.confirmPassword')"
+          :type="showPassword ? 'text' : 'password'"
+          autocomplete="new-password"
+          prepend-inner-icon="mdi-lock-check-outline"
+          :error-messages="errors.password_confirmation"
+          hide-details="auto"
+          @update:model-value="setFieldValue('password_confirmation', $event)"
+        />
 
         <v-btn type="submit" color="primary" block size="large" :loading="loading" class="auth-submit mt-2">
           {{ t('auth.createAccount') }}

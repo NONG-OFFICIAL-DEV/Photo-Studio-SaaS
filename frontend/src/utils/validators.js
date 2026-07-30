@@ -1,12 +1,26 @@
 import * as yup from 'yup'
+import i18n from '@/plugins/i18n'
+
+const { t } = i18n.global
+
+yup.setLocale({
+  mixed: {
+    required: () => t('validation.required'),
+  },
+  string: {
+    email: () => t('validation.email'),
+    min: ({ min }) => t('validation.minLength', { min }),
+    max: ({ max }) => t('validation.maxLength', { max }),
+  },
+})
 
 const passwordRule = yup
   .string()
   .required()
   .min(8)
-  .matches(/[a-z]/, 'Must contain a lowercase letter')
-  .matches(/[A-Z]/, 'Must contain an uppercase letter')
-  .matches(/\d/, 'Must contain a number')
+  .matches(/[a-z]/, () => t('validation.passwordStrength'))
+  .matches(/[A-Z]/, () => t('validation.passwordStrength'))
+  .matches(/\d/, () => t('validation.passwordStrength'))
 
 export const loginSchema = yup.object({
   email: yup.string().required().email(),
@@ -23,7 +37,7 @@ export const registerSchema = yup.object({
   password_confirmation: yup
     .string()
     .required()
-    .oneOf([yup.ref('password')], 'Passwords must match'),
+    .oneOf([yup.ref('password')], () => t('validation.passwordMatch')),
 })
 
 export const forgotPasswordSchema = yup.object({
@@ -35,7 +49,7 @@ export const resetPasswordSchema = yup.object({
   password_confirmation: yup
     .string()
     .required()
-    .oneOf([yup.ref('password')], 'Passwords must match'),
+    .oneOf([yup.ref('password')], () => t('validation.passwordMatch')),
 })
 
 export const customerSchema = yup.object({
