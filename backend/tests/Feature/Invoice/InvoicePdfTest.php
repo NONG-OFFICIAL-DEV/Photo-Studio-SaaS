@@ -1,0 +1,92 @@
+<?php
+
+namespace Tests\Feature\Invoice;
+
+use App\Enums\TenantRole;
+use App\Models\Invoice;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\URL;
+use Tests\Concerns\CreatesTenantUsers;
+use Tests\TestCase;
+
+class InvoicePdfTest extends TestCase
+{
+    use CreatesTenantUsers, RefreshDatabase;
+
+    public function test_owner_can_download_the_invoice_pdf(): void
+    {
+        [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+        $invoice = Invoice::factory()->create(['tenant_id' => $tenant->id]);
+
+        $this->actingAsUser($owner)
+            ->get("/api/v1/invoices/{$invoice->id}/pdf")
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
+    }
+
+    public function test_a_role_without_invoices_view_cannot_download_the_pdf(): void
+    {
+        [$tenant, $photographer] = $this->createTenantWithUser(TenantRole::Photographer);
+        $invoice = Invoice::factory()->create(['tenant_id' => $tenant->id]);
+
+        $this->actingAsUser($photographer)
+            ->get("/api/v1/invoices/{$invoice->id}/pdf")
+            ->assertForbidden();
+    }
+
+    public function test_a_tenant_cannot_download_another_tenants_invoice_pdf(): void
+    {
+        [, $ownerA] = $this->createTenantWithUser(TenantRole::Owner);
+        [$tenantB] = $this->createTenantWithUser(TenantRole::Owner);
+        $invoiceB = Invoice::factory()->create(['tenant_id' => $tenantB->id]);
+
+        $this->actingAsUser($ownerA)
+            ->get("/api/v1/invoices/{$invoiceB->id}/pdf")
+            ->assertNotFound();
+    }
+
+    public function test_it_generates_a_time_limited_signed_share_link(): void
+    {
+        [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+        $invoice = Invoice::factory()->create(['tenant_id' => $tenant->id]);
+
+        $response = $this->actingAsUser($owner)
+            ->getJson("/api/v1/invoices/{$invoice->id}/share-link")
+            ->assertOk();
+
+        $this->assertStringContainsString('signature=', $response->json('data.url'));
+        $this->assertNotNull($response->json('data.expires_at'));
+    }
+
+    public function test_the_signed_link_serves_the_pdf_with_no_authentication(): void
+    {
+        [$tenant] = $this->createTenantWithUser(TenantRole::Owner);
+        $invoice = Invoice::factory()->create(['tenant_id' => $tenant->id]);
+
+        $url = URL::temporarySignedRoute('api.v1.invoices.public-pdf', now()->addDays(30), ['invoice' => $invoice->id]);
+
+        $this->get($url)
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
+    }
+
+    public function test_a_tampered_signature_is_rejected(): void
+    {
+        [$tenant] = $this->createTenantWithUser(TenantRole::Owner);
+        $invoice = Invoice::factory()->create(['tenant_id' => $tenant->id]);
+
+        $url = URL::temporarySignedRoute('api.v1.invoices.public-pdf', now()->addDays(30), ['invoice' => $invoice->id]);
+
+        $this->get($url.'tampered')->assertForbidden();
+    }
+
+    public function test_an_expired_signed_link_is_rejected(): void
+    {
+        [$tenant] = $this->createTenantWithUser(TenantRole::Owner);
+        $invoice = Invoice::factory()->create(['tenant_id' => $tenant->id]);
+
+        $url = URL::temporarySignedRoute('api.v1.invoices.public-pdf', now()->subDay(), ['invoice' => $invoice->id]);
+
+        $this->get($url)->assertForbidden();
+    }
+}

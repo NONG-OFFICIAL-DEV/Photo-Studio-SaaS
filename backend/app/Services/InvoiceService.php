@@ -13,6 +13,7 @@ use App\Models\ServiceAddOn;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Repositories\Contracts\InvoiceRepositoryInterface;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -143,6 +144,18 @@ class InvoiceService extends BaseService
         $invoice->update(['status' => InvoiceStatus::Sent]);
 
         return $invoice;
+    }
+
+    /**
+     * Renders the invoice as a PDF — shared by the authenticated download
+     * endpoint and the unauthenticated signed-link endpoint (customers have
+     * no account, so that route can't require auth:api/tenant).
+     */
+    public function renderPdf(Invoice $invoice)
+    {
+        $invoice->loadMissing(['items', 'customer', 'order', 'tenant']);
+
+        return Pdf::loadView('pdf.invoice', ['invoice' => $invoice])->setPaper('a4');
     }
 
     public function void(Invoice $invoice, string $reason): Invoice

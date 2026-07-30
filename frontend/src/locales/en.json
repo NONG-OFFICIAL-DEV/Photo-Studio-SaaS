@@ -41,10 +41,10 @@
     "SUBSCRIPTION_NOT_SCHEDULED_FOR_CANCELLATION": "This subscription is not scheduled for cancellation.",
     "SUBSCRIPTION_ALREADY_ENDED": "This subscription has already ended and cannot be resumed — renew instead.",
     "SUBSCRIPTION_NOT_SUSPENDED": "Only a suspended subscription can be reactivated this way.",
-    "LINE_ITEMS_LOCKED_IN_PRODUCTION": "Line items can no longer be changed once an order has entered production.",
-    "EDITING_TASK_NOT_COMPLETE": "The editing task must be completed before this order can be marked ready for delivery.",
-    "ORDER_CANNOT_BE_CANCELLED": "This order can no longer be cancelled.",
-    "ORDER_INVALID_STATUS_TRANSITION": "This action requires the order to be \"{expected}\" (currently \"{current}\").",
+    "LINE_ITEMS_LOCKED_IN_PRODUCTION": "Line items can no longer be changed once a project has entered production.",
+    "EDITING_TASK_NOT_COMPLETE": "The editing task must be completed before this project can be marked ready for delivery.",
+    "ORDER_CANNOT_BE_CANCELLED": "This project can no longer be cancelled.",
+    "ORDER_INVALID_STATUS_TRANSITION": "This action requires the project to be \"{expected}\" (currently \"{current}\").",
     "INSUFFICIENT_STOCK": "Cannot remove {quantity} {unit} — only {available} {unit} in stock.",
     "MOVEMENT_NOT_FOUND": "Movement not found for this item.",
     "ALBUM_ALREADY_ARCHIVED": "This album is already archived.",
@@ -142,7 +142,7 @@
     "discount": "Discount",
     "quantity": "Qty",
     "unitPrice": "Unit Price",
-    "order": "Order",
+    "order": "Project",
     "plan": "Plan"
   },
   "menu": {
@@ -151,7 +151,7 @@
     "bookings": "Bookings",
     "services": "Services & Pricing",
     "packages": "Packages",
-    "orders": "Orders",
+    "orders": "Projects",
     "editingQueue": "Editing Queue",
     "albums": "Albums",
     "gallery": "Gallery",
@@ -207,11 +207,11 @@
     "verifyEmailPrompt": "Please verify your email address.",
     "resendVerification": "Resend verification email",
     "brandHeadline": "Run your entire studio from one place",
-    "brandSubtitle": "Bookings, orders, editing, and customers — all in sync, all in real time.",
+    "brandSubtitle": "Bookings, projects, editing, and customers — all in sync, all in real time.",
     "features": {
       "bookings": "Schedule and manage sessions with a visual calendar",
       "editing": "Track editing jobs from queue to delivery",
-      "orders": "Turn bookings into orders and invoices instantly",
+      "orders": "Turn bookings into projects and invoices instantly",
       "customers": "Keep every client profile, tag, and history in one place"
     }
   },
@@ -230,7 +230,7 @@
     "bookings": "Bookings",
     "pendingEditing": "Pending Editing",
     "readyForDelivery": "Ready for Delivery",
-    "completedOrders": "Completed Orders",
+    "completedOrders": "Completed Projects",
     "topServices": "Top Services",
     "noDataYet": "No data yet — available once the Bookings module ships."
   },
@@ -339,7 +339,7 @@
       "start": "Start",
       "complete": "Complete",
       "markNoShow": "Mark No-Show",
-      "createOrder": "Create Order"
+      "createOrder": "Create Project"
     },
     "messages": {
       "deletedSuccess": "Booking deleted successfully.",
@@ -396,13 +396,13 @@
     }
   },
   "orders": {
-    "title": "Orders",
-    "subtitle": "Track customer orders from confirmation through delivery.",
-    "newOrder": "New Order",
-    "createOrder": "Create Order",
-    "orderDetails": "Order Details",
-    "cancelOrder": "Cancel Order",
-    "keepOrder": "Keep Order",
+    "title": "Projects",
+    "subtitle": "Track customer projects from confirmation through delivery.",
+    "newOrder": "New Project",
+    "createOrder": "Create Project",
+    "orderDetails": "Project Details",
+    "cancelOrder": "Cancel Project",
+    "keepOrder": "Keep Project",
     "items": "Items",
     "itemsCount": "{count} item(s)",
     "addFromCatalog": "Add from catalog",
@@ -410,7 +410,7 @@
     "itemNamePlaceholder": "Item name",
     "noItemsYet": "No items yet.",
     "linkedBooking": "Linked Booking (optional)",
-    "creatingFromBooking": "Creating an order for {name}'s booking.",
+    "creatingFromBooking": "Creating a project for {name}'s booking.",
     "createInvoice": "Create Invoice",
     "assignEditor": "Assign editor (optional)",
     "startProduction": "Start Production",
@@ -418,8 +418,8 @@
     "deliver": "Deliver",
     "editingTask": "Editing Task",
     "assignedToSuffix": " — assigned to {name}",
-    "orderCreated": "Order created successfully.",
-    "orderCancelled": "Order cancelled.",
+    "orderCreated": "Project created successfully.",
+    "orderCancelled": "Project cancelled.",
     "status": {
       "pending": "Pending",
       "confirmed": "Confirmed",
@@ -429,14 +429,14 @@
       "cancelled": "Cancelled"
     },
     "errors": {
-      "needsOneItem": "Add at least one item to the order.",
+      "needsOneItem": "Add at least one item to the project.",
       "customItemIncomplete": "Every custom item needs a name and a price.",
-      "saveFailed": "Unable to save order."
+      "saveFailed": "Unable to save project."
     }
   },
   "editing": {
     "title": "Editing Queue",
-    "subtitle": "Track production work on orders currently being edited.",
+    "subtitle": "Track production work on projects currently being edited.",
     "unassigned": "Unassigned",
     "status": {
       "pending": "Pending",
@@ -489,11 +489,11 @@
     "createInvoice": "Create Invoice",
     "invoiceNumber": "Invoice #",
     "invoiceDetails": "Invoice Details",
-    "createFromOrder": "Create from an existing order",
-    "creatingFromOrder": "Creating an invoice for {name}'s order.",
-    "linkedOrder": "Order",
-    "itemsFromOrder": "Items (copied from the selected order)",
-    "selectOrderPrompt": "Select an order to preview its items.",
+    "createFromOrder": "Create from an existing project",
+    "creatingFromOrder": "Creating an invoice for {name}'s project.",
+    "linkedOrder": "Project",
+    "itemsFromOrder": "Items (copied from the selected project)",
+    "selectOrderPrompt": "Select a project to preview its items.",
     "issueDate": "Issue Date",
     "dueDate": "Due Date",
     "taxRate": "Tax Rate",
@@ -507,6 +507,9 @@
     "reference": "Reference",
     "methodLabel": "Method",
     "send": "Send",
+    "downloadPdf": "Download PDF",
+    "sendViaTelegram": "Send via Telegram",
+    "telegramMessage": "Invoice {number} — Total: ${total}, Due: {dueDate}.",
     "voidInvoice": "Void Invoice",
     "methods": {
       "cash": "Cash",
@@ -654,7 +657,7 @@
   "commissions": {
     "title": "Commissions",
     "newEntry": "New Commission",
-    "linkedOrder": "Linked Order (optional)",
+    "linkedOrder": "Linked Project (optional)",
     "earnedDate": "Earned Date",
     "deleteConfirmTitle": "Delete commission entry?",
     "deleteConfirmMessage": "This will remove this commission entry.",
@@ -730,10 +733,10 @@
   },
   "reports": {
     "title": "Reports",
-    "subtitle": "Revenue, bookings, orders, and expenses — filterable by date range.",
+    "subtitle": "Revenue, bookings, projects, and expenses — filterable by date range.",
     "revenue": "Revenue",
     "bookings": "Bookings",
-    "orders": "Orders",
+    "orders": "Projects",
     "expenses": "Expenses",
     "dateFrom": "From",
     "dateTo": "To",
@@ -776,7 +779,7 @@
       "exportData": "Export all my data"
     },
     "themeHint": "These colors replace the default theme across the whole app for your team.",
-    "dataExportHint": "Download a zip of CSV files (customers, orders, invoices, expenses) for backup or migration.",
+    "dataExportHint": "Download a zip of CSV files (customers, projects, invoices, expenses) for backup or migration.",
     "messages": {
       "savedSuccess": "Settings saved successfully.",
       "saveError": "Could not save settings.",
@@ -859,7 +862,7 @@
         "priceYearly": "Yearly Price",
         "maxUsers": "Max Users",
         "storageLimitGb": "Storage Limit (GB)",
-        "monthlyOrderLimit": "Monthly Order Limit",
+        "monthlyOrderLimit": "Monthly Project Limit",
         "trialDays": "Trial Days",
         "sortOrder": "Sort Order",
         "isActive": "Active",
@@ -933,7 +936,7 @@
     "limits": {
       "maxUsers": "Users ({count} max)",
       "storage": "Storage ({count} GB)",
-      "orders": "Orders this month ({count} max)"
+      "orders": "Projects this month ({count} max)"
     },
     "actions": {
       "renew": "Renew",

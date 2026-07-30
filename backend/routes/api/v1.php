@@ -186,6 +186,9 @@ Route::middleware(['auth:api', 'tenant', 'subscription.active'])->group(function
         Route::post('/{invoice}/send', [InvoiceController::class, 'send']);
         Route::post('/{invoice}/void', [InvoiceController::class, 'void']);
 
+        Route::get('/{invoice}/pdf', [InvoiceController::class, 'downloadPdf']);
+        Route::get('/{invoice}/share-link', [InvoiceController::class, 'shareLink']);
+
         Route::post('/{invoice}/payments', [PaymentController::class, 'store']);
         Route::delete('/{invoice}/payments/{payment}', [PaymentController::class, 'destroy']);
     });
@@ -269,6 +272,17 @@ Route::middleware(['auth:api', 'tenant', 'subscription.active'])->group(function
         Route::get('/api-logs', [AuditController::class, 'apiLogs']);
     });
 });
+
+/*
+ * Signed, unauthenticated invoice PDF link — shared with customers over
+ * Telegram/WhatsApp/SMS, who have no account, so this can't sit behind
+ * auth:api/tenant like every other invoice route. Same 'signed' pattern as
+ * the email-verification link above; expires per the signature baked in
+ * by InvoiceController::shareLink() (see routes/api/v1.php's auth group).
+ */
+Route::get('/invoices/{invoice}/public-pdf', [InvoiceController::class, 'publicPdf'])
+    ->middleware('signed')
+    ->name('invoices.public-pdf');
 
 /*
  * Tenant self-service billing. Deliberately OUTSIDE `subscription.active` —

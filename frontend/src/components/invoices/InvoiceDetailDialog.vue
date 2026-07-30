@@ -9,6 +9,8 @@ import {
   sendInvoiceApi,
   recordInvoicePaymentApi,
   deleteInvoicePaymentApi,
+  getInvoicePdfApi,
+  getInvoiceShareLinkApi,
 } from '@/apis/invoice.api'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
@@ -28,6 +30,8 @@ const appStore = useAppStore()
 const invoice = ref(null)
 const loading = ref(false)
 const actionLoading = ref(false)
+const pdfLoading = ref(false)
+const telegramLoading = ref(false)
 
 const STATUS_MAP = computed(() => ({
   draft: { color: 'default', label: t('invoices.status.draft') },
@@ -59,13 +63,17 @@ async function load() {
   }
 }
 
-watch(() => [props.modelValue, props.invoiceId], async ([open]) => {
-  if (open) {
-    payment.value = { amount: null, method: 'cash', paid_at: null, reference: '' }
-    paymentError.value = ''
-    await load()
-  }
-}, { immediate: true })
+watch(
+  () => [props.modelValue, props.invoiceId],
+  async ([open]) => {
+    if (open) {
+      payment.value = { amount: null, method: 'cash', paid_at: null, reference: '' }
+      paymentError.value = ''
+      await load()
+    }
+  },
+  { immediate: true },
+)
 
 async function sendNow() {
   actionLoading.value = true
@@ -77,6 +85,56 @@ async function sendNow() {
     appStore.notify(translateApiMessage(error, 'common.actionFailed'), 'error')
   } finally {
     actionLoading.value = false
+  }
+}
+
+/**
+ * Downloading the PDF or sharing it via Telegram is a real delivery to the
+ * customer — same as clicking Send — so a still-draft invoice is marked
+ * sent first, silently, rather than making the user click Send separately
+ * beforehand.
+ */
+async function ensureSent() {
+  if (invoice.value?.status !== 'draft') return
+  await sendInvoiceApi(props.invoiceId)
+  await load()
+  emit('changed')
+}
+
+async function downloadPdf() {
+  pdfLoading.value = true
+  try {
+    await ensureSent()
+    const { data } = await getInvoicePdfApi(props.invoiceId)
+    const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }))
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${invoice.value.invoice_number}.pdf`
+    link.click()
+    window.URL.revokeObjectURL(url)
+  } catch (error) {
+    appStore.notify(translateApiMessage(error, 'common.actionFailed'), 'error')
+  } finally {
+    pdfLoading.value = false
+  }
+}
+
+async function sendViaTelegram() {
+  telegramLoading.value = true
+  try {
+    await ensureSent()
+    const { data } = await getInvoiceShareLinkApi(props.invoiceId)
+    const text = t('invoices.telegramMessage', {
+      number: invoice.value.invoice_number,
+      total: invoice.value.total,
+      dueDate: invoice.value.due_date ?? '—',
+    })
+    const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(data.data.url)}&text=${encodeURIComponent(text)}`
+    window.open(shareUrl, '_blank', 'noopener')
+  } catch (error) {
+    appStore.notify(translateApiMessage(error, 'common.actionFailed'), 'error')
+  } finally {
+    telegramLoading.value = false
   }
 }
 
@@ -115,13 +173,29 @@ async function removePayment(paymentId) {
 }
 
 const canSend = computed(() => auth.hasPermission('invoices.send') && invoice.value?.status === 'draft')
-const canVoid = computed(() => auth.hasPermission('invoices.void') && invoice.value && !['paid', 'void'].includes(invoice.value.status))
-const canRecordPayment = computed(() => auth.hasPermission('payments.record') && invoice.value && !['draft', 'void', 'paid'].includes(invoice.value.status))
+const canVoid = computed(
+  () => auth.hasPermission('invoices.void') && invoice.value && !['paid', 'void'].includes(invoice.value.status),
+)
+const canRecordPayment = computed(
+  () =>
+    auth.hasPermission('payments.record') && invoice.value && !['draft', 'void', 'paid'].includes(invoice.value.status),
+)
 const canDeletePayment = computed(() => auth.hasPermission('payments.delete'))
+const canDownloadPdf = computed(
+  () => auth.hasPermission('invoices.view') && invoice.value && invoice.value.status !== 'void',
+)
+const canShareTelegram = computed(
+  () => auth.hasPermission('invoices.send') && invoice.value && invoice.value.status !== 'void',
+)
 </script>
 
 <template>
-  <AppDialog :model-value="modelValue" :title="t('invoices.invoiceDetails')" max-width="720" @update:model-value="emit('update:modelValue', $event)">
+  <AppDialog
+    :model-value="modelValue"
+    :title="t('invoices.invoiceDetails')"
+    max-width="720"
+    @update:model-value="emit('update:modelValue', $event)"
+  >
     <div v-if="loading" class="d-flex justify-center py-8">
       <v-progress-circular indeterminate color="primary" />
     </div>
@@ -137,7 +211,12 @@ const canDeletePayment = computed(() => auth.hasPermission('payments.delete'))
 
       <v-table density="compact" class="mb-4">
         <thead>
-          <tr><th>{{ t('fields.name') }}</th><th>{{ t('fields.unitPrice') }}</th><th>{{ t('fields.quantity') }}</th><th>{{ t('fields.total') }}</th></tr>
+          <tr>
+            <th>{{ t('fields.name') }}</th>
+            <th>{{ t('fields.unitPrice') }}</th>
+            <th>{{ t('fields.quantity') }}</th>
+            <th>{{ t('fields.total') }}</th>
+          </tr>
         </thead>
         <tbody>
           <tr v-for="item in invoice.items" :key="item.id">
@@ -152,22 +231,28 @@ const canDeletePayment = computed(() => auth.hasPermission('payments.delete'))
       <div class="d-flex justify-end mb-4">
         <div style="min-width: 240px">
           <div class="d-flex justify-space-between text-body-2">
-            <span>{{ t('fields.subtotal') }}</span><span>${{ invoice.subtotal }}</span>
+            <span>{{ t('fields.subtotal') }}</span
+            ><span>${{ invoice.subtotal }}</span>
           </div>
           <div class="d-flex justify-space-between text-body-2">
-            <span>{{ t('fields.discount') }}</span><span>-${{ invoice.discount_amount }}</span>
+            <span>{{ t('fields.discount') }}</span
+            ><span>-${{ invoice.discount_amount }}</span>
           </div>
           <div class="d-flex justify-space-between text-body-2">
-            <span>{{ t('invoices.taxAmount') }}</span><span>${{ invoice.tax_amount }}</span>
+            <span>{{ t('invoices.taxAmount') }}</span
+            ><span>${{ invoice.tax_amount }}</span>
           </div>
           <div class="d-flex justify-space-between text-h6">
-            <span>{{ t('fields.total') }}</span><span>${{ invoice.total }}</span>
+            <span>{{ t('fields.total') }}</span
+            ><span>${{ invoice.total }}</span>
           </div>
           <div class="d-flex justify-space-between text-body-2 text-success">
-            <span>{{ t('invoices.amountPaid') }}</span><span>${{ invoice.amount_paid }}</span>
+            <span>{{ t('invoices.amountPaid') }}</span
+            ><span>${{ invoice.amount_paid }}</span>
           </div>
           <div class="d-flex justify-space-between text-subtitle-1 font-weight-bold">
-            <span>{{ t('invoices.balanceDue') }}</span><span>${{ invoice.balance_due }}</span>
+            <span>{{ t('invoices.balanceDue') }}</span
+            ><span>${{ invoice.balance_due }}</span>
           </div>
         </div>
       </div>
@@ -181,7 +266,11 @@ const canDeletePayment = computed(() => auth.hasPermission('payments.delete'))
         <v-table density="compact">
           <thead>
             <tr>
-              <th>{{ t('invoices.paidAt') }}</th><th>{{ t('invoices.methodLabel') }}</th><th>{{ t('invoices.amount') }}</th><th>{{ t('invoices.reference') }}</th><th style="width: 40px" />
+              <th>{{ t('invoices.paidAt') }}</th>
+              <th>{{ t('invoices.methodLabel') }}</th>
+              <th>{{ t('invoices.amount') }}</th>
+              <th>{{ t('invoices.reference') }}</th>
+              <th style="width: 40px" />
             </tr>
           </thead>
           <tbody>
@@ -191,7 +280,14 @@ const canDeletePayment = computed(() => auth.hasPermission('payments.delete'))
               <td>${{ p.amount }}</td>
               <td>{{ p.reference || '—' }}</td>
               <td>
-                <v-btn v-if="canDeletePayment" icon="mdi-close" size="small" variant="text" :loading="actionLoading" @click="removePayment(p.id)" />
+                <v-btn
+                  v-if="canDeletePayment"
+                  icon="mdi-close"
+                  size="small"
+                  variant="text"
+                  :loading="actionLoading"
+                  @click="removePayment(p.id)"
+                />
               </td>
             </tr>
           </tbody>
@@ -200,18 +296,34 @@ const canDeletePayment = computed(() => auth.hasPermission('payments.delete'))
 
       <div v-if="canRecordPayment" class="mb-4">
         <div class="text-subtitle-2 mb-2">{{ t('invoices.recordPayment') }}</div>
-        <v-alert v-if="paymentError" type="error" variant="tonal" density="compact" class="mb-2">{{ paymentError }}</v-alert>
+        <v-alert v-if="paymentError" type="error" variant="tonal" density="compact" class="mb-2">{{
+          paymentError
+        }}</v-alert>
         <v-row dense>
-          <v-col cols="6" sm="3">
-            <v-text-field v-model.number="payment.amount" :label="t('invoices.amount')" type="number" step="0.01" prefix="$" density="compact" hide-details />
+          <v-col cols="6" sm="6">
+            <v-text-field
+              v-model.number="payment.amount"
+              :label="t('invoices.amount')"
+              type="number"
+              step="0.01"
+              prefix="$"
+              density="compact"
+              hide-details
+            />
           </v-col>
-          <v-col cols="6" sm="3">
-            <v-select v-model="payment.method" :label="t('invoices.methodLabel')" :items="METHOD_ITEMS" density="compact" hide-details />
+          <v-col cols="6" sm="6">
+            <v-select
+              v-model="payment.method"
+              :label="t('invoices.methodLabel')"
+              :items="METHOD_ITEMS"
+              density="compact"
+              hide-details
+            />
           </v-col>
-          <v-col cols="6" sm="3">
+          <v-col cols="6" sm="6">
             <AppDatePicker v-model="payment.paid_at" :label="t('invoices.paidAt')" />
           </v-col>
-          <v-col cols="6" sm="3">
+          <v-col cols="6" sm="6">
             <v-text-field v-model="payment.reference" :label="t('invoices.reference')" density="compact" hide-details />
           </v-col>
         </v-row>
@@ -223,6 +335,24 @@ const canDeletePayment = computed(() => auth.hasPermission('payments.delete'))
       <div class="d-flex flex-wrap ga-2">
         <v-btn v-if="canSend" color="primary" variant="flat" :loading="actionLoading" @click="sendNow">
           {{ t('invoices.send') }}
+        </v-btn>
+        <v-btn
+          v-if="canDownloadPdf"
+          variant="outlined"
+          prepend-icon="mdi-file-pdf-box"
+          :loading="pdfLoading"
+          @click="downloadPdf"
+        >
+          {{ t('invoices.downloadPdf') }}
+        </v-btn>
+        <v-btn
+          v-if="canShareTelegram"
+          variant="outlined"
+          prepend-icon="mdi-send"
+          :loading="telegramLoading"
+          @click="sendViaTelegram"
+        >
+          {{ t('invoices.sendViaTelegram') }}
         </v-btn>
         <v-btn v-if="canVoid" color="error" variant="text" @click="emit('void-requested', invoice.id)">
           {{ t('invoices.voidInvoice') }}
