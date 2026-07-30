@@ -24,9 +24,12 @@ const loading = ref(false)
 const confirmDelete = ref(false)
 const categoryToDelete = ref(null)
 
-watch(() => props.modelValue, (open) => {
-  if (open) categoriesStore.fetch(true)
-})
+watch(
+  () => props.modelValue,
+  (open) => {
+    if (open) categoriesStore.fetch(true)
+  },
+)
 
 async function onSubmit(values, { resetForm }) {
   loading.value = true
@@ -58,11 +61,23 @@ async function confirmDeleteCategory() {
 </script>
 
 <template>
-  <AppDialog :model-value="modelValue" :title="t('services.manageCategories')" max-width="480" @update:model-value="emit('update:modelValue', $event)">
+  <AppDialog
+    :model-value="modelValue"
+    :title="t('services.manageCategories')"
+    max-width="480"
+    @update:model-value="emit('update:modelValue', $event)"
+  >
     <AppForm :schema="serviceCategorySchema" :initial-values="{ name: '', description: '' }" @submit="onSubmit">
       <template #default="{ errors, values, setFieldValue }">
         <div class="d-flex ga-2 align-start mb-4">
-          <v-text-field :model-value="values.name" :label="t('services.newCategoryName')" density="compact" hide-details :error-messages="errors.name" @update:model-value="setFieldValue('name', $event)" />
+          <v-text-field
+            :model-value="values.name"
+            :label="t('services.newCategoryName')"
+            density="compact"
+            hide-details
+            :error-messages="errors.name"
+            @update:model-value="setFieldValue('name', $event)"
+          />
           <v-btn type="submit" icon="mdi-plus" color="primary" :loading="loading" />
         </div>
       </template>
@@ -71,7 +86,7 @@ async function confirmDeleteCategory() {
     <v-list density="compact">
       <v-list-item v-for="category in categoriesStore.categories" :key="category.id" :title="category.name">
         <template #append>
-          <v-btn icon="mdi-delete-outline" size="small" variant="text" @click="askDelete(category)" />
+          <v-btn icon="mdi-delete-outline" size="small" variant="text" color="error" @click="askDelete(category)" />
         </template>
       </v-list-item>
     </v-list>

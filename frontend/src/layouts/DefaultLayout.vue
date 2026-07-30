@@ -327,8 +327,8 @@ function toggleLocale() {
               rounded="md"
               class="mx-1 my-1"
               :title="t('common.toggleLanguage')"
-              @click="toggleLocale"
               prepend-icon="mdi-translate"
+              @click="toggleLocale"
             >
               <template #append>
                 <v-chip size="x-small" variant="tonal" class="font-weight-bold bg-primary">
@@ -341,9 +341,9 @@ function toggleLocale() {
             <v-list-item
               rounded="md"
               class="mx-1 my-1"
-              @click="appStore.toggleTheme"
               :title="t('common.toggleTheme')"
               prepend-icon="mdi-theme-light-dark"
+              @click="appStore.toggleTheme"
             >
               <template #append>
                 <v-switch

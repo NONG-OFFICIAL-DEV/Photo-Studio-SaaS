@@ -83,6 +83,7 @@
     "no": "ទេ",
     "close": "បិទ",
     "back": "ត្រឡប់ក្រោយ",
+    "next": "បន្ទាប់",
     "submit": "ដាក់ស្នើ",
     "welcome": "សូមស្វាគមន៍",
     "noItemsFound": "រកមិនឃើញ {item}",
@@ -328,6 +329,10 @@
     "locationTypes": {
       "studio": "ស្ទូឌីយោ",
       "onLocation": "នៅទីតាំងក្រៅ"
+    },
+    "steps": {
+      "details": "ព័ត៌មានលម្អិត",
+      "schedule": "កាលវិភាគ"
     },
     "actions": {
       "confirm": "បញ្ជាក់",

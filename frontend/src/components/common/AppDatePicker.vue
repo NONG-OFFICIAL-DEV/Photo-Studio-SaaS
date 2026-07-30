@@ -20,7 +20,11 @@ const dateValue = computed({
     return typeof props.modelValue === 'string' ? parseISO(props.modelValue) : props.modelValue
   },
   set(val) {
-    emit('update:modelValue', val ? val.toISOString().slice(0, 10) : null)
+    // toISOString() converts to UTC, which rolls back to the previous day
+    // for any timezone ahead of UTC (the picker gives local midnight for
+    // the clicked day) — format() reads the Date's local components instead,
+    // matching how parseISO() above already reads the string back as local.
+    emit('update:modelValue', val ? format(val, 'yyyy-MM-dd') : null)
     menu.value = false
   },
 })

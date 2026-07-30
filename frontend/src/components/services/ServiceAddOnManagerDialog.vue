@@ -27,9 +27,12 @@ async function loadAddOns() {
   addOns.value = data.data
 }
 
-watch(() => props.modelValue, (open) => {
-  if (open) loadAddOns()
-})
+watch(
+  () => props.modelValue,
+  (open) => {
+    if (open) loadAddOns()
+  },
+)
 
 async function onSubmit(values, { resetForm }) {
   loading.value = true
@@ -59,12 +62,35 @@ async function confirmDeleteAddOn() {
 </script>
 
 <template>
-  <AppDialog :model-value="modelValue" :title="t('services.manageAddOns')" max-width="480" @update:model-value="emit('update:modelValue', $event)">
+  <AppDialog
+    :model-value="modelValue"
+    :title="t('services.manageAddOns')"
+    max-width="480"
+    @update:model-value="emit('update:modelValue', $event)"
+  >
     <AppForm :schema="serviceAddOnSchema" :initial-values="{ name: '', price: null }" @submit="onSubmit">
       <template #default="{ errors, values, setFieldValue }">
         <div class="d-flex ga-2 align-start mb-4">
-          <v-text-field :model-value="values.name" :label="t('services.addOnName')" density="compact" hide-details :error-messages="errors.name" @update:model-value="setFieldValue('name', $event)" />
-          <v-text-field :model-value="values.price" :label="t('fields.price')" type="number" step="0.01" prefix="$" density="compact" hide-details style="max-width: 120px" :error-messages="errors.price" @update:model-value="setFieldValue('price', $event)" />
+          <v-text-field
+            :model-value="values.name"
+            :label="t('services.addOnName')"
+            density="compact"
+            hide-details
+            :error-messages="errors.name"
+            @update:model-value="setFieldValue('name', $event)"
+          />
+          <v-text-field
+            :model-value="values.price"
+            :label="t('fields.price')"
+            type="number"
+            step="0.01"
+            prefix="$"
+            density="compact"
+            hide-details
+            style="max-width: 120px"
+            :error-messages="errors.price"
+            @update:model-value="setFieldValue('price', $event)"
+          />
           <v-btn type="submit" icon="mdi-plus" color="primary" :loading="loading" />
         </div>
       </template>
@@ -73,7 +99,7 @@ async function confirmDeleteAddOn() {
     <v-list density="compact">
       <v-list-item v-for="addOn in addOns" :key="addOn.id" :title="addOn.name" :subtitle="`$${addOn.price}`">
         <template #append>
-          <v-btn icon="mdi-delete-outline" size="small" variant="text" @click="askDelete(addOn)" />
+          <v-btn icon="mdi-delete-outline" size="small" variant="text" color="error" @click="askDelete(addOn)" />
         </template>
       </v-list-item>
     </v-list>

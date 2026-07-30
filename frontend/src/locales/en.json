@@ -83,6 +83,7 @@
     "no": "No",
     "close": "Close",
     "back": "Back",
+    "next": "Next",
     "submit": "Submit",
     "welcome": "Welcome",
     "noItemsFound": "No {item} found",
@@ -328,6 +329,10 @@
     "locationTypes": {
       "studio": "Studio",
       "onLocation": "On Location"
+    },
+    "steps": {
+      "details": "Details",
+      "schedule": "Schedule"
     },
     "actions": {
       "confirm": "Confirm",
