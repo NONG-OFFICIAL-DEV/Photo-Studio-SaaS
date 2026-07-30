@@ -294,7 +294,7 @@ function toggleLocale() {
           <v-list density="comfortable" class="py-1">
             <v-list-item
               prepend-icon="mdi-cash-multiple"
-              :title="t('common.billing')"
+              :title="t('menu.billing')"
               rounded="md"
               class="mx-1 my-1"
               to="/billing"
