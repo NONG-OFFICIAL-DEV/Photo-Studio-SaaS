@@ -109,7 +109,8 @@
       "locked": "ជាប់សោ"
     },
     "toggleLanguage": "ប្តូរភាសា",
-    "toggleTheme": "ប្តូរស្បែក"
+    "toggleTheme": "ប្តូរស្បែក",
+    "addNewItem": "បន្ថែម {item} ថ្មី"
   },
   "fields": {
     "name": "ឈ្មោះ",
@@ -956,5 +957,192 @@
     },
     "freePlanHint": "នេះជាគម្រោងឥតគិតថ្លៃ និងគ្មានអ្វីត្រូវបន្តជាវទេ។ សូមជ្រើសរើសគម្រោងបង់ប្រាក់ដើម្បីបើកការទូទាត់។",
     "pendingPaymentHint": "ជ្រើសរើសគម្រោងខាងក្រោម — អ្នកនឹងត្រូវបានស្នើសុំបញ្ជាក់ការទូទាត់បន្ទាប់។"
+  },
+  "$vuetify": {
+    "badge": "ស្លាកសញ្ញា",
+    "open": "បើក",
+    "close": "បិទ",
+    "dismiss": "បិទចោល",
+    "confirmEdit": {
+      "ok": "យល់ព្រម",
+      "cancel": "បោះបង់"
+    },
+    "dataIterator": {
+      "noResultsText": "រកមិនឃើញទិន្នន័យត្រូវគ្នា",
+      "loadingText": "កំពុងផ្ទុកទិន្នន័យ..."
+    },
+    "dataTable": {
+      "itemsPerPageText": "ជួរដេកក្នុងមួយទំព័រ៖",
+      "ariaLabel": {
+        "sortDescending": "តម្រៀបចុះ។",
+        "sortAscending": "តម្រៀបឡើង។",
+        "sortNone": "មិនទាន់តម្រៀប។",
+        "activateNone": "ចុចដើម្បីលុបការតម្រៀប។",
+        "activateDescending": "ចុចដើម្បីតម្រៀបចុះ។",
+        "activateAscending": "ចុចដើម្បីតម្រៀបឡើង។",
+        "selectRow": "ជ្រើសរើសជួរដេក",
+        "selectAll": "ជ្រើសរើសទាំងអស់",
+        "selectGroup": "ជ្រើសរើសក្រុម"
+      },
+      "sortBy": "តម្រៀបតាម"
+    },
+    "dataFooter": {
+      "itemsPerPageText": "ចំនួនធាតុក្នុងមួយទំព័រ៖",
+      "itemsPerPageAll": "ទាំងអស់",
+      "nextPage": "ទំព័របន្ទាប់",
+      "prevPage": "ទំព័រមុន",
+      "firstPage": "ទំព័រដំបូង",
+      "lastPage": "ទំព័រចុងក្រោយ",
+      "pageText": "{0}-{1} នៃ {2}"
+    },
+    "dateRangeInput": {
+      "divider": "ដល់"
+    },
+    "datePicker": {
+      "itemsSelected": "បានជ្រើសរើស {0}",
+      "range": {
+        "title": "ជ្រើសរើសកាលបរិច្ឆេទ",
+        "header": "បញ្ចូលកាលបរិច្ឆេទ"
+      },
+      "title": "ជ្រើសរើសកាលបរិច្ឆេទ",
+      "header": "បញ្ចូលកាលបរិច្ឆេទ",
+      "input": {
+        "placeholder": "បញ្ចូលកាលបរិច្ឆេទ"
+      },
+      "ariaLabel": {
+        "previousMonth": "ខែមុន",
+        "nextMonth": "ខែបន្ទាប់",
+        "selectYear": "ជ្រើសរើសឆ្នាំ",
+        "previousYear": "ឆ្នាំមុន",
+        "nextYear": "ឆ្នាំបន្ទាប់",
+        "selectMonth": "ជ្រើសរើសខែ",
+        "selectDate": "{0}",
+        "currentDate": "ថ្ងៃនេះ {0}"
+      }
+    },
+    "noDataText": "មិនមានទិន្នន័យ",
+    "carousel": {
+      "prev": "រូបភាពមុន",
+      "next": "រូបភាពបន្ទាប់",
+      "ariaLabel": {
+        "delimiter": "ស្លាយទី {0} នៃ {1}"
+      }
+    },
+    "calendar": {
+      "moreEvents": "{0} ថែមទៀត",
+      "today": "ថ្ងៃនេះ"
+    },
+    "input": {
+      "clear": "សម្អាត {0}",
+      "prependAction": "សកម្មភាពមុន {0}",
+      "appendAction": "សកម្មភាពបន្ថែម {0}",
+      "otp": "សូមបញ្ចូលតួអក្សរ OTP {0}"
+    },
+    "fileInput": {
+      "counter": "{0} ឯកសារ",
+      "counterSize": "{0} ឯកសារ (សរុប {1})"
+    },
+    "fileUpload": {
+      "title": "អូស និងទម្លាក់ឯកសារនៅទីនេះ",
+      "divider": "ឬ",
+      "browse": "រកមើលឯកសារ"
+    },
+    "timePicker": {
+      "am": "AM",
+      "pm": "PM",
+      "title": "ជ្រើសរើសម៉ោង",
+      "hour": "ម៉ោង",
+      "minute": "នាទី",
+      "second": "វិនាទី",
+      "notAllowed": "តម្លៃមិនត្រូវបានអនុញ្ញាតទេ"
+    },
+    "pagination": {
+      "ariaLabel": {
+        "root": "ការរុករកទំព័រ",
+        "next": "ទំព័របន្ទាប់",
+        "previous": "ទំព័រមុន",
+        "page": "ទៅកាន់ទំព័រ {0}",
+        "currentPage": "ទំព័រ {0} ទំព័របច្ចុប្បន្ន",
+        "first": "ទំព័រដំបូង",
+        "last": "ទំព័រចុងក្រោយ"
+      }
+    },
+    "stepper": {
+      "next": "បន្ទាប់",
+      "prev": "មុន"
+    },
+    "rating": {
+      "ariaLabel": {
+        "item": "ការវាយតម្លៃ {0} នៃ {1}"
+      }
+    },
+    "loading": "កំពុងផ្ទុក...",
+    "infiniteScroll": {
+      "loadMore": "ផ្ទុកបន្ថែម",
+      "empty": "គ្មានទៀតទេ"
+    },
+    "rules": {
+      "required": "វាលនេះត្រូវការបំពេញ",
+      "email": "សូមបញ្ចូលអ៊ីមែលឱ្យត្រឹមត្រូវ",
+      "number": "វាលនេះអាចមានតែលេខប៉ុណ្ណោះ",
+      "integer": "វាលនេះអាចមានតែចំនួនគត់ប៉ុណ្ណោះ",
+      "capital": "វាលនេះអាចមានតែអក្សរធំប៉ុណ្ណោះ",
+      "maxLength": "អ្នកត្រូវបញ្ចូលអតិបរមា {0} តួអក្សរ",
+      "minLength": "អ្នកត្រូវបញ្ចូលយ៉ាងតិច {0} តួអក្សរ",
+      "strictLength": "ប្រវែងនៃវាលដែលបានបញ្ចូលមិនត្រឹមត្រូវ",
+      "exclude": "តួអក្សរ {0} មិនត្រូវបានអនុញ្ញាត",
+      "notEmpty": "សូមជ្រើសរើសយ៉ាងតិចមួយតម្លៃ",
+      "pattern": "ទម្រង់មិនត្រឹមត្រូវ"
+    },
+    "command": {
+      "search": "វាយពាក្យបញ្ជា ឬ ស្វែងរក..."
+    },
+    "hotkey": {
+      "then": "បន្ទាប់មក",
+      "ctrl": "Ctrl",
+      "command": "Command",
+      "space": "Space",
+      "shift": "Shift",
+      "alt": "Alt",
+      "enter": "Enter",
+      "escape": "Escape",
+      "upArrow": "ព្រួញឡើងលើ",
+      "downArrow": "ព្រួញចុះក្រោម",
+      "leftArrow": "ព្រួញឆ្វេង",
+      "rightArrow": "ព្រួញស្តាំ",
+      "backspace": "Backspace",
+      "option": "Option",
+      "plus": "បូក",
+      "shortcut": "ផ្លូវកាត់ក្តារចុច៖ {0}",
+      "or": "ឬ"
+    },
+    "video": {
+      "play": "លេង",
+      "pause": "ផ្អាក",
+      "seek": "រុករក",
+      "volume": "សំឡេង",
+      "showVolume": "បង្ហាញការគ្រប់គ្រងសំឡេង",
+      "mute": "បិទសំឡេង",
+      "unmute": "បើកសំឡេង",
+      "enterFullscreen": "ពេញអេក្រង់",
+      "exitFullscreen": "ចេញពីពេញអេក្រង់"
+    },
+    "colorPicker": {
+      "ariaLabel": {
+        "eyedropper": "ជ្រើសរើសពណ៌ដោយប្រើឧបករណ៍ជ្រើសពណ៌",
+        "hueSlider": "ភាពលាំពណ៌",
+        "alphaSlider": "តម្លាភាព",
+        "redInput": "តម្លៃក្រហម",
+        "greenInput": "តម្លៃបៃតង",
+        "blueInput": "តម្លៃខៀវ",
+        "alphaInput": "តម្លៃតម្លាភាព",
+        "hueInput": "តម្លៃភាពលាំពណ៌",
+        "saturationInput": "តម្លៃតិត្ថិភាព",
+        "lightnessInput": "តម្លៃពន្លឺ",
+        "hexInput": "តម្លៃ HEX",
+        "hexaInput": "តម្លៃ HEX ជាមួយតម្លាភាព",
+        "changeFormat": "ប្តូរទម្រង់ពណ៌"
+      }
+    }
   }
 }

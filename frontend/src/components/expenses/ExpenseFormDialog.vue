@@ -4,8 +4,10 @@ import { useI18n } from 'vue-i18n'
 import AppDialog from '@/components/common/AppDialog.vue'
 import AppForm from '@/components/common/AppForm.vue'
 import AppDatePicker from '@/components/common/AppDatePicker.vue'
+import AppSelectQuickAdd from '@/components/common/AppSelectQuickAdd.vue'
 import { expenseSchema } from '@/utils/validators'
 import { createExpenseApi, updateExpenseApi } from '@/apis/expense.api'
+import { createExpenseCategoryApi } from '@/apis/expense-category.api'
 import { useExpenseCategoriesStore } from '@/stores/expenseCategories'
 import { useAppStore } from '@/stores/app'
 import { translateApiMessage } from '@/utils/apiMessages'
@@ -50,6 +52,18 @@ watch(() => props.modelValue, (open) => {
   }
 })
 
+async function createCategory({ name }) {
+  try {
+    const { data } = await createExpenseCategoryApi({ name })
+    categoriesStore.invalidate()
+    await categoriesStore.fetch(true)
+    appStore.notify(t('expenses.messages.categoryCreated'))
+    return data.data
+  } catch (error) {
+    throw new Error(translateApiMessage(error, 'expenses.messages.categoryCreateError'), { cause: error })
+  }
+}
+
 async function onSubmit(values) {
   loading.value = true
   errorMessage.value = ''
@@ -92,13 +106,13 @@ async function onSubmit(values) {
             />
           </v-col>
           <v-col cols="12" sm="6">
-            <v-select
+            <AppSelectQuickAdd
               :model-value="values.category_id"
               :label="t('fields.category')"
-              clearable
-              item-title="name"
-              item-value="id"
               :items="categoriesStore.categories"
+              :add-label="t('common.addNewItem', { item: t('fields.category') })"
+              :name-placeholder="t('expenses.newCategoryName')"
+              :create-fn="createCategory"
               @update:model-value="setFieldValue('category_id', $event)"
             />
           </v-col>

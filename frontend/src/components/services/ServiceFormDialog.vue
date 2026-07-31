@@ -3,8 +3,10 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDialog from '@/components/common/AppDialog.vue'
 import AppForm from '@/components/common/AppForm.vue'
+import AppSelectQuickAdd from '@/components/common/AppSelectQuickAdd.vue'
 import { serviceSchema } from '@/utils/validators'
 import { createServiceApi, updateServiceApi } from '@/apis/service.api'
+import { createServiceCategoryApi } from '@/apis/service-category.api'
 import { useServiceCategoriesStore } from '@/stores/serviceCategories'
 import { translateApiMessage } from '@/utils/apiMessages'
 import { useAppStore } from '@/stores/app'
@@ -48,6 +50,18 @@ watch(() => props.modelValue, (open) => {
   if (open) categoriesStore.fetch()
 })
 
+async function createCategory({ name, description }) {
+  try {
+    const { data } = await createServiceCategoryApi({ name, description })
+    categoriesStore.invalidate()
+    await categoriesStore.fetch(true)
+    appStore.notify(t('services.messages.categoryCreated'))
+    return data.data
+  } catch (error) {
+    throw new Error(translateApiMessage(error, 'services.messages.categoryCreateError'), { cause: error })
+  }
+}
+
 async function onSubmit(values) {
   loading.value = true
   errorMessage.value = ''
@@ -81,13 +95,14 @@ async function onSubmit(values) {
             <v-text-field :model-value="values.name" :label="`${t('fields.name')} *`" :error-messages="errors.name" @update:model-value="setFieldValue('name', $event)" />
           </v-col>
           <v-col cols="12" sm="6">
-            <v-select
+            <AppSelectQuickAdd
               :model-value="values.category_id"
               :label="t('fields.category')"
-              clearable
-              item-title="name"
-              item-value="id"
               :items="categoriesStore.categories"
+              :add-label="t('common.addNewItem', { item: t('fields.category') })"
+              :name-placeholder="t('services.newCategoryName')"
+              :description-placeholder="t('fields.description')"
+              :create-fn="createCategory"
               @update:model-value="setFieldValue('category_id', $event)"
             />
           </v-col>
