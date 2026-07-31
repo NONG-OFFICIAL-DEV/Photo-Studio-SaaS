@@ -65,7 +65,8 @@
     "INVOICE_NOT_SENT": "Payments can only be recorded against a sent invoice.",
     "PAYMENT_EXCEEDS_BALANCE": "Payment of {amount} exceeds the remaining balance of {remaining}.",
     "PAYMENT_NOT_FOUND": "Payment not found for this invoice.",
-    "INVOICE_INVALID_STATUS_TRANSITION": "This action requires the invoice to be \"{expected}\" (currently \"{current}\")."
+    "INVOICE_INVALID_STATUS_TRANSITION": "This action requires the invoice to be \"{expected}\" (currently \"{current}\").",
+    "BOOKING_NOT_CONFIRMED": "This booking is \"{status}\" — it must be confirmed before a project can be created for it."
   },
   "common": {
     "save": "Save",
@@ -432,7 +433,8 @@
     "errors": {
       "needsOneItem": "Add at least one item to the project.",
       "customItemIncomplete": "Every custom item needs a name and a price.",
-      "saveFailed": "Unable to save project."
+      "saveFailed": "Unable to save project.",
+      "bookingNotConfirmed": "This booking is \"{status}\" — it must be confirmed before you can create a project for it."
     }
   },
   "editing": {

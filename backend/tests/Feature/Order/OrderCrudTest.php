@@ -2,12 +2,15 @@
 
 namespace Tests\Feature\Order;
 
+use App\Enums\BookingStatus;
 use App\Enums\TenantRole;
+use App\Models\Booking;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Service;
 use App\Models\ServiceAddOn;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Concerns\CreatesTenantUsers;
 use Tests\TestCase;
 
@@ -105,6 +108,57 @@ class OrderCrudTest extends TestCase
         $this->assertNotNull($order);
         $this->assertCount(2, $order['items']);
         $this->assertSame('Custom Retouching', $order['items'][0]['name']);
+    }
+
+    #[DataProvider('notConfirmableBookingStatuses')]
+    public function test_creating_an_order_from_a_not_yet_confirmed_or_no_longer_active_booking_is_rejected(BookingStatus $status): void
+    {
+        [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+        $customer = Customer::factory()->create(['tenant_id' => $tenant->id]);
+        $booking = Booking::factory()->create(['tenant_id' => $tenant->id, 'customer_id' => $customer->id, 'status' => $status]);
+
+        $response = $this->actingAsUser($owner)->postJson('/api/v1/orders', [
+            'customer_id' => $customer->id,
+            'booking_id' => $booking->id,
+            'items' => [['name' => 'Wedding Package', 'unit_price' => 500, 'quantity' => 1]],
+        ]);
+
+        $response->assertStatus(422)->assertJsonPath('code', 'BOOKING_NOT_CONFIRMED');
+        $this->assertDatabaseMissing('orders', ['booking_id' => $booking->id]);
+    }
+
+    public static function notConfirmableBookingStatuses(): array
+    {
+        return [
+            'pending' => [BookingStatus::Pending],
+            'cancelled' => [BookingStatus::Cancelled],
+            'no show' => [BookingStatus::NoShow],
+        ];
+    }
+
+    #[DataProvider('confirmableBookingStatuses')]
+    public function test_creating_an_order_from_a_confirmed_or_further_along_booking_succeeds(BookingStatus $status): void
+    {
+        [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+        $customer = Customer::factory()->create(['tenant_id' => $tenant->id]);
+        $booking = Booking::factory()->create(['tenant_id' => $tenant->id, 'customer_id' => $customer->id, 'status' => $status]);
+
+        $this->actingAsUser($owner)->postJson('/api/v1/orders', [
+            'customer_id' => $customer->id,
+            'booking_id' => $booking->id,
+            'items' => [['name' => 'Wedding Package', 'unit_price' => 500, 'quantity' => 1]],
+        ])->assertCreated();
+
+        $this->assertDatabaseHas('orders', ['booking_id' => $booking->id]);
+    }
+
+    public static function confirmableBookingStatuses(): array
+    {
+        return [
+            'confirmed' => [BookingStatus::Confirmed],
+            'in progress' => [BookingStatus::InProgress],
+            'completed' => [BookingStatus::Completed],
+        ];
     }
 
     public function test_owner_can_view_update_and_delete_an_order(): void

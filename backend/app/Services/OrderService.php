@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use App\Enums\BookingStatus;
 use App\Enums\EditingStatus;
 use App\Enums\OrderStatus;
 use App\Exceptions\ApiException;
+use App\Models\Booking;
 use App\Models\Order;
 use App\Models\Package;
 use App\Models\Service;
@@ -30,6 +32,10 @@ class OrderService extends BaseService
     {
         $items = $data['items'] ?? [];
         unset($data['items']);
+
+        if (! empty($data['booking_id'])) {
+            $this->assertBookingIsConfirmable(Booking::query()->findOrFail($data['booking_id']));
+        }
 
         return DB::transaction(function () use ($data, $items, $creator) {
             $lines = $this->resolveLines($items);
@@ -138,6 +144,26 @@ class OrderService extends BaseService
         $order->update(['status' => OrderStatus::Cancelled, 'cancelled_reason' => $reason]);
 
         return $order;
+    }
+
+    /**
+     * A Pending booking can still be rescheduled or cancelled before the
+     * customer commits — creating a project (and its billing/production
+     * work) against one risks orphaned orders tied to a session that never
+     * happens. Cancelled/No Show bookings are excluded for the same reason,
+     * just after the fact instead of before. Confirmed, In Progress, and
+     * Completed are all fine — the booking is (or was) actually happening.
+     */
+    protected function assertBookingIsConfirmable(Booking $booking): void
+    {
+        if (in_array($booking->status, [BookingStatus::Pending, BookingStatus::Cancelled, BookingStatus::NoShow], true)) {
+            throw new ApiException(
+                422,
+                "This booking is \"{$booking->status->label()}\" — it must be confirmed before a project can be created for it.",
+                'BOOKING_NOT_CONFIRMED',
+                ['status' => $booking->status->label()]
+            );
+        }
     }
 
     protected function assertStatus(Order $order, OrderStatus $expected): void

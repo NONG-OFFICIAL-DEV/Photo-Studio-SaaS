@@ -27,6 +27,20 @@ const emit = defineEmits(['update:modelValue', 'saved'])
 const { t } = useI18n()
 const appStore = useAppStore()
 
+/*
+ * A Pending booking can still be rescheduled or cancelled before the
+ * customer commits, and Cancelled/No Show ones already didn't happen —
+ * creating a project against any of those risks orphaned billing/
+ * production work. The backend enforces this too (BOOKING_NOT_CONFIRMED),
+ * this just keeps the picker from offering an option that would fail.
+ */
+const CONFIRMABLE_BOOKING_STATUSES = ['confirmed', 'in_progress', 'completed']
+
+function bookingStatusLabel(status) {
+  const key = status.replace(/_([a-z])/g, (_, c) => c.toUpperCase())
+  return t(`bookings.status.${key}`)
+}
+
 const loading = ref(false)
 const errorMessage = ref('')
 
@@ -42,6 +56,10 @@ const bookingSelectItems = computed(() => bookingOptions.value.map(booking => ({
   id: booking.id,
   label: `${formatDate(booking.starts_at)} — ${booking.title || booking.type}`,
 })))
+
+const bookingNotConfirmed = computed(() => (
+  props.presetBooking && ! CONFIRMABLE_BOOKING_STATUSES.includes(props.presetBooking.status)
+))
 
 async function loadCatalog() {
   const [servicesRes, addonsRes, packagesRes] = await Promise.all([
@@ -171,7 +189,7 @@ async function loadBookingsForCustomer(customerId, setFieldValue) {
   if (!customerId) return
 
   const { data } = await getBookingsApi({ customer_id: customerId, perPage: 20 })
-  bookingOptions.value = data.data
+  bookingOptions.value = data.data.filter(booking => CONFIRMABLE_BOOKING_STATUSES.includes(booking.status))
 }
 
 function addCatalogItem() {
@@ -251,7 +269,16 @@ const subtotal = computed(() => computeSubtotal())
   <AppDialog :model-value="modelValue" :title="t('orders.newOrder')" max-width="720" @update:model-value="emit('update:modelValue', $event)">
     <v-alert v-if="errorMessage" type="error" variant="tonal" class="mb-4">{{ errorMessage }}</v-alert>
 
-    <AppForm :schema="orderSchema" :initial-values="initialValues" @submit="onSubmit">
+    <template v-if="bookingNotConfirmed">
+      <v-alert type="warning" variant="tonal" class="mb-4">
+        {{ t('orders.errors.bookingNotConfirmed', { status: bookingStatusLabel(presetBooking.status) }) }}
+      </v-alert>
+      <div class="d-flex justify-end">
+        <v-btn variant="text" @click="emit('update:modelValue', false)">{{ t('common.close') }}</v-btn>
+      </div>
+    </template>
+
+    <AppForm v-else :schema="orderSchema" :initial-values="initialValues" @submit="onSubmit">
       <template #default="{ errors, values, setFieldValue }">
         <v-alert v-if="presetBooking" type="info" variant="tonal" density="compact" class="mb-4">
           {{ t('orders.creatingFromBooking', { name: presetBooking.customer?.name }) }}
