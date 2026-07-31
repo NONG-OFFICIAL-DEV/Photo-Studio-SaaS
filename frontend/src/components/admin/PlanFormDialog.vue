@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDialog from '@/components/common/AppDialog.vue'
 import AppForm from '@/components/common/AppForm.vue'
@@ -20,6 +20,7 @@ const appStore = useAppStore()
 
 const loading = ref(false)
 const errorMessage = ref('')
+const formId = useId()
 
 const isEdit = computed(() => Boolean(props.plan?.id))
 const title = computed(() => (isEdit.value ? t('admin.plans.editPlan') : t('admin.plans.newPlan')))
@@ -69,7 +70,7 @@ async function onSubmit(values) {
   <AppDialog :model-value="modelValue" :title="title" max-width="720" @update:model-value="emit('update:modelValue', $event)">
     <v-alert v-if="errorMessage" type="error" variant="tonal" class="mb-4">{{ errorMessage }}</v-alert>
 
-    <AppForm :schema="planSchema" :initial-values="initialValues" @submit="onSubmit">
+    <AppForm :id="formId" :schema="planSchema" :initial-values="initialValues" @submit="onSubmit">
       <template #default="{ errors, values, setFieldValue }">
         <v-row>
           <v-col cols="12" sm="6">
@@ -154,12 +155,12 @@ async function onSubmit(values) {
             </v-row>
           </v-col>
         </v-row>
-
-        <div class="d-flex justify-end ga-2 mt-2">
-          <v-btn variant="text" @click="emit('update:modelValue', false)">{{ t('common.cancel') }}</v-btn>
-          <v-btn type="submit" color="primary" :loading="loading">{{ t('common.save') }}</v-btn>
-        </div>
       </template>
     </AppForm>
+
+    <template #actions>
+      <v-btn variant="text" @click="emit('update:modelValue', false)">{{ t('common.cancel') }}</v-btn>
+      <v-btn type="submit" :form="formId" color="primary" :loading="loading">{{ t('common.save') }}</v-btn>
+    </template>
   </AppDialog>
 </template>

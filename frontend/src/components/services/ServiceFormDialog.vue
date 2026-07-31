@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDialog from '@/components/common/AppDialog.vue'
 import AppForm from '@/components/common/AppForm.vue'
@@ -24,6 +24,7 @@ const categoriesStore = useServiceCategoriesStore()
 
 const loading = ref(false)
 const errorMessage = ref('')
+const formId = useId()
 
 const PRICING_UNITS = computed(() => [
   { title: t('services.pricingUnits.fixed'), value: 'fixed' },
@@ -88,7 +89,7 @@ async function onSubmit(values) {
   <AppDialog :model-value="modelValue" :title="title" max-width="640" @update:model-value="emit('update:modelValue', $event)">
     <v-alert v-if="errorMessage" type="error" variant="tonal" class="mb-4">{{ errorMessage }}</v-alert>
 
-    <AppForm :schema="serviceSchema" :initial-values="initialValues" @submit="onSubmit">
+    <AppForm :id="formId" :schema="serviceSchema" :initial-values="initialValues" @submit="onSubmit">
       <template #default="{ errors, values, setFieldValue }">
         <v-row>
           <v-col cols="12" sm="6">
@@ -140,12 +141,12 @@ async function onSubmit(values) {
             />
           </v-col>
         </v-row>
-
-        <div class="d-flex justify-end ga-2 mt-2">
-          <v-btn variant="text" :disabled="loading" @click="emit('update:modelValue', false)">{{ t('common.cancel') }}</v-btn>
-          <v-btn type="submit" color="primary" variant="flat" :loading="loading">{{ t('common.save') }}</v-btn>
-        </div>
       </template>
     </AppForm>
+
+    <template #actions>
+      <v-btn variant="text" :disabled="loading" @click="emit('update:modelValue', false)">{{ t('common.cancel') }}</v-btn>
+      <v-btn type="submit" :form="formId" color="primary" variant="flat" :loading="loading">{{ t('common.save') }}</v-btn>
+    </template>
   </AppDialog>
 </template>

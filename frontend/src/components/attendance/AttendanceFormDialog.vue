@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDialog from '@/components/common/AppDialog.vue'
 import AppForm from '@/components/common/AppForm.vue'
@@ -22,6 +22,7 @@ const appStore = useAppStore()
 const loading = ref(false)
 const errorMessage = ref('')
 const users = ref([])
+const formId = useId()
 
 const STATUS_ITEMS = computed(() => [
   { title: t('attendance.status.present'), value: 'present' },
@@ -58,7 +59,7 @@ async function onSubmit(values) {
   <AppDialog :model-value="modelValue" :title="t('attendance.newRecord')" max-width="480" @update:model-value="emit('update:modelValue', $event)">
     <v-alert v-if="errorMessage" type="error" variant="tonal" class="mb-4">{{ errorMessage }}</v-alert>
 
-    <AppForm :schema="attendanceSchema" :initial-values="{ user_id: null, date: null, status: 'absent', reason: '' }" @submit="onSubmit">
+    <AppForm :id="formId" :schema="attendanceSchema" :initial-values="{ user_id: null, date: null, status: 'absent', reason: '' }" @submit="onSubmit">
       <template #default="{ errors, values, setFieldValue }">
         <v-select
           :model-value="values.user_id"
@@ -90,12 +91,12 @@ async function onSubmit(values) {
         />
 
         <v-textarea :model-value="values.reason" :label="t('fields.reason')" rows="2" :error-messages="errors.reason" @update:model-value="setFieldValue('reason', $event)" />
-
-        <div class="d-flex justify-end ga-2 mt-2">
-          <v-btn variant="text" :disabled="loading" @click="emit('update:modelValue', false)">{{ t('common.cancel') }}</v-btn>
-          <v-btn type="submit" color="primary" variant="flat" :loading="loading">{{ t('common.save') }}</v-btn>
-        </div>
       </template>
     </AppForm>
+
+    <template #actions>
+      <v-btn variant="text" :disabled="loading" @click="emit('update:modelValue', false)">{{ t('common.cancel') }}</v-btn>
+      <v-btn type="submit" :form="formId" color="primary" variant="flat" :loading="loading">{{ t('common.save') }}</v-btn>
+    </template>
   </AppDialog>
 </template>

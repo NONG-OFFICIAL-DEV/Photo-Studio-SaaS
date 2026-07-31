@@ -9,10 +9,19 @@ import { useI18n } from 'vue-i18n'
  *   <AppForm :schema="loginSchema" :initial-values="{ email: '' }" @submit="onSubmit">
  *     <template #default="{ errors }"> ... fields ... </template>
  *   </AppForm>
+ *
+ * The optional `id` prop exists for dialogs: AppDialog's #actions slot
+ * renders inside v-card-actions, a sibling of v-card-text — not a
+ * descendant of the <form> this component renders — so a submit button
+ * placed there can't trigger submission just by being type="submit"
+ * inside the form. Give this component an id and point the button at it
+ * via the standard HTML `<button type="submit" form="...">` association
+ * instead (see any *FormDialog.vue for the pattern).
  */
 defineProps({
   schema: { type: Object, required: true },
   initialValues: { type: Object, default: () => ({}) },
+  id: { type: String, default: undefined },
 })
 
 const emit = defineEmits(['submit'])
@@ -30,6 +39,7 @@ watch(locale, () => {
 
 <template>
   <VeeForm
+    :id="id"
     ref="formRef"
     v-slot="slotProps"
     :validation-schema="schema"

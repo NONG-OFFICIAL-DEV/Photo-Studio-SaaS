@@ -32,7 +32,7 @@ const emit = defineEmits(['update:modelValue'])
 
       <v-divider v-if="$slots.actions" />
 
-      <v-card-actions v-if="$slots.actions" class="pa-4">
+      <v-card-actions v-if="$slots.actions" class="pa-4 ga-2 justify-end flex-wrap">
         <slot name="actions" :loading="loading" />
       </v-card-actions>
     </v-card>

@@ -188,6 +188,7 @@ const canDownloadPdf = computed(
 const canShareTelegram = computed(
   () => auth.hasPermission('invoices.send') && invoice.value && invoice.value.status !== 'void',
 )
+const hasFooterActions = computed(() => canSend.value || canDownloadPdf.value || canShareTelegram.value || canVoid.value)
 </script>
 
 <template>
@@ -332,33 +333,33 @@ const canShareTelegram = computed(
           {{ t('invoices.recordPayment') }}
         </v-btn>
       </div>
-      <v-divider class="my-4" />
-      <div class="d-flex flex-wrap ga-2">
-        <v-btn v-if="canSend" color="primary" variant="flat" :loading="actionLoading" @click="sendNow">
-          {{ t('invoices.send') }}
-        </v-btn>
-        <v-btn
-          v-if="canDownloadPdf"
-          variant="outlined"
-          prepend-icon="mdi-file-pdf-box"
-          :loading="pdfLoading"
-          @click="downloadPdf"
-        >
-          {{ t('invoices.downloadPdf') }}
-        </v-btn>
-        <v-btn
-          v-if="canShareTelegram"
-          variant="outlined"
-          prepend-icon="mdi-send"
-          :loading="telegramLoading"
-          @click="sendViaTelegram"
-        >
-          {{ t('invoices.sendViaTelegram') }}
-        </v-btn>
-        <v-btn v-if="canVoid" color="error" variant="text" @click="emit('void-requested', invoice.id)">
-          {{ t('invoices.voidInvoice') }}
-        </v-btn>
-      </div>
     </div>
+
+    <template v-if="invoice && hasFooterActions" #actions>
+      <v-btn v-if="canSend" color="primary" variant="flat" :loading="actionLoading" @click="sendNow">
+        {{ t('invoices.send') }}
+      </v-btn>
+      <v-btn
+        v-if="canDownloadPdf"
+        variant="outlined"
+        prepend-icon="mdi-file-pdf-box"
+        :loading="pdfLoading"
+        @click="downloadPdf"
+      >
+        {{ t('invoices.downloadPdf') }}
+      </v-btn>
+      <v-btn
+        v-if="canShareTelegram"
+        variant="outlined"
+        prepend-icon="mdi-send"
+        :loading="telegramLoading"
+        @click="sendViaTelegram"
+      >
+        {{ t('invoices.sendViaTelegram') }}
+      </v-btn>
+      <v-btn v-if="canVoid" color="error" variant="text" @click="emit('void-requested', invoice.id)">
+        {{ t('invoices.voidInvoice') }}
+      </v-btn>
+    </template>
   </AppDialog>
 </template>

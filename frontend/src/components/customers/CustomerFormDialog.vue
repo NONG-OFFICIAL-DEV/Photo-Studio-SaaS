@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDialog from '@/components/common/AppDialog.vue'
 import AppForm from '@/components/common/AppForm.vue'
@@ -23,6 +23,7 @@ const tagsStore = useCustomerTagsStore()
 
 const loading = ref(false)
 const errorMessage = ref('')
+const formId = useId()
 
 const isEdit = computed(() => Boolean(props.customer?.id))
 const title = computed(() => (isEdit.value ? t('customers.dialogs.editTitle') : t('customers.actions.addCustomer')))
@@ -67,7 +68,7 @@ async function onSubmit(values) {
   <AppDialog :model-value="modelValue" :title="title" max-width="640" @update:model-value="emit('update:modelValue', $event)">
     <v-alert v-if="errorMessage" type="error" variant="tonal" class="mb-4">{{ errorMessage }}</v-alert>
 
-    <AppForm :schema="customerSchema" :initial-values="initialValues" @submit="onSubmit">
+    <AppForm :id="formId" :schema="customerSchema" :initial-values="initialValues" @submit="onSubmit">
       <template #default="{ errors, values, setFieldValue }">
         <v-row>
           <v-col cols="12" sm="6">
@@ -117,12 +118,12 @@ async function onSubmit(values) {
             <v-textarea :model-value="values.address" :label="t('fields.address')" rows="2" :error-messages="errors.address" @update:model-value="setFieldValue('address', $event)" />
           </v-col>
         </v-row>
-
-        <div class="d-flex justify-end ga-2 mt-2">
-          <v-btn variant="text" :disabled="loading" @click="emit('update:modelValue', false)">{{ t('common.cancel') }}</v-btn>
-          <v-btn type="submit" color="primary" variant="flat" :loading="loading">{{ t('common.save') }}</v-btn>
-        </div>
       </template>
     </AppForm>
+
+    <template #actions>
+      <v-btn variant="text" :disabled="loading" @click="emit('update:modelValue', false)">{{ t('common.cancel') }}</v-btn>
+      <v-btn type="submit" :form="formId" color="primary" variant="flat" :loading="loading">{{ t('common.save') }}</v-btn>
+    </template>
   </AppDialog>
 </template>

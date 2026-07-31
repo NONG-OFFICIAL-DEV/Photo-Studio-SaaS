@@ -146,44 +146,45 @@ const EDITING_STATUS_LABELS = computed(() => ({
         </div>
       </div>
 
-      <div v-if="canUpdate" class="d-flex flex-wrap ga-2">
-        <v-btn v-if="order.status === 'pending'" color="info" variant="flat" :loading="actionLoading" @click="runAction('confirm')">
-          {{ t('common.confirm') }}
-        </v-btn>
-
-        <template v-if="order.status === 'confirmed'">
-          <v-select
-            v-model="assignedUserId"
-            :label="t('orders.assignEditor')"
-            clearable
-            density="compact"
-            item-title="name"
-            item-value="id"
-            :items="users"
-            style="max-width: 220px"
-            hide-details
-          />
-          <v-btn color="primary" variant="flat" :loading="actionLoading" @click="runAction('start-production')">
-            {{ t('orders.startProduction') }}
-          </v-btn>
-        </template>
-
-        <v-btn v-if="order.status === 'in_production'" color="secondary" variant="flat" :loading="actionLoading" @click="runAction('ready')">
-          {{ t('orders.markReady') }}
-        </v-btn>
-
-        <v-btn v-if="order.status === 'ready_for_delivery'" color="success" variant="flat" :loading="actionLoading" @click="runAction('deliver')">
-          {{ t('orders.deliver') }}
-        </v-btn>
-
-        <v-btn v-if="canCreateInvoice" color="primary" variant="tonal" prepend-icon="mdi-receipt-text-plus-outline" @click="emit('create-invoice-requested', order)">
-          {{ t('orders.createInvoice') }}
-        </v-btn>
-
-        <v-btn v-if="canCancel" color="error" variant="text" @click="emit('cancel-requested', order.id)">
-          {{ t('orders.cancelOrder') }}
-        </v-btn>
-      </div>
     </div>
+
+    <template v-if="order && canUpdate" #actions>
+      <v-btn v-if="order.status === 'pending'" color="info" variant="flat" :loading="actionLoading" @click="runAction('confirm')">
+        {{ t('common.confirm') }}
+      </v-btn>
+
+      <template v-if="order.status === 'confirmed'">
+        <v-select
+          v-model="assignedUserId"
+          :label="t('orders.assignEditor')"
+          clearable
+          density="compact"
+          item-title="name"
+          item-value="id"
+          :items="users"
+          style="max-width: 220px"
+          hide-details
+        />
+        <v-btn color="primary" variant="flat" :loading="actionLoading" @click="runAction('start-production')">
+          {{ t('orders.startProduction') }}
+        </v-btn>
+      </template>
+
+      <v-btn v-if="order.status === 'in_production'" color="secondary" variant="flat" :loading="actionLoading" @click="runAction('ready')">
+        {{ t('orders.markReady') }}
+      </v-btn>
+
+      <v-btn v-if="order.status === 'ready_for_delivery'" color="success" variant="flat" :loading="actionLoading" @click="runAction('deliver')">
+        {{ t('orders.deliver') }}
+      </v-btn>
+
+      <v-btn v-if="canCreateInvoice" color="primary" variant="tonal" prepend-icon="mdi-receipt-text-plus-outline" @click="emit('create-invoice-requested', order)">
+        {{ t('orders.createInvoice') }}
+      </v-btn>
+
+      <v-btn v-if="canCancel" color="error" variant="text" @click="emit('cancel-requested', order.id)">
+        {{ t('orders.cancelOrder') }}
+      </v-btn>
+    </template>
   </AppDialog>
 </template>

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDialog from '@/components/common/AppDialog.vue'
 import AppForm from '@/components/common/AppForm.vue'
@@ -21,6 +21,7 @@ const appStore = useAppStore()
 
 const loading = ref(false)
 const errorMessage = ref('')
+const formId = useId()
 const users = ref([])
 
 watch(() => props.modelValue, async (open) => {
@@ -54,6 +55,7 @@ async function onSubmit(values) {
     <p class="text-body-2 text-medium-emphasis mb-4">{{ t('payroll.autoComputeHint') }}</p>
 
     <AppForm
+      :id="formId"
       :schema="payrollEntrySchema"
       :initial-values="{ user_id: null, period_label: '', period_start: null, period_end: null, base_pay: null, commission_total: null, deductions: null, notes: '' }"
       @submit="onSubmit"
@@ -106,12 +108,12 @@ async function onSubmit(values) {
         </v-row>
 
         <v-textarea :model-value="values.notes" :label="t('fields.notes')" rows="2" :error-messages="errors.notes" @update:model-value="setFieldValue('notes', $event)" />
-
-        <div class="d-flex justify-end ga-2 mt-2">
-          <v-btn variant="text" :disabled="loading" @click="emit('update:modelValue', false)">{{ t('common.cancel') }}</v-btn>
-          <v-btn type="submit" color="primary" variant="flat" :loading="loading">{{ t('common.save') }}</v-btn>
-        </div>
       </template>
     </AppForm>
+
+    <template #actions>
+      <v-btn variant="text" :disabled="loading" @click="emit('update:modelValue', false)">{{ t('common.cancel') }}</v-btn>
+      <v-btn type="submit" :form="formId" color="primary" variant="flat" :loading="loading">{{ t('common.save') }}</v-btn>
+    </template>
   </AppDialog>
 </template>

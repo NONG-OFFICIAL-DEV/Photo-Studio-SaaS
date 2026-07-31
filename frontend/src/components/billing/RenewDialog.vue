@@ -67,10 +67,6 @@ async function confirmRenew() {
 
     <template v-if="isFreePlan">
       <p class="text-body-2 text-medium-emphasis mb-4">{{ t('billingPage.freePlanHint') }}</p>
-      <div class="d-flex justify-end ga-2">
-        <v-btn variant="text" @click="emit('update:modelValue', false)">{{ t('common.cancel') }}</v-btn>
-        <v-btn color="primary" @click="choosePlanInstead">{{ t('billingPage.actions.changePlan') }}</v-btn>
-      </div>
     </template>
 
     <template v-else>
@@ -86,11 +82,12 @@ async function confirmRenew() {
           </template>
         </v-radio>
       </v-radio-group>
+    </template>
 
-      <div class="d-flex justify-end ga-2 mt-4">
-        <v-btn variant="text" @click="emit('update:modelValue', false)">{{ t('common.cancel') }}</v-btn>
-        <v-btn color="primary" :loading="loading" @click="confirmRenew">{{ t('billingPage.actions.confirmPay') }}</v-btn>
-      </div>
+    <template #actions>
+      <v-btn variant="text" @click="emit('update:modelValue', false)">{{ t('common.cancel') }}</v-btn>
+      <v-btn v-if="isFreePlan" color="primary" @click="choosePlanInstead">{{ t('billingPage.actions.changePlan') }}</v-btn>
+      <v-btn v-else color="primary" :loading="loading" @click="confirmRenew">{{ t('billingPage.actions.confirmPay') }}</v-btn>
     </template>
   </AppDialog>
 </template>

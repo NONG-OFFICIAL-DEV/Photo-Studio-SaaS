@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDialog from '@/components/common/AppDialog.vue'
 import AppForm from '@/components/common/AppForm.vue'
@@ -29,6 +29,7 @@ const appStore = useAppStore()
 
 const loading = ref(false)
 const errorMessage = ref('')
+const formId = useId()
 
 const fromOrder = ref(false)
 const customerOptions = ref([])
@@ -330,7 +331,7 @@ async function onSubmit(values) {
   >
     <v-alert v-if="errorMessage" type="error" variant="tonal" class="mb-4">{{ errorMessage }}</v-alert>
 
-    <AppForm :schema="invoiceSchema" :initial-values="initialValues" @submit="onSubmit">
+    <AppForm :id="formId" :schema="invoiceSchema" :initial-values="initialValues" @submit="onSubmit">
       <template #default="{ errors, values, setFieldValue }">
         <v-alert v-if="presetOrder" type="info" variant="tonal" density="compact" class="mb-4">
           {{ t('invoices.creatingFromOrder', { name: presetOrder.customer?.name }) }}
@@ -551,16 +552,12 @@ async function onSubmit(values) {
             </div>
           </v-col>
         </v-row>
-        <v-divider class="my-4" />
-        <div class="d-flex justify-end ga-2 mt-2">
-          <v-btn variant="text" :disabled="loading" @click="emit('update:modelValue', false)">{{
-            t('common.cancel')
-          }}</v-btn>
-          <v-btn type="submit" color="primary" variant="flat" :loading="loading">{{
-            t('invoices.createInvoice')
-          }}</v-btn>
-        </div>
       </template>
     </AppForm>
+
+    <template #actions>
+      <v-btn variant="text" :disabled="loading" @click="emit('update:modelValue', false)">{{ t('common.cancel') }}</v-btn>
+      <v-btn type="submit" :form="formId" color="primary" variant="flat" :loading="loading">{{ t('invoices.createInvoice') }}</v-btn>
+    </template>
   </AppDialog>
 </template>

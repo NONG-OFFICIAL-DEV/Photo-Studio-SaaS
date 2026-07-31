@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDialog from '@/components/common/AppDialog.vue'
 import AppForm from '@/components/common/AppForm.vue'
@@ -17,6 +17,7 @@ const emit = defineEmits(['update:modelValue', 'saved'])
 const { t } = useI18n()
 const appStore = useAppStore()
 const loading = ref(false)
+const formId = useId()
 
 async function onSubmit(values) {
   loading.value = true
@@ -33,15 +34,15 @@ async function onSubmit(values) {
 
 <template>
   <AppDialog :model-value="modelValue" :title="t('orders.cancelOrder')" max-width="480" @update:model-value="emit('update:modelValue', $event)">
-    <AppForm :schema="cancelOrderSchema" :initial-values="{ reason: '' }" @submit="onSubmit">
+    <AppForm :id="formId" :schema="cancelOrderSchema" :initial-values="{ reason: '' }" @submit="onSubmit">
       <template #default="{ errors, values, setFieldValue }">
         <v-textarea :model-value="values.reason" :label="`${t('fields.reason')} *`" rows="3" :error-messages="errors.reason" @update:model-value="setFieldValue('reason', $event)" />
-
-        <div class="d-flex justify-end ga-2 mt-2">
-          <v-btn variant="text" :disabled="loading" @click="emit('update:modelValue', false)">{{ t('orders.keepOrder') }}</v-btn>
-          <v-btn type="submit" color="error" variant="flat" :loading="loading">{{ t('orders.cancelOrder') }}</v-btn>
-        </div>
       </template>
     </AppForm>
+
+    <template #actions>
+      <v-btn variant="text" :disabled="loading" @click="emit('update:modelValue', false)">{{ t('orders.keepOrder') }}</v-btn>
+      <v-btn type="submit" :form="formId" color="error" variant="flat" :loading="loading">{{ t('orders.cancelOrder') }}</v-btn>
+    </template>
   </AppDialog>
 </template>

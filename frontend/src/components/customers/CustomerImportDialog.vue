@@ -65,11 +65,11 @@ function close() {
       </v-list>
     </div>
 
-    <div class="d-flex justify-end ga-2 mt-4">
+    <template #actions>
       <v-btn variant="text" @click="close">{{ t('common.close') }}</v-btn>
       <v-btn color="primary" variant="flat" :loading="loading" :disabled="!files.length" @click="runImport">
         {{ t('customers.actions.import') }}
       </v-btn>
-    </div>
+    </template>
   </AppDialog>
 </template>

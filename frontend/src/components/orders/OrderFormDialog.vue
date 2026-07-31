@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDialog from '@/components/common/AppDialog.vue'
 import AppForm from '@/components/common/AppForm.vue'
@@ -43,6 +43,7 @@ function bookingStatusLabel(status) {
 
 const loading = ref(false)
 const errorMessage = ref('')
+const formId = useId()
 
 const customerOptions = ref([])
 const customerSearchLoading = ref(false)
@@ -269,16 +270,11 @@ const subtotal = computed(() => computeSubtotal())
   <AppDialog :model-value="modelValue" :title="t('orders.newOrder')" max-width="720" @update:model-value="emit('update:modelValue', $event)">
     <v-alert v-if="errorMessage" type="error" variant="tonal" class="mb-4">{{ errorMessage }}</v-alert>
 
-    <template v-if="bookingNotConfirmed">
-      <v-alert type="warning" variant="tonal" class="mb-4">
-        {{ t('orders.errors.bookingNotConfirmed', { status: bookingStatusLabel(presetBooking.status) }) }}
-      </v-alert>
-      <div class="d-flex justify-end">
-        <v-btn variant="text" @click="emit('update:modelValue', false)">{{ t('common.close') }}</v-btn>
-      </div>
-    </template>
+    <v-alert v-if="bookingNotConfirmed" type="warning" variant="tonal" class="mb-4">
+      {{ t('orders.errors.bookingNotConfirmed', { status: bookingStatusLabel(presetBooking.status) }) }}
+    </v-alert>
 
-    <AppForm v-else :schema="orderSchema" :initial-values="initialValues" @submit="onSubmit">
+    <AppForm v-else :id="formId" :schema="orderSchema" :initial-values="initialValues" @submit="onSubmit">
       <template #default="{ errors, values, setFieldValue }">
         <v-alert v-if="presetBooking" type="info" variant="tonal" density="compact" class="mb-4">
           {{ t('orders.creatingFromBooking', { name: presetBooking.customer?.name }) }}
@@ -401,12 +397,17 @@ const subtotal = computed(() => computeSubtotal())
             </div>
           </v-col>
         </v-row>
-
-        <div class="d-flex justify-end ga-2 mt-2">
-          <v-btn variant="text" :disabled="loading" @click="emit('update:modelValue', false)">{{ t('common.cancel') }}</v-btn>
-          <v-btn type="submit" color="primary" variant="flat" :loading="loading">{{ t('orders.createOrder') }}</v-btn>
-        </div>
       </template>
     </AppForm>
+
+    <template #actions>
+      <template v-if="bookingNotConfirmed">
+        <v-btn variant="text" @click="emit('update:modelValue', false)">{{ t('common.close') }}</v-btn>
+      </template>
+      <template v-else>
+        <v-btn variant="text" :disabled="loading" @click="emit('update:modelValue', false)">{{ t('common.cancel') }}</v-btn>
+        <v-btn type="submit" :form="formId" color="primary" variant="flat" :loading="loading">{{ t('orders.createOrder') }}</v-btn>
+      </template>
+    </template>
   </AppDialog>
 </template>
