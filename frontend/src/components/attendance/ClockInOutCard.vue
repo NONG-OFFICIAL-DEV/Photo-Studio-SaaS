@@ -5,6 +5,7 @@ import AppStatusChip from '@/components/common/AppStatusChip.vue'
 import { getTodayAttendanceApi, clockInApi, clockOutApi } from '@/apis/attendance.api'
 import { useAppStore } from '@/stores/app'
 import { translateApiMessage } from '@/utils/apiMessages'
+import { formatTime } from '@/utils/dateFormat'
 
 const { t } = useI18n()
 const appStore = useAppStore()
@@ -75,9 +76,9 @@ const hasClockedOut = computed(() => Boolean(record.value?.clock_out_at))
 
       <template v-else>
         <div v-if="hasClockedIn" class="text-body-2 text-medium-emphasis mb-3">
-          <div>{{ t('attendance.clockedInAt', { time: new Date(record.clock_in_at).toLocaleTimeString() }) }}</div>
+          <div>{{ t('attendance.clockedInAt', { time: formatTime(record.clock_in_at) }) }}</div>
           <div v-if="hasClockedOut">
-            {{ t('attendance.clockedOutAt', { time: new Date(record.clock_out_at).toLocaleTimeString() }) }}
+            {{ t('attendance.clockedOutAt', { time: formatTime(record.clock_out_at) }) }}
           </div>
         </div>
 

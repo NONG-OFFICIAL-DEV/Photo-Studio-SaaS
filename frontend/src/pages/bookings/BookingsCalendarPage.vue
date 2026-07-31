@@ -8,11 +8,10 @@ import AppStatusChip from '@/components/common/AppStatusChip.vue'
 import BookingCalendar from '@/components/bookings/BookingCalendar.vue'
 import BookingFormDialog from '@/components/bookings/BookingFormDialog.vue'
 import { useAuthStore } from '@/stores/auth'
-import { useDateFnsLocale } from '@/utils/dateFnsLocale'
+import { formatDate } from '@/utils/dateFormat'
 
 const { t } = useI18n()
 const auth = useAuthStore()
-const dateFnsLocale = useDateFnsLocale()
 
 const STATUS_MAP = computed(() => ({
   pending: { color: 'warning', label: t('bookings.status.pending') },
@@ -73,7 +72,7 @@ async function onSaved() {
       <BookingCalendar ref="calendarRef" @day-click="onDayClick" @booking-click="onBookingClick" />
     </v-card>
 
-    <AppDialog v-model="dayDialog" :title="selectedDay ? format(selectedDay, 'MMMM d, yyyy', { locale: dateFnsLocale }) : ''" max-width="480">
+    <AppDialog v-model="dayDialog" :title="selectedDay ? formatDate(selectedDay) : ''" max-width="480">
       <div v-if="!dayBookings.length" class="text-body-2 text-medium-emphasis mb-4">{{ t('bookings.noBookingsOnDay') }}</div>
 
       <v-list v-else density="compact" class="mb-4">

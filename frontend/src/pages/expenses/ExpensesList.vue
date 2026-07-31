@@ -11,6 +11,7 @@ import { getExpensesApi, deleteExpenseApi } from '@/apis/expense.api'
 import { useExpenseCategoriesStore } from '@/stores/expenseCategories'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
+import { formatDate } from '@/utils/dateFormat'
 
 const { t } = useI18n()
 const auth = useAuthStore()
@@ -108,6 +109,10 @@ const canDelete = computed(() => auth.hasPermission('expenses.delete'))
         :filters="filters"
         item-label="expenses"
       >
+        <template #[`item.expense_date`]="{ item }">
+          {{ formatDate(item.expense_date) }}
+        </template>
+
         <template #[`item.category`]="{ item }">
           {{ item.category?.name || '—' }}
         </template>

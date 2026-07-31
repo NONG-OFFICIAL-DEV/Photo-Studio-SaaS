@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppTable from '@/components/common/AppTable.vue'
 import AppDatePicker from '@/components/common/AppDatePicker.vue'
+import { formatDateTime } from '@/utils/dateFormat'
 
 const props = defineProps({
   fetchFn: { type: Function, required: true },
@@ -51,7 +52,7 @@ const METHOD_COLORS = { GET: 'info', POST: 'success', PUT: 'warning', PATCH: 'wa
 
     <AppTable :headers="headers" :fetch-fn="fetchLogs" :filters="filters" item-label="logs">
       <template #[`item.created_at`]="{ item }">
-        {{ new Date(item.created_at).toLocaleString() }}
+        {{ formatDateTime(item.created_at) }}
       </template>
 
       <template #[`item.method`]="{ item }">

@@ -11,6 +11,7 @@ import {
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
 import { translateApiMessage } from '@/utils/apiMessages'
+import { formatDate } from '@/utils/dateFormat'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -122,7 +123,7 @@ const canAdjustStock = computed(() => auth.hasPermission('inventory.adjust-stock
           </thead>
           <tbody>
             <tr v-for="m in item.movements" :key="m.id">
-              <td>{{ m.moved_at }}</td>
+              <td>{{ formatDate(m.moved_at) }}</td>
               <td>
                 <v-chip :color="m.type === 'stock_in' ? 'success' : 'error'" size="small" variant="tonal">
                   {{ t(`inventory.movementTypes.${m.type === 'stock_in' ? 'stockIn' : 'stockOut'}`) }}

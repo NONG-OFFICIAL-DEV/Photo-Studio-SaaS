@@ -1,14 +1,11 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { format, parseISO } from 'date-fns'
-import { useDateFnsLocale } from '@/utils/dateFnsLocale'
-
-const dateFnsLocale = useDateFnsLocale()
 
 const props = defineProps({
   modelValue: { type: [String, Date, null], default: null },
   label: { type: String, default: '' },
-  displayFormat: { type: String, default: 'MMM d, yyyy' },
+  displayFormat: { type: String, default: 'dd/MM/yyyy' },
   clearable: { type: Boolean, default: true },
   errorMessages: { type: [String, Array], default: () => [] },
 })
@@ -32,9 +29,7 @@ const dateValue = computed({
   },
 })
 
-const displayText = computed(() => (
-  dateValue.value ? format(dateValue.value, props.displayFormat, { locale: dateFnsLocale.value }) : ''
-))
+const displayText = computed(() => (dateValue.value ? format(dateValue.value, props.displayFormat) : ''))
 </script>
 
 <template>

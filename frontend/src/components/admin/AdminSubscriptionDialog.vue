@@ -15,6 +15,7 @@ import {
 } from '@/apis/admin.api'
 import { useAppStore } from '@/stores/app'
 import { translateApiMessage } from '@/utils/apiMessages'
+import { formatDate } from '@/utils/dateFormat'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -205,7 +206,7 @@ const reactivate = () => runAction(
         </thead>
         <tbody>
           <tr v-for="payment in payments" :key="payment.id">
-            <td>{{ new Date(payment.paid_at).toLocaleDateString() }}</td>
+            <td>{{ formatDate(payment.paid_at) }}</td>
             <td>{{ payment.plan_name }}</td>
             <td>${{ Number(payment.amount).toFixed(2) }}</td>
             <td>{{ payment.recorded_by?.name ?? t('billingPage.self') }}</td>

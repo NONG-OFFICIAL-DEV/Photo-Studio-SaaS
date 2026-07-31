@@ -19,6 +19,7 @@ import {
 import { getUsersApi } from '@/apis/user.api'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
+import { formatDate, formatTime } from '@/utils/dateFormat'
 
 const { t } = useI18n()
 const auth = useAuthStore()
@@ -111,11 +112,7 @@ async function runAction(action, booking) {
 }
 
 function formatWhen(booking) {
-  const start = new Date(booking.starts_at)
-  const end = new Date(booking.ends_at)
-  const dateStr = start.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
-  const timeStr = (d) => d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
-  return `${dateStr}, ${timeStr(start)} - ${timeStr(end)}`
+  return `${formatDate(booking.starts_at)}, ${formatTime(booking.starts_at)} - ${formatTime(booking.ends_at)}`
 }
 
 const canCreate = computed(() => auth.hasPermission('bookings.create'))

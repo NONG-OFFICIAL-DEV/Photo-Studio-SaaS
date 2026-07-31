@@ -15,6 +15,7 @@ import {
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
 import { translateApiMessage } from '@/utils/apiMessages'
+import { formatDate } from '@/utils/dateFormat'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -127,7 +128,7 @@ async function sendViaTelegram() {
     const text = t('invoices.telegramMessage', {
       number: invoice.value.invoice_number,
       total: invoice.value.total,
-      dueDate: invoice.value.due_date ?? '—',
+      dueDate: invoice.value.due_date ? formatDate(invoice.value.due_date) : '—',
     })
     const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(data.data.url)}&text=${encodeURIComponent(text)}`
     window.open(shareUrl, '_blank', 'noopener')
@@ -275,7 +276,7 @@ const canShareTelegram = computed(
           </thead>
           <tbody>
             <tr v-for="p in invoice.payments" :key="p.id">
-              <td>{{ p.paid_at }}</td>
+              <td>{{ formatDate(p.paid_at) }}</td>
               <td>{{ t(`invoices.methods.${p.method === 'bank_transfer' ? 'bankTransfer' : p.method}`) }}</td>
               <td>${{ p.amount }}</td>
               <td>{{ p.reference || '—' }}</td>

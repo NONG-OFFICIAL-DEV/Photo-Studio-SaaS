@@ -7,6 +7,7 @@ import CommissionFormDialog from '@/components/commissions/CommissionFormDialog.
 import { getCommissionEntriesApi, deleteCommissionEntryApi } from '@/apis/commission.api'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
+import { formatDate } from '@/utils/dateFormat'
 
 const { t } = useI18n()
 const auth = useAuthStore()
@@ -62,6 +63,10 @@ const canDelete = computed(() => auth.hasPermission('commissions.delete'))
         :filters="filters"
         item-label="entries"
       >
+        <template #[`item.earned_date`]="{ item }">
+          {{ formatDate(item.earned_date) }}
+        </template>
+
         <template #[`item.user`]="{ item }">
           {{ item.user?.name }}
         </template>

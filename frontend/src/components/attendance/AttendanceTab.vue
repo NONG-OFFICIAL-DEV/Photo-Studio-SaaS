@@ -8,6 +8,7 @@ import AttendanceFormDialog from '@/components/attendance/AttendanceFormDialog.v
 import { getAttendanceRecordsApi, deleteAttendanceRecordApi } from '@/apis/attendance.api'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
+import { formatDate } from '@/utils/dateFormat'
 
 const { t } = useI18n()
 const auth = useAuthStore()
@@ -80,6 +81,10 @@ const canManage = computed(() => auth.hasPermission('attendance.manage'))
         :filters="filters"
         item-label="records"
       >
+        <template #[`item.date`]="{ item }">
+          {{ formatDate(item.date) }}
+        </template>
+
         <template #[`item.user`]="{ item }">
           {{ item.user?.name }}
         </template>

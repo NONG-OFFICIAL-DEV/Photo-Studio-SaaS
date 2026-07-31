@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import AppTable from '@/components/common/AppTable.vue'
 import AppDatePicker from '@/components/common/AppDatePicker.vue'
 import AuditPropertiesDialog from '@/components/audit/AuditPropertiesDialog.vue'
+import { formatDateTime } from '@/utils/dateFormat'
 
 const props = defineProps({
   fetchFn: { type: Function, required: true },
@@ -59,7 +60,7 @@ function showDetails(entry) {
 
     <AppTable :headers="headers" :fetch-fn="fetchEntries" :filters="filters" item-label="entries">
       <template #[`item.created_at`]="{ item }">
-        {{ new Date(item.created_at).toLocaleString() }}
+        {{ formatDateTime(item.created_at) }}
       </template>
 
       <template #[`item.outcome`]="{ item }">

@@ -8,6 +8,7 @@ import RenewDialog from '@/components/billing/RenewDialog.vue'
 import ChangePlanDialog from '@/components/billing/ChangePlanDialog.vue'
 import { getBillingApi, getBillingPaymentsApi, cancelBillingApi, resumeBillingApi } from '@/apis/billing.api'
 import { useAppStore } from '@/stores/app'
+import { formatDate } from '@/utils/dateFormat'
 
 const { t } = useI18n()
 const appStore = useAppStore()
@@ -67,7 +68,7 @@ const endsAtLabel = computed(() => {
     subscription.value?.status === 'trial'
       ? subscription.value?.trial_ends_at
       : subscription.value?.current_period_ends_at
-  return date ? new Date(date).toLocaleDateString() : '—'
+  return date ? formatDate(date) : '—'
 })
 
 function usagePercent(count, limit) {
@@ -206,7 +207,7 @@ async function confirmResumeSubscription() {
           </thead>
           <tbody>
             <tr v-for="payment in payments" :key="payment.id">
-              <td>{{ new Date(payment.paid_at).toLocaleDateString() }}</td>
+              <td>{{ formatDate(payment.paid_at) }}</td>
               <td>{{ payment.plan_name }}</td>
               <td>{{ t(`billingPage.cycles.${payment.billing_cycle}`) }}</td>
               <td>${{ Number(payment.amount).toFixed(2) }}</td>

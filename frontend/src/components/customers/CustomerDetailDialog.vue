@@ -9,6 +9,7 @@ import {
   deleteCustomerNoteApi,
   toggleCustomerFavoriteApi,
 } from '@/apis/customer.api'
+import { formatDate } from '@/utils/dateFormat'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -111,7 +112,7 @@ async function toggleFavorite() {
       <v-list v-else density="compact">
         <v-list-item v-for="note in customer.notes" :key="note.id">
           <v-list-item-title>{{ note.note }}</v-list-item-title>
-          <v-list-item-subtitle>{{ note.author }} &middot; {{ new Date(note.created_at).toLocaleDateString() }}</v-list-item-subtitle>
+          <v-list-item-subtitle>{{ note.author }} &middot; {{ formatDate(note.created_at) }}</v-list-item-subtitle>
           <template #append>
             <v-btn icon="mdi-delete-outline" size="small" variant="text" @click="removeNote(note.id)" />
           </template>

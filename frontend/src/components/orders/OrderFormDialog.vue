@@ -12,6 +12,7 @@ import { getServiceAddOnsApi } from '@/apis/service-addon.api'
 import { getPackagesApi } from '@/apis/package.api'
 import { translateApiMessage } from '@/utils/apiMessages'
 import { useAppStore } from '@/stores/app'
+import { formatDate } from '@/utils/dateFormat'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -39,7 +40,7 @@ const catalogPick = ref(null)
 
 const bookingSelectItems = computed(() => bookingOptions.value.map(booking => ({
   id: booking.id,
-  label: `${new Date(booking.starts_at).toLocaleDateString()} — ${booking.title || booking.type}`,
+  label: `${formatDate(booking.starts_at)} — ${booking.title || booking.type}`,
 })))
 
 async function loadCatalog() {

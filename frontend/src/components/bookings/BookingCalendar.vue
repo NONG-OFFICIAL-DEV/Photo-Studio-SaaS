@@ -75,7 +75,7 @@ defineExpose({ refresh: fetchBookings, bookings })
 <template>
   <div>
     <div class="d-flex align-center justify-space-between mb-3">
-      <div class="text-h6">{{ format(currentMonth, 'MMMM yyyy', { locale: dateFnsLocale }) }}</div>
+      <div class="text-h6">{{ format(currentMonth, 'MM/yyyy') }}</div>
       <div class="d-flex ga-1">
         <v-btn size="small" variant="outlined" @click="goToToday">{{ t('bookings.today') }}</v-btn>
         <v-btn icon="mdi-chevron-left" size="small" variant="text" @click="goToPreviousMonth" />

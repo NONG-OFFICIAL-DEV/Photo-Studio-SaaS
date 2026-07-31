@@ -1,49 +1,53 @@
 import { VuetifyDateAdapter } from 'vuetify/date/adapters/vuetify'
 
 /*
- * Vuetify's default date adapter formats month/weekday names via
- * Intl.DateTimeFormat(locale, ...) — 'km' isn't in Vuetify's own
- * locale-code map (falls back to the raw 'km' string) and, in practice,
- * still renders English month names in this app's target browsers. Rather
- * than fight Intl's locale resolution, this adapter renders Khmer names
- * itself and defers to the default adapter for everything else (numbers,
- * times, and every other locale).
+ * Two things this app wants that Vuetify's default date adapter doesn't
+ * give it:
+ *
+ * 1. Numeric month everywhere (dd/MM/yyyy), for every locale — month
+ *    NAMES need a translated locale object per language and are the kind
+ *    of thing this app would rather not maintain (see src/utils/
+ *    dateFormat.js, which applies the same rule to plain record dates).
+ *    This affects the calendar popup's own month/year navigation and any
+ *    other date the Vuetify components format internally.
+ *
+ * 2. Khmer weekday letters — 'km' isn't in Vuetify's own locale-code map
+ *    (falls back to the raw 'km' string) and, in practice, still renders
+ *    English weekday names in this app's target browsers even though
+ *    Intl.DateTimeFormat('km', ...) works fine standalone. Rendered here
+ *    directly instead of fighting Intl's locale resolution.
  */
-const KHMER_MONTHS = [
-  'មករា', 'កុម្ភៈ', 'មីនា', 'មេសា', 'ឧសភា', 'មិថុនា',
-  'កក្កដា', 'សីហា', 'កញ្ញា', 'តុលា', 'វិច្ឆិកា', 'ធ្នូ',
-]
-
 const KHMER_WEEKDAYS = ['អា', 'ច', 'អ', 'ព', 'ព្រ', 'សុ', 'ស']
+
+function pad(n) {
+  return String(n).padStart(2, '0')
+}
 
 export class KhmerDateAdapter extends VuetifyDateAdapter {
   format(date, formatString) {
-    if (this.locale !== 'km') return super.format(date, formatString)
-
     const d = this.date(date) ?? new Date()
-    const day = d.getDate()
-    const month = KHMER_MONTHS[d.getMonth()]
+    const day = pad(d.getDate())
+    const month = pad(d.getMonth() + 1)
     const year = d.getFullYear()
-    const weekday = KHMER_WEEKDAYS[d.getDay()]
+    const weekday = this.locale === 'km' ? KHMER_WEEKDAYS[d.getDay()] : super.format(date, 'weekdayShort')
 
     switch (formatString) {
       case 'month':
       case 'monthShort':
         return month
       case 'monthAndYear':
-        return `${month} ${year}`
+        return `${month}/${year}`
       case 'monthAndDate':
-        return `${month} ${day}`
+        return `${day}/${month}`
       case 'normalDate':
-        return `${day} ${month}`
       case 'shortDate':
-        return `${month} ${day}`
+        return `${day}/${month}`
       case 'fullDate':
-        return `${month} ${day}, ${year}`
+        return `${day}/${month}/${year}`
       case 'fullDateWithWeekday':
-        return `${weekday}, ${month} ${day}, ${year}`
+        return `${weekday}, ${day}/${month}/${year}`
       case 'normalDateWithWeekday':
-        return `${weekday}, ${day} ${month}`
+        return `${weekday}, ${day}/${month}`
       case 'weekday':
       case 'weekdayShort':
         return weekday
