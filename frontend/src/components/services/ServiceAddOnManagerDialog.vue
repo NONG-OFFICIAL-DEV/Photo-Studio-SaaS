@@ -91,7 +91,7 @@ async function confirmDeleteAddOn() {
             :error-messages="errors.price"
             @update:model-value="setFieldValue('price', $event)"
           />
-          <v-btn type="submit" icon="mdi-plus" color="primary" :loading="loading" />
+          <v-btn type="submit" size="small" icon="mdi-plus" color="primary" :loading="loading" />
         </div>
       </template>
     </AppForm>

@@ -78,7 +78,7 @@ async function confirmDeleteCategory() {
             :error-messages="errors.name"
             @update:model-value="setFieldValue('name', $event)"
           />
-          <v-btn type="submit" icon="mdi-plus" color="primary" :loading="loading" />
+          <v-btn type="submit" size="small" icon="mdi-plus" color="primary" :loading="loading" />
         </div>
       </template>
     </AppForm>

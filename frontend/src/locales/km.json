@@ -409,7 +409,7 @@
     "customItem": "ទំនិញផ្ទាល់ខ្លួន",
     "itemNamePlaceholder": "ឈ្មោះទំនិញ",
     "noItemsYet": "មិនទាន់មានទំនិញនៅឡើយទេ។",
-    "linkedBooking": "ការកក់ភ្ជាប់ (ស្រេចចិត្ត)",
+    "linkedBooking": "ភ្ជាប់ការកក់ (ស្រេចចិត្ត)",
     "creatingFromBooking": "កំពុងបង្កើតគម្រោងសម្រាប់ការកក់របស់ {name}។",
     "createInvoice": "បង្កើតវិក្កយបត្រ",
     "assignEditor": "ចាត់តាំងអ្នកកែសម្រួល (ស្រេចចិត្ត)",

@@ -63,7 +63,7 @@ async function confirmDeleteCategory() {
       <template #default="{ errors, values, setFieldValue }">
         <div class="d-flex ga-2 align-start mb-4">
           <v-text-field :model-value="values.name" :label="t('expenses.newCategoryName')" density="compact" hide-details :error-messages="errors.name" @update:model-value="setFieldValue('name', $event)" />
-          <v-btn type="submit" icon="mdi-plus" color="primary" :loading="loading" />
+          <v-btn type="submit" size="small" icon="mdi-plus" color="primary" :loading="loading" />
         </div>
       </template>
     </AppForm>

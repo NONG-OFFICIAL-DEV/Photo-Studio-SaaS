@@ -321,7 +321,7 @@ async function onSubmit(values) {
         />
 
         <v-row>
-          <v-col v-if="fromOrder" cols="12" sm="6">
+          <v-col v-if="fromOrder" cols="12" sm="4">
             <v-autocomplete
               :model-value="values.order_id"
               :label="`${t('invoices.linkedOrder')} *`"
@@ -336,7 +336,7 @@ async function onSubmit(values) {
               @update:model-value="selectOrder($event, setFieldValue)"
             />
           </v-col>
-          <v-col v-else cols="12" sm="6">
+          <v-col v-else cols="12" sm="4">
             <v-autocomplete
               :model-value="values.customer_id"
               :label="`${t('fields.customer')} *`"
@@ -355,14 +355,14 @@ async function onSubmit(values) {
             </v-autocomplete>
           </v-col>
 
-          <v-col cols="12" sm="3">
+          <v-col cols="12" sm="4">
             <AppDatePicker
               :model-value="values.issue_date"
               :label="t('invoices.issueDate')"
               @update:model-value="setFieldValue('issue_date', $event)"
             />
           </v-col>
-          <v-col cols="12" sm="3">
+          <v-col cols="12" sm="4">
             <AppDatePicker
               :model-value="values.due_date"
               :label="t('invoices.dueDate')"
@@ -412,7 +412,7 @@ async function onSubmit(values) {
             <v-btn variant="outlined" prepend-icon="mdi-pencil-plus-outline" @click="addCustomItem">{{ t('orders.customItem') }}</v-btn>
           </div>
 
-          <v-table density="compact" class="mb-4">
+          <v-table class="mb-4">
             <thead>
               <tr>
                 <th>{{ t('fields.name') }}</th>
@@ -437,7 +437,7 @@ async function onSubmit(values) {
                 </td>
                 <td>${{ lineTotal(item).toFixed(2) }}</td>
                 <td>
-                  <v-btn icon="mdi-close" size="small" variant="text" @click="removeItem(index)" />
+                  <v-btn icon="mdi-close" size="x-small" class="bg-error" variant="text" @click="removeItem(index)" />
                 </td>
               </tr>
               <tr v-if="!items.length">
