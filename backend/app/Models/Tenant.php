@@ -15,7 +15,7 @@ class Tenant extends Model
 
     protected $fillable = [
         'name', 'slug', 'domain', 'email', 'phone', 'address',
-        'logo_path', 'timezone', 'currency', 'locale', 'is_active', 'settings',
+        'logo_path', 'qr_payment_path', 'timezone', 'currency', 'locale', 'is_active', 'settings',
     ];
 
     /**

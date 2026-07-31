@@ -259,6 +259,7 @@ Route::middleware(['auth:api', 'tenant', 'subscription.active'])->group(function
         // Static segments before '/' so they aren't swallowed unexpectedly.
         Route::get('/export', [TenantSettingsController::class, 'export']);
         Route::post('/logo', [TenantSettingsController::class, 'uploadLogo']);
+        Route::post('/qr-payment', [TenantSettingsController::class, 'uploadQrPayment']);
 
         Route::get('/', [TenantSettingsController::class, 'show']);
         Route::put('/', [TenantSettingsController::class, 'update']);

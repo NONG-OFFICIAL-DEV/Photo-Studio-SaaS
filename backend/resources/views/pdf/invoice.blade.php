@@ -50,6 +50,9 @@
         .totals .grand { font-size: 15px; font-weight: bold; border-top: 2px solid #1f2937; padding-top: 6px; }
         .totals .balance { font-weight: bold; color: #b91c1c; }
         .notes { margin-top: 24px; }
+        .payment-qr { margin-top: 24px; text-align: center; }
+        .payment-qr img { max-height: 140px; max-width: 140px; }
+        .payment-qr .label { text-transform: uppercase; font-size: 10px; color: #6b7280; margin-top: 6px; }
         .footer { margin-top: 32px; padding-top: 12px; border-top: 1px solid #e5e7eb; font-size: 10px; color: #6b7280; text-align: center; }
     </style>
 </head>
@@ -117,6 +120,13 @@
         <div class="notes">
             <div class="label muted" style="text-transform: uppercase; font-size: 10px;">Notes</div>
             <div>{{ $invoice->notes }}</div>
+        </div>
+    @endif
+
+    @if($qrPaymentDataUri)
+        <div class="payment-qr">
+            <img src="{{ $qrPaymentDataUri }}" alt="Scan to pay">
+            <div class="label">Scan to Pay</div>
         </div>
     @endif
 

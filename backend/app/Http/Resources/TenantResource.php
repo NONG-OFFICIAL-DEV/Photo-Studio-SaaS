@@ -19,6 +19,7 @@ class TenantResource extends JsonResource
             'phone' => $this->phone,
             'address' => $this->address,
             'logo_url' => $this->logo_path ? asset('storage/'.$this->logo_path) : null,
+            'qr_payment_url' => $this->qr_payment_path ? asset('storage/'.$this->qr_payment_path) : null,
             'timezone' => $this->timezone,
             'currency' => $this->currency,
             'locale' => $this->locale,

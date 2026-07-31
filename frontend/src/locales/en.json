@@ -784,20 +784,24 @@
       "invoiceFooter": "Invoice footer / terms",
       "primaryColor": "Primary color",
       "secondaryColor": "Secondary color",
-      "attendanceStartTime": "Expected start time"
+      "attendanceStartTime": "Expected start time",
+      "qrPayment": "Payment QR code"
     },
     "actions": {
       "save": "Save changes",
       "uploadLogo": "Upload logo",
+      "uploadQrPayment": "Upload QR code",
       "exportData": "Export all my data"
     },
     "themeHint": "These colors replace the default theme across the whole app for your team.",
     "attendanceStartTimeHint": "Clock-ins after this time are marked Late.",
+    "qrPaymentHint": "Shown on invoice PDFs so customers can scan to pay (e.g. KHQR).",
     "dataExportHint": "Download a zip of CSV files (customers, projects, invoices, expenses) for backup or migration.",
     "messages": {
       "savedSuccess": "Settings saved successfully.",
       "saveError": "Could not save settings.",
-      "logoUpdated": "Logo updated successfully."
+      "logoUpdated": "Logo updated successfully.",
+      "qrPaymentUpdated": "QR code updated successfully."
     }
   },
   "admin": {

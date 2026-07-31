@@ -121,6 +121,23 @@ class InvoicePdfTest extends TestCase
             ->assertHeader('content-type', 'application/pdf');
     }
 
+    public function test_the_pdf_embeds_the_tenants_qr_payment_image_when_one_is_uploaded(): void
+    {
+        Storage::fake('public');
+
+        [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+        $this->actingAsUser($owner)
+            ->post('/api/v1/settings/qr-payment', ['qr_payment' => UploadedFile::fake()->image('qr.png')])
+            ->assertOk();
+
+        $invoice = Invoice::factory()->create(['tenant_id' => $tenant->id]);
+
+        $this->actingAsUser($owner)
+            ->get("/api/v1/invoices/{$invoice->id}/pdf")
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
+    }
+
     /**
      * A tenant that deleted/replaced its logo file behind the scenes (or a
      * migration gone wrong) shouldn't break PDF generation — the logo is

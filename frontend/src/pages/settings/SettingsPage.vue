@@ -8,6 +8,7 @@ import {
   getSettingsApi,
   updateSettingsApi,
   uploadSettingsLogoApi,
+  uploadSettingsQrPaymentApi,
   exportSettingsDataApi,
 } from '@/apis/settings.api'
 import { useAuthStore } from '@/stores/auth'
@@ -23,9 +24,11 @@ const loading = ref(true)
 const saving = ref(false)
 const exporting = ref(false)
 const logoUploading = ref(false)
+const qrUploading = ref(false)
 const errorMessage = ref('')
 const tenant = ref(null)
 const logoInput = ref(null)
+const qrInput = ref(null)
 
 const initialValues = computed(() => ({
   name: tenant.value?.name ?? '',
@@ -87,6 +90,26 @@ async function onLogoSelected(event) {
     appStore.notify(t('settingsPage.messages.logoUpdated'))
   } finally {
     logoUploading.value = false
+    event.target.value = ''
+  }
+}
+
+function triggerQrUpload() {
+  qrInput.value?.click()
+}
+
+async function onQrSelected(event) {
+  const file = event.target.files?.[0]
+  if (!file) return
+
+  qrUploading.value = true
+  try {
+    const { data } = await uploadSettingsQrPaymentApi(file)
+    tenant.value = data.data
+    await auth.fetchMe()
+    appStore.notify(t('settingsPage.messages.qrPaymentUpdated'))
+  } finally {
+    qrUploading.value = false
     event.target.value = ''
   }
 }
@@ -228,6 +251,29 @@ async function exportData() {
                         :error-messages="errors.invoice_footer"
                         @update:model-value="setFieldValue('invoice_footer', $event)"
                       />
+                    </v-col>
+                    <v-col cols="12">
+                      <v-divider class="mb-4" />
+                      <div class="d-flex align-center ga-4">
+                        <v-avatar size="72" rounded="lg" color="surface-variant">
+                          <v-img v-if="tenant?.qr_payment_url" :src="tenant.qr_payment_url" cover />
+                          <v-icon v-else icon="mdi-qrcode" size="32" />
+                        </v-avatar>
+                        <div>
+                          <div class="text-body-2 font-weight-medium mb-1">{{ t('settingsPage.fields.qrPayment') }}</div>
+                          <p class="text-caption text-medium-emphasis mb-2">{{ t('settingsPage.qrPaymentHint') }}</p>
+                          <input ref="qrInput" type="file" accept="image/*" class="d-none" @change="onQrSelected" />
+                          <v-btn
+                            variant="outlined"
+                            size="small"
+                            prepend-icon="mdi-qrcode"
+                            :loading="qrUploading"
+                            @click="triggerQrUpload"
+                          >
+                            {{ t('settingsPage.actions.uploadQrPayment') }}
+                          </v-btn>
+                        </div>
+                      </div>
                     </v-col>
                   </v-row>
                 </v-card-text>

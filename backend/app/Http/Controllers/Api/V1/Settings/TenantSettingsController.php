@@ -45,6 +45,17 @@ class TenantSettingsController extends Controller
         return $this->success(new TenantResource($tenant), 'Logo uploaded successfully.');
     }
 
+    public function uploadQrPayment(Request $request): JsonResponse
+    {
+        abort_unless($request->user()->can('tenant.settings.manage'), 403);
+
+        $request->validate(['qr_payment' => ['required', 'image', 'max:2048']]);
+
+        $tenant = $this->settings->uploadQrPayment($request->user()->tenant, $request->file('qr_payment'));
+
+        return $this->success(new TenantResource($tenant), 'QR payment image uploaded successfully.');
+    }
+
     public function export(Request $request): BinaryFileResponse
     {
         abort_unless($request->user()->can('tenant.settings.manage'), 403);

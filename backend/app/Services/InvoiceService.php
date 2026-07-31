@@ -168,6 +168,7 @@ class InvoiceService extends BaseService
         $html = View::make('pdf.invoice', [
             'invoice' => $invoice,
             'logoDataUri' => $this->logoDataUri($invoice->tenant),
+            'qrPaymentDataUri' => $this->qrPaymentDataUri($invoice->tenant),
             'khmerFontRegularDataUri' => $this->fontDataUri('NotoSansKhmer-Regular.ttf'),
             'khmerFontBoldDataUri' => $this->fontDataUri('NotoSansKhmer-Bold.ttf'),
         ])->render();
@@ -201,6 +202,21 @@ class InvoiceService extends BaseService
         $mime = Storage::disk('public')->mimeType($tenant->logo_path) ?: 'image/png';
 
         return "data:{$mime};base64,".base64_encode(Storage::disk('public')->get($tenant->logo_path));
+    }
+
+    /**
+     * Same reasoning and fallback behavior as logoDataUri() — a tenant's
+     * scan-to-pay QR code (e.g. KHQR), shown near the invoice footer.
+     */
+    protected function qrPaymentDataUri(Tenant $tenant): ?string
+    {
+        if (! $tenant->qr_payment_path || ! Storage::disk('public')->exists($tenant->qr_payment_path)) {
+            return null;
+        }
+
+        $mime = Storage::disk('public')->mimeType($tenant->qr_payment_path) ?: 'image/png';
+
+        return "data:{$mime};base64,".base64_encode(Storage::disk('public')->get($tenant->qr_payment_path));
     }
 
     /**

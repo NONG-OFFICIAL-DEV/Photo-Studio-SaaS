@@ -47,4 +47,21 @@ class TenantSettingsService
 
         return $tenant->fresh();
     }
+
+    public function uploadQrPayment(Tenant $tenant, UploadedFile $file): Tenant
+    {
+        if ($tenant->qr_payment_path) {
+            Storage::disk('public')->delete($tenant->qr_payment_path);
+        }
+
+        $path = $file->store("tenants/{$tenant->id}", 'public');
+        $tenant->update(['qr_payment_path' => $path]);
+
+        activity('audit')
+            ->performedOn($tenant)
+            ->tap(fn ($a) => $a->tenant_id = $tenant->id)
+            ->log('Tenant QR payment image updated');
+
+        return $tenant->fresh();
+    }
 }

@@ -5,6 +5,8 @@ namespace Tests\Feature\Settings;
 use App\Enums\TenantRole;
 use App\Models\Tenant;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\Concerns\CreatesTenantUsers;
 use Tests\TestCase;
 
@@ -106,6 +108,57 @@ class TenantSettingsTest extends TestCase
 
         $response->assertOk();
         $response->assertHeader('content-type', 'application/zip');
+    }
+
+    public function test_owner_can_upload_a_qr_payment_image(): void
+    {
+        Storage::fake('public');
+
+        [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+        $this->assertNull($tenant->qr_payment_path);
+
+        $response = $this->actingAsUser($owner)
+            ->post('/api/v1/settings/qr-payment', ['qr_payment' => UploadedFile::fake()->image('qr.png')])
+            ->assertOk();
+
+        $this->assertNotNull($response->json('data.qr_payment_url'));
+        $this->assertNotNull($tenant->fresh()->qr_payment_path);
+    }
+
+    public function test_uploading_a_qr_payment_image_replaces_the_previous_one(): void
+    {
+        Storage::fake('public');
+
+        [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+        $this->actingAsUser($owner)
+            ->post('/api/v1/settings/qr-payment', ['qr_payment' => UploadedFile::fake()->image('first.png')])
+            ->assertOk();
+        $firstPath = $tenant->fresh()->qr_payment_path;
+
+        $this->actingAsUser($owner)
+            ->post('/api/v1/settings/qr-payment', ['qr_payment' => UploadedFile::fake()->image('second.png')])
+            ->assertOk();
+
+        Storage::disk('public')->assertMissing($firstPath);
+        $this->assertNotSame($firstPath, $tenant->fresh()->qr_payment_path);
+    }
+
+    public function test_a_non_image_qr_payment_upload_is_rejected(): void
+    {
+        [, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+
+        $this->actingAsUser($owner)
+            ->post('/api/v1/settings/qr-payment', ['qr_payment' => UploadedFile::fake()->create('qr.pdf', 100)])
+            ->assertUnprocessable();
+    }
+
+    public function test_cashier_cannot_upload_a_qr_payment_image(): void
+    {
+        [, $cashier] = $this->createTenantWithUser(TenantRole::Cashier);
+
+        $this->actingAsUser($cashier)
+            ->post('/api/v1/settings/qr-payment', ['qr_payment' => UploadedFile::fake()->image('qr.png')])
+            ->assertForbidden();
     }
 
     public function test_settings_are_isolated_per_tenant(): void

@@ -10,4 +10,10 @@ export const uploadSettingsLogoApi = (file) => {
   return http.post('/v1/settings/logo', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
 }
 
+export const uploadSettingsQrPaymentApi = (file) => {
+  const formData = new FormData()
+  formData.append('qr_payment', file)
+  return http.post('/v1/settings/qr-payment', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+}
+
 export const exportSettingsDataApi = () => http.get('/v1/settings/export', { responseType: 'blob' })
