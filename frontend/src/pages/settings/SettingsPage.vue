@@ -40,6 +40,7 @@ const initialValues = computed(() => ({
   invoice_footer: tenant.value?.settings?.invoice_footer ?? '',
   primary_color: tenant.value?.settings?.primary_color ?? '',
   secondary_color: tenant.value?.settings?.secondary_color ?? '',
+  attendance_expected_start_time: tenant.value?.settings?.attendance_expected_start_time ?? '09:00',
 }))
 
 async function load() {
@@ -168,6 +169,17 @@ async function exportData() {
                     </v-col>
                     <v-col cols="12" sm="6">
                       <v-text-field :model-value="values.timezone" :label="`${t('settingsPage.fields.timezone')} *`" :error-messages="errors.timezone" @update:model-value="setFieldValue('timezone', $event)" />
+                    </v-col>
+                    <v-col cols="12" sm="6">
+                      <v-text-field
+                        :model-value="values.attendance_expected_start_time"
+                        type="time"
+                        :label="t('settingsPage.fields.attendanceStartTime')"
+                        :hint="t('settingsPage.attendanceStartTimeHint')"
+                        persistent-hint
+                        :error-messages="errors.attendance_expected_start_time"
+                        @update:model-value="setFieldValue('attendance_expected_start_time', $event)"
+                      />
                     </v-col>
                     <v-col cols="12">
                       <v-textarea :model-value="values.address" :label="t('fields.address')" rows="2" :error-messages="errors.address" @update:model-value="setFieldValue('address', $event)" />

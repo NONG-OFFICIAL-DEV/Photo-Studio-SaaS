@@ -31,6 +31,9 @@ class UpdateSettingsRequest extends FormRequest
             // Theme
             'primary_color' => ['nullable', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'secondary_color' => ['nullable', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+
+            // Attendance
+            'attendance_expected_start_time' => ['nullable', 'date_format:H:i'],
         ];
     }
 }

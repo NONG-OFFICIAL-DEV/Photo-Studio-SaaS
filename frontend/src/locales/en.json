@@ -783,7 +783,8 @@
       "defaultDueDays": "Default due days",
       "invoiceFooter": "Invoice footer / terms",
       "primaryColor": "Primary color",
-      "secondaryColor": "Secondary color"
+      "secondaryColor": "Secondary color",
+      "attendanceStartTime": "Expected start time"
     },
     "actions": {
       "save": "Save changes",
@@ -791,6 +792,7 @@
       "exportData": "Export all my data"
     },
     "themeHint": "These colors replace the default theme across the whole app for your team.",
+    "attendanceStartTimeHint": "Clock-ins after this time are marked Late.",
     "dataExportHint": "Download a zip of CSV files (customers, projects, invoices, expenses) for backup or migration.",
     "messages": {
       "savedSuccess": "Settings saved successfully.",

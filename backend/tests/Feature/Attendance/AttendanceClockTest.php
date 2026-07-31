@@ -36,6 +36,21 @@ class AttendanceClockTest extends TestCase
             ->assertJsonPath('data.status', 'late');
     }
 
+    public function test_expected_start_time_is_per_tenant_not_global(): void
+    {
+        [$tenant, $photographer] = $this->createTenantWithUser(TenantRole::Photographer);
+        $tenant->update(['settings' => ['attendance_expected_start_time' => '07:00']]);
+
+        // 08:45 would be "present" under the old global 09:00 default, but
+        // this studio opens at 07:00 — same clock-in time should be "late".
+        $this->travelTo(Carbon::parse('2026-08-03 08:45:00'));
+
+        $this->actingAsUser($photographer)
+            ->postJson('/api/v1/attendance/clock-in')
+            ->assertOk()
+            ->assertJsonPath('data.status', 'late');
+    }
+
     public function test_cannot_clock_in_twice_the_same_day(): void
     {
         [, $photographer] = $this->createTenantWithUser(TenantRole::Photographer);

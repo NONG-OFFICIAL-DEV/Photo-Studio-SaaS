@@ -31,6 +31,7 @@ class Tenant extends Model
         'invoice_footer' => null,
         'primary_color' => null,
         'secondary_color' => null,
+        'attendance_expected_start_time' => '09:00',
     ];
 
     protected function casts(): array

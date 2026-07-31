@@ -32,7 +32,7 @@ class AttendanceService extends BaseService
         }
 
         $now = now();
-        $expected = Carbon::parse($today.' '.config('attendance.expected_start_time', '09:00'));
+        $expected = Carbon::parse($today.' '.$user->tenant->setting('attendance_expected_start_time', '09:00'));
         $status = $now->greaterThan($expected) ? AttendanceStatus::Late : AttendanceStatus::Present;
 
         if ($record) {

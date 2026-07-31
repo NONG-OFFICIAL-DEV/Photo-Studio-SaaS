@@ -253,6 +253,11 @@ const hexColor = yup
   .nullable()
   .matches(/^#[0-9A-Fa-f]{6}$/, { excludeEmptyString: true, message: 'Must be a hex color like #6750A4' })
 
+const timeOfDay = yup
+  .string()
+  .nullable()
+  .matches(/^([01]\d|2[0-3]):[0-5]\d$/, { excludeEmptyString: true, message: 'Must be a time like 09:00' })
+
 export const settingsSchema = yup.object({
   name: yup.string().required().max(255),
   email: yup.string().required().email(),
@@ -266,6 +271,7 @@ export const settingsSchema = yup.object({
   invoice_footer: yup.string().nullable().max(2000),
   primary_color: hexColor,
   secondary_color: hexColor,
+  attendance_expected_start_time: timeOfDay,
 })
 
 export const planSchema = yup.object({
