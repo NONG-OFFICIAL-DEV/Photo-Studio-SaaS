@@ -13,11 +13,12 @@ use App\Models\ServiceAddOn;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Repositories\Contracts\InvoiceRepositoryInterface;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\View;
+use Spatie\Browsershot\Browsershot;
 
 class InvoiceService extends BaseService
 {
@@ -151,40 +152,45 @@ class InvoiceService extends BaseService
      * Renders the invoice as a PDF — shared by the authenticated download
      * endpoint and the unauthenticated signed-link endpoint (customers have
      * no account, so that route can't require auth:api/tenant).
+     *
+     * Rendered through headless Chrome (Browsershot) rather than dompdf:
+     * dompdf draws text glyph-by-glyph straight from the font's cmap with
+     * no OpenType shaping engine, so Khmer's subscript consonant clusters
+     * (the invisible "coeng" joiner + following consonant) never get
+     * substituted into their stacked form — they render as a broken
+     * joiner glyph next to a full-size consonant. A real browser engine
+     * shapes them correctly.
      */
-    public function renderPdf(Invoice $invoice)
+    public function renderPdf(Invoice $invoice): string
     {
         $invoice->loadMissing(['items', 'customer', 'order', 'tenant']);
 
-        /*
-         * dompdf caches font metrics under storage_path('fonts') the first
-         * time a custom @font-face (see resources/views/pdf/invoice.blade
-         * .php's Khmer font) is registered, and throws a fatal error if
-         * that directory doesn't exist — Laravel's storage/ subdirs don't
-         * include it out of the box. In production, storage/ is a
-         * persistent Docker volume that predates this font, so a fresh
-         * image alone won't create it there either; this makes it
-         * self-healing regardless of deployment history.
-         */
-        if (! is_dir(storage_path('fonts'))) {
-            mkdir(storage_path('fonts'), 0775, true);
-        }
-
-        return Pdf::loadView('pdf.invoice', [
+        $html = View::make('pdf.invoice', [
             'invoice' => $invoice,
             'logoDataUri' => $this->logoDataUri($invoice->tenant),
-        ])->setPaper('a4');
+            'khmerFontRegularDataUri' => $this->fontDataUri('NotoSansKhmer-Regular.ttf'),
+            'khmerFontBoldDataUri' => $this->fontDataUri('NotoSansKhmer-Bold.ttf'),
+        ])->render();
+
+        return Browsershot::html($html)
+            ->setNodeBinary(config('browsershot.node_binary'))
+            ->setNodeModulePath(config('browsershot.node_modules_path'))
+            ->setChromePath(config('browsershot.chrome_path'))
+            ->noSandbox()
+            ->format('A4')
+            ->showBackground()
+            ->pdf();
     }
 
     /**
      * Embedded as a base64 data URI rather than a plain <img src="{{ $url }}">
-     * — dompdf has remote image fetching disabled by default (see
-     * enable_remote in vendor/barryvdh/laravel-dompdf's config), so a URL
-     * pointing back at this app's own storage wouldn't load, and would be a
-     * network round-trip even if it did. Reading straight off the disk
-     * sidesteps both. Falls back to no logo (rather than a broken image or
-     * a failed PDF) if the tenant hasn't uploaded one, or the stored file
-     * is missing.
+     * so the tenant's logo loads the same way regardless of PDF renderer —
+     * dompdf has remote fetching disabled by default, and headless Chrome
+     * rendering an HTML string (no base URL) can't resolve a relative or
+     * even same-origin URL back to this app either. Reading straight off
+     * disk sidesteps both, and is a network round-trip fewer either way.
+     * Falls back to no logo (rather than a broken image or a failed PDF)
+     * if the tenant hasn't uploaded one, or the stored file is missing.
      */
     protected function logoDataUri(Tenant $tenant): ?string
     {
@@ -195,6 +201,17 @@ class InvoiceService extends BaseService
         $mime = Storage::disk('public')->mimeType($tenant->logo_path) ?: 'image/png';
 
         return "data:{$mime};base64,".base64_encode(Storage::disk('public')->get($tenant->logo_path));
+    }
+
+    /**
+     * Same base64-data-URI reasoning as logoDataUri() — headless Chrome
+     * rendering a bare HTML string has no base URL to resolve a local
+     * file:// font path against, so the @font-face src has to be
+     * self-contained.
+     */
+    protected function fontDataUri(string $filename): string
+    {
+        return 'data:font/ttf;base64,'.base64_encode(file_get_contents(resource_path("fonts/{$filename}")));
     }
 
     public function void(Invoice $invoice, string $reason): Invoice

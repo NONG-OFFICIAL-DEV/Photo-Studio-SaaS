@@ -13,6 +13,7 @@ use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Response;
 
 class InvoiceController extends Controller
@@ -97,7 +98,7 @@ class InvoiceController extends Controller
     {
         $this->authorize('view', $invoice);
 
-        return $this->invoices->renderPdf($invoice)->download("{$invoice->invoice_number}.pdf");
+        return $this->pdfResponse($this->invoices->renderPdf($invoice), $invoice->invoice_number, HeaderUtils::DISPOSITION_ATTACHMENT);
     }
 
     /**
@@ -126,6 +127,20 @@ class InvoiceController extends Controller
     {
         $invoice = Invoice::withoutGlobalScopes()->findOrFail($invoice);
 
-        return $this->invoices->renderPdf($invoice)->stream("{$invoice->invoice_number}.pdf");
+        return $this->pdfResponse($this->invoices->renderPdf($invoice), $invoice->invoice_number, HeaderUtils::DISPOSITION_INLINE);
+    }
+
+    /**
+     * Browsershot returns raw PDF bytes rather than dompdf's response
+     * wrapper, so download/inline headers are built here instead of via
+     * a library helper — HeaderUtils::makeDisposition still handles the
+     * RFC 6266 escaping for us.
+     */
+    protected function pdfResponse(string $pdf, string $filename, string $disposition): Response
+    {
+        return response($pdf, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => HeaderUtils::makeDisposition($disposition, "{$filename}.pdf"),
+        ]);
     }
 }
