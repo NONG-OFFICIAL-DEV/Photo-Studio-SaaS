@@ -7,6 +7,7 @@
         .header { display: table; width: 100%; margin-bottom: 24px; }
         .header .studio { display: table-cell; vertical-align: top; }
         .header .invoice-meta { display: table-cell; vertical-align: top; text-align: right; }
+        .studio-logo { max-height: 56px; max-width: 220px; margin-bottom: 8px; }
         .studio-name { font-size: 18px; font-weight: bold; margin-bottom: 4px; }
         .muted { color: #6b7280; }
         .invoice-title { font-size: 22px; font-weight: bold; letter-spacing: 1px; }
@@ -30,6 +31,9 @@
 <body>
     <div class="header">
         <div class="studio">
+            @if($logoDataUri)
+                <img class="studio-logo" src="{{ $logoDataUri }}" alt="{{ $invoice->tenant->name }}">
+            @endif
             <div class="studio-name">{{ $invoice->tenant->name }}</div>
             @if($invoice->tenant->address)<div class="muted">{{ $invoice->tenant->address }}</div>@endif
             @if($invoice->tenant->phone)<div class="muted">{{ $invoice->tenant->phone }}</div>@endif

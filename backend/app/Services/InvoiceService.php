@@ -17,6 +17,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class InvoiceService extends BaseService
 {
@@ -155,7 +156,31 @@ class InvoiceService extends BaseService
     {
         $invoice->loadMissing(['items', 'customer', 'order', 'tenant']);
 
-        return Pdf::loadView('pdf.invoice', ['invoice' => $invoice])->setPaper('a4');
+        return Pdf::loadView('pdf.invoice', [
+            'invoice' => $invoice,
+            'logoDataUri' => $this->logoDataUri($invoice->tenant),
+        ])->setPaper('a4');
+    }
+
+    /**
+     * Embedded as a base64 data URI rather than a plain <img src="{{ $url }}">
+     * — dompdf has remote image fetching disabled by default (see
+     * enable_remote in vendor/barryvdh/laravel-dompdf's config), so a URL
+     * pointing back at this app's own storage wouldn't load, and would be a
+     * network round-trip even if it did. Reading straight off the disk
+     * sidesteps both. Falls back to no logo (rather than a broken image or
+     * a failed PDF) if the tenant hasn't uploaded one, or the stored file
+     * is missing.
+     */
+    protected function logoDataUri(Tenant $tenant): ?string
+    {
+        if (! $tenant->logo_path || ! Storage::disk('public')->exists($tenant->logo_path)) {
+            return null;
+        }
+
+        $mime = Storage::disk('public')->mimeType($tenant->logo_path) ?: 'image/png';
+
+        return "data:{$mime};base64,".base64_encode(Storage::disk('public')->get($tenant->logo_path));
     }
 
     public function void(Invoice $invoice, string $reason): Invoice

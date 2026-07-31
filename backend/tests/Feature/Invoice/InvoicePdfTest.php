@@ -5,6 +5,8 @@ namespace Tests\Feature\Invoice;
 use App\Enums\TenantRole;
 use App\Models\Invoice;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Tests\Concerns\CreatesTenantUsers;
 use Tests\TestCase;
@@ -88,5 +90,53 @@ class InvoicePdfTest extends TestCase
         $url = URL::temporarySignedRoute('api.v1.invoices.public-pdf', now()->subDay(), ['invoice' => $invoice->id]);
 
         $this->get($url)->assertForbidden();
+    }
+
+    public function test_the_pdf_renders_fine_when_the_tenant_has_no_logo(): void
+    {
+        [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+        $this->assertNull($tenant->logo_path);
+        $invoice = Invoice::factory()->create(['tenant_id' => $tenant->id]);
+
+        $this->actingAsUser($owner)
+            ->get("/api/v1/invoices/{$invoice->id}/pdf")
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
+    }
+
+    public function test_the_pdf_embeds_the_tenants_logo_when_one_is_uploaded(): void
+    {
+        Storage::fake('public');
+
+        [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+        $this->actingAsUser($owner)
+            ->post('/api/v1/settings/logo', ['logo' => UploadedFile::fake()->image('logo.png')])
+            ->assertOk();
+
+        $invoice = Invoice::factory()->create(['tenant_id' => $tenant->id]);
+
+        $this->actingAsUser($owner)
+            ->get("/api/v1/invoices/{$invoice->id}/pdf")
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
+    }
+
+    /**
+     * A tenant that deleted/replaced its logo file behind the scenes (or a
+     * migration gone wrong) shouldn't break PDF generation — the logo is
+     * just dropped from the render, same as never having one.
+     */
+    public function test_the_pdf_still_renders_if_the_stored_logo_file_is_missing(): void
+    {
+        Storage::fake('public');
+
+        [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+        $tenant->update(['logo_path' => 'tenants/'.$tenant->id.'/missing-logo.png']);
+        $invoice = Invoice::factory()->create(['tenant_id' => $tenant->id]);
+
+        $this->actingAsUser($owner)
+            ->get("/api/v1/invoices/{$invoice->id}/pdf")
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
     }
 }
