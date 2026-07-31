@@ -9,9 +9,12 @@
          * Khmer rendered as "???????". Noto Sans Khmer covers both Khmer
          * script and Latin/digits/punctuation, so one font handles the
          * whole invoice without per-run font-switching. Embedded as a
-         * base64 data URI rather than a filesystem path — Browsershot
-         * renders this view as a bare HTML string with no base URL, so a
-         * local file:// path has nothing to resolve against.
+         * base64 data URI rather than a local filesystem path — Browsershot
+         * renders this view as a bare HTML string with no base URL to
+         * resolve a bare path against, and (separately) Browsershot
+         * outright refuses to render any HTML containing the literal
+         * substring "file:" as a raw string-search safety check, so this
+         * comment can't even describe that path scheme by name.
          */
         @font-face {
             font-family: 'Noto Sans Khmer';

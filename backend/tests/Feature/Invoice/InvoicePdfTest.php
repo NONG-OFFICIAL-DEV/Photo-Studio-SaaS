@@ -141,13 +141,13 @@ class InvoicePdfTest extends TestCase
     }
 
     /**
-     * Regression test: Helvetica/DejaVu Sans (dompdf's defaults) have no
-     * Khmer glyphs — a customer or item name in Khmer used to render as
-     * "???????" until resources/views/pdf/invoice.blade.php registered
-     * Noto Sans Khmer. dompdf caches that font's metrics under
-     * storage_path('fonts') on first use, which doesn't exist by default
-     * (see InvoiceService::renderPdf()) — this also guards against that
-     * regressing.
+     * Regression test: dompdf's default fonts have no Khmer glyphs at all
+     * ("???????"), and even after registering Noto Sans Khmer, dompdf's
+     * lack of an OpenType shaping engine broke complex clusters (coeng
+     * subscript consonants) — which is why rendering moved to headless
+     * Chrome via Browsershot (see InvoiceService::renderPdf()). This guards
+     * against the render pipeline erroring on Khmer content again,
+     * whichever engine ends up handling it.
      */
     public function test_the_pdf_renders_khmer_text_without_erroring(): void
     {
@@ -163,5 +163,28 @@ class InvoicePdfTest extends TestCase
             ->get("/api/v1/invoices/{$invoice->id}/pdf")
             ->assertOk()
             ->assertHeader('content-type', 'application/pdf');
+    }
+
+    /**
+     * Regression test: Browsershot's setHtml() does a raw string search for
+     * "file:/" (and slight variants) anywhere in the whole rendered HTML —
+     * including inside comments — and refuses to render it at all if found
+     * (Spatie\Browsershot\Exceptions\HtmlIsNotAllowedToContainFile). An
+     * explanatory code comment describing why this view avoids file://
+     * paths once contained that exact substring and broke every invoice
+     * PDF. Checked against the raw view source rather than a live render
+     * so it fails fast without needing headless Chrome available.
+     */
+    public function test_the_invoice_pdf_view_source_never_contains_a_string_browsershot_treats_as_unsafe(): void
+    {
+        $source = file_get_contents(resource_path('views/pdf/invoice.blade.php'));
+
+        foreach (['file:/', 'file://', 'file:\\'] as $forbidden) {
+            $this->assertStringNotContainsStringIgnoringCase(
+                $forbidden,
+                $source,
+                "The invoice PDF view contains \"{$forbidden}\", which Browsershot refuses to render, even inside a comment."
+            );
+        }
     }
 }
