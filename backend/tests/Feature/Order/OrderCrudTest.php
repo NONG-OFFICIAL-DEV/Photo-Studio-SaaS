@@ -84,6 +84,29 @@ class OrderCrudTest extends TestCase
         $this->assertArrayHasKey('items.0', $response->json('meta.errors'));
     }
 
+    public function test_the_order_list_includes_each_orders_items(): void
+    {
+        [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+        $customer = Customer::factory()->create(['tenant_id' => $tenant->id]);
+
+        $this->actingAsUser($owner)->postJson('/api/v1/orders', [
+            'customer_id' => $customer->id,
+            'items' => [
+                ['name' => 'Custom Retouching', 'unit_price' => 30, 'quantity' => 1],
+                ['name' => 'Extra Print', 'unit_price' => 15, 'quantity' => 2],
+            ],
+        ])->assertCreated();
+
+        $response = $this->actingAsUser($owner)
+            ->getJson('/api/v1/orders')
+            ->assertOk();
+
+        $order = collect($response->json('data'))->first();
+        $this->assertNotNull($order);
+        $this->assertCount(2, $order['items']);
+        $this->assertSame('Custom Retouching', $order['items'][0]['name']);
+    }
+
     public function test_owner_can_view_update_and_delete_an_order(): void
     {
         [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);

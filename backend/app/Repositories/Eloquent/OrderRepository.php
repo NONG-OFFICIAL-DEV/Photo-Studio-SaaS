@@ -15,7 +15,7 @@ class OrderRepository extends BaseRepository implements OrderRepositoryInterface
 
     public function query(): Builder
     {
-        return parent::query()->with(['customer', 'editingTask']);
+        return parent::query()->with(['customer', 'editingTask', 'items']);
     }
 
     protected function applySearch(Builder $query, ?string $term): void

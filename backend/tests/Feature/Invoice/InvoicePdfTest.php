@@ -139,4 +139,29 @@ class InvoicePdfTest extends TestCase
             ->assertOk()
             ->assertHeader('content-type', 'application/pdf');
     }
+
+    /**
+     * Regression test: Helvetica/DejaVu Sans (dompdf's defaults) have no
+     * Khmer glyphs — a customer or item name in Khmer used to render as
+     * "???????" until resources/views/pdf/invoice.blade.php registered
+     * Noto Sans Khmer. dompdf caches that font's metrics under
+     * storage_path('fonts') on first use, which doesn't exist by default
+     * (see InvoiceService::renderPdf()) — this also guards against that
+     * regressing.
+     */
+    public function test_the_pdf_renders_khmer_text_without_erroring(): void
+    {
+        [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+        $customer = \App\Models\Customer::factory()->create(['tenant_id' => $tenant->id, 'name' => 'សុខ ចាន់ថា']);
+        $invoice = Invoice::factory()->create([
+            'tenant_id' => $tenant->id,
+            'customer_id' => $customer->id,
+            'notes' => 'អរគុណសម្រាប់ការជាវសេវាកម្មរបស់យើង',
+        ]);
+
+        $this->actingAsUser($owner)
+            ->get("/api/v1/invoices/{$invoice->id}/pdf")
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
+    }
 }

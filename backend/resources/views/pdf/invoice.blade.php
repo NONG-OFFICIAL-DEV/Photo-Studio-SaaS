@@ -3,7 +3,26 @@
 <head>
     <meta charset="utf-8">
     <style>
-        body { font-family: 'Helvetica', sans-serif; font-size: 12px; color: #1f2937; }
+        /*
+         * Helvetica (a PDF base-14 font) and dompdf's bundled DejaVu Sans
+         * fallback both lack Khmer glyphs — customer/tenant names in Khmer
+         * rendered as "???????". Noto Sans Khmer covers both Khmer script
+         * and Latin/digits/punctuation, so one font handles the whole
+         * invoice without per-run font-switching.
+         */
+        @font-face {
+            font-family: 'Noto Sans Khmer';
+            font-style: normal;
+            font-weight: normal;
+            src: url('{{ resource_path('fonts/NotoSansKhmer-Regular.ttf') }}') format('truetype');
+        }
+        @font-face {
+            font-family: 'Noto Sans Khmer';
+            font-style: normal;
+            font-weight: bold;
+            src: url('{{ resource_path('fonts/NotoSansKhmer-Bold.ttf') }}') format('truetype');
+        }
+        body { font-family: 'Noto Sans Khmer', 'DejaVu Sans', sans-serif; font-size: 12px; color: #1f2937; }
         .header { display: table; width: 100%; margin-bottom: 24px; }
         .header .studio { display: table-cell; vertical-align: top; }
         .header .invoice-meta { display: table-cell; vertical-align: top; text-align: right; }

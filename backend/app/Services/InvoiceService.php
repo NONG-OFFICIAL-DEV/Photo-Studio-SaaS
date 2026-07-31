@@ -156,6 +156,20 @@ class InvoiceService extends BaseService
     {
         $invoice->loadMissing(['items', 'customer', 'order', 'tenant']);
 
+        /*
+         * dompdf caches font metrics under storage_path('fonts') the first
+         * time a custom @font-face (see resources/views/pdf/invoice.blade
+         * .php's Khmer font) is registered, and throws a fatal error if
+         * that directory doesn't exist — Laravel's storage/ subdirs don't
+         * include it out of the box. In production, storage/ is a
+         * persistent Docker volume that predates this font, so a fresh
+         * image alone won't create it there either; this makes it
+         * self-healing regardless of deployment history.
+         */
+        if (! is_dir(storage_path('fonts'))) {
+            mkdir(storage_path('fonts'), 0775, true);
+        }
+
         return Pdf::loadView('pdf.invoice', [
             'invoice' => $invoice,
             'logoDataUri' => $this->logoDataUri($invoice->tenant),
