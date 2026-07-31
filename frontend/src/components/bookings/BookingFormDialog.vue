@@ -56,13 +56,10 @@ function combineDateTime(date, time) {
   return new Date(`${date}T${time}:00`).toISOString()
 }
 
-const startsSplit = splitDateTime(props.booking?.starts_at)
-const endsSplit = splitDateTime(props.booking?.ends_at)
-
-const startDate = ref(startsSplit.date)
-const startTime = ref(startsSplit.time || '09:00')
-const endDate = ref(endsSplit.date)
-const endTime = ref(endsSplit.time || '11:00')
+const startDate = ref(null)
+const startTime = ref('09:00')
+const endDate = ref(null)
+const endTime = ref('11:00')
 
 const initialValues = computed(() => ({
   customer_id: props.booking?.customer?.id ?? null,
@@ -80,6 +77,23 @@ watch(() => props.modelValue, async (open) => {
   if (!open) return
 
   errorMessage.value = ''
+
+  /*
+   * These local refs (not the Form's own `values.starts_at`/`ends_at`)
+   * drive the date pickers — AppDialog lazily mounts/unmounts its slot
+   * content, so AppForm re-reads `initialValues` fresh on every open, but
+   * BookingFormDialog itself stays mounted across opens, so these plain
+   * refs must be re-derived from `props.booking` here on every open —
+   * otherwise they'd stay frozen at whatever `props.booking` was the
+   * first time this component ever mounted (usually null), leaving the
+   * date pickers blank on every subsequent edit or calendar pre-fill.
+   */
+  const startsSplit = splitDateTime(props.booking?.starts_at)
+  const endsSplit = splitDateTime(props.booking?.ends_at)
+  startDate.value = startsSplit.date
+  startTime.value = startsSplit.time || '09:00'
+  endDate.value = endsSplit.date
+  endTime.value = endsSplit.time || '11:00'
 
   if (props.booking?.customer) {
     customerOptions.value = [props.booking.customer]
