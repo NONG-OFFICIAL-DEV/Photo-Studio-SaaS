@@ -332,7 +332,7 @@ const canShareTelegram = computed(
           {{ t('invoices.recordPayment') }}
         </v-btn>
       </div>
-
+      <v-divider class="my-4" />
       <div class="d-flex flex-wrap ga-2">
         <v-btn v-if="canSend" color="primary" variant="flat" :loading="actionLoading" @click="sendNow">
           {{ t('invoices.send') }}

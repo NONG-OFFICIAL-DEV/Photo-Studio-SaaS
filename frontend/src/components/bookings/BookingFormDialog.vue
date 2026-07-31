@@ -165,8 +165,11 @@ async function onSubmit(values) {
 
     <AppForm :schema="bookingSchema" :initial-values="initialValues" @submit="onSubmit">
       <template #default="{ errors, values, setFieldValue }">
-        <v-row>
-          <v-col cols="12">
+        <v-row>  
+          <v-col cols="6">
+            <v-text-field :model-value="values.title" :label="t('fields.title')" :error-messages="errors.title" @update:model-value="setFieldValue('title', $event)" />
+          </v-col>
+          <v-col cols="6">
             <v-autocomplete
               :model-value="values.customer_id"
               :label="`${t('fields.customer')} *`"
@@ -207,11 +210,6 @@ async function onSubmit(values) {
               @update:model-value="setFieldValue('assigned_user_id', $event)"
             />
           </v-col>
-
-          <v-col cols="12">
-            <v-text-field :model-value="values.title" :label="t('fields.title')" :error-messages="errors.title" @update:model-value="setFieldValue('title', $event)" />
-          </v-col>
-
           <v-col cols="6" sm="6">
             <AppDatePicker
               :model-value="startDate"
