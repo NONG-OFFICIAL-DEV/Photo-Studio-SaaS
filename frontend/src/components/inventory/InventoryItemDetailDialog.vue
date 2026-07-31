@@ -3,11 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDialog from '@/components/common/AppDialog.vue'
 import AppDatePicker from '@/components/common/AppDatePicker.vue'
-import {
-  getInventoryItemApi,
-  recordInventoryMovementApi,
-  deleteInventoryMovementApi,
-} from '@/apis/inventory.api'
+import { getInventoryItemApi, recordInventoryMovementApi, deleteInventoryMovementApi } from '@/apis/inventory.api'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
 import { translateApiMessage } from '@/utils/apiMessages'
@@ -47,13 +43,17 @@ async function load() {
   }
 }
 
-watch(() => [props.modelValue, props.itemId], async ([open]) => {
-  if (open) {
-    movement.value = { type: 'stock_in', quantity: null, reason: '', moved_at: null }
-    movementError.value = ''
-    await load()
-  }
-}, { immediate: true })
+watch(
+  () => [props.modelValue, props.itemId],
+  async ([open]) => {
+    if (open) {
+      movement.value = { type: 'stock_in', quantity: null, reason: '', moved_at: null }
+      movementError.value = ''
+      await load()
+    }
+  },
+  { immediate: true },
+)
 
 async function recordMovement() {
   movementError.value = ''
@@ -93,7 +93,12 @@ const canAdjustStock = computed(() => auth.hasPermission('inventory.adjust-stock
 </script>
 
 <template>
-  <AppDialog :model-value="modelValue" :title="t('inventory.itemDetails')" max-width="640" @update:model-value="emit('update:modelValue', $event)">
+  <AppDialog
+    :model-value="modelValue"
+    :title="t('inventory.itemDetails')"
+    max-width="640"
+    @update:model-value="emit('update:modelValue', $event)"
+  >
     <div v-if="loading" class="d-flex justify-center py-8">
       <v-progress-circular indeterminate color="primary" />
     </div>
@@ -118,7 +123,11 @@ const canAdjustStock = computed(() => auth.hasPermission('inventory.adjust-stock
         <v-table density="compact">
           <thead>
             <tr>
-              <th>{{ t('inventory.movedAt') }}</th><th>{{ t('fields.type') }}</th><th>{{ t('fields.quantity') }}</th><th>{{ t('fields.reason') }}</th><th style="width: 40px" />
+              <th>{{ t('inventory.movedAt') }}</th>
+              <th>{{ t('fields.type') }}</th>
+              <th>{{ t('fields.quantity') }}</th>
+              <th>{{ t('fields.reason') }}</th>
+              <th style="width: 40px" />
             </tr>
           </thead>
           <tbody>
@@ -132,7 +141,14 @@ const canAdjustStock = computed(() => auth.hasPermission('inventory.adjust-stock
               <td>{{ m.quantity }}</td>
               <td>{{ m.reason || '—' }}</td>
               <td>
-                <v-btn v-if="canAdjustStock" icon="mdi-close" size="small" variant="text" :loading="actionLoading" @click="removeMovement(m.id)" />
+                <v-btn
+                  v-if="canAdjustStock"
+                  icon="mdi-close"
+                  size="small"
+                  variant="text"
+                  :loading="actionLoading"
+                  @click="removeMovement(m.id)"
+                />
               </td>
             </tr>
           </tbody>
@@ -141,19 +157,34 @@ const canAdjustStock = computed(() => auth.hasPermission('inventory.adjust-stock
 
       <div v-if="canAdjustStock" class="mb-2">
         <div class="text-subtitle-2 mb-2">{{ t('inventory.recordMovement') }}</div>
-        <v-alert v-if="movementError" type="error" variant="tonal" density="compact" class="mb-2">{{ movementError }}</v-alert>
+        <v-alert v-if="movementError" type="error" variant="tonal" density="compact" class="mb-2">{{
+          movementError
+        }}</v-alert>
         <v-row dense>
-          <v-col cols="6" sm="3">
-            <v-select v-model="movement.type" :label="t('fields.type')" :items="TYPE_ITEMS" density="compact" hide-details />
+          <v-col cols="6" sm="6">
+            <v-select
+              v-model="movement.type"
+              :label="t('fields.type')"
+              :items="TYPE_ITEMS"
+              density="compact"
+              hide-details
+            />
           </v-col>
-          <v-col cols="6" sm="3">
-            <v-text-field v-model.number="movement.quantity" :label="t('fields.quantity')" type="number" step="0.01" density="compact" hide-details />
+          <v-col cols="6" sm="6">
+            <v-text-field
+              v-model.number="movement.quantity"
+              :label="t('fields.quantity')"
+              type="number"
+              step="0.01"
+              density="compact"
+              hide-details
+            />
           </v-col>
-          <v-col cols="6" sm="3">
+          <v-col cols="6" sm="6">
             <AppDatePicker v-model="movement.moved_at" :label="t('inventory.movedAt')" />
           </v-col>
-          <v-col cols="6" sm="3">
-            <v-text-field v-model="movement.reason" :label="t('fields.reason')" density="compact" hide-details />
+          <v-col cols="6" sm="6">
+            <v-textarea v-model="movement.reason" :label="t('fields.reason')" rows="3" density="compact" hide-details />
           </v-col>
         </v-row>
         <v-btn class="mt-2" color="primary" variant="tonal" :loading="actionLoading" @click="recordMovement">

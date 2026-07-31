@@ -41,11 +41,13 @@ const catalogOptions = ref([])
 const items = ref([])
 const catalogPick = ref(null)
 
-const orderSelectItems = computed(() => orderOptions.value.map(order => ({
-  id: order.id,
-  title: `${order.customer?.name ?? ''} — $${order.total}`,
-  total: order.total,
-})))
+const orderSelectItems = computed(() =>
+  orderOptions.value.map((order) => ({
+    id: order.id,
+    title: `${order.customer?.name ?? ''} — $${order.total}`,
+    total: order.total,
+  })),
+)
 
 const initialValues = computed(() => ({
   customer_id: props.presetOrder?.customer?.id ?? null,
@@ -57,23 +59,26 @@ const initialValues = computed(() => ({
   notes: '',
 }))
 
-watch(() => props.modelValue, (open) => {
-  if (open) {
-    fromOrder.value = Boolean(props.presetOrder)
-    items.value = []
-    catalogPick.value = null
-    orderPreview.value = props.presetOrder ?? null
-    errorMessage.value = ''
-    loadCatalog()
+watch(
+  () => props.modelValue,
+  (open) => {
+    if (open) {
+      fromOrder.value = Boolean(props.presetOrder)
+      items.value = []
+      catalogPick.value = null
+      orderPreview.value = props.presetOrder ?? null
+      errorMessage.value = ''
+      loadCatalog()
 
-    if (props.presetOrder) {
-      orderOptions.value = [props.presetOrder]
-    } else {
-      loadInitialCustomers()
-      loadInitialOrders()
+      if (props.presetOrder) {
+        orderOptions.value = [props.presetOrder]
+      } else {
+        loadInitialCustomers()
+        loadInitialOrders()
+      }
     }
-  }
-})
+  },
+)
 
 async function loadCatalog() {
   const [servicesRes, addonsRes, packagesRes] = await Promise.all([
@@ -83,15 +88,23 @@ async function loadCatalog() {
   ])
 
   catalogOptions.value = [
-    ...servicesRes.data.data.map(s => ({ key: `service:${s.id}`, type: 'service', id: s.id, name: s.name, price: s.price })),
-    ...addonsRes.data.data.filter(a => a.is_active).map(a => ({ key: `addon:${a.id}`, type: 'addon', id: a.id, name: a.name, price: a.price })),
-    ...packagesRes.data.data.map(p => ({
+    ...servicesRes.data.data.map((s) => ({
+      key: `service:${s.id}`,
+      type: 'service',
+      id: s.id,
+      name: s.name,
+      price: s.price,
+    })),
+    ...addonsRes.data.data
+      .filter((a) => a.is_active)
+      .map((a) => ({ key: `addon:${a.id}`, type: 'addon', id: a.id, name: a.name, price: a.price })),
+    ...packagesRes.data.data.map((p) => ({
       key: `package:${p.id}`,
       type: 'package',
       id: p.id,
       name: p.name,
       price: p.final_price,
-      optionalComponents: (p.components ?? []).filter(c => c.is_optional),
+      optionalComponents: (p.components ?? []).filter((c) => c.is_optional),
     })),
   ]
 }
@@ -103,10 +116,10 @@ async function loadCatalog() {
  * that same line. Deduped across multiple selected packages by catalog ref.
  */
 const availableOptionalAddons = computed(() => {
-  const selectedPackageIds = items.value.filter(item => item.package_id).map(item => item.package_id)
+  const selectedPackageIds = items.value.filter((item) => item.package_id).map((item) => item.package_id)
   const seen = new Map()
 
-  for (const pkg of catalogOptions.value.filter(c => c.type === 'package' && selectedPackageIds.includes(c.id))) {
+  for (const pkg of catalogOptions.value.filter((c) => c.type === 'package' && selectedPackageIds.includes(c.id))) {
     for (const component of pkg.optionalComponents) {
       const key = component.service_id ? `service:${component.service_id}` : `addon:${component.addon_id}`
       if (!seen.has(key)) seen.set(key, component)
@@ -117,10 +130,11 @@ const availableOptionalAddons = computed(() => {
 })
 
 function isOptionalAddonSelected(component) {
-  return items.value.some(item => (
-    (component.service_id && item.service_id === component.service_id)
-    || (component.addon_id && item.addon_id === component.addon_id)
-  ))
+  return items.value.some(
+    (item) =>
+      (component.service_id && item.service_id === component.service_id) ||
+      (component.addon_id && item.addon_id === component.addon_id),
+  )
 }
 
 function toggleOptionalAddon(component, checked) {
@@ -137,10 +151,11 @@ function toggleOptionalAddon(component, checked) {
     return
   }
 
-  const index = items.value.findIndex(item => (
-    (component.service_id && item.service_id === component.service_id)
-    || (component.addon_id && item.addon_id === component.addon_id)
-  ))
+  const index = items.value.findIndex(
+    (item) =>
+      (component.service_id && item.service_id === component.service_id) ||
+      (component.addon_id && item.addon_id === component.addon_id),
+  )
   if (index !== -1) items.value.splice(index, 1)
 }
 
@@ -213,7 +228,7 @@ function toggleFromOrder(value, setFieldValue) {
 
 function addCatalogItem() {
   if (!catalogPick.value) return
-  const picked = catalogOptions.value.find(c => c.key === catalogPick.value)
+  const picked = catalogOptions.value.find((c) => c.key === catalogPick.value)
   if (!picked) return
 
   items.value.push({
@@ -229,7 +244,15 @@ function addCatalogItem() {
 }
 
 function addCustomItem() {
-  items.value.push({ service_id: null, addon_id: null, package_id: null, name: '', unit_price: null, quantity: 1, readonly: false })
+  items.value.push({
+    service_id: null,
+    addon_id: null,
+    package_id: null,
+    name: '',
+    unit_price: null,
+    quantity: 1,
+    readonly: false,
+  })
 }
 
 function removeItem(index) {
@@ -262,7 +285,9 @@ async function onSubmit(values) {
       return
     }
 
-    const invalidCustom = items.value.some(item => !item.readonly && (!item.name || item.unit_price === null || item.unit_price === ''))
+    const invalidCustom = items.value.some(
+      (item) => !item.readonly && (!item.name || item.unit_price === null || item.unit_price === ''),
+    )
     if (invalidCustom) {
       errorMessage.value = t('invoices.errors.customItemIncomplete')
       return
@@ -274,7 +299,7 @@ async function onSubmit(values) {
     const payload = { ...values }
 
     if (!fromOrder.value) {
-      payload.items = items.value.map(item => ({
+      payload.items = items.value.map((item) => ({
         service_id: item.service_id,
         addon_id: item.addon_id,
         package_id: item.package_id,
@@ -297,14 +322,15 @@ async function onSubmit(values) {
 </script>
 
 <template>
-  <AppDialog :model-value="modelValue" :title="t('invoices.newInvoice')" max-width="760" @update:model-value="emit('update:modelValue', $event)">
+  <AppDialog
+    :model-value="modelValue"
+    :title="t('invoices.newInvoice')"
+    max-width="760"
+    @update:model-value="emit('update:modelValue', $event)"
+  >
     <v-alert v-if="errorMessage" type="error" variant="tonal" class="mb-4">{{ errorMessage }}</v-alert>
 
-    <AppForm
-      :schema="invoiceSchema"
-      :initial-values="initialValues"
-      @submit="onSubmit"
-    >
+    <AppForm :schema="invoiceSchema" :initial-values="initialValues" @submit="onSubmit">
       <template #default="{ errors, values, setFieldValue }">
         <v-alert v-if="presetOrder" type="info" variant="tonal" density="compact" class="mb-4">
           {{ t('invoices.creatingFromOrder', { name: presetOrder.customer?.name }) }}
@@ -377,7 +403,12 @@ async function onSubmit(values) {
           <div class="text-subtitle-2 mb-2">{{ t('invoices.itemsFromOrder') }}</div>
           <v-table v-if="orderPreview" density="compact" class="mb-4">
             <thead>
-              <tr><th>{{ t('fields.name') }}</th><th>{{ t('fields.unitPrice') }}</th><th>{{ t('fields.quantity') }}</th><th>{{ t('fields.total') }}</th></tr>
+              <tr>
+                <th>{{ t('fields.name') }}</th>
+                <th>{{ t('fields.unitPrice') }}</th>
+                <th>{{ t('fields.quantity') }}</th>
+                <th>{{ t('fields.total') }}</th>
+              </tr>
             </thead>
             <tbody>
               <tr v-for="orderItem in orderPreview.items" :key="orderItem.id">
@@ -409,7 +440,9 @@ async function onSubmit(values) {
               </template>
             </v-select>
             <v-btn icon="mdi-plus" variant="tonal" @click="addCatalogItem" />
-            <v-btn variant="outlined" prepend-icon="mdi-pencil-plus-outline" @click="addCustomItem">{{ t('orders.customItem') }}</v-btn>
+            <v-btn variant="outlined" prepend-icon="mdi-pencil-plus-outline" @click="addCustomItem">{{
+              t('orders.customItem')
+            }}</v-btn>
           </div>
 
           <v-table class="mb-4">
@@ -426,11 +459,24 @@ async function onSubmit(values) {
               <tr v-for="(item, index) in items" :key="index">
                 <td>
                   <span v-if="item.readonly">{{ item.name }}</span>
-                  <v-text-field v-else v-model="item.name" density="compact" hide-details :placeholder="t('orders.itemNamePlaceholder')" />
+                  <v-text-field
+                    v-else
+                    v-model="item.name"
+                    density="compact"
+                    hide-details
+                    :placeholder="t('orders.itemNamePlaceholder')"
+                  />
                 </td>
                 <td>
                   <span v-if="item.readonly">${{ item.unit_price }}</span>
-                  <v-text-field v-else v-model.number="item.unit_price" type="number" step="0.01" density="compact" hide-details />
+                  <v-text-field
+                    v-else
+                    v-model.number="item.unit_price"
+                    type="number"
+                    step="0.01"
+                    density="compact"
+                    hide-details
+                  />
                 </td>
                 <td>
                   <v-text-field v-model.number="item.quantity" type="number" min="1" density="compact" hide-details />
@@ -462,28 +508,57 @@ async function onSubmit(values) {
 
         <v-row>
           <v-col cols="12" sm="6">
-            <v-textarea :model-value="values.notes" :label="t('fields.notes')" rows="2" :error-messages="errors.notes" @update:model-value="setFieldValue('notes', $event)" />
+            <v-textarea
+              :model-value="values.notes"
+              :label="t('fields.notes')"
+              rows="2"
+              :error-messages="errors.notes"
+              @update:model-value="setFieldValue('notes', $event)"
+            />
           </v-col>
           <v-col cols="12" sm="6">
             <div class="d-flex ga-2">
-              <v-text-field :model-value="values.discount_amount" :label="t('fields.discount')" type="number" step="0.01" prefix="$" :error-messages="errors.discount_amount" @update:model-value="setFieldValue('discount_amount', $event)" />
-              <v-text-field :model-value="values.tax_rate" :label="t('invoices.taxRate')" type="number" step="0.01" suffix="%" :error-messages="errors.tax_rate" @update:model-value="setFieldValue('tax_rate', $event)" />
+              <v-text-field
+                :model-value="values.discount_amount"
+                :label="t('fields.discount')"
+                type="number"
+                step="0.01"
+                prefix="$"
+                :error-messages="errors.discount_amount"
+                @update:model-value="setFieldValue('discount_amount', $event)"
+              />
+              <v-text-field
+                :model-value="values.tax_rate"
+                :label="t('invoices.taxRate')"
+                type="number"
+                step="0.01"
+                suffix="%"
+                :error-messages="errors.tax_rate"
+                @update:model-value="setFieldValue('tax_rate', $event)"
+              />
             </div>
             <div class="text-body-2 d-flex justify-space-between">
-              <span>{{ t('fields.subtotal') }}</span><span>${{ subtotal.toFixed(2) }}</span>
+              <span>{{ t('fields.subtotal') }}</span
+              ><span>${{ subtotal.toFixed(2) }}</span>
             </div>
             <div class="text-body-2 d-flex justify-space-between">
-              <span>{{ t('invoices.taxAmount') }}</span><span>${{ totals(values).taxAmount.toFixed(2) }}</span>
+              <span>{{ t('invoices.taxAmount') }}</span
+              ><span>${{ totals(values).taxAmount.toFixed(2) }}</span>
             </div>
             <div class="text-h6 d-flex justify-space-between">
-              <span>{{ t('fields.total') }}</span><span>${{ totals(values).total.toFixed(2) }}</span>
+              <span>{{ t('fields.total') }}</span
+              ><span>${{ totals(values).total.toFixed(2) }}</span>
             </div>
           </v-col>
         </v-row>
-
+        <v-divider class="my-4" />
         <div class="d-flex justify-end ga-2 mt-2">
-          <v-btn variant="text" :disabled="loading" @click="emit('update:modelValue', false)">{{ t('common.cancel') }}</v-btn>
-          <v-btn type="submit" color="primary" variant="flat" :loading="loading">{{ t('invoices.createInvoice') }}</v-btn>
+          <v-btn variant="text" :disabled="loading" @click="emit('update:modelValue', false)">{{
+            t('common.cancel')
+          }}</v-btn>
+          <v-btn type="submit" color="primary" variant="flat" :loading="loading">{{
+            t('invoices.createInvoice')
+          }}</v-btn>
         </div>
       </template>
     </AppForm>

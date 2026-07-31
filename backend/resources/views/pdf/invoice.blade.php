@@ -4,23 +4,26 @@
     <meta charset="utf-8">
     <style>
         /*
-         * Helvetica (a PDF base-14 font) and dompdf's bundled DejaVu Sans
-         * fallback both lack Khmer glyphs — customer/tenant names in Khmer
-         * rendered as "???????". Noto Sans Khmer covers both Khmer script
-         * and Latin/digits/punctuation, so one font handles the whole
-         * invoice without per-run font-switching.
+         * The default fonts (and dompdf's DejaVu Sans, back when this was
+         * a dompdf view) lack Khmer glyphs — customer/tenant names in
+         * Khmer rendered as "???????". Noto Sans Khmer covers both Khmer
+         * script and Latin/digits/punctuation, so one font handles the
+         * whole invoice without per-run font-switching. Embedded as a
+         * base64 data URI rather than a filesystem path — Browsershot
+         * renders this view as a bare HTML string with no base URL, so a
+         * local file:// path has nothing to resolve against.
          */
         @font-face {
             font-family: 'Noto Sans Khmer';
             font-style: normal;
             font-weight: normal;
-            src: url('{{ resource_path('fonts/NotoSansKhmer-Regular.ttf') }}') format('truetype');
+            src: url('{{ $khmerFontRegularDataUri }}') format('truetype');
         }
         @font-face {
             font-family: 'Noto Sans Khmer';
             font-style: normal;
             font-weight: bold;
-            src: url('{{ resource_path('fonts/NotoSansKhmer-Bold.ttf') }}') format('truetype');
+            src: url('{{ $khmerFontBoldDataUri }}') format('truetype');
         }
         body { font-family: 'Noto Sans Khmer', 'DejaVu Sans', sans-serif; font-size: 12px; color: #1f2937; }
         .header { display: table; width: 100%; margin-bottom: 24px; }

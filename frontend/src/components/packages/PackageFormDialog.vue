@@ -195,11 +195,11 @@ async function onSubmit(values) {
           <v-btn icon="mdi-plus" variant="tonal" @click="addComponent" />
         </div>
 
-        <v-table density="compact" class="mb-4">
+        <v-table class="mb-4">
           <thead>
             <tr>
               <th>{{ t('fields.name') }}</th>
-              <th style="width: 100px">{{ t('fields.unitPrice') }}</th>
+              <th style="width: 120px">{{ t('fields.unitPrice') }}</th>
               <th style="width: 90px">{{ t('fields.quantity') }}</th>
               <th style="width: 100px">{{ t('fields.total') }}</th>
               <th style="width: 110px">{{ t('packages.optional') }}</th>
@@ -218,7 +218,7 @@ async function onSubmit(values) {
                 <v-checkbox v-model="component.is_optional" density="compact" hide-details />
               </td>
               <td>
-                <v-btn icon="mdi-close" size="small" variant="text" @click="removeComponent(index)" />
+                <v-btn icon="mdi-close" class="bg-red" size="x-small" variant="text" @click="removeComponent(index)" />
               </td>
             </tr>
             <tr v-if="!components.length">

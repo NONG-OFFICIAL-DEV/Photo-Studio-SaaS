@@ -127,7 +127,7 @@
     "customer": "Customer",
     "type": "Type",
     "assignedTo": "Assigned To",
-    "title": "Title",
+    "title": "Booking Title",
     "startDate": "Start date",
     "endDate": "End date",
     "startTime": "Start time",

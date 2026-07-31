@@ -27,7 +27,7 @@ const items = ref([])
 const totalItems = ref(0)
 const loading = ref(false)
 const search = ref('')
-const options = ref({ page: 1, itemsPerPage: 15, sortBy: [] })
+const options = ref({ page: 1, itemsPerPage: 10, sortBy: [] })
 
 async function load() {
   loading.value = true
