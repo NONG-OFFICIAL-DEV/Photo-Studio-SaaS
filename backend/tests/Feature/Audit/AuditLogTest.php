@@ -3,24 +3,49 @@
 namespace Tests\Feature\Audit;
 
 use App\Enums\TenantRole;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\CreatesTenantUsers;
 use Tests\TestCase;
 
+/**
+ * Audit log VIEWING is platform-admin-only (see config/permissions.php —
+ * 'audit.view' isn't in the catalog, so no tenant role can ever hold it).
+ * Recording still happens for every tenant; these tests verify that via the
+ * admin surface (App\Http\Controllers\Api\V1\Admin\AdminAuditController),
+ * which is where a super admin investigates it.
+ */
 class AuditLogTest extends TestCase
 {
     use CreatesTenantUsers, RefreshDatabase;
 
+    protected function superAdmin(): User
+    {
+        return User::factory()->create(['is_super_admin' => true, 'tenant_id' => null]);
+    }
+
+    public function test_no_tenant_role_can_view_the_audit_log(): void
+    {
+        foreach (TenantRole::cases() as $role) {
+            [, $user] = $this->createTenantWithUser($role);
+
+            $this->actingAsUser($user)
+                ->getJson('/api/v1/audit/log')
+                ->assertForbidden();
+        }
+    }
+
     public function test_updating_tenant_settings_is_recorded_in_the_audit_log(): void
     {
-        [, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+        $superAdmin = $this->superAdmin();
+        [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
 
         $this->actingAsUser($owner)
             ->putJson('/api/v1/settings', ['name' => 'Renamed Studio'])
             ->assertOk();
 
-        $response = $this->actingAsUser($owner)
-            ->getJson('/api/v1/audit/log')
+        $response = $this->actingAsUser($superAdmin)
+            ->getJson("/api/v1/admin/audit/log?tenant_id={$tenant->id}")
             ->assertOk();
 
         $entry = collect($response->json('data'))->first();
@@ -32,7 +57,7 @@ class AuditLogTest extends TestCase
     public function test_suspending_a_tenant_is_recorded_in_the_audit_log(): void
     {
         [$tenant] = $this->createTenantWithUser(TenantRole::Owner);
-        $superAdmin = \App\Models\User::factory()->create(['is_super_admin' => true, 'tenant_id' => null]);
+        $superAdmin = $this->superAdmin();
 
         $this->actingAsUser($superAdmin)
             ->postJson("/api/v1/admin/tenants/{$tenant->id}/suspend")
@@ -46,19 +71,5 @@ class AuditLogTest extends TestCase
         $this->assertNotNull($entry);
         $this->assertStringContainsString('suspended', $entry['description']);
         $this->assertSame($superAdmin->id, $entry['causer']['id']);
-    }
-
-    public function test_a_manager_cannot_see_another_tenants_audit_log(): void
-    {
-        [, $ownerA] = $this->createTenantWithUser(TenantRole::Owner);
-        [, $ownerB] = $this->createTenantWithUser(TenantRole::Owner);
-
-        $this->actingAsUser($ownerA)->putJson('/api/v1/settings', ['name' => 'Tenant A Renamed'])->assertOk();
-
-        $response = $this->actingAsUser($ownerB)
-            ->getJson('/api/v1/audit/log')
-            ->assertOk();
-
-        $this->assertEmpty($response->json('data'));
     }
 }
