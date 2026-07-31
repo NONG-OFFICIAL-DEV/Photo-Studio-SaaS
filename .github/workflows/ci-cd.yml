@@ -87,6 +87,6 @@ jobs:
             echo ">>> Running migrations"
             docker exec photo_studio_backend php artisan migrate --force
 
-            echo ">>> Clearing cache"
-            docker exec photo_studio_backend php artisan config:cache
-            docker exec photo_studio_backend php artisan route:cache
+            echo ">>> Discovering packages and optimizing"
+            docker exec photo_studio_backend php artisan package:discover --ansi
+            docker exec photo_studio_backend php artisan optimize
