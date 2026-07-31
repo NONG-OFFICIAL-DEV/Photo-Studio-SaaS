@@ -17,6 +17,12 @@ const subscriptionMessage = computed(() => {
   const key = `apiErrors.${blocked.code}`
   return te(key) ? t(key, blocked.params ?? {}) : blocked.message
 })
+
+// Only a lapsed *subscription* is fixable from Billing — a suspended
+// tenant or missing subscription/tenant record needs the platform (support
+// or an admin) to intervene, and billing itself is blocked for the former.
+const BILLING_ACTIONABLE_CODES = ['TRIAL_ENDED', 'SUBSCRIPTION_EXPIRED', 'SUBSCRIPTION_STATUS_BLOCKED']
+const isBillingActionable = computed(() => BILLING_ACTIONABLE_CODES.includes(appStore.subscriptionBlocked?.code))
 const canManageBilling = computed(() => auth.hasPermission('tenant.billing.manage'))
 
 const logoutLoading = ref(false)
@@ -463,16 +469,17 @@ function toggleLocale() {
       variant="tonal"
       rounded="0"
       density="comfortable"
-      prominent
       border="start"
       class="subscription-banner"
     >
       <div class="d-flex flex-wrap align-center justify-space-between ga-3">
         <span class="font-weight-medium">{{ subscriptionMessage }}</span>
-        <v-btn v-if="canManageBilling" color="error" variant="flat" size="small" :to="{ name: 'billing' }">
-          {{ t('subscriptionBanner.cta') }}
-        </v-btn>
-        <span v-else class="text-caption text-medium-emphasis">{{ t('subscriptionBanner.askOwner') }}</span>
+        <template v-if="isBillingActionable">
+          <v-btn v-if="canManageBilling" color="error" variant="flat" size="small" :to="{ name: 'billing' }">
+            {{ t('subscriptionBanner.cta') }}
+          </v-btn>
+          <span v-else class="text-caption text-medium-emphasis">{{ t('subscriptionBanner.askOwner') }}</span>
+        </template>
       </div>
     </v-alert>
 

@@ -57,29 +57,41 @@ function resolveQueue(error, token = null) {
 }
 
 /*
- * 402 handling: the backend blocks every tenant-scoped route behind
- * EnsureSubscriptionActive once a trial/subscription lapses, returning one
- * of these stable codes. Billing routes are deliberately exempt (so the
- * user can still reach them to fix it), which means any successful
- * response — an ordinary page load working again after they renew — is a
- * reliable signal to clear the banner.
+ * Account/subscription gate handling: IdentifyTenant and
+ * EnsureSubscriptionActive block every tenant-scoped route (403/402) once a
+ * tenant is suspended or its trial/subscription has lapsed, returning one
+ * of these stable codes. `/v1/auth/*` and `/v1/billing/*` are deliberately
+ * exempt from one or both gates (so a blocked user can still log in, check
+ * `/me`, and reach billing to fix a lapsed *subscription* — though not a
+ * platform *suspension*, which blocks billing too) — so a request to those
+ * always-reachable routes succeeding is NOT evidence the block is lifted.
+ * Only a genuinely gated route succeeding is a reliable "all clear" signal.
  */
-const SUBSCRIPTION_BLOCKED_CODES = [
+const ACCOUNT_BLOCKED_CODES = [
   'NO_SUBSCRIPTION_FOUND',
   'SUBSCRIPTION_STATUS_BLOCKED',
   'TRIAL_ENDED',
   'SUBSCRIPTION_EXPIRED',
+  'TENANT_SUSPENDED',
+  'NO_TENANT_ASSOCIATED',
 ]
+const GATE_EXEMPT_URL_PREFIXES = ['/v1/auth/', '/v1/billing/']
+
+function isGateExempt(url) {
+  return GATE_EXEMPT_URL_PREFIXES.some((prefix) => url?.includes(prefix))
+}
 
 http.interceptors.response.use(
   (response) => {
-    window.dispatchEvent(new CustomEvent('subscription:blocked', { detail: null }))
+    if (!isGateExempt(response.config?.url)) {
+      window.dispatchEvent(new CustomEvent('subscription:blocked', { detail: null }))
+    }
     return response
   },
   async (error) => {
     const { config, response } = error
 
-    if (response?.status === 402 && SUBSCRIPTION_BLOCKED_CODES.includes(response.data?.code)) {
+    if (response && ACCOUNT_BLOCKED_CODES.includes(response.data?.code)) {
       window.dispatchEvent(new CustomEvent('subscription:blocked', { detail: response.data }))
     }
 
