@@ -42,6 +42,33 @@ class BookingCalendarTest extends TestCase
         $this->assertTrue($inRange->exists);
     }
 
+    /**
+     * Regression test: a booking that starts partway through the requested
+     * end date used to be silently dropped — inRange() compared starts_at
+     * against midnight of $end, excluding anything on $end's own date. This
+     * also blocked single-day ranges outright (start === end), needed for
+     * the calendar's day/timeline view.
+     */
+    public function test_a_booking_on_the_requested_end_date_is_included(): void
+    {
+        [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+        $target = now()->addDays(5)->startOfDay();
+
+        Booking::factory()->create([
+            'tenant_id' => $tenant->id,
+            'title' => 'On End Date',
+            'starts_at' => $target->copy()->setTime(14, 0),
+            'ends_at' => $target->copy()->setTime(15, 0),
+        ]);
+
+        $response = $this->actingAsUser($owner)->getJson(
+            '/api/v1/bookings/calendar?start='.$target->toDateString().'&end='.$target->toDateString()
+        );
+
+        $response->assertOk();
+        $this->assertContains('On End Date', collect($response->json('data'))->pluck('title'));
+    }
+
     public function test_calendar_requires_start_and_end(): void
     {
         [, $owner] = $this->createTenantWithUser(TenantRole::Owner);

@@ -79,10 +79,17 @@ class BookingRepository extends BaseRepository implements BookingRepositoryInter
             ->exists();
     }
 
+    /**
+     * $end is treated as inclusive of that whole calendar day (callers pass
+     * "the last day I want to see", e.g. a month or week grid's last day —
+     * not a precise instant) — comparing against midnight of the day AFTER
+     * $end, rather than $end itself, so a booking on $end's own date isn't
+     * silently dropped for starting after midnight of that same day.
+     */
     public function inRange(Carbon $start, Carbon $end, array $filters = []): Collection
     {
         $query = $this->query()
-            ->where('starts_at', '<', $end)
+            ->where('starts_at', '<', $end->copy()->addDay()->startOfDay())
             ->where('ends_at', '>', $start);
 
         $this->applyFilters($query, $filters);

@@ -5,11 +5,19 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
 
-const { t } = useI18n()
+const { t, te } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 const appStore = useAppStore()
+
+const subscriptionMessage = computed(() => {
+  const blocked = appStore.subscriptionBlocked
+  if (!blocked) return ''
+  const key = `apiErrors.${blocked.code}`
+  return te(key) ? t(key, blocked.params ?? {}) : blocked.message
+})
+const canManageBilling = computed(() => auth.hasPermission('tenant.billing.manage'))
 
 const logoutLoading = ref(false)
 
@@ -207,6 +215,7 @@ async function handleLogout() {
   logoutLoading.value = true
   try {
     await auth.logout()
+    appStore.setSubscriptionBlocked(null)
     appStore.notify(t('auth.logoutSuccess'))
     router.push({ name: 'login' })
   } finally {
@@ -379,6 +388,7 @@ function toggleLocale() {
       </v-menu>
     </div>
   </v-app-bar>
+
   <v-navigation-drawer v-model="appStore.drawer" width="264">
     <!-- <v-divider /> -->
 
@@ -447,6 +457,25 @@ function toggleLocale() {
   </v-navigation-drawer>
 
   <v-main>
+    <v-alert
+      v-if="appStore.subscriptionBlocked"
+      type="error"
+      variant="tonal"
+      rounded="0"
+      density="comfortable"
+      prominent
+      border="start"
+      class="subscription-banner"
+    >
+      <div class="d-flex flex-wrap align-center justify-space-between ga-3">
+        <span class="font-weight-medium">{{ subscriptionMessage }}</span>
+        <v-btn v-if="canManageBilling" color="error" variant="flat" size="small" :to="{ name: 'billing' }">
+          {{ t('subscriptionBanner.cta') }}
+        </v-btn>
+        <span v-else class="text-caption text-medium-emphasis">{{ t('subscriptionBanner.askOwner') }}</span>
+      </div>
+    </v-alert>
+
     <v-container fluid>
       <router-view />
     </v-container>
@@ -454,6 +483,12 @@ function toggleLocale() {
 </template>
 
 <style scoped>
+.subscription-banner {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
 .nav-list {
   padding-inline: 8px;
 }

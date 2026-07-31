@@ -48,7 +48,7 @@ class BookingController extends Controller
 
         $request->validate([
             'start' => ['required', 'date'],
-            'end' => ['required', 'date', 'after:start'],
+            'end' => ['required', 'date', 'after_or_equal:start'],
         ]);
 
         $bookings = $this->bookings->calendarRange(

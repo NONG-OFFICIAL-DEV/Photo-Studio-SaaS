@@ -175,6 +175,10 @@
     },
     "billing": "Billing"
   },
+  "subscriptionBanner": {
+    "cta": "Go to Billing",
+    "askOwner": "Ask your studio owner to resolve this."
+  },
   "auth": {
     "login": "Login",
     "loginTitle": "Sign in to your studio",
@@ -301,9 +305,14 @@
     "newBooking": "New Booking",
     "editBooking": "Edit Booking",
     "calendarTitle": "Booking Calendar",
-    "calendarSubtitle": "Month view of all scheduled sessions.",
+    "calendarSubtitle": "View and manage all scheduled sessions.",
     "listView": "List View",
     "today": "Today",
+    "calendarViews": {
+      "month": "Month",
+      "week": "Week",
+      "day": "Day"
+    },
     "addBooking": "Add Booking",
     "noBookingsOnDay": "No bookings on this day.",
     "moreCount": "+{count} more",

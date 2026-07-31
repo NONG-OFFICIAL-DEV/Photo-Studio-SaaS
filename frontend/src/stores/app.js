@@ -11,6 +11,11 @@ export const useAppStore = defineStore('app', () => {
   const globalLoading = ref(false)
 
   const snackbar = ref({ show: false, text: '', color: 'success' })
+  const subscriptionBlocked = ref(null)
+
+  function setSubscriptionBlocked(payload) {
+    subscriptionBlocked.value = payload
+  }
 
   function toggleTheme() {
     theme.value = theme.value === 'light' ? 'dark' : 'light'
@@ -26,5 +31,16 @@ export const useAppStore = defineStore('app', () => {
     snackbar.value = { show: true, text, color }
   }
 
-  return { theme, locale, drawer, globalLoading, snackbar, toggleTheme, setLocale, notify }
+  return {
+    theme,
+    locale,
+    drawer,
+    globalLoading,
+    snackbar,
+    subscriptionBlocked,
+    toggleTheme,
+    setLocale,
+    notify,
+    setSubscriptionBlocked,
+  }
 })

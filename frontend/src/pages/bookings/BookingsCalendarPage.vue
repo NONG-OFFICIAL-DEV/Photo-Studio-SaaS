@@ -25,6 +25,7 @@ const STATUS_MAP = computed(() => ({
 const calendarRef = ref(null)
 const dayDialog = ref(false)
 const selectedDay = ref(null)
+const selectedTime = ref(null)
 const dayBookings = ref([])
 
 const formDialog = ref(false)
@@ -32,8 +33,9 @@ const editingBooking = ref(null)
 
 const canCreate = computed(() => auth.hasPermission('bookings.create'))
 
-function onDayClick({ date, bookings }) {
+function onDayClick({ date, time, bookings }) {
   selectedDay.value = date
+  selectedTime.value = time
   dayBookings.value = bookings
   dayDialog.value = true
 }
@@ -43,11 +45,31 @@ function onBookingClick(booking) {
   formDialog.value = true
 }
 
+/**
+ * Month view clicks carry no time (falls back to a 9am default); week/day
+ * timeline clicks land on an exact time slot, so the new booking starts
+ * right there instead — either way the session defaults to 2 hours long.
+ */
 function createForSelectedDay() {
   dayDialog.value = false
-  editingBooking.value = selectedDay.value
-    ? { starts_at: new Date(selectedDay.value.setHours(9, 0)).toISOString(), ends_at: new Date(selectedDay.value.setHours(11, 0)).toISOString() }
-    : null
+
+  if (!selectedDay.value) {
+    editingBooking.value = null
+    formDialog.value = true
+    return
+  }
+
+  const start = new Date(selectedDay.value)
+  if (selectedTime.value) {
+    const [hours, minutes] = selectedTime.value.split(':').map(Number)
+    start.setHours(hours, minutes)
+  } else {
+    start.setHours(9, 0)
+  }
+  const end = new Date(start)
+  end.setHours(end.getHours() + 2)
+
+  editingBooking.value = { starts_at: start.toISOString(), ends_at: end.toISOString() }
   formDialog.value = true
 }
 

@@ -56,10 +56,32 @@ function resolveQueue(error, token = null) {
   pendingQueue = []
 }
 
+/*
+ * 402 handling: the backend blocks every tenant-scoped route behind
+ * EnsureSubscriptionActive once a trial/subscription lapses, returning one
+ * of these stable codes. Billing routes are deliberately exempt (so the
+ * user can still reach them to fix it), which means any successful
+ * response — an ordinary page load working again after they renew — is a
+ * reliable signal to clear the banner.
+ */
+const SUBSCRIPTION_BLOCKED_CODES = [
+  'NO_SUBSCRIPTION_FOUND',
+  'SUBSCRIPTION_STATUS_BLOCKED',
+  'TRIAL_ENDED',
+  'SUBSCRIPTION_EXPIRED',
+]
+
 http.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    window.dispatchEvent(new CustomEvent('subscription:blocked', { detail: null }))
+    return response
+  },
   async (error) => {
     const { config, response } = error
+
+    if (response?.status === 402 && SUBSCRIPTION_BLOCKED_CODES.includes(response.data?.code)) {
+      window.dispatchEvent(new CustomEvent('subscription:blocked', { detail: response.data }))
+    }
 
     if (!response || response.status !== 401 || config?._retry || config?.url?.includes('/v1/auth/refresh')) {
       return Promise.reject(error)
