@@ -17,3 +17,7 @@ export const uploadSettingsQrPaymentApi = (file) => {
 }
 
 export const exportSettingsDataApi = () => http.get('/v1/settings/export', { responseType: 'blob' })
+
+export const connectTelegramApi = (botToken) => http.post('/v1/settings/telegram/connect', { bot_token: botToken })
+
+export const disconnectTelegramApi = () => http.post('/v1/settings/telegram/disconnect')

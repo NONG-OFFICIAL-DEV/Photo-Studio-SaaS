@@ -10,7 +10,7 @@ import {
   recordInvoicePaymentApi,
   deleteInvoicePaymentApi,
   getInvoicePdfApi,
-  getInvoiceShareLinkApi,
+  sendInvoiceTelegramApi,
 } from '@/apis/invoice.api'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
@@ -124,14 +124,8 @@ async function sendViaTelegram() {
   telegramLoading.value = true
   try {
     await ensureSent()
-    const { data } = await getInvoiceShareLinkApi(props.invoiceId)
-    const text = t('invoices.telegramMessage', {
-      number: invoice.value.invoice_number,
-      total: invoice.value.total,
-      dueDate: invoice.value.due_date ? formatDate(invoice.value.due_date) : '—',
-    })
-    const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(data.data.url)}&text=${encodeURIComponent(text)}`
-    window.open(shareUrl, '_blank', 'noopener')
+    await sendInvoiceTelegramApi(props.invoiceId)
+    appStore.notify(t('invoices.telegramSent'))
   } catch (error) {
     appStore.notify(translateApiMessage(error, 'common.actionFailed'), 'error')
   } finally {
@@ -188,6 +182,7 @@ const canDownloadPdf = computed(
 const canShareTelegram = computed(
   () => auth.hasPermission('invoices.send') && invoice.value && invoice.value.status !== 'void',
 )
+const customerTelegramConnected = computed(() => invoice.value?.customer?.telegram_connected ?? false)
 const hasFooterActions = computed(() => canSend.value || canDownloadPdf.value || canShareTelegram.value || canVoid.value)
 </script>
 
@@ -348,8 +343,15 @@ const hasFooterActions = computed(() => canSend.value || canDownloadPdf.value ||
       >
         {{ t('invoices.downloadPdf') }}
       </v-btn>
+      <v-tooltip v-if="canShareTelegram && !customerTelegramConnected" :text="t('invoices.telegramNotLinkedHint')">
+        <template #activator="{ props: tooltipProps }">
+          <span v-bind="tooltipProps">
+            <v-btn variant="outlined" prepend-icon="mdi-send" disabled>{{ t('invoices.sendViaTelegram') }}</v-btn>
+          </span>
+        </template>
+      </v-tooltip>
       <v-btn
-        v-if="canShareTelegram"
+        v-else-if="canShareTelegram"
         variant="outlined"
         prepend-icon="mdi-send"
         :loading="telegramLoading"

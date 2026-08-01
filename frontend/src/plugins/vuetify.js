@@ -25,8 +25,7 @@ const lightTheme = {
     warning: '#F9A825',
     info: '#0288D1',
     background: '#FFFBFE',
-    surface: '#FFFBFE',
-    'surface-variant': '#E7E0EC',
+    surface: '#FFFBFE'
   },
 }
 
@@ -42,8 +41,7 @@ const darkTheme = {
     warning: '#FFD54F',
     info: '#4FC3F7',
     background: '#1C1B1F',
-    surface: '#1C1B1F',
-    'surface-variant': '#49454F',
+    surface: '#1C1B1F'
   },
 }
 

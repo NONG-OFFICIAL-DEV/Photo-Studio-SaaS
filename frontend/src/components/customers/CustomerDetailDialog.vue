@@ -8,8 +8,12 @@ import {
   addCustomerNoteApi,
   deleteCustomerNoteApi,
   toggleCustomerFavoriteApi,
+  getCustomerTelegramLinkApi,
+  unlinkCustomerTelegramApi,
 } from '@/apis/customer.api'
 import { formatDate } from '@/utils/dateFormat'
+import { translateApiMessage } from '@/utils/apiMessages'
+import { useAppStore } from '@/stores/app'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -19,10 +23,13 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'changed'])
 
 const { t } = useI18n()
+const appStore = useAppStore()
 const customer = ref(null)
 const loading = ref(false)
 const noteText = ref('')
 const noteLoading = ref(false)
+const telegramLoading = ref(false)
+const telegramLink = ref(null)
 
 async function load() {
   if (!props.customerId) return
@@ -36,7 +43,10 @@ async function load() {
 }
 
 watch(() => [props.modelValue, props.customerId], ([open]) => {
-  if (open) load()
+  if (open) {
+    telegramLink.value = null
+    load()
+  }
 }, { immediate: true })
 
 async function addNote() {
@@ -62,6 +72,39 @@ async function toggleFavorite() {
   await toggleCustomerFavoriteApi(props.customerId)
   await load()
   emit('changed')
+}
+
+async function generateTelegramLink() {
+  telegramLoading.value = true
+  try {
+    const { data } = await getCustomerTelegramLinkApi(props.customerId)
+    if (data.data.linked) {
+      await load()
+    } else {
+      telegramLink.value = data.data.link
+    }
+  } catch (error) {
+    appStore.notify(translateApiMessage(error, 'common.actionFailed'), 'error')
+  } finally {
+    telegramLoading.value = false
+  }
+}
+
+async function copyTelegramLink() {
+  await window.navigator.clipboard.writeText(telegramLink.value)
+  appStore.notify(t('customers.telegram.linkCopied'))
+}
+
+async function unlinkTelegram() {
+  telegramLoading.value = true
+  try {
+    await unlinkCustomerTelegramApi(props.customerId)
+    telegramLink.value = null
+    await load()
+    emit('changed')
+  } finally {
+    telegramLoading.value = false
+  }
 }
 </script>
 
@@ -97,6 +140,41 @@ async function toggleFavorite() {
       <v-alert v-if="customer.is_blacklisted" type="error" variant="tonal" density="compact" class="mb-4">
         {{ customer.blacklist_reason }}
       </v-alert>
+
+      <v-card variant="outlined" class="mb-4">
+        <v-card-text>
+          <div class="d-flex align-center justify-space-between flex-wrap ga-2">
+            <div class="d-flex align-center ga-2">
+              <v-icon icon="mdi-send-circle-outline" :color="customer.telegram_connected ? 'success' : undefined" />
+              <span class="text-body-2">
+                {{ customer.telegram_connected ? t('customers.telegram.connected') : t('customers.telegram.notConnected') }}
+              </span>
+            </div>
+            <v-btn
+              v-if="customer.telegram_connected"
+              size="small"
+              variant="text"
+              color="error"
+              :loading="telegramLoading"
+              @click="unlinkTelegram"
+            >
+              {{ t('customers.telegram.unlink') }}
+            </v-btn>
+            <v-btn v-else size="small" variant="tonal" :loading="telegramLoading" @click="generateTelegramLink">
+              {{ t('customers.telegram.generateLink') }}
+            </v-btn>
+          </div>
+
+          <div v-if="telegramLink" class="mt-3">
+            <p class="text-caption text-medium-emphasis mb-1">{{ t('customers.telegram.shareHint') }}</p>
+            <div class="d-flex align-center ga-2">
+              <v-text-field :model-value="telegramLink" readonly density="compact" hide-details />
+              <v-btn icon="mdi-content-copy" size="small" variant="text" @click="copyTelegramLink" />
+              <v-btn icon="mdi-open-in-new" size="small" variant="text" :href="telegramLink" target="_blank" />
+            </div>
+          </div>
+        </v-card-text>
+      </v-card>
 
       <v-divider class="mb-4" />
 

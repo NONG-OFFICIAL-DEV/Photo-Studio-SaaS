@@ -22,6 +22,7 @@ class Customer extends Model
     protected $fillable = [
         'tenant_id', 'name', 'email', 'phone', 'address', 'birthday', 'gender',
         'avatar_path', 'is_favorite', 'is_blacklisted', 'blacklist_reason', 'created_by',
+        'telegram_chat_id', 'telegram_link_token', 'telegram_linked_at',
     ];
 
     /**
@@ -43,6 +44,7 @@ class Customer extends Model
             'gender' => CustomerGender::class,
             'is_favorite' => 'boolean',
             'is_blacklisted' => 'boolean',
+            'telegram_linked_at' => 'datetime',
         ];
     }
 

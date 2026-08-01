@@ -30,3 +30,16 @@ export const importCustomersApi = (file) => {
     headers: { 'Content-Type': 'multipart/form-data' },
   })
 }
+
+export const getCustomerTelegramLinkApi = id => http.post(`/v1/customers/${id}/telegram/link`)
+
+export const unlinkCustomerTelegramApi = id => http.post(`/v1/customers/${id}/telegram/unlink`)
+
+export const sendCustomerTelegramFilesApi = (id, files, caption) => {
+  const formData = new FormData()
+  files.forEach(file => formData.append('files[]', file))
+  if (caption) formData.append('caption', caption)
+  return http.post(`/v1/customers/${id}/telegram/send`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+}

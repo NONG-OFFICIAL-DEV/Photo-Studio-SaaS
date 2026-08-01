@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\V1\Commission\CommissionEntryController;
 use App\Http\Controllers\Api\V1\Customer\CustomerController;
 use App\Http\Controllers\Api\V1\Customer\CustomerNoteController;
 use App\Http\Controllers\Api\V1\Customer\CustomerTagController;
+use App\Http\Controllers\Api\V1\Customer\CustomerTelegramController;
 use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\Expense\ExpenseCategoryController;
 use App\Http\Controllers\Api\V1\Expense\ExpenseController;
@@ -32,7 +33,9 @@ use App\Http\Controllers\Api\V1\Report\ReportController;
 use App\Http\Controllers\Api\V1\Service\ServiceAddOnController;
 use App\Http\Controllers\Api\V1\Service\ServiceCategoryController;
 use App\Http\Controllers\Api\V1\Service\ServiceController;
+use App\Http\Controllers\Api\V1\Settings\TelegramSettingsController;
 use App\Http\Controllers\Api\V1\Settings\TenantSettingsController;
+use App\Http\Controllers\Api\V1\Telegram\TelegramWebhookController;
 use App\Http\Controllers\Api\V1\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -102,6 +105,10 @@ Route::middleware(['auth:api', 'tenant', 'subscription.active'])->group(function
 
         Route::post('/{customer}/notes', [CustomerNoteController::class, 'store']);
         Route::delete('/{customer}/notes/{note}', [CustomerNoteController::class, 'destroy']);
+
+        Route::post('/{customer}/telegram/link', [CustomerTelegramController::class, 'link']);
+        Route::post('/{customer}/telegram/unlink', [CustomerTelegramController::class, 'unlink']);
+        Route::post('/{customer}/telegram/send', [CustomerTelegramController::class, 'sendFiles']);
     });
 
     Route::prefix('bookings')->name('bookings.')->group(function () {
@@ -190,6 +197,7 @@ Route::middleware(['auth:api', 'tenant', 'subscription.active'])->group(function
 
         Route::get('/{invoice}/pdf', [InvoiceController::class, 'downloadPdf']);
         Route::get('/{invoice}/share-link', [InvoiceController::class, 'shareLink']);
+        Route::post('/{invoice}/telegram/send', [InvoiceController::class, 'sendTelegram']);
 
         Route::post('/{invoice}/payments', [PaymentController::class, 'store']);
         Route::delete('/{invoice}/payments/{payment}', [PaymentController::class, 'destroy']);
@@ -262,6 +270,8 @@ Route::middleware(['auth:api', 'tenant', 'subscription.active'])->group(function
         Route::get('/export', [TenantSettingsController::class, 'export']);
         Route::post('/logo', [TenantSettingsController::class, 'uploadLogo']);
         Route::post('/qr-payment', [TenantSettingsController::class, 'uploadQrPayment']);
+        Route::post('/telegram/connect', [TelegramSettingsController::class, 'connect']);
+        Route::post('/telegram/disconnect', [TelegramSettingsController::class, 'disconnect']);
 
         Route::get('/', [TenantSettingsController::class, 'show']);
         Route::put('/', [TenantSettingsController::class, 'update'])->middleware('email.verified');
@@ -286,6 +296,16 @@ Route::middleware(['auth:api', 'tenant', 'subscription.active'])->group(function
 Route::get('/invoices/{invoice}/public-pdf', [InvoiceController::class, 'publicPdf'])
     ->middleware('signed')
     ->name('invoices.public-pdf');
+
+/*
+ * Telegram calls this directly — no account, so it can't sit behind
+ * auth:api/tenant either, and Telegram can't produce Laravel's 'signed'
+ * middleware's signature. Authenticity is instead verified inside
+ * TelegramWebhookController via the secret_token this tenant's bot
+ * registered with setWebhook (see TelegramSettingsController::connect()).
+ */
+Route::post('/webhooks/telegram/{tenant}', [TelegramWebhookController::class, 'handle'])
+    ->name('webhooks.telegram');
 
 /*
  * Tenant self-service billing. Deliberately OUTSIDE `subscription.active` —

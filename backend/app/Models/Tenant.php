@@ -16,6 +16,7 @@ class Tenant extends Model
     protected $fillable = [
         'name', 'slug', 'domain', 'email', 'phone', 'address',
         'logo_path', 'qr_payment_path', 'timezone', 'currency', 'locale', 'is_active', 'settings',
+        'telegram_bot_token', 'telegram_bot_username', 'telegram_webhook_secret', 'telegram_connected_at',
     ];
 
     /**
@@ -39,7 +40,13 @@ class Tenant extends Model
         return [
             'is_active' => 'boolean',
             'settings' => 'array',
+            'telegram_connected_at' => 'datetime',
         ];
+    }
+
+    public function telegramConnected(): bool
+    {
+        return (bool) $this->telegram_bot_token;
     }
 
     public function users(): HasMany

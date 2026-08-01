@@ -25,6 +25,12 @@ class TenantResource extends JsonResource
             'locale' => $this->locale,
             'is_active' => $this->is_active,
             'settings' => $this->settingsWithDefaults(),
+            // Never expose telegram_bot_token/telegram_webhook_secret —
+            // these are credentials, not a settings-page scalar.
+            'telegram' => [
+                'connected' => $this->telegramConnected(),
+                'bot_username' => $this->telegram_bot_username,
+            ],
             'subscription' => $this->whenLoaded('activeSubscription', fn () => $this->activeSubscription
                 ? new SubscriptionResource($this->activeSubscription)
                 : null),

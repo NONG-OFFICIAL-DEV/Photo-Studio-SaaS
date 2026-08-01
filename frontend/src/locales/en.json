@@ -69,7 +69,12 @@
     "INVOICE_INVALID_STATUS_TRANSITION": "This action requires the invoice to be \"{expected}\" (currently \"{current}\").",
     "BOOKING_NOT_CONFIRMED": "This booking is \"{status}\" — it must be confirmed before a project can be created for it.",
     "CANNOT_DEACTIVATE_SELF": "You cannot deactivate your own account.",
-    "CANNOT_DEACTIVATE_LAST_OWNER": "A studio must have at least one active owner."
+    "CANNOT_DEACTIVATE_LAST_OWNER": "A studio must have at least one active owner.",
+    "TELEGRAM_INVALID_TOKEN": "That bot token was rejected by Telegram — double-check it from {'@'}BotFather.",
+    "TELEGRAM_WEBHOOK_FAILED": "The bot token works, but Telegram could not reach this server to register the webhook. Make sure this app is deployed behind a public HTTPS domain, then try again.",
+    "TELEGRAM_NOT_CONFIGURED": "Connect a Telegram bot in Settings first.",
+    "TELEGRAM_CUSTOMER_NOT_LINKED": "This customer has not connected Telegram yet.",
+    "TELEGRAM_SEND_FAILED": "Failed to send via Telegram."
   },
   "common": {
     "save": "Save",
@@ -284,6 +289,14 @@
       "addPlaceholder": "Add a note about this customer...",
       "empty": "No notes yet."
     },
+    "telegram": {
+      "connected": "Connected via Telegram",
+      "notConnected": "Not connected to Telegram",
+      "generateLink": "Connect Telegram",
+      "unlink": "Disconnect",
+      "shareHint": "Send this link to the customer once (SMS, in person, existing chat) — they tap it, open Telegram, and press Start.",
+      "linkCopied": "Link copied."
+    },
     "messages": {
       "updatedSuccess": "Customer updated successfully.",
       "createdSuccess": "Customer created successfully.",
@@ -490,6 +503,17 @@
       "deleteConfirmTitle": "Delete album?",
       "deleteConfirmMessage": "This will remove '{name}'."
     },
+    "telegram": {
+      "send": "Send via Telegram",
+      "notLinkedHint": "This customer hasn't connected Telegram yet — check in settings page.",
+      "dialogTitle": "Send to {name} via Telegram",
+      "hint": "Choose photos or a PDF from your computer — they're forwarded straight to the customer's Telegram chat and never stored on this server.",
+      "chooseFiles": "Choose files",
+      "captionLabel": "Message (optional)",
+      "captionPlaceholder": "e.g. Here are your final photos!",
+      "sendError": "Unable to send files via Telegram.",
+      "sentSuccess": "Sent {count} file(s) via Telegram."
+    },
     "messages": {
       "createdSuccess": "Album created successfully.",
       "updatedSuccess": "Album updated successfully.",
@@ -524,7 +548,8 @@
     "send": "Send",
     "downloadPdf": "Download PDF",
     "sendViaTelegram": "Send via Telegram",
-    "telegramMessage": "Invoice {number} — Total: ${total}, Due: {dueDate}.",
+    "telegramSent": "Invoice sent via Telegram.",
+    "telegramNotLinkedHint": "This customer hasn't connected Telegram yet — connect from their profile first.",
     "voidInvoice": "Void Invoice",
     "methods": {
       "cash": "Cash",
@@ -784,6 +809,7 @@
       "company": "Company",
       "invoice": "Invoice",
       "theme": "Theme",
+      "telegram": "Telegram",
       "data": "Data"
     },
     "fields": {
@@ -808,6 +834,18 @@
     "attendanceStartTimeHint": "Clock-ins after this time are marked Late.",
     "qrPaymentHint": "Shown on invoice PDFs so customers can scan to pay (e.g. KHQR).",
     "dataExportHint": "Download a zip of CSV files (customers, projects, invoices, expenses) for backup or migration.",
+    "telegram": {
+      "setupHint": "Create a free bot in about 2 minutes: open Telegram, message {'@'}BotFather, send /newbot, follow the prompts, then paste the token it gives you below.",
+      "botToken": "Bot token",
+      "botTokenPlaceholder": "123456789:AAExampleTokenFromBotFather",
+      "connect": "Connect",
+      "disconnect": "Disconnect",
+      "connectedAs": "Connected as @{username}",
+      "connectedHint": "Customers who connect can now receive photos and invoices directly in Telegram — no gallery link, no new app.",
+      "connectError": "Could not connect the Telegram bot.",
+      "connectedSuccess": "Telegram bot connected.",
+      "disconnectedSuccess": "Telegram bot disconnected."
+    },
     "messages": {
       "savedSuccess": "Settings saved successfully.",
       "saveError": "Could not save settings.",

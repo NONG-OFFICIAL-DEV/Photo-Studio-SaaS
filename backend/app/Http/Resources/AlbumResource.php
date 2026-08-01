@@ -20,6 +20,7 @@ class AlbumResource extends JsonResource
             'customer' => $this->whenLoaded('customer', fn () => $this->customer ? [
                 'id' => $this->customer->id,
                 'name' => $this->customer->name,
+                'telegram_connected' => (bool) $this->customer->telegram_chat_id,
             ] : null),
             'order_id' => $this->order_id,
             'created_at' => $this->created_at,

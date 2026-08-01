@@ -69,7 +69,12 @@
     "INVOICE_INVALID_STATUS_TRANSITION": "សកម្មភាពនេះទាមទារឱ្យវិក្កយបត្រស្ថិតក្នុងស្ថានភាព \"{expected}\" (បច្ចុប្បន្ន \"{current}\")។",
     "BOOKING_NOT_CONFIRMED": "ការកក់នេះស្ថិតក្នុងស្ថានភាព \"{status}\" — វាត្រូវតែបញ្ជាក់ជាមុនសិន មុននឹងអាចបង្កើតគម្រោងសម្រាប់វាបាន។",
     "CANNOT_DEACTIVATE_SELF": "អ្នកមិនអាចផ្អាកគណនីខ្លួនឯងបានទេ។",
-    "CANNOT_DEACTIVATE_LAST_OWNER": "ស្ទូឌីយោត្រូវតែមានម្ចាស់យ៉ាងហោចណាស់មួយនាក់ដែលកំពុងសកម្ម។"
+    "CANNOT_DEACTIVATE_LAST_OWNER": "ស្ទូឌីយោត្រូវតែមានម្ចាស់យ៉ាងហោចណាស់មួយនាក់ដែលកំពុងសកម្ម។",
+    "TELEGRAM_INVALID_TOKEN": "Telegram បានបដិសេធ Token នេះ — សូមពិនិត្យម្តងទៀតពី {'@'}BotFather។",
+    "TELEGRAM_WEBHOOK_FAILED": "Token ត្រឹមត្រូវហើយ ប៉ុន្តែ Telegram មិនអាចទាក់ទងម៉ាស៊ីនមេនេះដើម្បីចុះឈ្មោះ webhook បានទេ។ សូមប្រាកដថាកម្មវិធីនេះដំណើរការនៅលើដែន HTTPS សាធារណៈ រួចព្យាយាមម្តងទៀត។",
+    "TELEGRAM_NOT_CONFIGURED": "សូមភ្ជាប់ Telegram bot នៅក្នុងការកំណត់សិន។",
+    "TELEGRAM_CUSTOMER_NOT_LINKED": "អតិថិជននេះមិនទាន់ភ្ជាប់ Telegram ទេ។",
+    "TELEGRAM_SEND_FAILED": "ការផ្ញើតាម Telegram បរាជ័យ។"
   },
   "common": {
     "save": "រក្សាទុក",
@@ -284,6 +289,14 @@
       "addPlaceholder": "បន្ថែមកំណត់ចំណាំអំពីអតិថិជននេះ...",
       "empty": "មិនទាន់មានកំណត់ចំណាំនៅឡើយទេ។"
     },
+    "telegram": {
+      "connected": "បានភ្ជាប់តាម Telegram",
+      "notConnected": "មិនទាន់ភ្ជាប់ Telegram ទេ",
+      "generateLink": "ភ្ជាប់ Telegram",
+      "unlink": "ផ្តាច់",
+      "shareHint": "ផ្ញើតំណនេះទៅអតិថិជនម្តង (SMS ជួបផ្ទាល់ ឬសារដែលមានស្រាប់) — ពួកគេចុចវា បើក Telegram រួចចុច Start ។",
+      "linkCopied": "បានចម្លងតំណ។"
+    },
     "messages": {
       "updatedSuccess": "ធ្វើបច្ចុប្បន្នភាពអតិថិជនបានជោគជ័យ។",
       "createdSuccess": "បង្កើតអតិថិជនបានជោគជ័យ។",
@@ -490,6 +503,17 @@
       "deleteConfirmTitle": "លុបអាល់ប៊ុម?",
       "deleteConfirmMessage": "សកម្មភាពនេះនឹងលុប '{name}' ចេញ។"
     },
+    "telegram": {
+      "send": "ផ្ញើតាម Telegram",
+      "notLinkedHint": "អតិថិជននេះមិនទាន់ភ្ជាប់ Telegram ទេ — សូមទៅកាន់ទំព័រការកំណត់។",
+      "dialogTitle": "ផ្ញើទៅ {name} តាម Telegram",
+      "hint": "ជ្រើសរើសរូបភាព ឬឯកសារ PDF ពីកុំព្យូទ័ររបស់អ្នក — ពួកវានឹងត្រូវបានបញ្ជូនទៅកាន់ជជែក Telegram របស់អតិថិជនដោយផ្ទាល់ ហើយមិនត្រូវបានរក្សាទុកនៅលើម៉ាស៊ីនមេនេះទេ។",
+      "chooseFiles": "ជ្រើសរើសឯកសារ",
+      "captionLabel": "សារ (មិនចាំបាច់)",
+      "captionPlaceholder": "ឧ. នេះជារូបភាពចុងក្រោយរបស់អ្នក!",
+      "sendError": "មិនអាចផ្ញើឯកសារតាម Telegram បានទេ។",
+      "sentSuccess": "បានផ្ញើឯកសារ {count} តាម Telegram ។"
+    },
     "messages": {
       "createdSuccess": "បង្កើតអាល់ប៊ុមបានជោគជ័យ។",
       "updatedSuccess": "ធ្វើបច្ចុប្បន្នភាពអាល់ប៊ុមបានជោគជ័យ។",
@@ -524,7 +548,8 @@
     "send": "ផ្ញើ",
     "downloadPdf": "ទាញយក PDF",
     "sendViaTelegram": "ផ្ញើតាម Telegram",
-    "telegramMessage": "វិក្កយបត្រ {number} — សរុប៖ ${total}, ផុតកំណត់៖ {dueDate}។",
+    "telegramSent": "វិក្កយបត្របានផ្ញើតាម Telegram ។",
+    "telegramNotLinkedHint": "អតិថិជននេះមិនទាន់ភ្ជាប់ Telegram ទេ — សូមភ្ជាប់ពីទំព័រប្រវត្តិរូបគាត់សិន។",
     "voidInvoice": "លុបចោលវិក្កយបត្រ",
     "methods": {
       "cash": "សាច់ប្រាក់",
@@ -784,6 +809,7 @@
       "company": "ក្រុមហ៊ុន",
       "invoice": "វិក្កយបត្រ",
       "theme": "រូបរាង",
+      "telegram": "Telegram",
       "data": "ទិន្នន័យ"
     },
     "fields": {
@@ -808,6 +834,18 @@
     "attendanceStartTimeHint": "ការចុះឈ្មោះចូលធ្វើការក្រោយម៉ោងនេះនឹងត្រូវបានសម្គាល់ថាយឺត។",
     "qrPaymentHint": "បង្ហាញនៅលើវិក្កយបត្រ PDF ដើម្បីឱ្យអតិថិជនស្កេនទូទាត់ប្រាក់ (ឧ. KHQR)។",
     "dataExportHint": "ទាញយកឯកសារ CSV ជា zip (អតិថិជន គម្រោង វិក្កយបត្រ ចំណាយ) សម្រាប់បម្រុងទុក ឬផ្ទេរទិន្នន័យ។",
+    "telegram": {
+      "setupHint": "បង្កើត bot ឥតគិតថ្លៃក្នុងរយៈពេលប្រហែល ២ នាទី៖ បើក Telegram ផ្ញើសារទៅ {'@'}BotFather វាយ /newbot ធ្វើតាមការណែនាំ រួចចម្លង Token ដែលវាផ្តល់ឱ្យមកបញ្ចូលខាងក្រោម។",
+      "botToken": "Bot Token",
+      "botTokenPlaceholder": "123456789:AAExampleTokenFromBotFather",
+      "connect": "ភ្ជាប់",
+      "disconnect": "ផ្តាច់",
+      "connectedAs": "បានភ្ជាប់ជា @{username}",
+      "connectedHint": "អតិថិជនដែលបានភ្ជាប់ឥឡូវអាចទទួលរូបថត និងវិក្កយបត្រដោយផ្ទាល់តាម Telegram — មិនចាំបាច់មានតំណភ្ជាប់វិចិត្រសាល ឬកម្មវិធីថ្មីទេ។",
+      "connectError": "មិនអាចភ្ជាប់ Telegram bot បានទេ។",
+      "connectedSuccess": "បានភ្ជាប់ Telegram bot ជាស្ថាពរ។",
+      "disconnectedSuccess": "បានផ្តាច់ Telegram bot ។"
+    },
     "messages": {
       "savedSuccess": "បានរក្សាទុកការកំណត់ដោយជោគជ័យ។",
       "saveError": "មិនអាចរក្សាទុកការកំណត់បានទេ។",

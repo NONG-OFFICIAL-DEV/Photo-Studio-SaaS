@@ -18,6 +18,7 @@ class InvoiceResource extends JsonResource
                 'id' => $this->customer->id,
                 'name' => $this->customer->name,
                 'phone' => $this->customer->phone,
+                'telegram_connected' => (bool) $this->customer->telegram_chat_id,
             ]),
             'order_id' => $this->order_id,
             'issue_date' => $this->issue_date,

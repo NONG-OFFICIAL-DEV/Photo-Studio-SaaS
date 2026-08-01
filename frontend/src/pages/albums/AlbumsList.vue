@@ -6,6 +6,7 @@ import AppTable from '@/components/common/AppTable.vue'
 import AppStatusChip from '@/components/common/AppStatusChip.vue'
 import AppConfirmDialog from '@/components/common/AppConfirmDialog.vue'
 import AlbumFormDialog from '@/components/albums/AlbumFormDialog.vue'
+import AlbumTelegramSendDialog from '@/components/albums/AlbumTelegramSendDialog.vue'
 import {
   getAlbumsApi,
   deleteAlbumApi,
@@ -50,6 +51,8 @@ const formDialog = ref(false)
 const editingAlbum = ref(null)
 const confirmDelete = ref(false)
 const deleteTarget = ref(null)
+const telegramDialog = ref(false)
+const telegramTarget = ref(null)
 
 function openCreate() {
   editingAlbum.value = null
@@ -59,6 +62,11 @@ function openCreate() {
 function openEdit(album) {
   editingAlbum.value = album
   formDialog.value = true
+}
+
+function openTelegramSend(album) {
+  telegramTarget.value = album
+  telegramDialog.value = true
 }
 
 function askDelete(album) {
@@ -152,14 +160,36 @@ const canDelete = computed(() => auth.hasPermission('albums.delete'))
             <v-btn v-if="!['delivered', 'archived'].includes(item.status)" size="small" variant="text" class="mr-1" @click="runAction('archive', item)">
               {{ t('albums.actions.archive') }}
             </v-btn>
+            <v-tooltip
+              v-if="item.customer"
+              :text="item.customer.telegram_connected ? t('albums.telegram.send') : t('albums.telegram.notLinkedHint')"
+            >
+              <template #activator="{ props: tooltipProps }">
+                <span v-bind="tooltipProps">
+                  <v-btn
+                    icon="mdi-send-outline"
+                    size="small"
+                    variant="text"
+                    :disabled="!item.customer.telegram_connected"
+                    @click="openTelegramSend(item)"
+                  />
+                </span>
+              </template>
+            </v-tooltip>
             <v-btn icon="mdi-pencil-outline" size="small" variant="text" @click="openEdit(item)" />
           </template>
-          <v-btn v-if="canDelete" icon="mdi-trash-can-outline" size="small" variant="text" @click="askDelete(item)" />
+          <v-btn v-if="canDelete" icon="mdi-trash-can-outline" size="small" variant="text"  color="error" @click="askDelete(item)" />
         </template>
       </AppTable>
     </v-card>
 
     <AlbumFormDialog v-model="formDialog" :album="editingAlbum" @saved="tableRef?.refresh()" />
+
+    <AlbumTelegramSendDialog
+      v-model="telegramDialog"
+      :customer-id="telegramTarget?.customer?.id"
+      :customer-name="telegramTarget?.customer?.name"
+    />
 
     <AppConfirmDialog
       v-model="confirmDelete"

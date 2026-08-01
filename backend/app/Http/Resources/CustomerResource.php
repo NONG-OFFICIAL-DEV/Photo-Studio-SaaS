@@ -22,6 +22,7 @@ class CustomerResource extends JsonResource
             'is_favorite' => $this->is_favorite,
             'is_blacklisted' => $this->is_blacklisted,
             'blacklist_reason' => $this->blacklist_reason,
+            'telegram_connected' => (bool) $this->telegram_chat_id,
             'tags' => CustomerTagResource::collection($this->whenLoaded('tags')),
             'notes' => CustomerNoteResource::collection($this->whenLoaded('notes')),
             'created_by' => $this->whenLoaded('createdBy', fn () => $this->createdBy?->name),

@@ -11,9 +11,12 @@ import {
   uploadSettingsLogoApi,
   uploadSettingsQrPaymentApi,
   exportSettingsDataApi,
+  connectTelegramApi,
+  disconnectTelegramApi,
 } from '@/apis/settings.api'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
+import { translateApiMessage } from '@/utils/apiMessages'
 
 const { t } = useI18n()
 const auth = useAuthStore()
@@ -29,6 +32,11 @@ const submitError = ref(null)
 const tenant = ref(null)
 const logoInput = ref(null)
 const qrInput = ref(null)
+
+const telegramBotToken = ref('')
+const telegramConnecting = ref(false)
+const telegramDisconnecting = ref(false)
+const telegramError = ref(null)
 
 const initialValues = computed(() => ({
   name: tenant.value?.name ?? '',
@@ -128,6 +136,34 @@ async function exportData() {
     exporting.value = false
   }
 }
+
+async function connectTelegram() {
+  telegramConnecting.value = true
+  telegramError.value = null
+  try {
+    await connectTelegramApi(telegramBotToken.value)
+    await load()
+    telegramBotToken.value = ''
+    appStore.notify(t('settingsPage.telegram.connectedSuccess'))
+  } catch (error) {
+    telegramError.value = error
+  } finally {
+    telegramConnecting.value = false
+  }
+}
+
+async function disconnectTelegram() {
+  telegramDisconnecting.value = true
+  try {
+    await disconnectTelegramApi()
+    await load()
+    appStore.notify(t('settingsPage.telegram.disconnectedSuccess'))
+  } catch (error) {
+    appStore.notify(translateApiMessage(error, 'common.actionFailed'), 'error')
+  } finally {
+    telegramDisconnecting.value = false
+  }
+}
 </script>
 
 <template>
@@ -138,6 +174,7 @@ async function exportData() {
       <v-tab value="company">{{ t('settingsPage.tabs.company') }}</v-tab>
       <v-tab value="invoice">{{ t('settingsPage.tabs.invoice') }}</v-tab>
       <v-tab value="theme">{{ t('settingsPage.tabs.theme') }}</v-tab>
+      <v-tab value="telegram">{{ t('settingsPage.tabs.telegram') }}</v-tab>
       <v-tab value="data">{{ t('settingsPage.tabs.data') }}</v-tab>
     </v-tabs>
 
@@ -153,7 +190,7 @@ async function exportData() {
               <v-card variant="outlined">
                 <v-card-text>
                   <div class="d-flex align-center ga-4 mb-4">
-                    <v-avatar size="72" rounded="lg" color="surface-variant">
+                    <v-avatar size="72" rounded="lg">
                       <v-img v-if="tenant?.logo_url" :src="tenant.logo_url" cover />
                       <v-icon v-else icon="mdi-domain" size="32" />
                     </v-avatar>
@@ -255,7 +292,7 @@ async function exportData() {
                     <v-col cols="12">
                       <v-divider class="mb-4" />
                       <div class="d-flex align-center ga-4">
-                        <v-avatar size="72" rounded="lg" color="surface-variant">
+                        <v-avatar size="72" rounded="lg">
                           <v-img v-if="tenant?.qr_payment_url" :src="tenant.qr_payment_url" cover />
                           <v-icon v-else icon="mdi-qrcode" size="32" />
                         </v-avatar>
@@ -328,6 +365,50 @@ async function exportData() {
               </v-card>
             </v-window-item>
 
+            <v-window-item value="telegram">
+              <v-card variant="outlined">
+                <v-card-text>
+                  <template v-if="tenant?.telegram?.connected">
+                    <v-alert type="success" variant="tonal" class="mb-4">
+                      <div class="d-flex align-center justify-space-between flex-wrap ga-2">
+                        <span>{{ t('settingsPage.telegram.connectedAs', { username: tenant.telegram.bot_username }) }}</span>
+                        <v-btn size="small" variant="tonal" color="error" :loading="telegramDisconnecting" @click="disconnectTelegram">
+                          {{ t('settingsPage.telegram.disconnect') }}
+                        </v-btn>
+                      </div>
+                    </v-alert>
+                    <p class="text-body-2 text-medium-emphasis mb-0">{{ t('settingsPage.telegram.connectedHint') }}</p>
+                  </template>
+
+                  <template v-else>
+                    <p class="text-body-2 text-medium-emphasis mb-4">{{ t('settingsPage.telegram.setupHint') }}</p>
+                    <AppApiErrorAlert :error="telegramError" fallback-key="settingsPage.telegram.connectError" />
+                    <v-row>
+                      <v-col cols="12" sm="8">
+                        <v-text-field
+                          v-model="telegramBotToken"
+                          :label="t('settingsPage.telegram.botToken')"
+                          :placeholder="t('settingsPage.telegram.botTokenPlaceholder')"
+                          hide-details
+                        />
+                      </v-col>
+                      <v-col cols="12" sm="4" class="d-flex align-center">
+                        <v-btn
+                          color="primary"
+                          variant="flat"
+                          :disabled="!telegramBotToken"
+                          :loading="telegramConnecting"
+                          @click="connectTelegram"
+                        >
+                          {{ t('settingsPage.telegram.connect') }}
+                        </v-btn>
+                      </v-col>
+                    </v-row>
+                  </template>
+                </v-card-text>
+              </v-card>
+            </v-window-item>
+
             <v-window-item value="data">
               <v-card variant="outlined">
                 <v-card-text>
@@ -345,7 +426,7 @@ async function exportData() {
             </v-window-item>
           </v-window>
 
-          <div v-if="tab !== 'data'" class="d-flex justify-end mt-4">
+          <div v-if="!['data', 'telegram'].includes(tab)" class="d-flex justify-end mt-4">
             <v-btn type="submit" color="primary" :loading="saving">{{ t('settingsPage.actions.save') }}</v-btn>
           </div>
         </template>

@@ -9,6 +9,7 @@ use App\Http\Requests\Invoice\VoidInvoiceRequest;
 use App\Http\Resources\InvoiceResource;
 use App\Models\Invoice;
 use App\Services\InvoiceService;
+use App\Services\TelegramService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -87,6 +88,44 @@ class InvoiceController extends Controller
         $invoice = $this->invoices->void($invoice, $request->string('reason')->toString());
 
         return $this->success(new InvoiceResource($invoice), 'Invoice voided.');
+    }
+
+    /**
+     * The "click one button, customer gets the invoice" flow — renders the
+     * same PDF downloadPdf() serves and forwards it straight to the
+     * customer's linked Telegram chat, never touching this app's storage.
+     */
+    public function sendTelegram(Invoice $invoice, TelegramService $telegram): JsonResponse
+    {
+        $this->authorize('send', $invoice);
+
+        $invoice->loadMissing('customer');
+        $tenant = $invoice->tenant;
+
+        if (! $tenant->telegramConnected()) {
+            return $this->error('Connect a Telegram bot in Settings first.', 422, [], 'TELEGRAM_NOT_CONFIGURED');
+        }
+
+        if (! $invoice->customer?->telegram_chat_id) {
+            return $this->error('This customer has not connected Telegram yet.', 422, [], 'TELEGRAM_CUSTOMER_NOT_LINKED');
+        }
+
+        $pdf = $this->invoices->renderPdf($invoice);
+        $caption = "Invoice {$invoice->invoice_number} — Total: \${$invoice->total}";
+
+        $result = $telegram->sendDocument(
+            $tenant->telegram_bot_token,
+            $invoice->customer->telegram_chat_id,
+            $pdf,
+            "{$invoice->invoice_number}.pdf",
+            $caption
+        );
+
+        if (! ($result['ok'] ?? false)) {
+            return $this->error('Failed to send via Telegram.', 502, [], 'TELEGRAM_SEND_FAILED');
+        }
+
+        return $this->success(null, 'Invoice sent via Telegram.');
     }
 
     /**
