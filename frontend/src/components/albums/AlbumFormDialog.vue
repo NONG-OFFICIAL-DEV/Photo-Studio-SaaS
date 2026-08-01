@@ -24,6 +24,13 @@ const errorMessage = ref('')
 const formId = useId()
 const customerOptions = ref([])
 const customerSearchLoading = ref(false)
+// Selecting a customer re-fires @update:search with that customer's own
+// name (Vuetify syncing the input box's visible text) — treating it as a
+// fresh query narrows customerOptions down to just search matches for that
+// name, so reopening the dropdown to pick someone else can show far fewer
+// options than expected. Tracking the name just selected lets
+// searchCustomers ignore that one echoed call.
+const lastSelectedCustomerName = ref(null)
 
 const isEdit = computed(() => Boolean(props.album?.id))
 const title = computed(() => (isEdit.value ? t('albums.editAlbum') : t('albums.newAlbum')))
@@ -54,6 +61,7 @@ async function loadInitialCustomers() {
 
 async function searchCustomers(term) {
   if (!term) return loadInitialCustomers()
+  if (term === lastSelectedCustomerName.value) return
   if (term.length < 2) return
 
   customerSearchLoading.value = true
@@ -63,6 +71,11 @@ async function searchCustomers(term) {
   } finally {
     customerSearchLoading.value = false
   }
+}
+
+function selectCustomer(customerId, setFieldValue) {
+  setFieldValue('customer_id', customerId)
+  lastSelectedCustomerName.value = customerOptions.value.find((c) => c.id === customerId)?.name ?? null
 }
 
 async function onSubmit(values) {
@@ -108,7 +121,7 @@ async function onSubmit(values) {
               :loading="customerSearchLoading"
               no-filter
               @update:search="searchCustomers"
-              @update:model-value="setFieldValue('customer_id', $event)"
+              @update:model-value="selectCustomer($event, setFieldValue)"
             >
               <template #item="{ props: itemProps, item }">
                 <v-list-item v-bind="itemProps" :subtitle="item.raw.phone" />

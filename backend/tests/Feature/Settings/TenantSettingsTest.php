@@ -26,6 +26,16 @@ class TenantSettingsTest extends TestCase
             ->assertJsonPath('data.settings.default_due_days', 14);
     }
 
+    public function test_an_owner_with_an_unverified_email_cannot_update_settings(): void
+    {
+        [, $owner] = $this->createTenantWithUser(TenantRole::Owner, ['email_verified_at' => null]);
+
+        $this->actingAsUser($owner)
+            ->putJson('/api/v1/settings', ['name' => 'Should Not Save'])
+            ->assertStatus(403)
+            ->assertJsonPath('code', 'EMAIL_NOT_VERIFIED');
+    }
+
     public function test_owner_can_update_company_invoice_and_theme_fields(): void
     {
         [, $owner] = $this->createTenantWithUser(TenantRole::Owner);

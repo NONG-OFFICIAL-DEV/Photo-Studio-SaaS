@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppToolbar from '@/components/common/AppToolbar.vue'
 import AppForm from '@/components/common/AppForm.vue'
+import AppApiErrorAlert from '@/components/common/AppApiErrorAlert.vue'
 import { settingsSchema } from '@/utils/validators'
 import {
   getSettingsApi,
@@ -13,7 +14,6 @@ import {
 } from '@/apis/settings.api'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
-import { translateApiMessage } from '@/utils/apiMessages'
 
 const { t } = useI18n()
 const auth = useAuthStore()
@@ -25,7 +25,7 @@ const saving = ref(false)
 const exporting = ref(false)
 const logoUploading = ref(false)
 const qrUploading = ref(false)
-const errorMessage = ref('')
+const submitError = ref(null)
 const tenant = ref(null)
 const logoInput = ref(null)
 const qrInput = ref(null)
@@ -60,7 +60,7 @@ load()
 
 async function onSubmit(values) {
   saving.value = true
-  errorMessage.value = ''
+  submitError.value = null
 
   try {
     const { data } = await updateSettingsApi(values)
@@ -68,7 +68,7 @@ async function onSubmit(values) {
     await auth.fetchMe()
     appStore.notify(t('settingsPage.messages.savedSuccess'))
   } catch (error) {
-    errorMessage.value = translateApiMessage(error, 'settingsPage.messages.saveError')
+    submitError.value = error
   } finally {
     saving.value = false
   }
@@ -144,7 +144,7 @@ async function exportData() {
     <v-skeleton-loader v-if="loading" type="article" />
 
     <template v-else>
-      <v-alert v-if="errorMessage" type="error" variant="tonal" class="mb-4">{{ errorMessage }}</v-alert>
+      <AppApiErrorAlert :error="submitError" fallback-key="settingsPage.messages.saveError" />
 
       <AppForm :schema="settingsSchema" :initial-values="initialValues" @submit="onSubmit">
         <template #default="{ errors, values, setFieldValue }">

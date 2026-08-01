@@ -18,6 +18,7 @@
     "ACCOUNT_DEACTIVATED": "This account has been deactivated.",
     "EMAIL_ALREADY_VERIFIED": "Email already verified.",
     "VERIFICATION_LINK_SENT": "Verification link sent.",
+    "EMAIL_NOT_VERIFIED": "Please verify your email address before doing this — check your inbox or resend the link from the dashboard.",
     "PASSWORD_LINK_SENT": "We have emailed your password reset link!",
     "PASSWORD_INVALID_USER": "We can't find a user with that email address.",
     "PASSWORD_RESET_THROTTLED": "Please wait before retrying.",
@@ -66,7 +67,9 @@
     "PAYMENT_EXCEEDS_BALANCE": "Payment of {amount} exceeds the remaining balance of {remaining}.",
     "PAYMENT_NOT_FOUND": "Payment not found for this invoice.",
     "INVOICE_INVALID_STATUS_TRANSITION": "This action requires the invoice to be \"{expected}\" (currently \"{current}\").",
-    "BOOKING_NOT_CONFIRMED": "This booking is \"{status}\" — it must be confirmed before a project can be created for it."
+    "BOOKING_NOT_CONFIRMED": "This booking is \"{status}\" — it must be confirmed before a project can be created for it.",
+    "CANNOT_DEACTIVATE_SELF": "You cannot deactivate your own account.",
+    "CANNOT_DEACTIVATE_LAST_OWNER": "A studio must have at least one active owner."
   },
   "common": {
     "save": "Save",
@@ -718,6 +721,10 @@
     "commissionRate": "Commission Rate",
     "basePay": "Base Pay",
     "passwordHint": "The employee will use this password to log in — share it with them directly.",
+    "deactivate": "Deactivate",
+    "reactivate": "Reactivate",
+    "confirmDeactivateTitle": "Deactivate employee?",
+    "confirmDeactivateMessage": "{name} will no longer be able to log in or be assigned new work. Their history (bookings, payroll, commissions) is kept, and this can be reversed at any time.",
     "payTypes": {
       "salary": "Salary",
       "hourly": "Hourly"
@@ -735,7 +742,11 @@
       "updatedSuccess": "Employee profile updated successfully.",
       "saveError": "Unable to save employee profile.",
       "createdSuccess": "Employee created successfully.",
-      "createError": "Unable to create employee."
+      "createError": "Unable to create employee.",
+      "deactivatedSuccess": "Employee deactivated successfully.",
+      "deactivateError": "Unable to deactivate employee.",
+      "reactivatedSuccess": "Employee reactivated successfully.",
+      "reactivateError": "Unable to reactivate employee."
     }
   },
   "planLimits": {

@@ -73,8 +73,10 @@ Route::prefix('auth')->name('auth.')->group(function () {
  */
 Route::middleware(['auth:api', 'tenant', 'subscription.active'])->group(function () {
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
-    Route::post('/users', [UserController::class, 'store'])->name('users.store');
-    Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+    Route::post('/users', [UserController::class, 'store'])->middleware('email.verified')->name('users.store');
+    Route::put('/users/{user}', [UserController::class, 'update'])->middleware('email.verified')->name('users.update');
+    Route::post('/users/{user}/deactivate', [UserController::class, 'deactivate'])->middleware('email.verified')->name('users.deactivate');
+    Route::post('/users/{user}/reactivate', [UserController::class, 'reactivate'])->middleware('email.verified')->name('users.reactivate');
 
     Route::get('/plan-limits', [PlanLimitController::class, 'show'])->name('plan-limits.show');
 
@@ -262,7 +264,7 @@ Route::middleware(['auth:api', 'tenant', 'subscription.active'])->group(function
         Route::post('/qr-payment', [TenantSettingsController::class, 'uploadQrPayment']);
 
         Route::get('/', [TenantSettingsController::class, 'show']);
-        Route::put('/', [TenantSettingsController::class, 'update']);
+        Route::put('/', [TenantSettingsController::class, 'update'])->middleware('email.verified');
     });
 
     Route::prefix('audit')->name('audit.')->group(function () {

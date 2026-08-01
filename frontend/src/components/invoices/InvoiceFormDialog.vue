@@ -161,6 +161,16 @@ function toggleOptionalAddon(component, checked) {
   if (index !== -1) items.value.splice(index, 1)
 }
 
+// Selecting an item re-fires @update:search with that item's own display
+// title — Vuetify syncing the input box's visible text counts as a
+// "search" event too. Treating it as a fresh query wipes the options list
+// down to whatever (if anything) matches that title text server-side, so
+// reopening the dropdown to pick something else can show "No data
+// available" even though plenty of other rows exist. Tracking the title
+// just selected lets the search handler ignore that one echoed call.
+const lastSelectedCustomerTitle = ref(null)
+const lastSelectedOrderTitle = ref(null)
+
 async function loadInitialCustomers() {
   customerSearchLoading.value = true
   try {
@@ -173,6 +183,7 @@ async function loadInitialCustomers() {
 
 async function searchCustomers(term) {
   if (!term) return loadInitialCustomers()
+  if (term === lastSelectedCustomerTitle.value) return
   if (term.length < 2) return
 
   customerSearchLoading.value = true
@@ -182,6 +193,11 @@ async function searchCustomers(term) {
   } finally {
     customerSearchLoading.value = false
   }
+}
+
+function selectCustomer(customerId, setFieldValue) {
+  setFieldValue('customer_id', customerId)
+  lastSelectedCustomerTitle.value = customerOptions.value.find((c) => c.id === customerId)?.name ?? null
 }
 
 async function loadInitialOrders() {
@@ -196,6 +212,7 @@ async function loadInitialOrders() {
 
 async function searchOrders(term) {
   if (!term) return loadInitialOrders()
+  if (term === lastSelectedOrderTitle.value) return
   if (term.length < 2) return
 
   orderSearchLoading.value = true
@@ -210,6 +227,7 @@ async function searchOrders(term) {
 async function selectOrder(orderId, setFieldValue) {
   setFieldValue('order_id', orderId)
   orderPreview.value = null
+  lastSelectedOrderTitle.value = orderSelectItems.value.find((o) => o.id === orderId)?.title ?? null
 
   if (!orderId) {
     setFieldValue('customer_id', null)
@@ -375,7 +393,7 @@ async function onSubmit(values) {
               :error-messages="errors.customer_id"
               no-filter
               @update:search="searchCustomers"
-              @update:model-value="setFieldValue('customer_id', $event)"
+              @update:model-value="selectCustomer($event, setFieldValue)"
             >
               <template #item="{ props: itemProps, item }">
                 <v-list-item v-bind="itemProps" :subtitle="item.raw.phone" />

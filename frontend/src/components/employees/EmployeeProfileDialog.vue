@@ -3,10 +3,10 @@ import { computed, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDialog from '@/components/common/AppDialog.vue'
 import AppForm from '@/components/common/AppForm.vue'
+import AppApiErrorAlert from '@/components/common/AppApiErrorAlert.vue'
 import { employmentSchema } from '@/utils/validators'
 import { updateUserEmploymentApi } from '@/apis/user.api'
 import { useAppStore } from '@/stores/app'
-import { translateApiMessage } from '@/utils/apiMessages'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -19,7 +19,7 @@ const { t } = useI18n()
 const appStore = useAppStore()
 
 const loading = ref(false)
-const errorMessage = ref('')
+const submitError = ref(null)
 const formId = useId()
 
 const PAY_TYPES = computed(() => [
@@ -34,12 +34,12 @@ const initialValues = computed(() => ({
 }))
 
 watch(() => props.modelValue, (open) => {
-  if (open) errorMessage.value = ''
+  if (open) submitError.value = null
 })
 
 async function onSubmit(values) {
   loading.value = true
-  errorMessage.value = ''
+  submitError.value = null
 
   try {
     await updateUserEmploymentApi(props.employee.id, values)
@@ -47,7 +47,7 @@ async function onSubmit(values) {
     emit('saved')
     emit('update:modelValue', false)
   } catch (error) {
-    errorMessage.value = translateApiMessage(error, 'employees.messages.saveError')
+    submitError.value = error
   } finally {
     loading.value = false
   }
@@ -56,7 +56,7 @@ async function onSubmit(values) {
 
 <template>
   <AppDialog :model-value="modelValue" :title="t('employees.editPayProfile', { name: employee?.name })" max-width="480" @update:model-value="emit('update:modelValue', $event)">
-    <v-alert v-if="errorMessage" type="error" variant="tonal" class="mb-4">{{ errorMessage }}</v-alert>
+    <AppApiErrorAlert :error="submitError" fallback-key="employees.messages.saveError" />
 
     <AppForm :id="formId" :schema="employmentSchema" :initial-values="initialValues" @submit="onSubmit">
       <template #default="{ errors, values, setFieldValue }">

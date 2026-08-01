@@ -155,6 +155,17 @@ class AuthService
         /** @var User $user */
         $user = auth('api')->user();
 
+        // Re-checked here, not just at login — an access token stays valid
+        // for its full TTL regardless of what happens to the account
+        // afterward, so deactivating someone mid-session would otherwise
+        // let them keep refreshing into new tokens for up to
+        // jwt.refresh_ttl (default 14 days) before it actually takes
+        // effect. This caps that gap to at most one access-token TTL.
+        if (! $user->isActive()) {
+            auth('api')->logout();
+            throw new InvalidCredentialsException('This account has been deactivated.', 'ACCOUNT_DEACTIVATED');
+        }
+
         return $this->tokenPayload($user, $token, $ttlMinutes);
     }
 

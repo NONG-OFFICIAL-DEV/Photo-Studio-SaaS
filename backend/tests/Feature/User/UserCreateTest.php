@@ -42,6 +42,21 @@ class UserCreateTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_an_owner_with_an_unverified_email_cannot_create_an_employee(): void
+    {
+        [, $owner] = $this->createTenantWithUser(TenantRole::Owner, ['email_verified_at' => null]);
+
+        $this->actingAsUser($owner)
+            ->postJson('/api/v1/users', [
+                'name' => 'New Photographer',
+                'email' => 'photographer@example.com',
+                'password' => 'password123',
+                'role' => TenantRole::Photographer->value,
+            ])
+            ->assertStatus(403)
+            ->assertJsonPath('code', 'EMAIL_NOT_VERIFIED');
+    }
+
     public function test_an_employee_cannot_be_created_with_the_owner_role(): void
     {
         [, $owner] = $this->createTenantWithUser(TenantRole::Owner);

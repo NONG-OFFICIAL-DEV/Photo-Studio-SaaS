@@ -26,6 +26,12 @@ const formId = useId()
 const users = ref([])
 const orders = ref([])
 const orderSearchLoading = ref(false)
+// Selecting an order re-fires @update:search with that order's own display
+// title (Vuetify syncing the input box's visible text) — treating it as a
+// fresh query would wipe `orders` down to whatever matches that title text,
+// so reopening the dropdown to pick a different order could show no
+// options. Tracking the title just selected lets searchOrders ignore it.
+const lastSelectedOrderTitle = ref(null)
 
 watch(() => props.modelValue, async (open) => {
   if (open) {
@@ -48,6 +54,7 @@ async function loadInitialOrders() {
 
 async function searchOrders(term) {
   if (!term) return loadInitialOrders()
+  if (term === lastSelectedOrderTitle.value) return
   if (term.length < 2) return
 
   orderSearchLoading.value = true
@@ -57,6 +64,12 @@ async function searchOrders(term) {
   } finally {
     orderSearchLoading.value = false
   }
+}
+
+function selectOrder(orderId, setFieldValue) {
+  setFieldValue('order_id', orderId)
+  const order = orders.value.find((o) => o.id === orderId)
+  lastSelectedOrderTitle.value = order ? `${order.customer?.name ?? ''} — $${order.total}` : null
 }
 
 async function onSubmit(values) {
@@ -108,7 +121,7 @@ async function onSubmit(values) {
           no-filter
           class="mb-2"
           @update:search="searchOrders"
-          @update:model-value="setFieldValue('order_id', $event)"
+          @update:model-value="selectOrder($event, setFieldValue)"
         />
 
         <v-text-field :model-value="values.amount" :label="`${t('invoices.amount')} *`" type="number" step="0.01" prefix="$" :error-messages="errors.amount" class="mb-2" @update:model-value="setFieldValue('amount', $event)" />

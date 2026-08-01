@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\PayType;
+use App\Enums\UserStatus;
 use App\Traits\BelongsToTenant;
 use Database\Factories\UserFactory;
 use Illuminate\Auth\MustVerifyEmail;
@@ -41,6 +42,7 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmailContrac
             'pay_type' => PayType::class,
             'base_pay' => 'decimal:2',
             'commission_rate' => 'decimal:2',
+            'status' => UserStatus::class,
         ];
     }
 
@@ -61,7 +63,7 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmailContrac
 
     public function isActive(): bool
     {
-        return $this->status === 'active';
+        return $this->status === UserStatus::Active;
     }
 
     /* -----------------------------------------------------------------

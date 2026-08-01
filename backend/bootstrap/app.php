@@ -1,6 +1,7 @@
 <?php
 
 use App\Exceptions\ApiException;
+use App\Http\Middleware\EnsureEmailIsVerified;
 use App\Http\Middleware\EnsurePlanFeature;
 use App\Http\Middleware\EnsureSubscriptionActive;
 use App\Http\Middleware\EnsureSuperAdmin;
@@ -46,6 +47,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'tenant' => IdentifyTenant::class,
             'subscription.active' => EnsureSubscriptionActive::class,
+            'email.verified' => EnsureEmailIsVerified::class,
             'super-admin' => EnsureSuperAdmin::class,
             'plan.feature' => EnsurePlanFeature::class,
         ]);

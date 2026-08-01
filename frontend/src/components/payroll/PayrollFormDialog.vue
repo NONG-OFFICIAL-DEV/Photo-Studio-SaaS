@@ -1,6 +1,7 @@
 <script setup>
 import { ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { endOfMonth, format, startOfMonth, subMonths } from 'date-fns'
 import AppDialog from '@/components/common/AppDialog.vue'
 import AppForm from '@/components/common/AppForm.vue'
 import AppDatePicker from '@/components/common/AppDatePicker.vue'
@@ -23,6 +24,33 @@ const loading = ref(false)
 const errorMessage = ref('')
 const formId = useId()
 const users = ref([])
+
+/*
+ * Free text let two entries for the same month end up labeled
+ * differently ("July 2026" vs "Jul 2026" vs "07/2026") — a fixed list of
+ * the last 12 calendar months (most recent first) makes every entry
+ * consistent and pickable in one tap. Numeric MM/yyyy, not a month name,
+ * per this app's standing "no month-name text" convention (see
+ * BookingCalendar.vue) — avoids the Khmer month-translation problem
+ * entirely instead of needing to solve it here too.
+ */
+const PERIOD_OPTIONS = Array.from({ length: 12 }, (_, i) => {
+  const monthStart = startOfMonth(subMonths(new Date(), i))
+  return {
+    label: format(monthStart, 'MM/yyyy'),
+    start: format(monthStart, 'yyyy-MM-dd'),
+    end: format(endOfMonth(monthStart), 'yyyy-MM-dd'),
+  }
+})
+
+function selectPeriod(label, setFieldValue) {
+  setFieldValue('period_label', label)
+  const period = PERIOD_OPTIONS.find((p) => p.label === label)
+  if (period) {
+    setFieldValue('period_start', period.start)
+    setFieldValue('period_end', period.end)
+  }
+}
 
 watch(() => props.modelValue, async (open) => {
   if (open) {
@@ -57,7 +85,7 @@ async function onSubmit(values) {
     <AppForm
       :id="formId"
       :schema="payrollEntrySchema"
-      :initial-values="{ user_id: null, period_label: '', period_start: null, period_end: null, base_pay: null, commission_total: null, deductions: null, notes: '' }"
+      :initial-values="{ user_id: null, period_label: null, period_start: null, period_end: null, base_pay: null, commission_total: null, deductions: null, notes: '' }"
       @submit="onSubmit"
     >
       <template #default="{ errors, values, setFieldValue }">
@@ -72,7 +100,16 @@ async function onSubmit(values) {
           @update:model-value="setFieldValue('user_id', $event)"
         />
 
-        <v-text-field :model-value="values.period_label" :label="`${t('payroll.periodLabel')} *`" :error-messages="errors.period_label" class="mb-2" placeholder="e.g. July 2026" @update:model-value="setFieldValue('period_label', $event)" />
+        <v-select
+          :model-value="values.period_label"
+          :label="`${t('payroll.periodLabel')} *`"
+          item-title="label"
+          item-value="label"
+          :items="PERIOD_OPTIONS"
+          :error-messages="errors.period_label"
+          class="mb-2"
+          @update:model-value="selectPeriod($event, setFieldValue)"
+        />
 
         <v-row>
           <v-col cols="6">
