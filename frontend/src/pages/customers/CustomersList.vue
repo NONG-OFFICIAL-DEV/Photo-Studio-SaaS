@@ -120,18 +120,26 @@ const canImport = computed(() => auth.hasPermission('customers.import'))
   <div>
     <AppToolbar :title="t('customers.title')" :subtitle="t('customers.subtitle')">
       <template #actions>
-        <v-btn v-if="canImport" variant="outlined" prepend-icon="mdi-upload" @click="importDialog = true">{{ t('customers.actions.import') }}</v-btn>
+        <v-btn v-if="canImport" variant="outlined" prepend-icon="mdi-upload" @click="importDialog = true">{{
+          t('customers.actions.import')
+        }}</v-btn>
         <v-menu v-if="canExport">
           <template #activator="{ props: menuProps }">
-            <v-btn variant="outlined" prepend-icon="mdi-download" v-bind="menuProps">{{ t('customers.actions.export') }}</v-btn>
+            <v-btn variant="outlined" prepend-icon="mdi-download" v-bind="menuProps">{{
+              t('customers.actions.export')
+            }}</v-btn>
           </template>
           <v-list>
             <v-list-item :title="t('customers.actions.exportCsv')" @click="exportCustomers('csv')" />
             <v-list-item :title="t('customers.actions.exportExcel')" @click="exportCustomers('xlsx')" />
           </v-list>
         </v-menu>
-        <v-btn variant="outlined" prepend-icon="mdi-tag-multiple-outline" @click="tagManagerDialog = true">{{ t('fields.tags') }}</v-btn>
-        <v-btn v-if="canCreate" color="primary" prepend-icon="mdi-plus" @click="openCreate">{{ t('customers.actions.addCustomer') }}</v-btn>
+        <v-btn variant="outlined" prepend-icon="mdi-tag-multiple-outline" @click="tagManagerDialog = true">{{
+          t('fields.tags')
+        }}</v-btn>
+        <v-btn v-if="canCreate" color="primary" prepend-icon="mdi-plus" @click="openCreate">{{
+          t('customers.actions.addCustomer')
+        }}</v-btn>
       </template>
     </AppToolbar>
 
@@ -161,21 +169,29 @@ const canImport = computed(() => auth.hasPermission('customers.import'))
         />
       </v-col>
       <v-col cols="6" sm="3">
-        <v-checkbox v-model="filters.is_favorite" :label="t('customers.filters.favoritesOnly')" density="compact" hide-details true-value="1" :false-value="null" />
+        <v-checkbox
+          v-model="filters.is_favorite"
+          :label="t('customers.filters.favoritesOnly')"
+          density="compact"
+          hide-details
+          true-value="1"
+          :false-value="null"
+        />
       </v-col>
       <v-col cols="6" sm="3">
-        <v-checkbox v-model="filters.is_blacklisted" :label="t('customers.filters.blacklistedOnly')" density="compact" hide-details true-value="1" :false-value="null" />
+        <v-checkbox
+          v-model="filters.is_blacklisted"
+          :label="t('customers.filters.blacklistedOnly')"
+          density="compact"
+          hide-details
+          true-value="1"
+          :false-value="null"
+        />
       </v-col>
     </v-row>
 
     <v-card variant="flat" border rounded="lg" class="pa-4">
-      <AppTable
-        ref="tableRef"
-        :headers="headers"
-        :fetch-fn="fetchCustomers"
-        :filters="filters"
-        item-label="customers"
-      >
+      <AppTable ref="tableRef" :headers="headers" :fetch-fn="fetchCustomers" :filters="filters" item-label="customers">
         <template #[`item.name`]="{ item }">
           <div class="d-flex align-center ga-1">
             <v-icon v-if="item.is_favorite" icon="mdi-star" color="warning" size="16" />
@@ -184,7 +200,15 @@ const canImport = computed(() => auth.hasPermission('customers.import'))
         </template>
 
         <template #[`item.tags`]="{ item }">
-          <v-chip v-for="tag in item.tags" :key="tag.id" size="x-small" :color="tag.color" variant="tonal" label class="mr-1">
+          <v-chip
+            v-for="tag in item.tags"
+            :key="tag.id"
+            size="x-small"
+            :color="tag.color"
+            variant="tonal"
+            label
+            class="mr-1"
+          >
             {{ tag.name }}
           </v-chip>
         </template>
@@ -199,7 +223,14 @@ const canImport = computed(() => auth.hasPermission('customers.import'))
         </template>
 
         <template #[`item.actions`]="{ item }">
-          <v-btn icon="mdi-eye-outline" size="small" variant="text" @click="openDetail(item)" />
+          <v-btn
+            :text="t('customers.telegram.generateLink')"
+            color="blue"
+            size="small"
+            variant="outlined"
+            append-icon="mdi-send-circle-outline"
+            @click="openDetail(item)"
+          />
           <v-btn
             :icon="item.is_favorite ? 'mdi-star' : 'mdi-star-outline'"
             :color="item.is_favorite ? 'warning' : undefined"
@@ -227,23 +258,11 @@ const canImport = computed(() => auth.hasPermission('customers.import'))
       </AppTable>
     </v-card>
 
-    <CustomerFormDialog
-      v-model="formDialog"
-      :customer="editingCustomer"
-      @saved="tableRef?.refresh()"
-    />
+    <CustomerFormDialog v-model="formDialog" :customer="editingCustomer" @saved="tableRef?.refresh()" />
 
-    <CustomerDetailDialog
-      v-model="detailDialog"
-      :customer-id="selectedCustomerId"
-      @changed="tableRef?.refresh()"
-    />
+    <CustomerDetailDialog v-model="detailDialog" :customer-id="selectedCustomerId" @changed="tableRef?.refresh()" />
 
-    <CustomerBlacklistDialog
-      v-model="blacklistDialog"
-      :customer-id="blacklistTargetId"
-      @saved="tableRef?.refresh()"
-    />
+    <CustomerBlacklistDialog v-model="blacklistDialog" :customer-id="blacklistTargetId" @saved="tableRef?.refresh()" />
 
     <CustomerImportDialog v-model="importDialog" @imported="tableRef?.refresh()" />
 

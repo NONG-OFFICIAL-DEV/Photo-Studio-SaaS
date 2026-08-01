@@ -505,7 +505,7 @@
     },
     "telegram": {
       "send": "Send via Telegram",
-      "notLinkedHint": "This customer hasn't connected Telegram yet — check in settings page.",
+      "notLinkedHint": "This customer hasn't connected Telegram yet — connect from their profile first.",
       "dialogTitle": "Send to {name} via Telegram",
       "hint": "Choose photos or a PDF from your computer — they're forwarded straight to the customer's Telegram chat and never stored on this server.",
       "chooseFiles": "Choose files",
