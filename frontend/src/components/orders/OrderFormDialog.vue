@@ -330,7 +330,18 @@ const subtotal = computed(() => computeSubtotal())
             :items="catalogOptions"
           >
             <template #item="{ props: itemProps, item }">
-              <v-list-item v-bind="itemProps" :subtitle="`$${item.raw.price} · ${item.raw.type}`" />
+              <v-list-item v-bind="itemProps">
+                <template #append>
+                  <v-icon
+                    :icon="item.raw.type === 'service' ? 'mdi-tag-multiple-outline' : 'mdi-plus-box-multiple-outline'"
+                    size="16"
+                    class="me-1"
+                  />
+                  <span class="text-body-2 text-medium-emphasis">
+                    {{ `$${item.raw.price}` }} {{ $t(`services.itemType.${item.raw.type}`) }}
+                  </span>
+                </template>
+              </v-list-item>
             </template>
           </v-select>
           <v-btn icon="mdi-plus" variant="tonal" @click="addCatalogItem" />
