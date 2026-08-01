@@ -77,6 +77,66 @@ class AdminAnalyticsTest extends TestCase
         $this->assertCount(6, $response->json('data.signups_trend'));
     }
 
+    public function test_new_tenants_and_revenue_collected_respect_the_selected_date_range(): void
+    {
+        $superAdmin = $this->superAdmin();
+
+        // created_at isn't in Tenant::$fillable, so a mass-assigned update()
+        // would silently no-op — set it directly and save() to bypass that.
+        [$tenantOld] = $this->createTenantWithUser(TenantRole::Owner);
+        $tenantOld->created_at = now()->subMonths(3);
+        $tenantOld->save();
+
+        [$tenantNew] = $this->createTenantWithUser(TenantRole::Owner);
+        $tenantNew->created_at = now()->subDays(2);
+        $tenantNew->save();
+
+        \App\Models\SubscriptionPayment::create([
+            'tenant_id' => $tenantNew->id,
+            'subscription_id' => Subscription::where('tenant_id', $tenantNew->id)->value('id'),
+            'plan_id' => Subscription::where('tenant_id', $tenantNew->id)->value('plan_id'),
+            'amount' => 49,
+            'billing_cycle' => BillingCycle::Monthly->value,
+            'period_start' => now()->subDays(1),
+            'period_end' => now()->addMonth(),
+            'paid_at' => now()->subDays(1),
+        ]);
+        \App\Models\SubscriptionPayment::create([
+            'tenant_id' => $tenantOld->id,
+            'subscription_id' => Subscription::where('tenant_id', $tenantOld->id)->value('id'),
+            'plan_id' => Subscription::where('tenant_id', $tenantOld->id)->value('plan_id'),
+            'amount' => 999,
+            'billing_cycle' => BillingCycle::Monthly->value,
+            'period_start' => now()->subMonths(3),
+            'period_end' => now()->subMonths(2),
+            'paid_at' => now()->subMonths(3),
+        ]);
+
+        $response = $this->actingAsUser($superAdmin)
+            ->getJson('/api/v1/admin/analytics?date_from='.now()->subWeek()->toDateString().'&date_to='.now()->toDateString())
+            ->assertOk();
+
+        $response->assertJsonPath('data.new_tenants', 1);
+        $this->assertEquals(49.0, $response->json('data.revenue_collected'));
+
+        // Both tenants still count toward the always-current totals,
+        // regardless of the date filter applied above.
+        $response->assertJsonPath('data.total_tenants', 2);
+    }
+
+    public function test_signups_trend_spans_the_requested_range_not_a_fixed_six_months(): void
+    {
+        $superAdmin = $this->superAdmin();
+        $this->createTenantWithUser(TenantRole::Owner);
+
+        $response = $this->actingAsUser($superAdmin)
+            ->getJson('/api/v1/admin/analytics?date_from='.now()->subDays(3)->toDateString().'&date_to='.now()->toDateString())
+            ->assertOk();
+
+        // A 4-day range groups by day, not month — expect 4 daily points.
+        $this->assertCount(4, $response->json('data.signups_trend'));
+    }
+
     public function test_mrr_falls_back_to_plan_price_when_subscription_has_no_amount(): void
     {
         $superAdmin = $this->superAdmin();

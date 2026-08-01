@@ -830,7 +830,11 @@
       "activeTenants": "Active Tenants",
       "suspendedTenants": "Suspended Tenants",
       "mrr": "MRR",
-      "signupsTrend": "Signups (last 6 months)",
+      "newTenants": "New Tenants",
+      "revenueCollected": "Revenue Collected",
+      "dateFrom": "From",
+      "dateTo": "To",
+      "signupsTrend": "Signups",
       "subscriptionsByStatus": "Subscriptions by Status",
       "statuses": {
         "trial": "Trial",

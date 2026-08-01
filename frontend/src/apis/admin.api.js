@@ -1,6 +1,6 @@
 import http from './api'
 
-export const getAdminAnalyticsApi = () => http.get('/v1/admin/analytics')
+export const getAdminAnalyticsApi = (params = {}) => http.get('/v1/admin/analytics', { params })
 
 export const getAdminTenantsApi = params => http.get('/v1/admin/tenants', { params })
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\AdminAnalyticsService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class AdminAnalyticsController extends Controller
 {
@@ -15,8 +16,11 @@ class AdminAnalyticsController extends Controller
     {
     }
 
-    public function stats(): JsonResponse
+    public function stats(Request $request): JsonResponse
     {
-        return $this->success($this->analytics->stats());
+        $from = $request->query('date_from') ?: now()->subMonths(5)->startOfMonth()->toDateString();
+        $to = $request->query('date_to') ?: now()->endOfMonth()->toDateString();
+
+        return $this->success($this->analytics->stats($from, $to));
     }
 }

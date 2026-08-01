@@ -12,6 +12,7 @@ import {
   Filler,
 } from 'chart.js'
 import AppToolbar from '@/components/common/AppToolbar.vue'
+import AppDatePicker from '@/components/common/AppDatePicker.vue'
 import { getAdminAnalyticsApi } from '@/apis/admin.api'
 import { formatCurrency } from '@/utils/currencyFormat'
 
@@ -19,6 +20,8 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip,
 
 const { t } = useI18n()
 const statsData = ref(null)
+const dateFrom = ref(new Date(new Date().getFullYear(), new Date().getMonth() - 5, 1).toISOString().slice(0, 10))
+const dateTo = ref(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().slice(0, 10))
 
 const stats = computed(() => {
   const d = statsData.value
@@ -27,6 +30,14 @@ const stats = computed(() => {
     { title: t('admin.analytics.activeTenants'), value: String(d?.active_tenants ?? 0), icon: 'mdi-check-circle-outline', color: 'success' },
     { title: t('admin.analytics.suspendedTenants'), value: String(d?.suspended_tenants ?? 0), icon: 'mdi-cancel', color: 'error' },
     { title: t('admin.analytics.mrr'), value: formatCurrency(d?.mrr ?? 0), icon: 'mdi-cash-multiple', color: 'tertiary' },
+  ]
+})
+
+const periodStats = computed(() => {
+  const d = statsData.value
+  return [
+    { title: t('admin.analytics.newTenants'), value: String(d?.new_tenants ?? 0), icon: 'mdi-domain-plus', color: 'info' },
+    { title: t('admin.analytics.revenueCollected'), value: formatCurrency(d?.revenue_collected ?? 0), icon: 'mdi-cash-check', color: 'success' },
   ]
 })
 
@@ -62,7 +73,7 @@ const chartOptions = { responsive: true, maintainAspectRatio: false, plugins: { 
 
 async function loadStats() {
   try {
-    const { data } = await getAdminAnalyticsApi()
+    const { data } = await getAdminAnalyticsApi({ date_from: dateFrom.value, date_to: dateTo.value })
     statsData.value = data.data
   } catch {
     statsData.value = null
@@ -78,6 +89,31 @@ onMounted(loadStats)
 
     <v-row>
       <v-col v-for="stat in stats" :key="stat.title" cols="12" sm="6" md="3">
+        <v-card variant="flat" border rounded="lg">
+          <v-card-text class="d-flex align-center ga-4">
+            <v-avatar :color="stat.color" variant="tonal" size="48">
+              <v-icon :icon="stat.icon" />
+            </v-avatar>
+            <div>
+              <div class="text-caption text-medium-emphasis">{{ stat.title }}</div>
+              <div class="text-h6 font-weight-bold">{{ stat.value }}</div>
+            </div>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+
+    <v-row dense class="mt-2 align-center">
+      <v-col cols="6" sm="3">
+        <AppDatePicker v-model="dateFrom" :label="t('admin.analytics.dateFrom')" :clearable="false" @update:model-value="loadStats" />
+      </v-col>
+      <v-col cols="6" sm="3">
+        <AppDatePicker v-model="dateTo" :label="t('admin.analytics.dateTo')" :clearable="false" @update:model-value="loadStats" />
+      </v-col>
+    </v-row>
+
+    <v-row>
+      <v-col v-for="stat in periodStats" :key="stat.title" cols="12" sm="6" md="3">
         <v-card variant="flat" border rounded="lg">
           <v-card-text class="d-flex align-center ga-4">
             <v-avatar :color="stat.color" variant="tonal" size="48">
