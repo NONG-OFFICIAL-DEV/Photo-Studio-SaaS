@@ -44,7 +44,7 @@ class TelegramSettingsController extends Controller
         $hook = $this->telegram->setWebhook($token, $webhookUrl, $secret);
 
         if (! ($hook['ok'] ?? false)) {
-            return $this->error('The bot token works, but Telegram could not reach this server to register the webhook. Make sure this app is deployed behind a public HTTPS domain, then try again.', 502, [], 'TELEGRAM_WEBHOOK_FAILED');
+            return $this->error('The bot token works, but Telegram could not reach this server to register the webhook. Make sure this app is deployed behind a public HTTPS domain, then try again.', 422, [], 'TELEGRAM_WEBHOOK_FAILED');
         }
 
         $tenant->update([
