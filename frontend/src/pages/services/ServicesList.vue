@@ -11,6 +11,7 @@ import { getServicesApi, deleteServiceApi } from '@/apis/service.api'
 import { useServiceCategoriesStore } from '@/stores/serviceCategories'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
+import { formatCurrency } from '@/utils/currencyFormat'
 
 const { t } = useI18n()
 const auth = useAuthStore()
@@ -78,7 +79,7 @@ async function confirmDeleteService() {
 }
 
 function formatPrice(service) {
-  const amount = `$${Number(service.price).toFixed(2)}`
+  const amount = formatCurrency(service.price)
   return service.pricing_unit === 'fixed' ? amount : `${amount} ${PRICING_UNIT_SUFFIX.value[service.pricing_unit]}`
 }
 

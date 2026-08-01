@@ -9,6 +9,7 @@ import PlanFormDialog from '@/components/admin/PlanFormDialog.vue'
 import { getAdminPlansApi, deleteAdminPlanApi } from '@/apis/admin.api'
 import { useAppStore } from '@/stores/app'
 import { translateApiMessage } from '@/utils/apiMessages'
+import { formatCurrency } from '@/utils/currencyFormat'
 
 const { t } = useI18n()
 const appStore = useAppStore()
@@ -77,7 +78,7 @@ async function confirmDeletePlan() {
     <v-card variant="flat" border rounded="lg" class="pa-4">
       <AppTable ref="tableRef" :headers="headers" :fetch-fn="fetchPlans" :show-search="true" item-label="plans">
         <template #[`item.price_monthly`]="{ item }">
-          ${{ Number(item.price_monthly).toFixed(2) }}
+          {{ formatCurrency(item.price_monthly) }}
         </template>
 
         <template #[`item.is_active`]="{ item }">

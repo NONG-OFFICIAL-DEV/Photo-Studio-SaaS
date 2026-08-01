@@ -9,6 +9,7 @@ import ChangePlanDialog from '@/components/billing/ChangePlanDialog.vue'
 import { getBillingApi, getBillingPaymentsApi, cancelBillingApi, resumeBillingApi } from '@/apis/billing.api'
 import { useAppStore } from '@/stores/app'
 import { formatDate } from '@/utils/dateFormat'
+import { formatCurrency } from '@/utils/currencyFormat'
 
 const { t } = useI18n()
 const appStore = useAppStore()
@@ -121,7 +122,7 @@ async function confirmResumeSubscription() {
             </v-card-title>
             <v-card-text>
               <div v-if="subscription.amount" class="text-h5 font-weight-bold mb-2">
-                ${{ Number(subscription.amount).toFixed(2) }}
+                {{ formatCurrency(subscription.amount) }}
                 <span class="text-caption text-medium-emphasis"
                   >/ {{ t(`billingPage.cycles.${subscription.billing_cycle}`) }}</span
                 >
@@ -210,7 +211,7 @@ async function confirmResumeSubscription() {
               <td>{{ formatDate(payment.paid_at) }}</td>
               <td>{{ payment.plan_name }}</td>
               <td>{{ t(`billingPage.cycles.${payment.billing_cycle}`) }}</td>
-              <td>${{ Number(payment.amount).toFixed(2) }}</td>
+              <td>{{ formatCurrency(payment.amount) }}</td>
               <td>{{ payment.recorded_by?.name ?? t('billingPage.self') }}</td>
             </tr>
             <tr v-if="!payments.length">

@@ -16,6 +16,7 @@ import {
 import { useAppStore } from '@/stores/app'
 import { translateApiMessage } from '@/utils/apiMessages'
 import { formatDate } from '@/utils/dateFormat'
+import { formatCurrency } from '@/utils/currencyFormat'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -128,7 +129,7 @@ const reactivate = () => runAction(
         <div>
           <div class="text-h6">{{ subscription.plan?.name }}</div>
           <div class="text-body-2 text-medium-emphasis">
-            {{ subscription.amount ? `$${Number(subscription.amount).toFixed(2)} / ${subscription.billing_cycle}` : '—' }}
+            {{ subscription.amount ? `${formatCurrency(subscription.amount)} / ${subscription.billing_cycle}` : '—' }}
           </div>
         </div>
         <AppStatusChip :status="subscription.status" />
@@ -208,7 +209,7 @@ const reactivate = () => runAction(
           <tr v-for="payment in payments" :key="payment.id">
             <td>{{ formatDate(payment.paid_at) }}</td>
             <td>{{ payment.plan_name }}</td>
-            <td>${{ Number(payment.amount).toFixed(2) }}</td>
+            <td>{{ formatCurrency(payment.amount) }}</td>
             <td>{{ payment.recorded_by?.name ?? t('billingPage.self') }}</td>
           </tr>
           <tr v-if="!payments.length">

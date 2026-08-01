@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDatePicker from '@/components/common/AppDatePicker.vue'
 import { getRevenueReportApi, exportRevenueReportApi } from '@/apis/report.api'
+import { formatCurrency } from '@/utils/currencyFormat'
 
 const { t } = useI18n()
 
@@ -68,7 +69,7 @@ async function exportReport(format) {
           <v-card variant="flat" border rounded="lg">
             <v-card-text>
               <div class="text-caption text-medium-emphasis">{{ t('reports.totalInvoiced') }}</div>
-              <div class="text-h6 font-weight-bold">${{ report.total_invoiced.toFixed(2) }}</div>
+              <div class="text-h6 font-weight-bold">{{ formatCurrency(report.total_invoiced) }}</div>
             </v-card-text>
           </v-card>
         </v-col>
@@ -76,7 +77,7 @@ async function exportReport(format) {
           <v-card variant="flat" border rounded="lg">
             <v-card-text>
               <div class="text-caption text-medium-emphasis">{{ t('reports.totalCollected') }}</div>
-              <div class="text-h6 font-weight-bold">${{ report.total_collected.toFixed(2) }}</div>
+              <div class="text-h6 font-weight-bold">{{ formatCurrency(report.total_collected) }}</div>
             </v-card-text>
           </v-card>
         </v-col>
@@ -84,7 +85,7 @@ async function exportReport(format) {
           <v-card variant="flat" border rounded="lg">
             <v-card-text>
               <div class="text-caption text-medium-emphasis">{{ t('reports.outstanding') }}</div>
-              <div class="text-h6 font-weight-bold">${{ report.outstanding.toFixed(2) }}</div>
+              <div class="text-h6 font-weight-bold">{{ formatCurrency(report.outstanding) }}</div>
             </v-card-text>
           </v-card>
         </v-col>
@@ -102,8 +103,8 @@ async function exportReport(format) {
           <tbody>
             <tr v-for="row in report.breakdown" :key="row.period">
               <td>{{ row.period }}</td>
-              <td>${{ row.invoiced.toFixed(2) }}</td>
-              <td>${{ row.collected.toFixed(2) }}</td>
+              <td>{{ formatCurrency(row.invoiced) }}</td>
+              <td>{{ formatCurrency(row.collected) }}</td>
             </tr>
             <tr v-if="!report.breakdown.length">
               <td colspan="3" class="text-center text-medium-emphasis py-4">{{ t('common.noData') }}</td>

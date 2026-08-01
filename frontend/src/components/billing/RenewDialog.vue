@@ -5,6 +5,7 @@ import AppDialog from '@/components/common/AppDialog.vue'
 import { renewBillingApi } from '@/apis/billing.api'
 import { translateApiMessage } from '@/utils/apiMessages'
 import { useAppStore } from '@/stores/app'
+import { formatCurrency } from '@/utils/currencyFormat'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -77,7 +78,7 @@ async function confirmRenew() {
           <template #label>
             <div class="d-flex justify-space-between" style="width: 100%">
               <span>{{ cycle.label }}</span>
-              <span class="font-weight-bold">${{ Number(cycle.price).toFixed(2) }}</span>
+              <span class="font-weight-bold">{{ formatCurrency(cycle.price) }}</span>
             </div>
           </template>
         </v-radio>

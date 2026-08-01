@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDatePicker from '@/components/common/AppDatePicker.vue'
 import { getExpenseReportApi, exportExpenseReportApi } from '@/apis/report.api'
+import { formatCurrency } from '@/utils/currencyFormat'
 
 const { t } = useI18n()
 
@@ -56,7 +57,7 @@ async function exportReport(format) {
     <template v-else-if="report">
       <v-card variant="flat" border rounded="lg" class="pa-4 mb-4">
         <div class="text-caption text-medium-emphasis">{{ t('reports.total') }}</div>
-        <div class="text-h6 font-weight-bold">${{ report.total.toFixed(2) }}</div>
+        <div class="text-h6 font-weight-bold">{{ formatCurrency(report.total) }}</div>
       </v-card>
 
       <v-card variant="flat" border rounded="lg" class="pa-4">
@@ -70,7 +71,7 @@ async function exportReport(format) {
           <tbody>
             <tr v-for="row in report.by_category" :key="row.category">
               <td>{{ row.category }}</td>
-              <td>${{ row.amount.toFixed(2) }}</td>
+              <td>{{ formatCurrency(row.amount) }}</td>
             </tr>
             <tr v-if="!report.by_category.length">
               <td colspan="2" class="text-center text-medium-emphasis py-4">{{ t('common.noData') }}</td>

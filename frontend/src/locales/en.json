@@ -980,7 +980,7 @@
     "cycleNotAvailable": "Not available on this billing cycle",
     "savePercent": "Save {percent}%",
     "savePercentHint": "Save up to {percent}% with this billing cycle.",
-    "perMonthEquivalent": "≈ ${amount}/mo"
+    "perMonthEquivalent": "≈ {amount}/mo"
   },
   "$vuetify": {
     "badge": "Badge",

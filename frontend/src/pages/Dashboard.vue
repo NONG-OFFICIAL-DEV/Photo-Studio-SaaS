@@ -18,6 +18,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
 import { resendVerificationApi } from '@/apis/auth.api'
 import { getDashboardStatsApi } from '@/apis/dashboard.api'
+import { formatCurrency } from '@/utils/currencyFormat'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Filler)
 
@@ -31,8 +32,8 @@ const statsData = ref(null)
 const stats = computed(() => {
   const d = statsData.value
   return [
-    { title: t('dashboard.todayRevenue'), value: `$${(d?.today_revenue ?? 0).toFixed(2)}`, icon: 'mdi-cash', color: 'success' },
-    { title: t('dashboard.monthlyRevenue'), value: `$${(d?.monthly_revenue ?? 0).toFixed(2)}`, icon: 'mdi-chart-line', color: 'primary' },
+    { title: t('dashboard.todayRevenue'), value: formatCurrency(d?.today_revenue ?? 0), icon: 'mdi-cash', color: 'success' },
+    { title: t('dashboard.monthlyRevenue'), value: formatCurrency(d?.monthly_revenue ?? 0), icon: 'mdi-chart-line', color: 'primary' },
     { title: t('dashboard.newCustomers'), value: String(d?.new_customers ?? 0), icon: 'mdi-account-plus-outline', color: 'info' },
     { title: t('dashboard.bookings'), value: String(d?.bookings ?? 0), icon: 'mdi-calendar-check-outline', color: 'secondary' },
     { title: t('dashboard.pendingEditing'), value: String(d?.pending_editing ?? 0), icon: 'mdi-image-edit-outline', color: 'warning' },
@@ -77,7 +78,7 @@ async function resendVerification() {
   resendLoading.value = true
   try {
     const { data } = await resendVerificationApi()
-    appStore.notify(data.message)
+    appStore.notify(t(`apiErrors.${data.code}`))
   } finally {
     resendLoading.value = false
   }
@@ -147,7 +148,7 @@ async function resendVerification() {
             <v-list v-else density="compact">
               <v-list-item v-for="service in topServices" :key="service.name" :title="service.name">
                 <template #append>
-                  <span class="text-body-2">${{ service.revenue.toFixed(2) }}</span>
+                  <span class="text-body-2">{{ formatCurrency(service.revenue) }}</span>
                 </template>
               </v-list-item>
             </v-list>

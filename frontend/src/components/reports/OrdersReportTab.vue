@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDatePicker from '@/components/common/AppDatePicker.vue'
 import { getOrdersReportApi, exportOrdersReportApi } from '@/apis/report.api'
+import { formatCurrency } from '@/utils/currencyFormat'
 
 const { t } = useI18n()
 
@@ -67,7 +68,7 @@ async function exportReport(format) {
           <v-card variant="flat" border rounded="lg">
             <v-card-text>
               <div class="text-caption text-medium-emphasis">{{ t('reports.totalValue') }}</div>
-              <div class="text-h6 font-weight-bold">${{ report.total_value.toFixed(2) }}</div>
+              <div class="text-h6 font-weight-bold">{{ formatCurrency(report.total_value) }}</div>
             </v-card-text>
           </v-card>
         </v-col>
@@ -86,7 +87,7 @@ async function exportReport(format) {
             <tr v-for="row in report.by_status" :key="row.status">
               <td>{{ row.label }}</td>
               <td>{{ row.count }}</td>
-              <td>${{ row.value.toFixed(2) }}</td>
+              <td>{{ formatCurrency(row.value) }}</td>
             </tr>
           </tbody>
         </v-table>

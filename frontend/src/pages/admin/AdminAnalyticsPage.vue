@@ -13,6 +13,7 @@ import {
 } from 'chart.js'
 import AppToolbar from '@/components/common/AppToolbar.vue'
 import { getAdminAnalyticsApi } from '@/apis/admin.api'
+import { formatCurrency } from '@/utils/currencyFormat'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Filler)
 
@@ -25,7 +26,7 @@ const stats = computed(() => {
     { title: t('admin.analytics.totalTenants'), value: String(d?.total_tenants ?? 0), icon: 'mdi-domain', color: 'primary' },
     { title: t('admin.analytics.activeTenants'), value: String(d?.active_tenants ?? 0), icon: 'mdi-check-circle-outline', color: 'success' },
     { title: t('admin.analytics.suspendedTenants'), value: String(d?.suspended_tenants ?? 0), icon: 'mdi-cancel', color: 'error' },
-    { title: t('admin.analytics.mrr'), value: `$${(d?.mrr ?? 0).toFixed(2)}`, icon: 'mdi-cash-multiple', color: 'tertiary' },
+    { title: t('admin.analytics.mrr'), value: formatCurrency(d?.mrr ?? 0), icon: 'mdi-cash-multiple', color: 'tertiary' },
   ]
 })
 

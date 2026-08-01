@@ -5,6 +5,7 @@ import AppDialog from '@/components/common/AppDialog.vue'
 import { getBillingPlansApi, changeBillingPlanApi } from '@/apis/billing.api'
 import { useAppStore } from '@/stores/app'
 import { translateApiMessage } from '@/utils/apiMessages'
+import { formatCurrency } from '@/utils/currencyFormat'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -149,7 +150,7 @@ async function confirmChange() {
       <v-progress-circular indeterminate color="primary" />
     </div>
 
-    <v-row v-else>
+    <v-row v-else dense>
       <v-col v-for="plan in plans" :key="plan.id" cols="12" sm="6" md="4">
         <v-card
           variant="outlined"
@@ -182,12 +183,12 @@ async function confirmChange() {
           <v-card-text class="flex-grow-1">
             <template v-if="isAvailable(plan)">
               <div class="d-flex align-baseline ga-1">
-                <span class="text-h4 font-weight-bold">${{ Number(priceFor(plan)).toFixed(0) }}</span>
-                <span class="text-body-2 text-medium-emphasis">/ {{ t(`billingPage.cycles.${billingCycle}`) }}</span>
+                <span class="text-h4 font-weight-bold">{{ formatCurrency(priceFor(plan)) }}</span>
               </div>
+              <span class="text-body-2 text-medium-emphasis">/ {{ t(`billingPage.cycles.${billingCycle}`) }}</span>
               <div v-if="billingCycle !== 'monthly'" class="d-flex align-center flex-wrap ga-2 mt-1 mb-3">
                 <span class="text-caption text-medium-emphasis">
-                  {{ t('billingPage.perMonthEquivalent', { amount: monthlyEquivalent(plan).toFixed(2) }) }}
+                  {{ t('billingPage.perMonthEquivalent', { amount: formatCurrency(monthlyEquivalent(plan)) }) }}
                 </span>
                 <v-chip v-if="savingsPercent(plan)" size="x-small" color="success" variant="flat">
                   {{ t('billingPage.savePercent', { percent: savingsPercent(plan) }) }}

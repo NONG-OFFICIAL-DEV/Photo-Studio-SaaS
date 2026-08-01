@@ -980,7 +980,7 @@
     "cycleNotAvailable": "មិនអាចប្រើបាននៅលើវដ្តទូទាត់នេះទេ",
     "savePercent": "សន្សំ {percent}%",
     "savePercentHint": "សន្សំបានរហូតដល់ {percent}% ជាមួយវដ្តទូទាត់នេះ។",
-    "perMonthEquivalent": "≈ ${amount}/ខែ"
+    "perMonthEquivalent": "≈ {amount}/ខែ"
   },
   "$vuetify": {
     "badge": "ស្លាកសញ្ញា",

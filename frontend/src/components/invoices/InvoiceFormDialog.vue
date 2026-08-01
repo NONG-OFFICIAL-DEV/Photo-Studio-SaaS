@@ -13,6 +13,7 @@ import { getServiceAddOnsApi } from '@/apis/service-addon.api'
 import { getPackagesApi } from '@/apis/package.api'
 import { useAppStore } from '@/stores/app'
 import { translateApiMessage } from '@/utils/apiMessages'
+import { formatCurrency } from '@/utils/currencyFormat'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -482,7 +483,7 @@ async function onSubmit(values) {
                 <td>
                   <v-text-field v-model.number="item.quantity" type="number" min="1" density="compact" hide-details />
                 </td>
-                <td>${{ lineTotal(item).toFixed(2) }}</td>
+                <td>{{ formatCurrency(lineTotal(item)) }}</td>
                 <td>
                   <v-btn icon="mdi-close" size="x-small" class="bg-error" variant="text" @click="removeItem(index)" />
                 </td>
@@ -499,7 +500,7 @@ async function onSubmit(values) {
               v-for="component in availableOptionalAddons"
               :key="component.service_id || component.addon_id"
               :model-value="isOptionalAddonSelected(component)"
-              :label="`${component.name} (+$${component.unit_price})`"
+              :label="`${component.name} (+${formatCurrency(component.unit_price)})`"
               density="compact"
               hide-details
               @update:model-value="toggleOptionalAddon(component, $event)"
@@ -540,15 +541,15 @@ async function onSubmit(values) {
             </div>
             <div class="text-body-2 d-flex justify-space-between">
               <span>{{ t('fields.subtotal') }}</span
-              ><span>${{ subtotal.toFixed(2) }}</span>
+              ><span>{{ formatCurrency(subtotal) }}</span>
             </div>
             <div class="text-body-2 d-flex justify-space-between">
               <span>{{ t('invoices.taxAmount') }}</span
-              ><span>${{ totals(values).taxAmount.toFixed(2) }}</span>
+              ><span>{{ formatCurrency(totals(values).taxAmount) }}</span>
             </div>
             <div class="text-h6 d-flex justify-space-between">
               <span>{{ t('fields.total') }}</span
-              ><span>${{ totals(values).total.toFixed(2) }}</span>
+              ><span>{{ formatCurrency(totals(values).total) }}</span>
             </div>
           </v-col>
         </v-row>

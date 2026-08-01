@@ -9,6 +9,7 @@ import { getServicesApi } from '@/apis/service.api'
 import { getServiceAddOnsApi } from '@/apis/service-addon.api'
 import { translateApiMessage } from '@/utils/apiMessages'
 import { useAppStore } from '@/stores/app'
+import { formatCurrency } from '@/utils/currencyFormat'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -210,11 +211,11 @@ async function onSubmit(values) {
           <tbody>
             <tr v-for="(component, index) in components" :key="index">
               <td>{{ component.name }}</td>
-              <td>${{ component.unit_price }}</td>
+              <td>{{ formatCurrency(component.unit_price) }}</td>
               <td>
                 <v-text-field v-model.number="component.quantity" type="number" min="1" density="compact" hide-details />
               </td>
-              <td>${{ lineTotal(component).toFixed(2) }}</td>
+              <td>{{ formatCurrency(lineTotal(component)) }}</td>
               <td>
                 <v-checkbox v-model="component.is_optional" density="compact" hide-details />
               </td>
@@ -256,10 +257,10 @@ async function onSubmit(values) {
         <div class="d-flex justify-end mb-4">
           <div style="min-width: 220px">
             <div class="text-body-2 d-flex justify-space-between">
-              <span>{{ t('packages.componentTotal') }}</span><span>${{ componentTotal.toFixed(2) }}</span>
+              <span>{{ t('packages.componentTotal') }}</span><span>{{ formatCurrency(componentTotal) }}</span>
             </div>
             <div class="text-h6 d-flex justify-space-between">
-              <span>{{ t('packages.finalPrice') }}</span><span>${{ finalPrice(values).toFixed(2) }}</span>
+              <span>{{ t('packages.finalPrice') }}</span><span>{{ formatCurrency(finalPrice(values)) }}</span>
             </div>
           </div>
         </div>
