@@ -56,7 +56,7 @@ class AdminTenantService extends BaseService
 
     public function changePlan(Tenant $tenant, Plan $plan, User $actor): Subscription
     {
-        return $this->subscriptions->changePlan($this->subscriptionFor($tenant), $plan, $actor);
+        return $this->subscriptions->changePlan($this->subscriptionFor($tenant), $plan, null, $actor);
     }
 
     public function renewSubscription(Tenant $tenant, ?BillingCycle $cycle, User $actor): Subscription

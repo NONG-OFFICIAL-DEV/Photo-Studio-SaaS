@@ -8,7 +8,8 @@ export const getBillingPaymentsApi = () => http.get('/v1/billing/payments')
 
 export const renewBillingApi = billingCycle => http.post('/v1/billing/renew', { billing_cycle: billingCycle })
 
-export const changeBillingPlanApi = planId => http.put('/v1/billing/plan', { plan_id: planId })
+export const changeBillingPlanApi = (planId, billingCycle) =>
+  http.put('/v1/billing/plan', { plan_id: planId, billing_cycle: billingCycle })
 
 export const cancelBillingApi = () => http.post('/v1/billing/cancel')
 

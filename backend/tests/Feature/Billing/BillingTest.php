@@ -162,6 +162,46 @@ class BillingTest extends TestCase
         $this->assertDatabaseCount('subscription_payments', 0);
     }
 
+    public function test_changing_plan_can_also_switch_billing_cycle_in_the_same_request(): void
+    {
+        [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+        $tenant->activeSubscription->update(['billing_cycle' => 'monthly']);
+        $newPlan = Plan::factory()->create(['name' => 'Studio Pro', 'price_yearly' => 290]);
+
+        $response = $this->actingAsUser($owner)
+            ->putJson('/api/v1/billing/plan', ['plan_id' => $newPlan->id, 'billing_cycle' => 'yearly'])
+            ->assertOk();
+
+        $response->assertJsonPath('data.plan.id', $newPlan->id)
+            ->assertJsonPath('data.billing_cycle', 'yearly')
+            ->assertJsonPath('data.amount', 290);
+    }
+
+    public function test_changing_plan_without_a_cycle_keeps_the_existing_one(): void
+    {
+        [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+        $tenant->activeSubscription->update(['billing_cycle' => 'quarterly']);
+        $newPlan = Plan::factory()->create(['name' => 'Studio Pro', 'price_quarterly' => 79]);
+
+        $response = $this->actingAsUser($owner)
+            ->putJson('/api/v1/billing/plan', ['plan_id' => $newPlan->id])
+            ->assertOk();
+
+        $response->assertJsonPath('data.billing_cycle', 'quarterly')
+            ->assertJsonPath('data.amount', 79);
+    }
+
+    public function test_it_cannot_change_plan_onto_a_billing_cycle_the_new_plan_does_not_offer(): void
+    {
+        [, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+        $newPlan = Plan::factory()->create(['price_yearly' => null]);
+
+        $this->actingAsUser($owner)
+            ->putJson('/api/v1/billing/plan', ['plan_id' => $newPlan->id, 'billing_cycle' => 'yearly'])
+            ->assertStatus(422)
+            ->assertJsonPath('code', 'BILLING_CYCLE_NOT_AVAILABLE');
+    }
+
     public function test_it_cannot_change_to_an_inactive_plan(): void
     {
         [, $owner] = $this->createTenantWithUser(TenantRole::Owner);

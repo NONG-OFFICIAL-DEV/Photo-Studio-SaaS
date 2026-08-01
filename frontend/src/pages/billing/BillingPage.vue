@@ -231,6 +231,7 @@ async function confirmResumeSubscription() {
     <ChangePlanDialog
       v-model="changePlanDialog"
       :current-plan-id="subscription?.plan?.id"
+      :current-billing-cycle="subscription?.billing_cycle"
       :pending-payment="resumeRenewAfterPlanChange"
       @changed="onPlanChanged"
     />

@@ -124,9 +124,20 @@ class SubscriptionService
     }
 
     /**
-     * Switches which plan the subscription is billed against. Deliberately
-     * no proration — this is simulated billing, not a real payment
-     * processor — the new price simply takes effect on the next renew().
+     * Switches which plan the subscription is billed against, and
+     * optionally its billing cycle in the same call — a tenant picking a
+     * new plan on a cycle their old plan didn't need to support is a single
+     * user action, not two. Deliberately no proration — this is simulated
+     * billing, not a real payment processor — the new price simply takes
+     * effect on the next renew().
+     *
+     * $cycle null keeps whatever cycle the subscription is already on
+     * (unchanged default behavior for callers not exposing a cycle picker,
+     * e.g. the admin override). Whichever cycle ends up in effect must
+     * actually have a price on the target plan — switching to a plan that
+     * doesn't sell a quarterly tier while quarterly is selected should
+     * fail loudly (BILLING_CYCLE_NOT_AVAILABLE), not silently null out the
+     * amount, mirroring renew()'s equivalent guard.
      *
      * Nobody — tenant self-service or admin override — can switch a
      * subscription onto a plan with no real price on any cycle (the Free
@@ -135,7 +146,7 @@ class SubscriptionService
      * ongoing tier. Switching back to it wouldn't shorten a period already
      * paid for, but it WOULD be a way to dodge every future renewal charge.
      */
-    public function changePlan(Subscription $subscription, Plan $plan, ?User $actor): Subscription
+    public function changePlan(Subscription $subscription, Plan $plan, ?BillingCycle $cycle, ?User $actor): Subscription
     {
         if (! $plan->is_active) {
             throw new ApiException(422, 'This plan is not available.', 'PLAN_NOT_AVAILABLE');
@@ -146,14 +157,21 @@ class SubscriptionService
         }
 
         $oldPlanName = $subscription->plan?->name ?? 'previous plan';
-        $cycle = $subscription->billing_cycle ?? BillingCycle::Monthly;
+        $oldCycle = $subscription->billing_cycle;
+        $cycle ??= $oldCycle ?? BillingCycle::Monthly;
+        $amount = $this->priceForCycle($plan, $cycle);
+
+        if ($amount === null) {
+            throw new ApiException(422, "\"{$plan->name}\" isn't available on a {$cycle->value} billing cycle.", 'BILLING_CYCLE_NOT_AVAILABLE', ['plan' => $plan->name, 'cycle' => $cycle->value]);
+        }
 
         $subscription->update([
             'plan_id' => $plan->id,
-            'amount' => $this->priceForCycle($plan, $cycle),
+            'billing_cycle' => $cycle,
+            'amount' => $amount,
         ]);
 
-        $this->logAudit($subscription, $actor, "Plan changed from \"{$oldPlanName}\" to \"{$plan->name}\"");
+        $this->logAudit($subscription, $actor, "Plan changed from \"{$oldPlanName}\" ({$oldCycle?->value}) to \"{$plan->name}\" ({$cycle->value})");
 
         return $subscription->fresh('plan');
     }

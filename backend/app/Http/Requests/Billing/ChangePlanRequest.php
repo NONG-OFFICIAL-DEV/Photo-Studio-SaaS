@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Billing;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ChangePlanRequest extends FormRequest
 {
@@ -15,6 +16,7 @@ class ChangePlanRequest extends FormRequest
     {
         return [
             'plan_id' => ['required', 'uuid', 'exists:plans,id'],
+            'billing_cycle' => ['nullable', Rule::in(['monthly', 'quarterly', 'yearly'])],
         ];
     }
 }

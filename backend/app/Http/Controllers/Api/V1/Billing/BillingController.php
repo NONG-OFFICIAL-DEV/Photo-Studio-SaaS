@@ -87,8 +87,9 @@ class BillingController extends Controller
         $tenant = $request->user()->tenant;
         $subscription = $tenant->activeSubscription()->firstOrFail();
         $plan = Plan::findOrFail($request->validated('plan_id'));
+        $cycle = $request->validated('billing_cycle') ? BillingCycle::from($request->validated('billing_cycle')) : null;
 
-        $subscription = $this->subscriptions->changePlan($subscription, $plan, null);
+        $subscription = $this->subscriptions->changePlan($subscription, $plan, $cycle, null);
 
         return $this->success(new SubscriptionResource($subscription), 'Plan changed successfully.');
     }

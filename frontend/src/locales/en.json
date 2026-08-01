@@ -932,6 +932,7 @@
     "title": "Billing & Subscription",
     "subtitle": "Your plan, usage, and payment history.",
     "currentPlan": "Current Plan",
+    "selected": "Selected",
     "usage": "Usage",
     "paymentHistory": "Payment History",
     "paidAt": "Paid",
@@ -962,7 +963,8 @@
       "cancel": "Cancel Subscription",
       "resume": "Resume Subscription",
       "selectPlan": "Select Plan",
-      "confirmPay": "Confirm Payment"
+      "confirmPay": "Confirm Payment",
+      "confirmChangePlan": "Confirm Change"
     },
     "messages": {
       "renewed": "Subscription renewed successfully.",
@@ -973,7 +975,12 @@
       "resumed": "Subscription cancellation reversed."
     },
     "freePlanHint": "This is a free plan and has nothing to renew. Choose a paid plan to enable billing.",
-    "pendingPaymentHint": "Choose a plan below — you'll be asked to confirm payment next."
+    "pendingPaymentHint": "Choose a plan below — you'll be asked to confirm payment next.",
+    "changePlanCycleHint": "Prices below reflect the billing cycle selected here.",
+    "cycleNotAvailable": "Not available on this billing cycle",
+    "savePercent": "Save {percent}%",
+    "savePercentHint": "Save up to {percent}% with this billing cycle.",
+    "perMonthEquivalent": "≈ ${amount}/mo"
   },
   "$vuetify": {
     "badge": "Badge",
