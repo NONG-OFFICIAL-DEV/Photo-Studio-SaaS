@@ -40,6 +40,7 @@ return [
         'commissions' => ['commissions.view', 'commissions.record', 'commissions.delete'],
         'payroll' => ['payroll.view', 'payroll.create', 'payroll.update', 'payroll.delete', 'payroll.pay'],
         'reports' => ['reports.view', 'reports.export'],
+        'audit' => ['audit.view'],
     ],
 
     /*
