@@ -91,11 +91,16 @@ class InvoiceController extends Controller
     }
 
     /**
-     * The "click one button, customer gets the invoice" flow — renders the
-     * same PDF downloadPdf() serves and forwards it straight to the
-     * customer's linked Telegram chat, never touching this app's storage.
+     * The "click one button, customer gets the invoice" flow. `format`
+     * picks the attachment (falls back to 'pdf' on anything unrecognized,
+     * same defensive-default style as ReportController's export `format`
+     * query param): 'pdf' downloads/renders the same document
+     * downloadPdf() serves, 'image' renders the same layout as a single
+     * PNG (so the QR code is a plain photo the customer can view/save
+     * without a PDF viewer), 'text' sends no attachment at all — just the
+     * formatted message. Never touches this app's own storage either way.
      */
-    public function sendTelegram(Invoice $invoice, TelegramService $telegram): JsonResponse
+    public function sendTelegram(Request $request, Invoice $invoice, TelegramService $telegram): JsonResponse
     {
         $this->authorize('send', $invoice);
 
@@ -110,16 +115,31 @@ class InvoiceController extends Controller
             return $this->error('This customer has not connected Telegram yet.', 422, [], 'TELEGRAM_CUSTOMER_NOT_LINKED');
         }
 
-        $pdf = $this->invoices->renderPdf($invoice);
-        $caption = "Invoice {$invoice->invoice_number} — Total: \${$invoice->total}";
+        $format = $request->input('format', 'pdf');
+        $format = in_array($format, ['pdf', 'image', 'text'], true) ? $format : 'pdf';
+        $chatId = $invoice->customer->telegram_chat_id;
+        $token = $tenant->telegram_bot_token;
 
-        $result = $telegram->sendDocument(
-            $tenant->telegram_bot_token,
-            $invoice->customer->telegram_chat_id,
-            $pdf,
-            "{$invoice->invoice_number}.pdf",
-            $caption
-        );
+        $result = match ($format) {
+            'image' => $telegram->sendPhoto(
+                $token,
+                $chatId,
+                $this->invoices->renderImage($invoice),
+                $this->invoices->invoiceSummaryText($invoice)
+            ),
+            'text' => $telegram->sendMessage(
+                $token,
+                $chatId,
+                $this->invoices->invoiceSummaryText($invoice, withAttachment: false)
+            ),
+            default => $telegram->sendDocument(
+                $token,
+                $chatId,
+                $this->invoices->renderPdf($invoice),
+                "{$invoice->invoice_number}.pdf",
+                $this->invoices->invoiceSummaryText($invoice)
+            ),
+        };
 
         if (! ($result['ok'] ?? false)) {
             return $this->error('Failed to send via Telegram.', 502, [], 'TELEGRAM_SEND_FAILED');

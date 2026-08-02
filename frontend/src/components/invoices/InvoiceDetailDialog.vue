@@ -120,11 +120,11 @@ async function downloadPdf() {
   }
 }
 
-async function sendViaTelegram() {
+async function sendViaTelegram(format) {
   telegramLoading.value = true
   try {
     await ensureSent()
-    await sendInvoiceTelegramApi(props.invoiceId)
+    await sendInvoiceTelegramApi(props.invoiceId, format)
     appStore.notify(t('invoices.telegramSent'))
   } catch (error) {
     appStore.notify(translateApiMessage(error, 'common.actionFailed'), 'error')
@@ -350,15 +350,18 @@ const hasFooterActions = computed(() => canSend.value || canDownloadPdf.value ||
           </span>
         </template>
       </v-tooltip>
-      <v-btn
-        v-else-if="canShareTelegram"
-        variant="outlined"
-        prepend-icon="mdi-send"
-        :loading="telegramLoading"
-        @click="sendViaTelegram"
-      >
-        {{ t('invoices.sendViaTelegram') }}
-      </v-btn>
+      <v-menu v-else-if="canShareTelegram">
+        <template #activator="{ props: menuProps }">
+          <v-btn variant="outlined" prepend-icon="mdi-send" :loading="telegramLoading" v-bind="menuProps">
+            {{ t('invoices.sendViaTelegram') }}
+          </v-btn>
+        </template>
+        <v-list>
+          <v-list-item :title="t('invoices.telegramFormats.pdf')" @click="sendViaTelegram('pdf')" />
+          <v-list-item :title="t('invoices.telegramFormats.image')" @click="sendViaTelegram('image')" />
+          <v-list-item :title="t('invoices.telegramFormats.text')" @click="sendViaTelegram('text')" />
+        </v-list>
+      </v-menu>
       <v-btn v-if="canVoid" color="error" variant="text" @click="emit('void-requested', invoice.id)">
         {{ t('invoices.voidInvoice') }}
       </v-btn>

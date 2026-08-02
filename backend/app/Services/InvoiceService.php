@@ -163,6 +163,28 @@ class InvoiceService extends BaseService
      */
     public function renderPdf(Invoice $invoice): string
     {
+        return $this->newBrowsershot($invoice)
+            ->format('A4')
+            ->pdf();
+    }
+
+    /**
+     * Same invoice layout as renderPdf(), rendered as a single PNG instead —
+     * for Telegram delivery as an actual photo rather than a document that
+     * needs a PDF viewer to open. A4-proportioned viewport (at 96dpi) with
+     * fullPage() so the whole invoice fits in one image regardless of item
+     * count, rather than a single fixed-height crop.
+     */
+    public function renderImage(Invoice $invoice): string
+    {
+        return $this->newBrowsershot($invoice)
+            ->windowSize(794, 1123)
+            ->fullPage()
+            ->screenshot();
+    }
+
+    protected function newBrowsershot(Invoice $invoice): Browsershot
+    {
         $invoice->loadMissing(['items', 'customer', 'order', 'tenant']);
 
         $html = View::make('pdf.invoice', [
@@ -178,9 +200,43 @@ class InvoiceService extends BaseService
             ->setNodeModulePath(config('browsershot.node_modules_path'))
             ->setChromePath(config('browsershot.chrome_path'))
             ->noSandbox()
-            ->format('A4')
-            ->showBackground()
-            ->pdf();
+            ->showBackground();
+    }
+
+    /**
+     * The message sent alongside (or, for the text-only send mode, instead
+     * of) the invoice attachment. $withAttachment toggles the "scan the QR
+     * in the attached image" line — it only makes sense when a PDF/image
+     * actually accompanies this message. Numeric date only (no month name)
+     * — this app's standing convention, since Khmer month-name localization
+     * isn't reliable (see BookingCalendar.vue).
+     */
+    public function invoiceSummaryText(Invoice $invoice, bool $withAttachment = true): string
+    {
+        $invoice->loadMissing(['customer', 'tenant']);
+
+        $lines = [
+            "🧾 Invoice #{$invoice->invoice_number}",
+            $invoice->tenant->name,
+            '',
+            "Hello {$invoice->customer?->name},",
+            '',
+            'Thank you for your purchase!',
+            '',
+            'Invoice Date: '.optional($invoice->issue_date)->format('d/m/Y'),
+            'Total: $'.number_format((float) $invoice->total, 2),
+            'Status: '.$invoice->status->label(),
+        ];
+
+        if ($withAttachment) {
+            $lines[] = '';
+            $lines[] = 'Please scan the QR code in the attached invoice image to make your payment.';
+        }
+
+        $lines[] = '';
+        $lines[] = 'Thank you for your business!';
+
+        return implode("\n", $lines);
     }
 
     /**

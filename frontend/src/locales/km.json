@@ -548,6 +548,11 @@
     "send": "ផ្ញើ",
     "downloadPdf": "ទាញយក PDF",
     "sendViaTelegram": "ផ្ញើតាម Telegram",
+    "telegramFormats": {
+      "pdf": "ផ្ញើជា PDF",
+      "image": "ផ្ញើជារូបភាព",
+      "text": "ផ្ញើជាអត្ថបទ"
+    },
     "telegramSent": "វិក្កយបត្របានផ្ញើតាម Telegram ។",
     "telegramNotLinkedHint": "អតិថិជននេះមិនទាន់ភ្ជាប់ Telegram ទេ — សូមភ្ជាប់ពីទំព័រប្រវត្តិរូបគាត់សិន។",
     "voidInvoice": "លុបចោលវិក្កយបត្រ",

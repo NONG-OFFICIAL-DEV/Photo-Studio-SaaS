@@ -548,6 +548,11 @@
     "send": "Send",
     "downloadPdf": "Download PDF",
     "sendViaTelegram": "Send via Telegram",
+    "telegramFormats": {
+      "pdf": "Send as PDF",
+      "image": "Send as Image",
+      "text": "Send as Text"
+    },
     "telegramSent": "Invoice sent via Telegram.",
     "telegramNotLinkedHint": "This customer hasn't connected Telegram yet — connect from their profile first.",
     "voidInvoice": "Void Invoice",

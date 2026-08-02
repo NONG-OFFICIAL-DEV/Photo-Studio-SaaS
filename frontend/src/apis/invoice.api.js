@@ -14,7 +14,7 @@ export const sendInvoiceApi = id => http.post(`/v1/invoices/${id}/send`)
 
 export const getInvoicePdfApi = id => http.get(`/v1/invoices/${id}/pdf`, { responseType: 'blob' })
 
-export const sendInvoiceTelegramApi = id => http.post(`/v1/invoices/${id}/telegram/send`)
+export const sendInvoiceTelegramApi = (id, format = 'pdf') => http.post(`/v1/invoices/${id}/telegram/send`, { format })
 
 export const voidInvoiceApi = (id, reason) => http.post(`/v1/invoices/${id}/void`, { reason })
 

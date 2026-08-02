@@ -62,7 +62,7 @@ class TelegramTest extends TestCase
 
         $this->actingAsUser($owner)
             ->postJson('/api/v1/settings/telegram/connect', ['bot_token' => '123:ABC'])
-            ->assertStatus(502)
+            ->assertStatus(422)
             ->assertJsonPath('code', 'TELEGRAM_WEBHOOK_FAILED');
     }
 
@@ -279,12 +279,82 @@ class TelegramTest extends TestCase
     {
         [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
         $tenant->update(['telegram_bot_token' => '123:ABC', 'telegram_bot_username' => 'my_studio_bot']);
-        $customer = Customer::factory()->create(['tenant_id' => $tenant->id, 'telegram_chat_id' => '999']);
+        $customer = Customer::factory()->create(['tenant_id' => $tenant->id, 'telegram_chat_id' => '999', 'name' => 'Sokha Chan']);
         $invoice = Invoice::factory()->create(['tenant_id' => $tenant->id, 'customer_id' => $customer->id]);
         Http::fake(['api.telegram.org/*/sendDocument' => Http::response(['ok' => true, 'result' => ['message_id' => 1]])]);
 
         $this->actingAsUser($owner)
             ->postJson("/api/v1/invoices/{$invoice->id}/telegram/send")
+            ->assertOk();
+
+        Http::assertSent(function ($request) use ($tenant, $invoice) {
+            if (! str_contains($request->url(), '/sendDocument')) {
+                return false;
+            }
+
+            $caption = collect($request->data())->firstWhere('name', 'caption')['contents'] ?? null;
+
+            return str_contains($caption, "Invoice #{$invoice->invoice_number}")
+                && str_contains($caption, $tenant->name)
+                && str_contains($caption, 'Sokha Chan')
+                && str_contains($caption, 'Please scan the QR code')
+                && str_contains($caption, 'Thank you for your business!');
+        });
+    }
+
+    public function test_owner_can_send_an_invoice_image_via_telegram(): void
+    {
+        [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+        $tenant->update(['telegram_bot_token' => '123:ABC', 'telegram_bot_username' => 'my_studio_bot']);
+        $customer = Customer::factory()->create(['tenant_id' => $tenant->id, 'telegram_chat_id' => '999']);
+        $invoice = Invoice::factory()->create(['tenant_id' => $tenant->id, 'customer_id' => $customer->id]);
+        Http::fake(['api.telegram.org/*/sendPhoto' => Http::response(['ok' => true, 'result' => ['message_id' => 1]])]);
+
+        $this->actingAsUser($owner)
+            ->postJson("/api/v1/invoices/{$invoice->id}/telegram/send", ['format' => 'image'])
+            ->assertOk();
+
+        Http::assertSent(fn ($request) => str_contains($request->url(), '/sendPhoto'));
+        Http::assertNotSent(fn ($request) => str_contains($request->url(), '/sendDocument'));
+    }
+
+    /**
+     * The text-only mode sends no attachment, so the message must drop the
+     * "scan the QR in the attached image" instruction — nothing is attached.
+     */
+    public function test_owner_can_send_an_invoice_as_text_via_telegram(): void
+    {
+        [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+        $tenant->update(['telegram_bot_token' => '123:ABC', 'telegram_bot_username' => 'my_studio_bot']);
+        $customer = Customer::factory()->create(['tenant_id' => $tenant->id, 'telegram_chat_id' => '999']);
+        $invoice = Invoice::factory()->create(['tenant_id' => $tenant->id, 'customer_id' => $customer->id]);
+        Http::fake(['api.telegram.org/*/sendMessage' => Http::response(['ok' => true, 'result' => ['message_id' => 1]])]);
+
+        $this->actingAsUser($owner)
+            ->postJson("/api/v1/invoices/{$invoice->id}/telegram/send", ['format' => 'text'])
+            ->assertOk();
+
+        Http::assertSent(function ($request) use ($invoice) {
+            if (! str_contains($request->url(), '/sendMessage')) {
+                return false;
+            }
+
+            return str_contains($request['text'], "Invoice #{$invoice->invoice_number}")
+                && ! str_contains($request['text'], 'Please scan the QR code');
+        });
+        Http::assertNotSent(fn ($request) => str_contains($request->url(), '/sendDocument') || str_contains($request->url(), '/sendPhoto'));
+    }
+
+    public function test_an_unrecognized_invoice_send_format_falls_back_to_pdf(): void
+    {
+        [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+        $tenant->update(['telegram_bot_token' => '123:ABC', 'telegram_bot_username' => 'my_studio_bot']);
+        $customer = Customer::factory()->create(['tenant_id' => $tenant->id, 'telegram_chat_id' => '999']);
+        $invoice = Invoice::factory()->create(['tenant_id' => $tenant->id, 'customer_id' => $customer->id]);
+        Http::fake(['api.telegram.org/*/sendDocument' => Http::response(['ok' => true, 'result' => ['message_id' => 1]])]);
+
+        $this->actingAsUser($owner)
+            ->postJson("/api/v1/invoices/{$invoice->id}/telegram/send", ['format' => 'not-a-real-format'])
             ->assertOk();
 
         Http::assertSent(fn ($request) => str_contains($request->url(), '/sendDocument'));

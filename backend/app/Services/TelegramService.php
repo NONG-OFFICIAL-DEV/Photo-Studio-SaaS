@@ -58,4 +58,21 @@ class TelegramService
             ]))
             ->json() ?? ['ok' => false];
     }
+
+    /**
+     * Sent as an actual Telegram photo (not sendDocument) so it shows as an
+     * inline, tappable image the customer can view/save directly — no PDF
+     * viewer or "open file" step needed to see (and scan) an embedded QR
+     * code.
+     */
+    public function sendPhoto(string $token, string $chatId, mixed $contents, ?string $caption = null): array
+    {
+        return Http::timeout(60)
+            ->attach('photo', $contents, 'invoice.png')
+            ->post("{$this->baseUrl($token)}/sendPhoto", array_filter([
+                'chat_id' => $chatId,
+                'caption' => $caption,
+            ]))
+            ->json() ?? ['ok' => false];
+    }
 }
