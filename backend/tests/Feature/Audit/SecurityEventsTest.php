@@ -9,12 +9,9 @@ use Tests\Concerns\CreatesTenantUsers;
 use Tests\TestCase;
 
 /**
- * Security events VIEWING is platform-admin-only (see config/permissions.php
- * — 'audit.view' isn't in the catalog, so no tenant role, including the
- * tenant Owner, can ever hold it). Recording still happens for every
- * tenant; these tests verify that via the admin surface (App\Http\
- * Controllers\Api\V1\Admin\AdminAuditController), which is where a super
- * admin investigates it.
+ * Security events viewing is platform-admin-only — no tenant role,
+ * including Owner, can ever hold 'audit.view'. Recording still happens
+ * for every tenant regardless of who can view it.
  */
 class SecurityEventsTest extends TestCase
 {
@@ -29,10 +26,7 @@ class SecurityEventsTest extends TestCase
     {
         foreach (TenantRole::cases() as $role) {
             [, $user] = $this->createTenantWithUser($role);
-
-            $this->actingAsUser($user)
-                ->getJson('/api/v1/audit/security-events')
-                ->assertForbidden();
+            $this->actingAsUser($user)->getJson('/api/v1/audit/security-events')->assertForbidden();
         }
     }
 

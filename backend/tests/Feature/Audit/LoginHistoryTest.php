@@ -9,11 +9,9 @@ use Tests\Concerns\CreatesTenantUsers;
 use Tests\TestCase;
 
 /**
- * Login history VIEWING is platform-admin-only (see config/permissions.php
- * — 'audit.view' isn't in the catalog, so no tenant role can ever hold it).
- * Recording still happens for every login attempt; these tests verify that
- * via the admin surface (App\Http\Controllers\Api\V1\Admin\
- * AdminAuditController), which is where a super admin investigates it.
+ * Login history viewing is platform-admin-only — no tenant role, including
+ * Owner, can ever hold 'audit.view'. Recording still happens for every
+ * login attempt regardless of who can view it.
  */
 class LoginHistoryTest extends TestCase
 {
@@ -28,10 +26,7 @@ class LoginHistoryTest extends TestCase
     {
         foreach (TenantRole::cases() as $role) {
             [, $user] = $this->createTenantWithUser($role);
-
-            $this->actingAsUser($user)
-                ->getJson('/api/v1/audit/login-history')
-                ->assertForbidden();
+            $this->actingAsUser($user)->getJson('/api/v1/audit/login-history')->assertForbidden();
         }
     }
 

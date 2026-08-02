@@ -6,6 +6,7 @@ import AppTable from '@/components/common/AppTable.vue'
 import AppStatusChip from '@/components/common/AppStatusChip.vue'
 import AppConfirmDialog from '@/components/common/AppConfirmDialog.vue'
 import AdminSubscriptionDialog from '@/components/admin/AdminSubscriptionDialog.vue'
+import AdminTenantRolePermissionDialog from '@/components/admin/AdminTenantRolePermissionDialog.vue'
 import {
   getAdminTenantsApi,
   suspendAdminTenantApi,
@@ -45,6 +46,14 @@ const subscriptionTarget = ref(null)
 function openSubscriptionDialog(tenant) {
   subscriptionTarget.value = tenant
   subscriptionDialog.value = true
+}
+
+const permissionsDialog = ref(false)
+const permissionsTarget = ref(null)
+
+function openPermissionsDialog(tenant) {
+  permissionsTarget.value = tenant
+  permissionsDialog.value = true
 }
 
 function askSuspend(tenant) {
@@ -125,6 +134,14 @@ async function confirmToggle() {
             {{ t('admin.tenants.actions.manageSubscription') }}
           </v-btn>
           <v-btn
+            size="small"
+            variant="text"
+            prepend-icon="mdi-shield-account-outline"
+            @click="openPermissionsDialog(item)"
+          >
+            {{ t('admin.tenants.actions.managePermissions') }}
+          </v-btn>
+          <v-btn
             v-if="item.is_active"
             size="small"
             variant="text"
@@ -162,5 +179,7 @@ async function confirmToggle() {
       :tenant="subscriptionTarget"
       @changed="tableRef?.refresh()"
     />
+
+    <AdminTenantRolePermissionDialog v-model="permissionsDialog" :tenant="permissionsTarget" />
   </div>
 </template>

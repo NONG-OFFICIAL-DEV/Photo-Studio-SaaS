@@ -936,7 +936,8 @@
       "actions": {
         "suspend": "Suspend",
         "activate": "Activate",
-        "manageSubscription": "Manage Subscription"
+        "manageSubscription": "Manage Subscription",
+        "managePermissions": "Manage Permissions"
       },
       "confirmSuspendTitle": "Suspend tenant?",
       "confirmActivateTitle": "Activate tenant?",
@@ -1003,6 +1004,14 @@
       "messages": {
         "savedSuccess": "Role permissions updated.",
         "saveError": "Could not save role permissions."
+      }
+    },
+    "tenantRolePermissions": {
+      "dialogTitle": "Manage Permissions — {name}",
+      "ownerLockedHint": "{role} always has every permission and can't be changed here — every studio needs at least one fully-privileged account.",
+      "messages": {
+        "savedSuccess": "This studio's role permissions were updated.",
+        "saveError": "Could not save this studio's role permissions."
       }
     }
   },

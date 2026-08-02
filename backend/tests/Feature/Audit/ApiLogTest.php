@@ -9,11 +9,9 @@ use Tests\Concerns\CreatesTenantUsers;
 use Tests\TestCase;
 
 /**
- * API log VIEWING is platform-admin-only (see config/permissions.php —
- * 'audit.view' isn't in the catalog, so no tenant role can ever hold it).
- * Recording still happens for every tenant; these tests verify that via the
- * admin surface (App\Http\Controllers\Api\V1\Admin\AdminAuditController),
- * which is where a super admin investigates it.
+ * API log viewing is platform-admin-only — no tenant role, including
+ * Owner, can ever hold 'audit.view'. Recording still happens for every
+ * tenant regardless of who can view it.
  */
 class ApiLogTest extends TestCase
 {
@@ -28,10 +26,7 @@ class ApiLogTest extends TestCase
     {
         foreach (TenantRole::cases() as $role) {
             [, $user] = $this->createTenantWithUser($role);
-
-            $this->actingAsUser($user)
-                ->getJson('/api/v1/audit/api-logs')
-                ->assertForbidden();
+            $this->actingAsUser($user)->getJson('/api/v1/audit/api-logs')->assertForbidden();
         }
     }
 

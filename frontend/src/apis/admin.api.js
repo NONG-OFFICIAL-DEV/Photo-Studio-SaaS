@@ -38,3 +38,8 @@ export const getAdminRolePermissionsApi = () => http.get('/v1/admin/role-permiss
 
 export const updateAdminRolePermissionsApi = (role, permissions) =>
   http.put(`/v1/admin/role-permissions/${role}`, { permissions })
+
+export const getAdminTenantRolePermissionsApi = tenantId => http.get(`/v1/admin/tenants/${tenantId}/role-permissions`)
+
+export const updateAdminTenantRolePermissionsApi = (tenantId, role, permissions) =>
+  http.put(`/v1/admin/tenants/${tenantId}/role-permissions/${role}`, { permissions })

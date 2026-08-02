@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\V1\Admin\AdminAuditController;
 use App\Http\Controllers\Api\V1\Admin\AdminPlanController;
 use App\Http\Controllers\Api\V1\Admin\AdminRolePermissionController;
 use App\Http\Controllers\Api\V1\Admin\AdminTenantController;
+use App\Http\Controllers\Api\V1\Admin\AdminTenantRolePermissionController;
 use App\Http\Controllers\Api\V1\Album\AlbumController;
 use App\Http\Controllers\Api\V1\Attendance\AttendanceController;
 use App\Http\Controllers\Api\V1\Audit\AuditController;
@@ -357,6 +358,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth:api', 'super-admin'])-
             Route::post('/suspend', [AdminTenantController::class, 'suspendSubscription']);
             Route::post('/reactivate', [AdminTenantController::class, 'reactivateSubscription']);
             Route::get('/payments', [AdminTenantController::class, 'subscriptionPayments']);
+        });
+
+        Route::prefix('{tenant}/role-permissions')->name('role-permissions.')->group(function () {
+            Route::get('/', [AdminTenantRolePermissionController::class, 'index']);
+            Route::put('/{role}', [AdminTenantRolePermissionController::class, 'update']);
         });
     });
 
