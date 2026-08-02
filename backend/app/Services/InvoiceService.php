@@ -205,13 +205,15 @@ class InvoiceService extends BaseService
 
     /**
      * The message sent alongside (or, for the text-only send mode, instead
-     * of) the invoice attachment. $withAttachment toggles the "scan the QR
-     * in the attached image" line — it only makes sense when a PDF/image
-     * actually accompanies this message. Numeric date only (no month name)
-     * — this app's standing convention, since Khmer month-name localization
+     * of) the invoice attachment — same content regardless of format, since
+     * the follow-up QR photo (see qrPaymentImageBytes()) is sent as its own
+     * separate message either way, not embedded in this one. The QR-scan
+     * line only appears when the tenant actually has a payment QR uploaded
+     * — nothing to point at otherwise. Numeric date only (no month name) —
+     * this app's standing convention, since Khmer month-name localization
      * isn't reliable (see BookingCalendar.vue).
      */
-    public function invoiceSummaryText(Invoice $invoice, bool $withAttachment = true): string
+    public function invoiceSummaryText(Invoice $invoice): string
     {
         $invoice->loadMissing(['customer', 'tenant']);
 
@@ -228,9 +230,9 @@ class InvoiceService extends BaseService
             'Status: '.$invoice->status->label(),
         ];
 
-        if ($withAttachment) {
+        if ($invoice->tenant->qr_payment_path) {
             $lines[] = '';
-            $lines[] = 'Please scan the QR code in the attached invoice image to make your payment.';
+            $lines[] = 'Scan the QR code below to pay via your banking app.';
         }
 
         $lines[] = '';
@@ -273,6 +275,22 @@ class InvoiceService extends BaseService
         $mime = Storage::disk('public')->mimeType($tenant->qr_payment_path) ?: 'image/png';
 
         return "data:{$mime};base64,".base64_encode(Storage::disk('public')->get($tenant->qr_payment_path));
+    }
+
+    /**
+     * Raw bytes of the tenant's payment QR — for sending as its own plain
+     * Telegram photo (see InvoiceController::sendTelegram()), separate
+     * from whatever's embedded in the PDF/image attachment, so the
+     * customer can save and scan just the QR itself without cropping it
+     * out of a bigger document.
+     */
+    public function qrPaymentImageBytes(Tenant $tenant): ?string
+    {
+        if (! $tenant->qr_payment_path || ! Storage::disk('public')->exists($tenant->qr_payment_path)) {
+            return null;
+        }
+
+        return Storage::disk('public')->get($tenant->qr_payment_path);
     }
 
     /**

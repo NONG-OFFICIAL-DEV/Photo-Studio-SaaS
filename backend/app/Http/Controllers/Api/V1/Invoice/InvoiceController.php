@@ -96,9 +96,14 @@ class InvoiceController extends Controller
      * same defensive-default style as ReportController's export `format`
      * query param): 'pdf' downloads/renders the same document
      * downloadPdf() serves, 'image' renders the same layout as a single
-     * PNG (so the QR code is a plain photo the customer can view/save
-     * without a PDF viewer), 'text' sends no attachment at all — just the
-     * formatted message. Never touches this app's own storage either way.
+     * PNG, 'text' sends no attachment at all — just the formatted message.
+     *
+     * Whichever format is chosen, if the tenant has a payment QR uploaded,
+     * a SECOND message follows with that QR as its own plain photo — a
+     * customer can crop a QR out of a PDF, but "save this photo, scan it"
+     * is a much lower-friction ask, so this doesn't piggyback on whichever
+     * format happened to be picked. Never touches this app's own storage
+     * either way.
      */
     public function sendTelegram(Request $request, Invoice $invoice, TelegramService $telegram): JsonResponse
     {
@@ -119,30 +124,20 @@ class InvoiceController extends Controller
         $format = in_array($format, ['pdf', 'image', 'text'], true) ? $format : 'pdf';
         $chatId = $invoice->customer->telegram_chat_id;
         $token = $tenant->telegram_bot_token;
+        $caption = $this->invoices->invoiceSummaryText($invoice);
 
         $result = match ($format) {
-            'image' => $telegram->sendPhoto(
-                $token,
-                $chatId,
-                $this->invoices->renderImage($invoice),
-                $this->invoices->invoiceSummaryText($invoice)
-            ),
-            'text' => $telegram->sendMessage(
-                $token,
-                $chatId,
-                $this->invoices->invoiceSummaryText($invoice, withAttachment: false)
-            ),
-            default => $telegram->sendDocument(
-                $token,
-                $chatId,
-                $this->invoices->renderPdf($invoice),
-                "{$invoice->invoice_number}.pdf",
-                $this->invoices->invoiceSummaryText($invoice)
-            ),
+            'image' => $telegram->sendPhoto($token, $chatId, $this->invoices->renderImage($invoice), $caption),
+            'text' => $telegram->sendMessage($token, $chatId, $caption),
+            default => $telegram->sendDocument($token, $chatId, $this->invoices->renderPdf($invoice), "{$invoice->invoice_number}.pdf", $caption),
         };
 
         if (! ($result['ok'] ?? false)) {
             return $this->error('Failed to send via Telegram.', 502, [], 'TELEGRAM_SEND_FAILED');
+        }
+
+        if ($qrImage = $this->invoices->qrPaymentImageBytes($tenant)) {
+            $telegram->sendPhoto($token, $chatId, $qrImage, 'Scan to pay via your banking app.', 'payment-qr.png');
         }
 
         return $this->success(null, 'Invoice sent via Telegram.');

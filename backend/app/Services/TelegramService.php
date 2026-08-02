@@ -65,10 +65,10 @@ class TelegramService
      * viewer or "open file" step needed to see (and scan) an embedded QR
      * code.
      */
-    public function sendPhoto(string $token, string $chatId, mixed $contents, ?string $caption = null): array
+    public function sendPhoto(string $token, string $chatId, mixed $contents, ?string $caption = null, string $filename = 'invoice.png'): array
     {
         return Http::timeout(60)
-            ->attach('photo', $contents, 'invoice.png')
+            ->attach('photo', $contents, $filename)
             ->post("{$this->baseUrl($token)}/sendPhoto", array_filter([
                 'chat_id' => $chatId,
                 'caption' => $caption,
