@@ -40,6 +40,7 @@ const initialValues = computed(() => ({
   has_online_gallery: props.plan?.has_online_gallery ?? true,
   has_reports: props.plan?.has_reports ?? false,
   has_api_access: props.plan?.has_api_access ?? false,
+  has_telegram: props.plan?.has_telegram ?? false,
   is_active: props.plan?.is_active ?? true,
   sort_order: props.plan?.sort_order ?? 0,
 }))
@@ -150,6 +151,14 @@ async function onSubmit(values) {
                   :label="t('admin.plans.fields.hasApiAccess')"
                   hide-details
                   @update:model-value="setFieldValue('has_api_access', $event)"
+                />
+              </v-col>
+              <v-col cols="6" sm="3">
+                <v-checkbox
+                  :model-value="values.has_telegram"
+                  :label="t('admin.plans.fields.hasTelegram')"
+                  hide-details
+                  @update:model-value="setFieldValue('has_telegram', $event)"
                 />
               </v-col>
             </v-row>

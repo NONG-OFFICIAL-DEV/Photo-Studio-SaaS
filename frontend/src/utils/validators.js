@@ -289,6 +289,7 @@ export const planSchema = yup.object({
   has_online_gallery: yup.boolean(),
   has_reports: yup.boolean(),
   has_api_access: yup.boolean(),
+  has_telegram: yup.boolean(),
   is_active: yup.boolean(),
   sort_order: yup.number().typeError('Must be a number').nullable().integer().min(0),
 })

@@ -28,6 +28,20 @@ class PackageTelegramTest extends TestCase
             ->assertJsonPath('code', 'TELEGRAM_NOT_CONFIGURED');
     }
 
+    public function test_send_is_blocked_when_the_plan_lacks_telegram(): void
+    {
+        [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+        $tenant->activeSubscription->plan->update(['has_telegram' => false]);
+        $tenant->update(['telegram_bot_token' => '123:ABC', 'telegram_bot_username' => 'my_studio_bot']);
+        $package = Package::factory()->create(['tenant_id' => $tenant->id]);
+        $customer = Customer::factory()->create(['tenant_id' => $tenant->id, 'telegram_chat_id' => '999']);
+
+        $this->actingAsUser($owner)
+            ->postJson("/api/v1/packages/{$package->id}/telegram/send", ['customer_id' => $customer->id])
+            ->assertStatus(403)
+            ->assertJsonPath('code', 'PLAN_FEATURE_NOT_INCLUDED');
+    }
+
     public function test_send_fails_when_the_customer_has_not_linked_telegram(): void
     {
         [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);

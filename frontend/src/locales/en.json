@@ -872,7 +872,8 @@
       "analytics": "Analytics",
       "tenants": "Tenants",
       "plans": "Plans",
-      "audit": "Audit"
+      "audit": "Audit",
+      "rolePermissions": "Role Permissions"
     },
     "analytics": {
       "title": "Platform Analytics",
@@ -953,7 +954,8 @@
         "hasWatermarkGallery": "Watermark Gallery",
         "hasOnlineGallery": "Online Gallery",
         "hasReports": "Reports",
-        "hasApiAccess": "API Access"
+        "hasApiAccess": "API Access",
+        "hasTelegram": "Telegram Integration"
       },
       "messages": {
         "createdSuccess": "Plan created successfully.",
@@ -961,6 +963,15 @@
         "deletedSuccess": "Plan deleted successfully.",
         "saveError": "Could not save plan.",
         "deleteError": "Could not delete plan."
+      }
+    },
+    "rolePermissions": {
+      "title": "Role Permissions",
+      "subtitle": "Choose which permissions each baseline role gets by default — changes apply to every studio immediately.",
+      "ownerLockedHint": "{role} always has every permission and can't be changed here — every studio needs at least one fully-privileged account.",
+      "messages": {
+        "savedSuccess": "Role permissions updated.",
+        "saveError": "Could not save role permissions."
       }
     }
   },

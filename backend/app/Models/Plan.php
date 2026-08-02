@@ -16,7 +16,7 @@ class Plan extends Model
         'name', 'code', 'description',
         'price_monthly', 'price_quarterly', 'price_yearly',
         'max_users', 'storage_limit_gb', 'monthly_order_limit',
-        'has_watermark_gallery', 'has_online_gallery', 'has_reports', 'has_api_access',
+        'has_watermark_gallery', 'has_online_gallery', 'has_reports', 'has_api_access', 'has_telegram',
         'trial_days', 'is_active', 'sort_order',
     ];
 
@@ -30,6 +30,7 @@ class Plan extends Model
             'has_online_gallery' => 'boolean',
             'has_reports' => 'boolean',
             'has_api_access' => 'boolean',
+            'has_telegram' => 'boolean',
             'is_active' => 'boolean',
         ];
     }

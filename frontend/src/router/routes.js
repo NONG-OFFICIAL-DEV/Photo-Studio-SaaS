@@ -147,6 +147,12 @@ export const routes = [
         component: () => import('@/pages/admin/AdminAuditPage.vue'),
         meta: { titleKey: 'admin.menu.audit' },
       },
+      {
+        path: 'role-permissions',
+        name: 'admin-role-permissions',
+        component: () => import('@/pages/admin/AdminRolePermissionsPage.vue'),
+        meta: { titleKey: 'admin.menu.rolePermissions' },
+      },
     ],
   },
   {

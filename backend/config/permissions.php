@@ -43,10 +43,15 @@ return [
     ],
 
     /*
-     * Default permissions granted to each baseline role when a tenant is
-     * provisioned. Owner always gets the full current catalog. Tenants can
-     * freely customize per-role grants afterwards (Dynamic Permission
-     * Assignment) — this matrix only seeds sensible defaults.
+     * NOT the live source of truth for non-Owner roles anymore — a super
+     * admin edits those defaults at runtime via the Admin > Role
+     * Permissions panel (App\Http\Controllers\Api\V1\Admin\
+     * AdminRolePermissionController), stored in the role_permission_defaults
+     * table (see App\Services\RolePermissionDefaultsService). This array is
+     * kept only as the ORIGINAL seed data (read once by that table's
+     * creation migration) and as the fallback if a role somehow has no DB
+     * row yet. Owner is the one exception: always '*' (every permission),
+     * hardcoded everywhere, never DB-backed, never editable.
      */
     'defaults' => [
         TenantRole::Owner->value => ['*'],

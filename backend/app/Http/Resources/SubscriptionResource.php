@@ -35,6 +35,7 @@ class SubscriptionResource extends JsonResource
                 'has_online_gallery' => $this->plan->has_online_gallery,
                 'has_reports' => $this->plan->has_reports,
                 'has_api_access' => $this->plan->has_api_access,
+                'has_telegram' => $this->plan->has_telegram,
             ] : null),
         ];
     }

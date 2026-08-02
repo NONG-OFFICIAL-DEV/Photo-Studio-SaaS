@@ -30,6 +30,7 @@ class StorePlanRequest extends FormRequest
             'has_online_gallery' => ['boolean'],
             'has_reports' => ['boolean'],
             'has_api_access' => ['boolean'],
+            'has_telegram' => ['boolean'],
             'trial_days' => ['nullable', 'integer', 'min:0'],
             'is_active' => ['boolean'],
             'sort_order' => ['nullable', 'integer', 'min:0'],

@@ -10,7 +10,7 @@ class SyncTenantPermissions extends Command
 {
     protected $signature = 'permissions:sync-tenants';
 
-    protected $description = 'Grant every tenant\'s baseline roles any permissions added to config/permissions.php since they registered (additive only)';
+    protected $description = 'Grant every tenant\'s baseline roles any permissions added to the catalog since they registered (additive only)';
 
     public function handle(SyncTenantRolePermissionsAction $action): int
     {

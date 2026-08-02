@@ -24,6 +24,23 @@ class TelegramTest extends TestCase
         ]);
     }
 
+    /**
+     * The shared "test_plan" fixture has has_telegram=true (see
+     * CreatesTenantUsers) — every other test in this file relies on that.
+     * This one swaps in a plan without the flag to prove the gate itself
+     * actually blocks, not just that the happy path works.
+     */
+    public function test_connecting_a_bot_is_blocked_when_the_plan_lacks_telegram(): void
+    {
+        [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+        $tenant->activeSubscription->plan->update(['has_telegram' => false]);
+
+        $this->actingAsUser($owner)
+            ->postJson('/api/v1/settings/telegram/connect', ['bot_token' => '123:ABC'])
+            ->assertStatus(403)
+            ->assertJsonPath('code', 'PLAN_FEATURE_NOT_INCLUDED');
+    }
+
     public function test_owner_can_connect_a_telegram_bot(): void
     {
         [, $owner] = $this->createTenantWithUser(TenantRole::Owner);

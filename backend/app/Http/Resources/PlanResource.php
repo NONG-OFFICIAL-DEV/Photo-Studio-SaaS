@@ -25,6 +25,7 @@ class PlanResource extends JsonResource
             'has_online_gallery' => $this->has_online_gallery,
             'has_reports' => $this->has_reports,
             'has_api_access' => $this->has_api_access,
+            'has_telegram' => $this->has_telegram,
             'trial_days' => $this->trial_days,
             'is_active' => $this->is_active,
             'sort_order' => $this->sort_order,

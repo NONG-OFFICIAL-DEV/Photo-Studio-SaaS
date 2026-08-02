@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\Admin\AdminAnalyticsController;
 use App\Http\Controllers\Api\V1\Admin\AdminAuditController;
 use App\Http\Controllers\Api\V1\Admin\AdminPlanController;
+use App\Http\Controllers\Api\V1\Admin\AdminRolePermissionController;
 use App\Http\Controllers\Api\V1\Admin\AdminTenantController;
 use App\Http\Controllers\Api\V1\Album\AlbumController;
 use App\Http\Controllers\Api\V1\Attendance\AttendanceController;
@@ -106,9 +107,9 @@ Route::middleware(['auth:api', 'tenant', 'subscription.active'])->group(function
         Route::post('/{customer}/notes', [CustomerNoteController::class, 'store']);
         Route::delete('/{customer}/notes/{note}', [CustomerNoteController::class, 'destroy']);
 
-        Route::post('/{customer}/telegram/link', [CustomerTelegramController::class, 'link']);
-        Route::post('/{customer}/telegram/unlink', [CustomerTelegramController::class, 'unlink']);
-        Route::post('/{customer}/telegram/send', [CustomerTelegramController::class, 'sendFiles']);
+        Route::post('/{customer}/telegram/link', [CustomerTelegramController::class, 'link'])->middleware('plan.feature:has_telegram');
+        Route::post('/{customer}/telegram/unlink', [CustomerTelegramController::class, 'unlink'])->middleware('plan.feature:has_telegram');
+        Route::post('/{customer}/telegram/send', [CustomerTelegramController::class, 'sendFiles'])->middleware('plan.feature:has_telegram');
     });
 
     Route::prefix('bookings')->name('bookings.')->group(function () {
@@ -147,7 +148,7 @@ Route::middleware(['auth:api', 'tenant', 'subscription.active'])->group(function
         Route::put('/{package}', [PackageController::class, 'update']);
         Route::delete('/{package}', [PackageController::class, 'destroy']);
 
-        Route::post('/{package}/telegram/send', [PackageController::class, 'sendTelegram']);
+        Route::post('/{package}/telegram/send', [PackageController::class, 'sendTelegram'])->middleware('plan.feature:has_telegram');
     });
 
     Route::prefix('orders')->name('orders.')->group(function () {
@@ -199,7 +200,7 @@ Route::middleware(['auth:api', 'tenant', 'subscription.active'])->group(function
 
         Route::get('/{invoice}/pdf', [InvoiceController::class, 'downloadPdf']);
         Route::get('/{invoice}/share-link', [InvoiceController::class, 'shareLink']);
-        Route::post('/{invoice}/telegram/send', [InvoiceController::class, 'sendTelegram']);
+        Route::post('/{invoice}/telegram/send', [InvoiceController::class, 'sendTelegram'])->middleware('plan.feature:has_telegram');
 
         Route::post('/{invoice}/payments', [PaymentController::class, 'store']);
         Route::delete('/{invoice}/payments/{payment}', [PaymentController::class, 'destroy']);
@@ -272,8 +273,8 @@ Route::middleware(['auth:api', 'tenant', 'subscription.active'])->group(function
         Route::get('/export', [TenantSettingsController::class, 'export']);
         Route::post('/logo', [TenantSettingsController::class, 'uploadLogo']);
         Route::post('/qr-payment', [TenantSettingsController::class, 'uploadQrPayment']);
-        Route::post('/telegram/connect', [TelegramSettingsController::class, 'connect']);
-        Route::post('/telegram/disconnect', [TelegramSettingsController::class, 'disconnect']);
+        Route::post('/telegram/connect', [TelegramSettingsController::class, 'connect'])->middleware('plan.feature:has_telegram');
+        Route::post('/telegram/disconnect', [TelegramSettingsController::class, 'disconnect'])->middleware('plan.feature:has_telegram');
 
         Route::get('/', [TenantSettingsController::class, 'show']);
         Route::put('/', [TenantSettingsController::class, 'update'])->middleware('email.verified');
@@ -366,5 +367,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth:api', 'super-admin'])-
         Route::get('/login-history', [AdminAuditController::class, 'loginHistory']);
         Route::get('/security-events', [AdminAuditController::class, 'securityEvents']);
         Route::get('/api-logs', [AdminAuditController::class, 'apiLogs']);
+    });
+
+    Route::prefix('role-permissions')->name('role-permissions.')->group(function () {
+        Route::get('/', [AdminRolePermissionController::class, 'index']);
+        Route::put('/{role}', [AdminRolePermissionController::class, 'update']);
     });
 });

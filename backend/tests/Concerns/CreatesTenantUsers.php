@@ -28,7 +28,7 @@ trait CreatesTenantUsers
 
         $plan = Plan::firstOrCreate(
             ['code' => 'test_plan'],
-            ['name' => 'Test Plan', 'trial_days' => 14, 'is_active' => true, 'has_reports' => true]
+            ['name' => 'Test Plan', 'trial_days' => 14, 'is_active' => true, 'has_reports' => true, 'has_telegram' => true]
         );
 
         Subscription::create([

@@ -33,3 +33,8 @@ export const createAdminPlanApi = payload => http.post('/v1/admin/plans', payloa
 export const updateAdminPlanApi = (id, payload) => http.put(`/v1/admin/plans/${id}`, payload)
 
 export const deleteAdminPlanApi = id => http.delete(`/v1/admin/plans/${id}`)
+
+export const getAdminRolePermissionsApi = () => http.get('/v1/admin/role-permissions')
+
+export const updateAdminRolePermissionsApi = (role, permissions) =>
+  http.put(`/v1/admin/role-permissions/${role}`, { permissions })
