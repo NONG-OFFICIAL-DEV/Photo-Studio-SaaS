@@ -36,6 +36,7 @@ use App\Http\Controllers\Api\V1\Service\ServiceCategoryController;
 use App\Http\Controllers\Api\V1\Service\ServiceController;
 use App\Http\Controllers\Api\V1\Settings\TelegramSettingsController;
 use App\Http\Controllers\Api\V1\Settings\TenantSettingsController;
+use App\Http\Controllers\Api\V1\Telegram\TelegramActivityController;
 use App\Http\Controllers\Api\V1\Telegram\TelegramWebhookController;
 use App\Http\Controllers\Api\V1\UserController;
 use Illuminate\Support\Facades\Route;
@@ -110,6 +111,7 @@ Route::middleware(['auth:api', 'tenant', 'subscription.active'])->group(function
         Route::post('/{customer}/telegram/link', [CustomerTelegramController::class, 'link'])->middleware('plan.feature:has_telegram');
         Route::post('/{customer}/telegram/unlink', [CustomerTelegramController::class, 'unlink'])->middleware('plan.feature:has_telegram');
         Route::post('/{customer}/telegram/send', [CustomerTelegramController::class, 'sendFiles'])->middleware('plan.feature:has_telegram');
+        Route::get('/{customer}/telegram/activity', [CustomerTelegramController::class, 'activity']);
     });
 
     Route::prefix('bookings')->name('bookings.')->group(function () {
@@ -266,6 +268,10 @@ Route::middleware(['auth:api', 'tenant', 'subscription.active'])->group(function
         Route::get('/orders/export', [ReportController::class, 'exportOrders']);
         Route::get('/expenses', [ReportController::class, 'expenses']);
         Route::get('/expenses/export', [ReportController::class, 'exportExpenses']);
+    });
+
+    Route::prefix('telegram')->name('telegram.')->group(function () {
+        Route::get('/activity', [TelegramActivityController::class, 'index']);
     });
 
     Route::prefix('settings')->name('settings.')->group(function () {

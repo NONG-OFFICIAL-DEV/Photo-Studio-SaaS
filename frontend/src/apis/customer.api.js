@@ -43,3 +43,5 @@ export const sendCustomerTelegramFilesApi = (id, files, caption) => {
     headers: { 'Content-Type': 'multipart/form-data' },
   })
 }
+
+export const getCustomerTelegramActivityApi = (id, params = {}) => http.get(`/v1/customers/${id}/telegram/activity`, { params })

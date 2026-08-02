@@ -9,6 +9,7 @@ use App\Http\Requests\Invoice\VoidInvoiceRequest;
 use App\Http\Resources\InvoiceResource;
 use App\Models\Invoice;
 use App\Services\InvoiceService;
+use App\Services\TelegramMessageLogService;
 use App\Services\TelegramService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -21,7 +22,7 @@ class InvoiceController extends Controller
 {
     use ApiResponse;
 
-    public function __construct(protected InvoiceService $invoices)
+    public function __construct(protected InvoiceService $invoices, protected TelegramMessageLogService $telegramLogs)
     {
     }
 
@@ -133,8 +134,12 @@ class InvoiceController extends Controller
         };
 
         if (! ($result['ok'] ?? false)) {
+            $this->telegramLogs->record($invoice->customer, 'invoice', $invoice->invoice_number, $format, false, $result['description'] ?? 'Failed to send via Telegram.', $request->user());
+
             return $this->error('Failed to send via Telegram.', 502, [], 'TELEGRAM_SEND_FAILED');
         }
+
+        $this->telegramLogs->record($invoice->customer, 'invoice', $invoice->invoice_number, $format, true, null, $request->user());
 
         if ($qrImage = $this->invoices->qrPaymentImageBytes($tenant)) {
             $telegram->sendPhoto($token, $chatId, $qrImage, 'Scan to pay via your banking app.', 'payment-qr.png');

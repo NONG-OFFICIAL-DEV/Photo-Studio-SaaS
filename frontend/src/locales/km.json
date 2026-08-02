@@ -170,6 +170,7 @@
     "inventory": "សម្ភារៈ និងឧបករណ៍",
     "employees": "បុគ្គលិក",
     "reports": "របាយការណ៍",
+    "telegramActivity": "សកម្មភាព Telegram",
     "settings": "ការកំណត់",
     "logout": "ចាកចេញ",
     "audit": "សវនកម្ម",
@@ -290,12 +291,15 @@
       "empty": "មិនទាន់មានកំណត់ចំណាំនៅឡើយទេ។"
     },
     "telegram": {
+      "columnTitle": "Telegram",
       "connected": "បានភ្ជាប់តាម Telegram",
       "notConnected": "មិនទាន់ភ្ជាប់ Telegram ទេ",
       "generateLink": "ភ្ជាប់ Telegram",
       "unlink": "ផ្តាច់",
       "shareHint": "ផ្ញើតំណនេះទៅអតិថិជនម្តង (SMS ជួបផ្ទាល់ ឬសារដែលមានស្រាប់) — ពួកគេចុចវា បើក Telegram រួចចុច Start ។",
-      "linkCopied": "បានចម្លងតំណ។"
+      "linkCopied": "បានចម្លងតំណ។",
+      "activityTitle": "ប្រវត្តិការផ្ញើ",
+      "activityEmpty": "មិនទាន់មានការផ្ញើតាម Telegram នៅឡើយទេ។"
     },
     "messages": {
       "updatedSuccess": "ធ្វើបច្ចុប្បន្នភាពអតិថិជនបានជោគជ័យ។",
@@ -621,6 +625,33 @@
       "updatedSuccess": "ធ្វើបច្ចុប្បន្នភាពកញ្ចប់បានជោគជ័យ។",
       "saveError": "មិនអាចរក្សាទុកកញ្ចប់បានទេ។",
       "deletedSuccess": "លុបកញ្ចប់បានជោគជ័យ។"
+    }
+  },
+  "telegramActivity": {
+    "title": "សកម្មភាព Telegram",
+    "subtitle": "រាល់ការផ្ញើវិក្កយបត្រ កញ្ចប់ និងរូបថតតាម Telegram — មើលថាតើជោគជ័យ ឬបរាជ័យ។",
+    "filters": {
+      "customer": "អតិថិជន",
+      "type": "ប្រភេទ",
+      "status": "ស្ថានភាព"
+    },
+    "types": {
+      "invoice": "វិក្កយបត្រ",
+      "album": "រូបថត",
+      "package": "កញ្ចប់"
+    },
+    "statuses": {
+      "sent": "បានផ្ញើ",
+      "failed": "បរាជ័យ"
+    },
+    "columns": {
+      "customer": "អតិថិជន",
+      "type": "ប្រភេទ",
+      "subject": "បានផ្ញើ",
+      "format": "ទម្រង់",
+      "status": "ស្ថានភាព",
+      "sentBy": "ផ្ញើដោយ",
+      "sentAt": "ពេលវេលាផ្ញើ"
     }
   },
   "expenses": {

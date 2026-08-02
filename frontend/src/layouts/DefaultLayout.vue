@@ -134,6 +134,13 @@ const tenantMenuGroups = computed(() => [
         permission: 'reports.view',
         planFeature: 'has_reports',
       },
+      {
+        title: t('menu.telegramActivity'),
+        icon: 'mdi-send-check-outline',
+        to: { name: 'telegram-activity' },
+        permission: 'customers.view',
+        planFeature: 'has_telegram',
+      },
     ],
   },
   {

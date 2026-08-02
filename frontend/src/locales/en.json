@@ -170,6 +170,7 @@
     "inventory": "Inventory",
     "employees": "Employees",
     "reports": "Reports",
+    "telegramActivity": "Telegram Activity",
     "settings": "Settings",
     "logout": "Logout",
     "audit": "Audit",
@@ -290,12 +291,15 @@
       "empty": "No notes yet."
     },
     "telegram": {
+      "columnTitle": "Telegram",
       "connected": "Connected via Telegram",
       "notConnected": "Not connected to Telegram",
       "generateLink": "Connect Telegram",
       "unlink": "Disconnect",
       "shareHint": "Send this link to the customer once (SMS, in person, existing chat) — they tap it, open Telegram, and press Start.",
-      "linkCopied": "Link copied."
+      "linkCopied": "Link copied.",
+      "activityTitle": "Send History",
+      "activityEmpty": "No Telegram sends yet."
     },
     "messages": {
       "updatedSuccess": "Customer updated successfully.",
@@ -621,6 +625,33 @@
       "updatedSuccess": "Package updated successfully.",
       "saveError": "Unable to save package.",
       "deletedSuccess": "Package deleted successfully."
+    }
+  },
+  "telegramActivity": {
+    "title": "Telegram Activity",
+    "subtitle": "Every invoice, package, and photo delivery sent via Telegram — see what succeeded or failed.",
+    "filters": {
+      "customer": "Customer",
+      "type": "Type",
+      "status": "Status"
+    },
+    "types": {
+      "invoice": "Invoice",
+      "album": "Photos",
+      "package": "Package"
+    },
+    "statuses": {
+      "sent": "Sent",
+      "failed": "Failed"
+    },
+    "columns": {
+      "customer": "Customer",
+      "type": "Type",
+      "subject": "Sent",
+      "format": "Format",
+      "status": "Status",
+      "sentBy": "Sent By",
+      "sentAt": "Sent At"
     }
   },
   "expenses": {

@@ -99,6 +99,12 @@ export const routes = [
         meta: { titleKey: 'menu.reports', permission: 'reports.view', planFeature: 'has_reports' },
       },
       {
+        path: 'telegram-activity',
+        name: 'telegram-activity',
+        component: () => import('@/pages/telegram/TelegramActivityPage.vue'),
+        meta: { titleKey: 'menu.telegramActivity', permission: 'customers.view', planFeature: 'has_telegram' },
+      },
+      {
         path: 'settings',
         name: 'settings',
         component: () => import('@/pages/settings/SettingsPage.vue'),

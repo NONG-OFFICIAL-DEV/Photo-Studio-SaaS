@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Api\V1\Customer;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Customer\SendTelegramFilesRequest;
 use App\Http\Resources\CustomerResource;
+use App\Http\Resources\TelegramMessageLogResource;
 use App\Models\Customer;
+use App\Services\TelegramMessageLogService;
 use App\Services\TelegramService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -16,8 +18,25 @@ class CustomerTelegramController extends Controller
 {
     use ApiResponse;
 
-    public function __construct(protected TelegramService $telegram)
+    public function __construct(protected TelegramService $telegram, protected TelegramMessageLogService $logs)
     {
+    }
+
+    public function activity(Request $request, Customer $customer): JsonResponse
+    {
+        $this->authorize('view', $customer);
+
+        $paginator = $this->logs->forCustomer($customer->id, $request->only(['type', 'status', 'perPage']));
+
+        return $this->success(
+            TelegramMessageLogResource::collection($paginator->items()),
+            meta: [
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'per_page' => $paginator->perPage(),
+                'total' => $paginator->total(),
+            ]
+        );
     }
 
     /**
@@ -103,9 +122,23 @@ class CustomerTelegramController extends Controller
             }
         }
 
+        $totalFiles = count($request->file('files'));
+
         if ($sent === 0) {
+            $this->logs->record($customer, 'album', "{$totalFiles} file(s)", null, false, 'Telegram rejected every file — check the bot is still connected.', $request->user());
+
             return $this->error('Telegram rejected every file — check the bot is still connected.', 502, [], 'TELEGRAM_SEND_FAILED');
         }
+
+        $this->logs->record(
+            $customer,
+            'album',
+            "{$totalFiles} file(s)",
+            null,
+            true,
+            $failed ? 'Sent '.$sent." of {$totalFiles}; failed: ".implode(', ', $failed) : null,
+            $request->user()
+        );
 
         return $this->success(
             ['sent' => $sent, 'failed' => $failed],

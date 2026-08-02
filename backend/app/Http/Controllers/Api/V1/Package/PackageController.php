@@ -10,6 +10,7 @@ use App\Http\Resources\PackageResource;
 use App\Models\Customer;
 use App\Models\Package;
 use App\Services\PackageService;
+use App\Services\TelegramMessageLogService;
 use App\Services\TelegramService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -19,7 +20,7 @@ class PackageController extends Controller
 {
     use ApiResponse;
 
-    public function __construct(protected PackageService $packages)
+    public function __construct(protected PackageService $packages, protected TelegramMessageLogService $telegramLogs)
     {
     }
 
@@ -101,8 +102,12 @@ class PackageController extends Controller
         );
 
         if (! ($result['ok'] ?? false)) {
+            $this->telegramLogs->record($customer, 'package', $package->name, null, false, $result['description'] ?? 'Failed to send via Telegram.', $request->user());
+
             return $this->error('Failed to send via Telegram.', 502, [], 'TELEGRAM_SEND_FAILED');
         }
+
+        $this->telegramLogs->record($customer, 'package', $package->name, null, true, null, $request->user());
 
         return $this->success(null, 'Package sent via Telegram.');
     }

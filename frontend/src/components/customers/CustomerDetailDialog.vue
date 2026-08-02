@@ -10,8 +10,9 @@ import {
   toggleCustomerFavoriteApi,
   getCustomerTelegramLinkApi,
   unlinkCustomerTelegramApi,
+  getCustomerTelegramActivityApi,
 } from '@/apis/customer.api'
-import { formatDate } from '@/utils/dateFormat'
+import { formatDate, formatDateTime } from '@/utils/dateFormat'
 import { translateApiMessage } from '@/utils/apiMessages'
 import { useAppStore } from '@/stores/app'
 
@@ -30,6 +31,8 @@ const noteText = ref('')
 const noteLoading = ref(false)
 const telegramLoading = ref(false)
 const telegramLink = ref(null)
+const telegramActivity = ref([])
+const telegramActivityLoading = ref(false)
 
 async function load() {
   if (!props.customerId) return
@@ -42,10 +45,22 @@ async function load() {
   }
 }
 
+async function loadTelegramActivity() {
+  if (!props.customerId) return
+  telegramActivityLoading.value = true
+  try {
+    const { data } = await getCustomerTelegramActivityApi(props.customerId, { perPage: 5 })
+    telegramActivity.value = data.data
+  } finally {
+    telegramActivityLoading.value = false
+  }
+}
+
 watch(() => [props.modelValue, props.customerId], ([open]) => {
   if (open) {
     telegramLink.value = null
     load()
+    loadTelegramActivity()
   }
 }, { immediate: true })
 
@@ -173,6 +188,31 @@ async function unlinkTelegram() {
               <v-btn icon="mdi-open-in-new" size="small" variant="text" :href="telegramLink" target="_blank" />
             </div>
           </div>
+
+          <v-divider class="my-3" />
+
+          <div class="text-caption text-medium-emphasis mb-2">{{ t('customers.telegram.activityTitle') }}</div>
+          <div v-if="telegramActivityLoading" class="d-flex justify-center py-2">
+            <v-progress-circular indeterminate size="20" color="primary" />
+          </div>
+          <div v-else-if="!telegramActivity.length" class="text-body-2 text-medium-emphasis">
+            {{ t('customers.telegram.activityEmpty') }}
+          </div>
+          <v-list v-else density="compact">
+            <v-list-item v-for="entry in telegramActivity" :key="entry.id">
+              <template #prepend>
+                <v-icon
+                  :icon="entry.status === 'sent' ? 'mdi-check-circle' : 'mdi-alert-circle'"
+                  :color="entry.status === 'sent' ? 'success' : 'error'"
+                  size="18"
+                />
+              </template>
+              <v-list-item-title class="text-body-2">
+                {{ t(`telegramActivity.types.${entry.type}`) }}<span v-if="entry.subject_label"> — {{ entry.subject_label }}</span>
+              </v-list-item-title>
+              <v-list-item-subtitle>{{ formatDateTime(entry.created_at) }} &middot; {{ entry.sent_by_name }}</v-list-item-subtitle>
+            </v-list-item>
+          </v-list>
         </v-card-text>
       </v-card>
 
