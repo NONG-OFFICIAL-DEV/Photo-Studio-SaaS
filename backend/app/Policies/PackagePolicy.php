@@ -31,4 +31,9 @@ class PackagePolicy
     {
         return $user->can('packages.delete') && $user->tenant_id === $package->tenant_id;
     }
+
+    public function send(User $user, Package $package): bool
+    {
+        return $user->can('packages.send') && $user->tenant_id === $package->tenant_id;
+    }
 }

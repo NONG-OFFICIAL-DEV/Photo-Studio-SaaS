@@ -60,6 +60,44 @@ class PackageService extends BaseService
         return $this->packages->delete($package);
     }
 
+    /**
+     * The Telegram quote message sent to a customer for a package —
+     * plain text only (no PDF/image render, unlike invoices): a package
+     * has no QR/payment step of its own, just a price and a components
+     * list, so a formatted message is the whole deliverable.
+     */
+    public function packageSummaryText(Package $package): string
+    {
+        $package->loadMissing(['components.service', 'components.addon', 'tenant']);
+
+        $lines = [
+            "🎁 {$package->name}",
+            $package->tenant->name,
+        ];
+
+        if ($package->description) {
+            $lines[] = '';
+            $lines[] = $package->description;
+        }
+
+        if ($package->components->isNotEmpty()) {
+            $lines[] = '';
+            $lines[] = 'Includes:';
+
+            foreach ($package->components as $component) {
+                $suffix = $component->is_optional ? ' (optional)' : '';
+                $lines[] = "• {$component->name} x{$component->quantity}{$suffix}";
+            }
+        }
+
+        $lines[] = '';
+        $lines[] = 'Price: $'.number_format((float) $package->final_price, 2);
+        $lines[] = '';
+        $lines[] = 'Interested? Reply here or contact us to book!';
+
+        return implode("\n", $lines);
+    }
+
     protected function normalizeComponents(array $components): array
     {
         return array_map(fn (array $component) => [

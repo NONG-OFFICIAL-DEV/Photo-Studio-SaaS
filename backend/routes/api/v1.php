@@ -146,6 +146,8 @@ Route::middleware(['auth:api', 'tenant', 'subscription.active'])->group(function
         Route::get('/{package}', [PackageController::class, 'show']);
         Route::put('/{package}', [PackageController::class, 'update']);
         Route::delete('/{package}', [PackageController::class, 'destroy']);
+
+        Route::post('/{package}/telegram/send', [PackageController::class, 'sendTelegram']);
     });
 
     Route::prefix('orders')->name('orders.')->group(function () {

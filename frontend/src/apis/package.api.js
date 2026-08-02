@@ -9,3 +9,5 @@ export const createPackageApi = payload => http.post('/v1/packages', payload)
 export const updatePackageApi = (id, payload) => http.put(`/v1/packages/${id}`, payload)
 
 export const deletePackageApi = id => http.delete(`/v1/packages/${id}`)
+
+export const sendPackageTelegramApi = (id, customerId) => http.post(`/v1/packages/${id}/telegram/send`, { customer_id: customerId })

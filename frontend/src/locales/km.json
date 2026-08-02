@@ -605,6 +605,14 @@
       "deleteConfirmTitle": "លុបកញ្ចប់នេះ?",
       "deleteConfirmMessage": "សកម្មភាពនេះនឹងលុប '{name}' ចេញ។"
     },
+    "telegram": {
+      "send": "ផ្ញើតាម Telegram",
+      "dialogTitle": "ផ្ញើ \"{name}\" តាម Telegram",
+      "hint": "ជ្រើសរើសអតិថិជនម្នាក់ដើម្បីផ្ញើតម្លៃ និងព័ត៌មានលម្អិតនៃកញ្ចប់នេះជាសារ Telegram ។",
+      "notLinkedHint": "អតិថិជននេះមិនទាន់ភ្ជាប់ Telegram ទេ — សូមភ្ជាប់ពីទំព័រប្រវត្តិរូបគាត់សិន។",
+      "sendError": "មិនអាចផ្ញើកញ្ចប់តាម Telegram បានទេ។",
+      "sentSuccess": "កញ្ចប់បានផ្ញើតាម Telegram ។"
+    },
     "errors": {
       "needsOneComponent": "សូមបន្ថែមសមាសធាតុយ៉ាងតិចមួយទៅក្នុងកញ្ចប់។"
     },

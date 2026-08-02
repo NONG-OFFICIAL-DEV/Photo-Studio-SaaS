@@ -605,6 +605,14 @@
       "deleteConfirmTitle": "Delete package?",
       "deleteConfirmMessage": "This will remove '{name}'."
     },
+    "telegram": {
+      "send": "Send via Telegram",
+      "dialogTitle": "Send \"{name}\" via Telegram",
+      "hint": "Pick a customer to send this package's price and details to as a Telegram message.",
+      "notLinkedHint": "This customer hasn't connected Telegram yet — connect from their profile first.",
+      "sendError": "Unable to send the package via Telegram.",
+      "sentSuccess": "Package sent via Telegram."
+    },
     "errors": {
       "needsOneComponent": "Add at least one component to the package."
     },

@@ -5,6 +5,7 @@ import AppToolbar from '@/components/common/AppToolbar.vue'
 import AppTable from '@/components/common/AppTable.vue'
 import AppConfirmDialog from '@/components/common/AppConfirmDialog.vue'
 import PackageFormDialog from '@/components/packages/PackageFormDialog.vue'
+import PackageTelegramSendDialog from '@/components/packages/PackageTelegramSendDialog.vue'
 import { getPackagesApi, deletePackageApi } from '@/apis/package.api'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
@@ -34,6 +35,8 @@ const formDialog = ref(false)
 const editingPackage = ref(null)
 const confirmDelete = ref(false)
 const deleteTarget = ref(null)
+const telegramDialog = ref(false)
+const telegramTarget = ref(null)
 
 function openCreate() {
   editingPackage.value = null
@@ -43,6 +46,11 @@ function openCreate() {
 function openEdit(pkg) {
   editingPackage.value = pkg
   formDialog.value = true
+}
+
+function openTelegramSend(pkg) {
+  telegramTarget.value = pkg
+  telegramDialog.value = true
 }
 
 function askDelete(pkg) {
@@ -60,6 +68,7 @@ async function confirmDeletePackage() {
 const canCreate = computed(() => auth.hasPermission('packages.create'))
 const canUpdate = computed(() => auth.hasPermission('packages.update'))
 const canDelete = computed(() => auth.hasPermission('packages.delete'))
+const canSend = computed(() => auth.hasPermission('packages.send'))
 </script>
 
 <template>
@@ -101,6 +110,7 @@ const canDelete = computed(() => auth.hasPermission('packages.delete'))
         </template>
 
         <template #[`item.actions`]="{ item }">
+          <v-btn v-if="canSend" icon="mdi-send-outline" size="small" variant="text" @click="openTelegramSend(item)" />
           <v-btn v-if="canUpdate" icon="mdi-pencil-outline" size="small" variant="text" @click="openEdit(item)" />
           <v-btn v-if="canDelete" icon="mdi-trash-can-outline" size="small" variant="text" @click="askDelete(item)" />
         </template>
@@ -108,6 +118,12 @@ const canDelete = computed(() => auth.hasPermission('packages.delete'))
     </v-card>
 
     <PackageFormDialog v-model="formDialog" :pkg="editingPackage" @saved="tableRef?.refresh()" />
+
+    <PackageTelegramSendDialog
+      v-model="telegramDialog"
+      :package-id="telegramTarget?.id"
+      :package-name="telegramTarget?.name"
+    />
 
     <AppConfirmDialog
       v-model="confirmDelete"
