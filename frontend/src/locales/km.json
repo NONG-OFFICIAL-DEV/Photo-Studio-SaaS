@@ -1285,5 +1285,26 @@
         "changeFormat": "ប្តូរទម្រង់ពណ៌"
       }
     }
+  },
+  "notifications": {
+    "title": "ការជូនដំណឹង",
+    "markAllRead": "សម្គាល់ថាបានអានទាំងអស់",
+    "empty": "មិនទាន់មានការជូនដំណឹងទេ",
+    "viewAll": "មើលទាំងអស់",
+    "events": {
+      "subscription": {
+        "expiring_soon": "គម្រោង {plan} របស់ {tenant} នឹងផុតកំណត់ក្នុងរយៈពេល {days} ថ្ងៃទៀត",
+        "expired": "គម្រោង {plan} របស់ {tenant} បានផុតកំណត់",
+        "suspended": "ការជាវរបស់ {tenant} ត្រូវបានផ្អាក",
+        "reactivated": "ការជាវរបស់ {tenant} ត្រូវបានបើកឡើងវិញ",
+        "renewed": "គម្រោង {plan} របស់ {tenant} ត្រូវបានបន្តរយៈពេល (${amount})"
+      },
+      "tenant": {
+        "registered": "អតិថិជនថ្មីបានចុះឈ្មោះ៖ {tenant} (គម្រោង {plan})"
+      }
+    },
+    "message": "សារ",
+    "date": "កាលបរិច្ឆេទ",
+    "open": "បើក"
   }
 }

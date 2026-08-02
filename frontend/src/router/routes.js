@@ -122,6 +122,12 @@ export const routes = [
         component: () => import('@/pages/billing/BillingPage.vue'),
         meta: { titleKey: 'menu.billing', permission: 'tenant.billing.manage' },
       },
+      {
+        path: 'notifications',
+        name: 'notifications',
+        component: () => import('@/pages/notifications/NotificationsPage.vue'),
+        meta: { titleKey: 'notifications.title' },
+      },
     ],
   },
   {
@@ -158,6 +164,12 @@ export const routes = [
         name: 'admin-role-permissions',
         component: () => import('@/pages/admin/AdminRolePermissionsPage.vue'),
         meta: { titleKey: 'admin.menu.rolePermissions' },
+      },
+      {
+        path: 'notifications',
+        name: 'admin-notifications',
+        component: () => import('@/pages/notifications/NotificationsPage.vue'),
+        meta: { titleKey: 'notifications.title' },
       },
     ],
   },

@@ -26,6 +26,7 @@ use App\Http\Controllers\Api\V1\Inventory\InventoryItemController;
 use App\Http\Controllers\Api\V1\Inventory\InventoryMovementController;
 use App\Http\Controllers\Api\V1\Invoice\InvoiceController;
 use App\Http\Controllers\Api\V1\Invoice\PaymentController;
+use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\Order\EditingTaskController;
 use App\Http\Controllers\Api\V1\Order\OrderController;
 use App\Http\Controllers\Api\V1\Package\PackageController;
@@ -69,6 +70,18 @@ Route::prefix('auth')->name('auth.')->group(function () {
         Route::get('/me', [AuthController::class, 'me']);
         Route::post('/email/resend', [EmailVerificationController::class, 'resend']);
     });
+});
+
+/*
+ * Purely user-scoped, no tenant resolution needed — reachable by both a
+ * tenant user (even one whose subscription just lapsed) and a super admin
+ * (no tenant at all), same as /auth/me above.
+ */
+Route::middleware('auth:api')->prefix('notifications')->name('notifications.')->group(function () {
+    Route::get('/', [NotificationController::class, 'index']);
+    Route::get('/unread-count', [NotificationController::class, 'unreadCount']);
+    Route::post('/read-all', [NotificationController::class, 'markAllRead']);
+    Route::post('/{id}/read', [NotificationController::class, 'markRead']);
 });
 
 /*

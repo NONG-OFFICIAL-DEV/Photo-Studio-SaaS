@@ -12,12 +12,14 @@ use App\Models\Plan;
 use App\Models\Subscription;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Notifications\Billing\NewTenantRegisteredNotification;
 use App\Repositories\Contracts\TenantRepositoryInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
 use Spatie\Permission\PermissionRegistrar;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -78,6 +80,11 @@ class AuthService
             $user->assignRole(TenantRole::Owner->value);
 
             event(new Registered($user));
+
+            $superAdmins = User::query()->where('is_super_admin', true)->get();
+            if ($superAdmins->isNotEmpty()) {
+                Notification::send($superAdmins, new NewTenantRegisteredNotification($tenant, $plan->name));
+            }
 
             $token = JWTAuth::fromUser($user);
 

@@ -18,7 +18,7 @@ class Subscription extends Model
     protected $fillable = [
         'tenant_id', 'plan_id', 'status', 'billing_cycle',
         'trial_ends_at', 'current_period_start', 'current_period_ends_at',
-        'cancelled_at', 'amount', 'meta',
+        'cancelled_at', 'expiring_soon_notified_at', 'amount', 'meta',
     ];
 
     protected function casts(): array
@@ -30,6 +30,7 @@ class Subscription extends Model
             'current_period_start' => 'datetime',
             'current_period_ends_at' => 'datetime',
             'cancelled_at' => 'datetime',
+            'expiring_soon_notified_at' => 'datetime',
             'amount' => 'decimal:2',
             'meta' => 'array',
         ];

@@ -73,6 +73,30 @@ class RegistrationTest extends TestCase
         $this->assertTrue($subscription->trial_ends_at->diffInDays(now()) <= 7);
     }
 
+    public function test_every_super_admin_is_notified_of_the_new_tenant(): void
+    {
+        $superAdmin = User::factory()->create(['is_super_admin' => true, 'tenant_id' => null]);
+        // A regular tenant user must never receive this — only super admins.
+        [, $regularUser] = [null, User::factory()->create(['tenant_id' => Tenant::factory()->create()->id])];
+
+        $this->postJson('/api/v1/auth/register', [
+            'studio_name' => 'Notify Me Studio',
+            'owner_name' => 'Notify Owner',
+            'email' => 'notifyme@example.test',
+            'password' => 'Passw0rd123',
+            'password_confirmation' => 'Passw0rd123',
+        ])->assertCreated();
+
+        $tenant = Tenant::where('name', 'Notify Me Studio')->firstOrFail();
+
+        $this->assertSame(1, $superAdmin->notifications()->count());
+        $notification = $superAdmin->notifications()->first();
+        $this->assertSame('tenant.registered', $notification->data['event']);
+        $this->assertSame($tenant->id, $notification->data['tenant_id']);
+
+        $this->assertSame(0, $regularUser->notifications()->count());
+    }
+
     public function test_it_rejects_duplicate_email(): void
     {
         User::factory()->create(['email' => 'taken@example.test', 'tenant_id' => null]);

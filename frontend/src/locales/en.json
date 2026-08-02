@@ -1285,5 +1285,26 @@
         "changeFormat": "Change color format"
       }
     }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark all as read",
+    "empty": "No notifications yet",
+    "viewAll": "View all",
+    "events": {
+      "subscription": {
+        "expiring_soon": "{tenant}'s {plan} plan expires in {days} day(s)",
+        "expired": "{tenant}'s {plan} plan has expired",
+        "suspended": "{tenant}'s subscription has been suspended",
+        "reactivated": "{tenant}'s subscription has been reactivated",
+        "renewed": "{tenant}'s {plan} plan was renewed (${amount})"
+      },
+      "tenant": {
+        "registered": "New tenant registered: {tenant} ({plan} plan)"
+      }
+    },
+    "message": "Message",
+    "date": "Date",
+    "open": "Open"
   }
 }

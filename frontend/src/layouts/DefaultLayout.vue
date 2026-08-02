@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
+import NotificationBell from '@/components/common/NotificationBell.vue'
 
 const { t, te } = useI18n()
 const route = useRoute()
@@ -281,6 +282,8 @@ function toggleLocale() {
       >
         {{ auth.tenant.name }}
       </v-chip>
+
+      <NotificationBell />
 
       <v-divider vertical inset class="mx-1" />
       <v-menu

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\BillingCycle;
 use App\Enums\SubscriptionStatus;
+use App\Enums\TenantRole;
 use App\Exceptions\ApiException;
 use App\Models\Order;
 use App\Models\Plan;
@@ -11,7 +12,14 @@ use App\Models\Subscription;
 use App\Models\SubscriptionPayment;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Notifications\Billing\SubscriptionExpiredNotification;
+use App\Notifications\Billing\SubscriptionExpiringSoonNotification;
+use App\Notifications\Billing\SubscriptionReactivatedNotification;
+use App\Notifications\Billing\SubscriptionRenewedNotification;
+use App\Notifications\Billing\SubscriptionSuspendedNotification;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Notification;
+use Spatie\Permission\PermissionRegistrar;
 
 /**
  * Subscription lifecycle for both the tenant self-service Billing page and
@@ -104,6 +112,9 @@ class SubscriptionService
             'current_period_ends_at' => $periodEnd,
             'amount' => $amount,
             'cancelled_at' => null,
+            // A new period should get its own fresh expiring-soon warning
+            // rather than staying silenced by the previous period's.
+            'expiring_soon_notified_at' => null,
         ]);
 
         SubscriptionPayment::create([
@@ -120,7 +131,10 @@ class SubscriptionService
 
         $this->logAudit($subscription, $actor, "Subscription renewed (\"{$plan->name}\", \${$amount})");
 
-        return $subscription->fresh('plan');
+        $subscription = $subscription->fresh('plan');
+        $this->notifyOwners($subscription, new SubscriptionRenewedNotification($subscription));
+
+        return $subscription;
     }
 
     /**
@@ -231,7 +245,10 @@ class SubscriptionService
 
         $this->logAudit($subscription, $actor, 'Subscription suspended');
 
-        return $subscription->fresh('plan');
+        $subscription = $subscription->fresh('plan');
+        $this->notifyOwners($subscription, new SubscriptionSuspendedNotification($subscription, $actor));
+
+        return $subscription;
     }
 
     /**
@@ -251,7 +268,10 @@ class SubscriptionService
 
         $this->logAudit($subscription, $actor, "Subscription reactivated as \"{$status->label()}\"");
 
-        return $subscription->fresh('plan');
+        $subscription = $subscription->fresh('plan');
+        $this->notifyOwners($subscription, new SubscriptionReactivatedNotification($subscription));
+
+        return $subscription;
     }
 
     /**
@@ -268,12 +288,56 @@ class SubscriptionService
             ->get();
 
         foreach ($due as $subscription) {
+            $becomesExpired = ! $subscription->cancelled_at;
+
             $subscription->update([
-                'status' => $subscription->cancelled_at ? SubscriptionStatus::Cancelled : SubscriptionStatus::Expired,
+                'status' => $becomesExpired ? SubscriptionStatus::Expired : SubscriptionStatus::Cancelled,
             ]);
+
+            // A tenant who scheduled their own cancellation already knows
+            // it's ending — only an unplanned lapse into Expired is a
+            // surprise worth notifying about.
+            if ($becomesExpired) {
+                $this->notifyOwners($subscription->fresh('plan'), new SubscriptionExpiredNotification($subscription), includeSuperAdmins: true);
+            }
         }
 
         return $due->count();
+    }
+
+    /**
+     * The `subscriptions:notify-expiring` sweep: warns a tenant's Owner (and
+     * super admins) once per period, $days before their Trial/Active
+     * subscription lapses — expireDue() only reacts after the fact, this is
+     * the proactive counterpart. expiring_soon_notified_at guards against
+     * re-notifying every day between the threshold and the actual expiry;
+     * renew() resets it so a later period gets its own warning.
+     */
+    public function expiringSoon(int $days = 3): int
+    {
+        $threshold = now()->addDays($days);
+
+        $subscriptions = Subscription::query()
+            ->whereNull('expiring_soon_notified_at')
+            ->where(function ($query) use ($threshold) {
+                $query->where(fn ($q) => $q->where('status', SubscriptionStatus::Trial->value)->whereNotNull('trial_ends_at')->whereBetween('trial_ends_at', [now(), $threshold]))
+                    ->orWhere(fn ($q) => $q->where('status', SubscriptionStatus::Active->value)->whereNotNull('current_period_ends_at')->whereBetween('current_period_ends_at', [now(), $threshold]));
+            })
+            ->get();
+
+        foreach ($subscriptions as $subscription) {
+            $endsAt = $subscription->status === SubscriptionStatus::Trial
+                ? $subscription->trial_ends_at
+                : $subscription->current_period_ends_at;
+
+            $daysLeft = max(0, now()->diffInDays($endsAt, false));
+
+            $this->notifyOwners($subscription, new SubscriptionExpiringSoonNotification($subscription, (int) $daysLeft), includeSuperAdmins: true);
+
+            $subscription->update(['expiring_soon_notified_at' => now()]);
+        }
+
+        return $subscriptions->count();
     }
 
     protected function statusFromDates(Subscription $subscription): SubscriptionStatus
@@ -307,5 +371,41 @@ class SubscriptionService
             ->causedBy($actor)
             ->tap(fn ($a) => $a->tenant_id = $subscription->tenant_id)
             ->log($description);
+    }
+
+    /**
+     * Notifies the tenant's Owner(s), and optionally every super admin, of a
+     * billing event. Explicitly sets the permissions team ID rather than
+     * trusting the caller's request context — this is called from both a
+     * tenant-scoped request (BillingController, team ID already correct)
+     * and an admin-scoped one (AdminTenantController, no team ID set at
+     * all), so it can't rely on either.
+     */
+    protected function notifyOwners(Subscription $subscription, \Illuminate\Notifications\Notification $notification, bool $includeSuperAdmins = false): void
+    {
+        $recipients = $this->ownersOf($subscription->tenant_id);
+
+        if ($includeSuperAdmins) {
+            $recipients = $recipients->merge($this->superAdmins());
+        }
+
+        if ($recipients->isNotEmpty()) {
+            Notification::send($recipients, $notification);
+        }
+    }
+
+    protected function ownersOf(string $tenantId): Collection
+    {
+        app(PermissionRegistrar::class)->setPermissionsTeamId($tenantId);
+
+        return User::query()
+            ->where('tenant_id', $tenantId)
+            ->whereHas('roles', fn ($query) => $query->where('name', TenantRole::Owner->value))
+            ->get();
+    }
+
+    protected function superAdmins(): Collection
+    {
+        return User::query()->where('is_super_admin', true)->get();
     }
 }

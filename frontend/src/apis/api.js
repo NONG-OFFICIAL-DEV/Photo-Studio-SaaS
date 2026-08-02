@@ -60,12 +60,13 @@ function resolveQueue(error, token = null) {
  * Account/subscription gate handling: IdentifyTenant and
  * EnsureSubscriptionActive block every tenant-scoped route (403/402) once a
  * tenant is suspended or its trial/subscription has lapsed, returning one
- * of these stable codes. `/v1/auth/*` and `/v1/billing/*` are deliberately
- * exempt from one or both gates (so a blocked user can still log in, check
- * `/me`, and reach billing to fix a lapsed *subscription* — though not a
- * platform *suspension*, which blocks billing too) — so a request to those
- * always-reachable routes succeeding is NOT evidence the block is lifted.
- * Only a genuinely gated route succeeding is a reliable "all clear" signal.
+ * of these stable codes. `/v1/auth/*`, `/v1/billing/*` and
+ * `/v1/notifications*` are deliberately exempt from one or both gates (so a
+ * blocked user can still log in, check `/me`, reach billing to fix a lapsed
+ * *subscription*, and still see the notification bell explaining why they're
+ * blocked) — so a request to those always-reachable routes succeeding is NOT
+ * evidence the block is lifted. Only a genuinely gated route succeeding is a
+ * reliable "all clear" signal.
  */
 const ACCOUNT_BLOCKED_CODES = [
   'NO_SUBSCRIPTION_FOUND',
@@ -75,7 +76,7 @@ const ACCOUNT_BLOCKED_CODES = [
   'TENANT_SUSPENDED',
   'NO_TENANT_ASSOCIATED',
 ]
-const GATE_EXEMPT_URL_PREFIXES = ['/v1/auth/', '/v1/billing/']
+const GATE_EXEMPT_URL_PREFIXES = ['/v1/auth/', '/v1/billing/', '/v1/notifications']
 
 function isGateExempt(url) {
   return GATE_EXEMPT_URL_PREFIXES.some((prefix) => url?.includes(prefix))

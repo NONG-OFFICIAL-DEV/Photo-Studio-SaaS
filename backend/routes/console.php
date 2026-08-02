@@ -10,3 +10,4 @@ Artisan::command('inspire', function () {
 
 Schedule::command('invoices:mark-overdue')->daily();
 Schedule::command('subscriptions:expire')->daily();
+Schedule::command('subscriptions:notify-expiring')->daily();
