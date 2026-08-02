@@ -87,6 +87,9 @@ jobs:
             echo ">>> Running migrations"
             docker exec photo_studio_backend php artisan migrate --force
 
+            echo ">>> Syncing tenant role permissions with the current catalog"
+            docker exec photo_studio_backend php artisan permissions:sync-tenants
+
             echo ">>> Discovering packages and optimizing"
             docker exec photo_studio_backend php artisan package:discover --ansi
             docker exec photo_studio_backend php artisan optimize
