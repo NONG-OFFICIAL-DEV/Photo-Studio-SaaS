@@ -34,7 +34,6 @@ const headers = computed(() => [
   { title: t('fields.phone'), key: 'phone' },
   { title: t('fields.email'), key: 'email' },
   { title: t('fields.tags'), key: 'tags', sortable: false },
-  { title: t('customers.telegram.columnTitle'), key: 'telegram_connected', sortable: false, align: 'center' },
   { title: t('fields.status'), key: 'status', sortable: false },
   { title: t('common.actions'), key: 'actions', sortable: false, align: 'end' },
 ])
@@ -214,20 +213,6 @@ const canImport = computed(() => auth.hasPermission('customers.import'))
           </v-chip>
         </template>
 
-        <template #[`item.telegram_connected`]="{ item }">
-          <v-tooltip :text="item.telegram_connected ? t('customers.telegram.connected') : t('customers.telegram.notConnected')">
-            <template #activator="{ props: tooltipProps }">
-              <v-icon
-                v-bind="tooltipProps"
-                icon="mdi-send-circle-outline"
-                :color="item.telegram_connected ? 'success' : undefined"
-                :class="{ 'text-medium-emphasis': !item.telegram_connected }"
-                size="20"
-              />
-            </template>
-          </v-tooltip>
-        </template>
-
         <template #[`item.status`]="{ item }">
           <AppStatusChip
             v-if="item.is_blacklisted"
@@ -239,10 +224,11 @@ const canImport = computed(() => auth.hasPermission('customers.import'))
 
         <template #[`item.actions`]="{ item }">
           <v-btn
-            :text="t('customers.telegram.generateLink')"
+            :text="item.telegram_connected ? t('customers.telegram.connected') : t('customers.telegram.generateLink')"
             color="blue"
             size="small"
             variant="outlined"
+            :class="{ 'text-medium-emphasis': !item.telegram_connected }"
             append-icon="mdi-send-circle-outline"
             @click="openDetail(item)"
           />

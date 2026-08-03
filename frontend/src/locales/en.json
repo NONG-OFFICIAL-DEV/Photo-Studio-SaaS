@@ -292,7 +292,7 @@
     },
     "telegram": {
       "columnTitle": "Telegram",
-      "connected": "Connected via Telegram",
+      "connected": "Connected",
       "notConnected": "Not connected to Telegram",
       "generateLink": "Connect Telegram",
       "unlink": "Disconnect",
