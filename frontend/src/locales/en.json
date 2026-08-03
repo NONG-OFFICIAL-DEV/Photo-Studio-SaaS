@@ -388,6 +388,10 @@
     "newService": "New Service",
     "editService": "Edit Service",
     "pricingUnit": "Pricing Unit",
+    "itemType": {
+      "service": "Service",
+      "addon": "Add-on"
+    },
     "pricingUnits": {
       "fixed": "Fixed Price",
       "perHour": "Per Hour",

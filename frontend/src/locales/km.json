@@ -388,6 +388,10 @@
     "newService": "សេវាថ្មី",
     "editService": "កែសម្រួលសេវា",
     "pricingUnit": "ឯកតាតម្លៃ",
+    "itemType": {
+      "service": "សេវាកម្ម",
+      "addon": "សេវាបន្ថែម"
+    },
     "pricingUnits": {
       "fixed": "តម្លៃថេរ",
       "perHour": "តាមម៉ោង",
