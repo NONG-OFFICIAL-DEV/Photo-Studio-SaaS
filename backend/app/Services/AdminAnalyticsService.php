@@ -8,6 +8,7 @@ use App\Models\Subscription;
 use App\Models\SubscriptionPayment;
 use App\Models\Tenant;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class AdminAnalyticsService
 {
@@ -39,6 +40,8 @@ class AdminAnalyticsService
                 2
             ),
             'signups_trend' => $this->signupsTrend($dateFrom, $dateTo),
+            'revenue_trend' => $this->revenueTrend($dateFrom, $dateTo),
+            'top_tenants' => $this->topTenants($dateFrom, $dateTo),
         ];
     }
 
@@ -108,10 +111,8 @@ class AdminAnalyticsService
      */
     protected function signupsTrend(string $dateFrom, string $dateTo): array
     {
-        $groupByMonth = Carbon::parse($dateFrom)->diffInDays(Carbon::parse($dateTo)) > 31;
-        $sqlFormat = $groupByMonth ? 'YYYY-MM' : 'YYYY-MM-DD';
-        $labelFormat = $groupByMonth ? 'm/Y' : 'd/m';
         [$from, $to] = $this->dayBounds($dateFrom, $dateTo);
+        $sqlFormat = $this->trendSqlFormat($dateFrom, $dateTo);
 
         $counts = Tenant::query()
             ->whereBetween('created_at', [$from, $to])
@@ -119,6 +120,77 @@ class AdminAnalyticsService
             ->groupBy('period')
             ->pluck('total', 'period');
 
+        return $this->fillTrendBuckets($dateFrom, $dateTo, $counts);
+    }
+
+    /**
+     * Same shape and granularity as signupsTrend(), summing collected
+     * subscription payments instead of counting new tenants — the "total
+     * revenue by month/year" view.
+     */
+    protected function revenueTrend(string $dateFrom, string $dateTo): array
+    {
+        [$from, $to] = $this->dayBounds($dateFrom, $dateTo);
+        $sqlFormat = $this->trendSqlFormat($dateFrom, $dateTo);
+
+        $sums = SubscriptionPayment::query()
+            ->whereBetween('paid_at', [$from, $to])
+            ->selectRaw("to_char(paid_at, '{$sqlFormat}') as period, sum(amount) as total")
+            ->groupBy('period')
+            ->pluck('total', 'period');
+
+        return $this->fillTrendBuckets($dateFrom, $dateTo, $sums, round: true);
+    }
+
+    /**
+     * Tenants ranked by how much they've paid within the selected date
+     * range — widen the range (e.g. to "all time") to see lifetime spend
+     * rather than a separate, disconnected concept of "top tenants."
+     */
+    protected function topTenants(string $dateFrom, string $dateTo, int $limit = 10): array
+    {
+        [$from, $to] = $this->dayBounds($dateFrom, $dateTo);
+
+        $rows = DB::table('subscription_payments')
+            ->select('tenant_id')
+            ->selectRaw('SUM(amount) as total_spent')
+            ->selectRaw('COUNT(*) as payments_count')
+            ->whereBetween('paid_at', [$from, $to])
+            ->groupBy('tenant_id')
+            ->orderByDesc('total_spent')
+            ->limit($limit)
+            ->get();
+
+        $tenantNames = Tenant::query()->whereIn('id', $rows->pluck('tenant_id'))->pluck('name', 'id');
+
+        return $rows->map(fn ($row) => [
+            'tenant_id' => $row->tenant_id,
+            'tenant_name' => $tenantNames[$row->tenant_id] ?? null,
+            'total_spent' => (float) round($row->total_spent, 2),
+            'payments_count' => (int) $row->payments_count,
+        ])->all();
+    }
+
+    protected function trendSqlFormat(string $dateFrom, string $dateTo): string
+    {
+        return $this->trendGroupByMonth($dateFrom, $dateTo) ? 'YYYY-MM' : 'YYYY-MM-DD';
+    }
+
+    protected function trendGroupByMonth(string $dateFrom, string $dateTo): bool
+    {
+        return Carbon::parse($dateFrom)->diffInDays(Carbon::parse($dateTo)) > 31;
+    }
+
+    /**
+     * Walks every day/month in the range (matching whichever granularity
+     * trendSqlFormat() picked) and pairs it with a pre-grouped `$counts`
+     * map (period => value), defaulting missing periods to 0 — a gap in
+     * the data must render as a dip in the chart, not silently vanish.
+     */
+    protected function fillTrendBuckets(string $dateFrom, string $dateTo, $counts, bool $round = false): array
+    {
+        $groupByMonth = $this->trendGroupByMonth($dateFrom, $dateTo);
+        $labelFormat = $groupByMonth ? 'm/Y' : 'd/m';
         $cursor = Carbon::parse($dateFrom)->startOf($groupByMonth ? 'month' : 'day');
         $end = Carbon::parse($dateTo);
         $step = $groupByMonth ? 'addMonth' : 'addDay';
@@ -127,7 +199,8 @@ class AdminAnalyticsService
         $trend = [];
         while ($cursor->lte($end)) {
             $key = $cursor->format($periodFormat);
-            $trend[] = ['label' => $cursor->format($labelFormat), 'value' => (int) ($counts[$key] ?? 0)];
+            $value = $counts[$key] ?? 0;
+            $trend[] = ['label' => $cursor->format($labelFormat), 'value' => $round ? (float) round($value, 2) : (int) $value];
             $cursor->{$step}();
         }
 

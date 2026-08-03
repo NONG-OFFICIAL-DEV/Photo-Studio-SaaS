@@ -7,8 +7,11 @@ use App\Enums\SubscriptionStatus;
 use App\Enums\TenantRole;
 use App\Models\Plan;
 use App\Models\Subscription;
+use App\Models\SubscriptionPayment;
+use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Tests\Concerns\CreatesTenantUsers;
 use Tests\TestCase;
 
@@ -19,6 +22,20 @@ class AdminAnalyticsTest extends TestCase
     protected function superAdmin(): User
     {
         return User::factory()->create(['is_super_admin' => true, 'tenant_id' => null]);
+    }
+
+    protected function recordPayment(Tenant $tenant, float $amount, Carbon $paidAt): SubscriptionPayment
+    {
+        return SubscriptionPayment::create([
+            'tenant_id' => $tenant->id,
+            'subscription_id' => Subscription::where('tenant_id', $tenant->id)->value('id'),
+            'plan_id' => Subscription::where('tenant_id', $tenant->id)->value('plan_id'),
+            'amount' => $amount,
+            'billing_cycle' => BillingCycle::Monthly->value,
+            'period_start' => $paidAt,
+            'period_end' => $paidAt->copy()->addMonth(),
+            'paid_at' => $paidAt,
+        ]);
     }
 
     public function test_it_reports_tenant_counts_and_mrr(): void
@@ -155,5 +172,55 @@ class AdminAnalyticsTest extends TestCase
             ->assertOk();
 
         $this->assertEquals(75.0, $response->json('data.mrr'));
+    }
+
+    public function test_top_tenants_ranks_by_amount_spent_within_the_date_range(): void
+    {
+        $superAdmin = $this->superAdmin();
+        [$bigSpender] = $this->createTenantWithUser(TenantRole::Owner);
+        [$smallSpender] = $this->createTenantWithUser(TenantRole::Owner);
+        [$outOfRangeSpender] = $this->createTenantWithUser(TenantRole::Owner);
+
+        $this->recordPayment($bigSpender, 300, now()->subDays(2));
+        $this->recordPayment($bigSpender, 200, now()->subDay());
+        $this->recordPayment($smallSpender, 100, now()->subDays(3));
+        // Outside the queried range entirely — must not appear in the ranking.
+        $this->recordPayment($outOfRangeSpender, 999, now()->subMonths(6));
+
+        $response = $this->actingAsUser($superAdmin)
+            ->getJson('/api/v1/admin/analytics?date_from='.now()->subWeek()->toDateString().'&date_to='.now()->toDateString())
+            ->assertOk();
+
+        $topTenants = $response->json('data.top_tenants');
+
+        $this->assertCount(2, $topTenants);
+        $this->assertSame($bigSpender->id, $topTenants[0]['tenant_id']);
+        $this->assertEquals(500.0, $topTenants[0]['total_spent']);
+        $this->assertSame(2, $topTenants[0]['payments_count']);
+        $this->assertSame($smallSpender->id, $topTenants[1]['tenant_id']);
+        $this->assertEquals(100.0, $topTenants[1]['total_spent']);
+    }
+
+    public function test_revenue_trend_sums_payments_per_bucket_at_the_same_granularity_as_signups_trend(): void
+    {
+        $superAdmin = $this->superAdmin();
+        [$tenant] = $this->createTenantWithUser(TenantRole::Owner);
+
+        $this->recordPayment($tenant, 40, now()->subDays(2));
+        $this->recordPayment($tenant, 60, now()->subDays(2));
+        $this->recordPayment($tenant, 25, now());
+
+        $response = $this->actingAsUser($superAdmin)
+            ->getJson('/api/v1/admin/analytics?date_from='.now()->subDays(3)->toDateString().'&date_to='.now()->toDateString())
+            ->assertOk();
+
+        $revenueTrend = $response->json('data.revenue_trend');
+
+        // Same 4-daily-point granularity as signups_trend for an identical range.
+        $this->assertCount(4, $revenueTrend);
+        $this->assertEquals(4, count($response->json('data.signups_trend')));
+
+        $totalAcrossBuckets = array_sum(array_column($revenueTrend, 'value'));
+        $this->assertEquals(125.0, $totalAcrossBuckets);
     }
 }

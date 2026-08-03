@@ -188,6 +188,7 @@ const visibleTenantGroups = computed(() =>
 const adminMenuItems = [
   { title: t('admin.menu.analytics'), icon: 'mdi-view-dashboard-outline', to: { name: 'admin-analytics' } },
   { title: t('admin.menu.tenants'), icon: 'mdi-domain', to: { name: 'admin-tenants' } },
+  { title: t('admin.menu.revenueReport'), icon: 'mdi-chart-line', to: { name: 'admin-revenue-report' } },
   { title: t('admin.menu.plans'), icon: 'mdi-shape-outline', to: { name: 'admin-plans' } },
   { title: t('admin.menu.audit'), icon: 'mdi-shield-search', to: { name: 'admin-audit' } },
   { title: t('admin.menu.rolePermissions'), icon: 'mdi-shield-account-outline', to: { name: 'admin-role-permissions' } },

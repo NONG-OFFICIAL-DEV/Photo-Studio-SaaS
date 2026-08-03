@@ -904,7 +904,8 @@
       "tenants": "Tenants",
       "plans": "Plans",
       "audit": "Audit",
-      "rolePermissions": "Role Permissions"
+      "rolePermissions": "Role Permissions",
+      "revenueReport": "Revenue Report"
     },
     "analytics": {
       "title": "Platform Analytics",
@@ -963,7 +964,8 @@
           "suspended": "Subscription suspended.",
           "reactivated": "Subscription reactivated."
         }
-      }
+      },
+      "registered": "Registered"
     },
     "plans": {
       "title": "Plans",
@@ -1030,6 +1032,23 @@
       "messages": {
         "success": "Tenant \"{name}\" and all of its data have been permanently deleted.",
         "error": "Failed to delete this tenant."
+      }
+    },
+    "revenueReport": {
+      "title": "Revenue Report",
+      "subtitle": "When tenants signed up and how much each one has paid, across the whole platform.",
+      "revenueInRange": "Revenue in Range",
+      "mrr": "MRR",
+      "newTenants": "New Tenants",
+      "revenueTrend": "Revenue",
+      "topTenants": "Top Tenants by Spend",
+      "topTenantsSubtitle": "Ranked by total paid within the selected date range — widen the range to see lifetime spend.",
+      "payments": "payments",
+      "noTopTenants": "No payments in this range yet.",
+      "presets": {
+        "month": "This Month",
+        "quarter": "Last 3 Months",
+        "year": "Last 12 Months"
       }
     }
   },

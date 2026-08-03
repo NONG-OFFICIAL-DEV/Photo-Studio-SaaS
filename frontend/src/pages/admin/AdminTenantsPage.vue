@@ -14,6 +14,7 @@ import {
   activateAdminTenantApi,
 } from '@/apis/admin.api'
 import { useAppStore } from '@/stores/app'
+import { formatDate } from '@/utils/dateFormat'
 
 const { t } = useI18n()
 const appStore = useAppStore()
@@ -25,6 +26,7 @@ const headers = computed(() => [
   { title: t('admin.tenants.plan'), key: 'plan', sortable: false },
   { title: t('admin.tenants.subscriptionStatus'), key: 'subscription', sortable: false },
   { title: t('admin.tenants.users'), key: 'users_count' },
+  { title: t('admin.tenants.registered'), key: 'created_at' },
   { title: t('fields.status'), key: 'is_active', sortable: false },
   { title: t('common.actions'), key: 'actions', sortable: false, align: 'end' },
 ])
@@ -127,6 +129,10 @@ async function confirmToggle() {
         <template #[`item.subscription`]="{ item }">
           <AppStatusChip v-if="item.subscription" :status="item.subscription.status" />
           <span v-else>—</span>
+        </template>
+
+        <template #[`item.created_at`]="{ item }">
+          {{ formatDate(item.created_at) }}
         </template>
 
         <template #[`item.is_active`]="{ item }">

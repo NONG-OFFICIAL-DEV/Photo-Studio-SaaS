@@ -148,6 +148,12 @@ export const routes = [
         meta: { titleKey: 'admin.menu.tenants' },
       },
       {
+        path: 'revenue-report',
+        name: 'admin-revenue-report',
+        component: () => import('@/pages/admin/AdminRevenueReportPage.vue'),
+        meta: { titleKey: 'admin.menu.revenueReport' },
+      },
+      {
         path: 'plans',
         name: 'admin-plans',
         component: () => import('@/pages/admin/AdminPlansPage.vue'),
