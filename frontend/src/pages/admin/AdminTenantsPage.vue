@@ -134,51 +134,42 @@ async function confirmToggle() {
         </template>
 
         <template #[`item.actions`]="{ item }">
-          <v-btn
-            size="small"
-            variant="text"
-            prepend-icon="mdi-credit-card-outline"
-            @click="openSubscriptionDialog(item)"
-          >
-            {{ t('admin.tenants.actions.manageSubscription') }}
-          </v-btn>
-          <v-btn
-            size="small"
-            variant="text"
-            prepend-icon="mdi-shield-account-outline"
-            @click="openPermissionsDialog(item)"
-          >
-            {{ t('admin.tenants.actions.managePermissions') }}
-          </v-btn>
-          <v-btn
-            v-if="item.is_active"
-            size="small"
-            variant="text"
-            color="error"
-            prepend-icon="mdi-account-cancel-outline"
-            @click="askSuspend(item)"
-          >
-            {{ t('admin.tenants.actions.suspend') }}
-          </v-btn>
-          <v-btn
-            v-else
-            size="small"
-            variant="text"
-            color="success"
-            prepend-icon="mdi-account-check-outline"
-            @click="askActivate(item)"
-          >
-            {{ t('admin.tenants.actions.activate') }}
-          </v-btn>
-          <v-btn
-            size="small"
-            variant="text"
-            color="error"
-            prepend-icon="mdi-delete-alert-outline"
-            @click="openDeleteDialog(item)"
-          >
-            {{ t('admin.tenants.actions.delete') }}
-          </v-btn>
+          <v-menu>
+            <template #activator="{ props: menuProps }">
+              <v-btn icon="mdi-dots-vertical" size="small" variant="text" v-bind="menuProps" />
+            </template>
+            <v-list density="compact" min-width="220">
+              <v-list-item
+                :title="t('admin.tenants.actions.manageSubscription')"
+                prepend-icon="mdi-credit-card-outline"
+                @click="openSubscriptionDialog(item)"
+              />
+              <v-list-item
+                :title="t('admin.tenants.actions.managePermissions')"
+                prepend-icon="mdi-shield-account-outline"
+                @click="openPermissionsDialog(item)"
+              />
+              <v-list-item
+                v-if="item.is_active"
+                :title="t('admin.tenants.actions.suspend')"
+                prepend-icon="mdi-account-cancel-outline"
+                @click="askSuspend(item)"
+              />
+              <v-list-item
+                v-else
+                :title="t('admin.tenants.actions.activate')"
+                prepend-icon="mdi-account-check-outline"
+                @click="askActivate(item)"
+              />
+              <v-divider class="my-1" />
+              <v-list-item
+                class="text-error"
+                :title="t('admin.tenants.actions.delete')"
+                prepend-icon="mdi-delete-alert-outline"
+                @click="openDeleteDialog(item)"
+              />
+            </v-list>
+          </v-menu>
         </template>
       </AppTable>
     </v-card>
