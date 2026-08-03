@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Api\V1\Admin;
 
+use App\Actions\DeleteTenantAction;
 use App\Enums\BillingCycle;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ChangePlanRequest;
+use App\Http\Requests\Admin\DeleteTenantRequest;
 use App\Http\Requests\Admin\RenewSubscriptionRequest;
 use App\Http\Resources\AdminTenantResource;
 use App\Http\Resources\SubscriptionPaymentResource;
@@ -101,5 +103,12 @@ class AdminTenantController extends Controller
     public function subscriptionPayments(Tenant $tenant): JsonResponse
     {
         return $this->success(SubscriptionPaymentResource::collection($this->tenants->subscriptionPayments($tenant)));
+    }
+
+    public function destroy(DeleteTenantRequest $request, Tenant $tenant, DeleteTenantAction $action): JsonResponse
+    {
+        $summary = $action->execute($tenant, $request->user());
+
+        return $this->noContent("Tenant \"{$summary['tenant_name']}\" and all of its data have been permanently deleted.");
     }
 }

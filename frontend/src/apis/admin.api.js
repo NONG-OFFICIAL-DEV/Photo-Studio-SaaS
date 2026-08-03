@@ -10,6 +10,9 @@ export const suspendAdminTenantApi = id => http.post(`/v1/admin/tenants/${id}/su
 
 export const activateAdminTenantApi = id => http.post(`/v1/admin/tenants/${id}/activate`)
 
+export const deleteAdminTenantApi = (id, confirmName) =>
+  http.post(`/v1/admin/tenants/${id}/delete`, { confirm_name: confirmName })
+
 export const changeAdminSubscriptionPlanApi = (tenantId, planId) =>
   http.put(`/v1/admin/tenants/${tenantId}/subscription/plan`, { plan_id: planId })
 

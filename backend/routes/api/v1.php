@@ -362,6 +362,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth:api', 'super-admin'])-
         Route::get('/{tenant}', [AdminTenantController::class, 'show']);
         Route::post('/{tenant}/suspend', [AdminTenantController::class, 'suspend']);
         Route::post('/{tenant}/activate', [AdminTenantController::class, 'activate']);
+        Route::post('/{tenant}/delete', [AdminTenantController::class, 'destroy']);
 
         Route::prefix('{tenant}/subscription')->name('subscription.')->group(function () {
             Route::put('/plan', [AdminTenantController::class, 'changePlan']);

@@ -7,6 +7,7 @@ import AppStatusChip from '@/components/common/AppStatusChip.vue'
 import AppConfirmDialog from '@/components/common/AppConfirmDialog.vue'
 import AdminSubscriptionDialog from '@/components/admin/AdminSubscriptionDialog.vue'
 import AdminTenantRolePermissionDialog from '@/components/admin/AdminTenantRolePermissionDialog.vue'
+import AdminTenantDeleteDialog from '@/components/admin/AdminTenantDeleteDialog.vue'
 import {
   getAdminTenantsApi,
   suspendAdminTenantApi,
@@ -54,6 +55,14 @@ const permissionsTarget = ref(null)
 function openPermissionsDialog(tenant) {
   permissionsTarget.value = tenant
   permissionsDialog.value = true
+}
+
+const deleteDialog = ref(false)
+const deleteTarget = ref(null)
+
+function openDeleteDialog(tenant) {
+  deleteTarget.value = tenant
+  deleteDialog.value = true
 }
 
 function askSuspend(tenant) {
@@ -161,6 +170,15 @@ async function confirmToggle() {
           >
             {{ t('admin.tenants.actions.activate') }}
           </v-btn>
+          <v-btn
+            size="small"
+            variant="text"
+            color="error"
+            prepend-icon="mdi-delete-alert-outline"
+            @click="openDeleteDialog(item)"
+          >
+            {{ t('admin.tenants.actions.delete') }}
+          </v-btn>
         </template>
       </AppTable>
     </v-card>
@@ -181,5 +199,11 @@ async function confirmToggle() {
     />
 
     <AdminTenantRolePermissionDialog v-model="permissionsDialog" :tenant="permissionsTarget" />
+
+    <AdminTenantDeleteDialog
+      v-model="deleteDialog"
+      :tenant="deleteTarget"
+      @deleted="tableRef?.refresh()"
+    />
   </div>
 </template>

@@ -937,7 +937,8 @@
         "suspend": "Suspend",
         "activate": "Activate",
         "manageSubscription": "Manage Subscription",
-        "managePermissions": "Manage Permissions"
+        "managePermissions": "Manage Permissions",
+        "delete": "Delete"
       },
       "confirmSuspendTitle": "Suspend tenant?",
       "confirmActivateTitle": "Activate tenant?",
@@ -1012,6 +1013,23 @@
       "messages": {
         "savedSuccess": "This studio's role permissions were updated.",
         "saveError": "Could not save this studio's role permissions."
+      }
+    },
+    "tenantDelete": {
+      "dialogTitle": "Delete \"{name}\"",
+      "warning": "This permanently deletes the tenant and every piece of data tied to it — users, customers, bookings, invoices, payments, files, and history. This action cannot be undone.",
+      "impact": {
+        "users": "All staff accounts and their access",
+        "customers": "All customer records and contact history",
+        "records": "All bookings, orders, invoices, payments, albums, and reports",
+        "files": "All uploaded files (logo, QR payment code, etc.)"
+      },
+      "confirmHint": "Type \"{name}\" to confirm.",
+      "confirmButton": "Delete Permanently",
+      "cancelButton": "Cancel",
+      "messages": {
+        "success": "Tenant \"{name}\" and all of its data have been permanently deleted.",
+        "error": "Failed to delete this tenant."
       }
     }
   },
