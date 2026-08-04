@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\V1\Admin\AdminAnalyticsController;
 use App\Http\Controllers\Api\V1\Admin\AdminAuditController;
+use App\Http\Controllers\Api\V1\Admin\AdminPaymentConfirmationController;
 use App\Http\Controllers\Api\V1\Admin\AdminPlanController;
 use App\Http\Controllers\Api\V1\Admin\AdminPlatformSettingController;
 use App\Http\Controllers\Api\V1\Admin\AdminRolePermissionController;
@@ -364,6 +365,7 @@ Route::middleware(['auth:api', 'tenant'])->prefix('billing')->name('billing.')->
     Route::put('/plan', [BillingController::class, 'changePlan']);
     Route::post('/cancel', [BillingController::class, 'cancel']);
     Route::post('/resume', [BillingController::class, 'resume']);
+    Route::post('/payment-claims', [BillingController::class, 'submitPaymentClaim']);
 });
 
 /*
@@ -422,5 +424,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth:api', 'super-admin'])-
         Route::get('/', [AdminPlatformSettingController::class, 'show']);
         Route::put('/', [AdminPlatformSettingController::class, 'update']);
         Route::post('/khqr', [AdminPlatformSettingController::class, 'uploadKhqr']);
+    });
+
+    Route::prefix('payment-claims')->name('payment-claims.')->group(function () {
+        Route::get('/', [AdminPaymentConfirmationController::class, 'index']);
+        Route::post('/{claim}/confirm', [AdminPaymentConfirmationController::class, 'confirm']);
+        Route::post('/{claim}/reject', [AdminPaymentConfirmationController::class, 'reject']);
     });
 });

@@ -183,6 +183,12 @@ export const routes = [
         component: () => import('@/pages/admin/AdminPaymentSettingsPage.vue'),
         meta: { titleKey: 'admin.menu.paymentSettings' },
       },
+      {
+        path: 'payment-claims',
+        name: 'admin-payment-claims',
+        component: () => import('@/pages/admin/AdminPaymentClaimsPage.vue'),
+        meta: { titleKey: 'admin.menu.paymentClaims' },
+      },
     ],
   },
   {

@@ -14,3 +14,13 @@ export const changeBillingPlanApi = (planId, billingCycle) =>
 export const cancelBillingApi = () => http.post('/v1/billing/cancel')
 
 export const resumeBillingApi = () => http.post('/v1/billing/resume')
+
+export const submitPaymentClaimApi = ({ claimed_amount, note, receipt }) => {
+  const formData = new FormData()
+  if (claimed_amount !== null && claimed_amount !== undefined && claimed_amount !== '') {
+    formData.append('claimed_amount', claimed_amount)
+  }
+  if (note) formData.append('note', note)
+  if (receipt) formData.append('receipt', receipt)
+  return http.post('/v1/billing/payment-claims', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+}

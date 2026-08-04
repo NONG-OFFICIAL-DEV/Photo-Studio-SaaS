@@ -6,9 +6,10 @@ import AppStatusChip from '@/components/common/AppStatusChip.vue'
 import AppConfirmDialog from '@/components/common/AppConfirmDialog.vue'
 import RenewDialog from '@/components/billing/RenewDialog.vue'
 import ChangePlanDialog from '@/components/billing/ChangePlanDialog.vue'
+import PaymentClaimDialog from '@/components/billing/PaymentClaimDialog.vue'
 import { getBillingApi, getBillingPaymentsApi, cancelBillingApi, resumeBillingApi } from '@/apis/billing.api'
 import { useAppStore } from '@/stores/app'
-import { formatDate } from '@/utils/dateFormat'
+import { formatDate, formatDateTime } from '@/utils/dateFormat'
 import { formatCurrency } from '@/utils/currencyFormat'
 
 const { t } = useI18n()
@@ -19,9 +20,11 @@ const subscription = ref(null)
 const usage = ref(null)
 const payments = ref([])
 const paymentInfo = ref(null)
+const pendingPaymentClaim = ref(null)
 
 const renewDialog = ref(false)
 const changePlanDialog = ref(false)
+const paymentClaimDialog = ref(false)
 const confirmCancel = ref(false)
 const confirmResume = ref(false)
 const actionLoading = ref(false)
@@ -57,6 +60,7 @@ async function load() {
     subscription.value = billing.data.subscription
     usage.value = billing.data.usage
     paymentInfo.value = billing.data.payment_info
+    pendingPaymentClaim.value = billing.data.pending_payment_claim
     payments.value = paymentsData.data
   } finally {
     loading.value = false
@@ -221,9 +225,16 @@ async function confirmResumeSubscription() {
                   <v-list-item-subtitle class="text-body-1 font-weight-medium">{{ paymentInfo.bank_account_number }}</v-list-item-subtitle>
                 </v-list-item>
               </v-list>
-              <p v-if="paymentInfo.payment_instructions" class="text-body-2 text-medium-emphasis text-wrap">
+              <p v-if="paymentInfo.payment_instructions" class="text-body-2 text-medium-emphasis text-wrap mb-4">
                 {{ paymentInfo.payment_instructions }}
               </p>
+
+              <v-alert v-if="pendingPaymentClaim" type="info" variant="tonal" density="comfortable">
+                {{ t('billingPage.paymentClaim.pendingNotice', { date: formatDateTime(pendingPaymentClaim.created_at) }) }}
+              </v-alert>
+              <v-btn v-else color="primary" variant="flat" prepend-icon="mdi-check-decagram-outline" @click="paymentClaimDialog = true">
+                {{ t('billingPage.paymentClaim.iVePaid') }}
+              </v-btn>
             </v-col>
           </v-row>
         </v-card-text>
@@ -270,6 +281,11 @@ async function confirmResumeSubscription() {
       :current-billing-cycle="subscription?.billing_cycle"
       :pending-payment="resumeRenewAfterPlanChange"
       @changed="onPlanChanged"
+    />
+    <PaymentClaimDialog
+      v-model="paymentClaimDialog"
+      :default-amount="subscription?.amount"
+      @submitted="load"
     />
 
     <AppConfirmDialog

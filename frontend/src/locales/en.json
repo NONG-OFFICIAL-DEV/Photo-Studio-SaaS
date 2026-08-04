@@ -927,7 +927,8 @@
       "audit": "Audit",
       "rolePermissions": "Role Permissions",
       "revenueReport": "Revenue Report",
-      "paymentSettings": "Payment Settings"
+      "paymentSettings": "Payment Settings",
+      "paymentClaims": "Payment Claims"
     },
     "analytics": {
       "title": "Platform Analytics",
@@ -1088,6 +1089,29 @@
         "khqrUploaded": "KHQR image uploaded successfully.",
         "khqrUploadError": "Failed to upload KHQR image."
       }
+    },
+    "paymentClaims": {
+      "title": "Payment Claims",
+      "subtitle": "Tenants who say they've paid via bank transfer — check your bank app, then confirm or reject.",
+      "tenant": "Tenant",
+      "receipt": "Receipt",
+      "submittedBy": "Submitted By",
+      "submittedAt": "Submitted At",
+      "actions": {
+        "confirm": "Confirm",
+        "reject": "Reject"
+      },
+      "confirmTitle": "Confirm Payment",
+      "confirmMessage": "Confirm that {name} has paid? This will renew their subscription.",
+      "rejectTitle": "Reject Payment Claim",
+      "rejectHint": "Reject {name}'s payment claim — no subscription changes will be made.",
+      "reviewNote": "Reason (optional)",
+      "messages": {
+        "confirmed": "Payment claim confirmed and subscription renewed.",
+        "confirmError": "Failed to confirm payment claim.",
+        "rejected": "Payment claim rejected.",
+        "rejectError": "Failed to reject payment claim."
+      }
     }
   },
   "auditPage": {
@@ -1179,6 +1203,20 @@
       "bankName": "Bank",
       "accountName": "Account Name",
       "accountNumber": "Account Number"
+    },
+    "paymentClaim": {
+      "dialogTitle": "I've Paid",
+      "hint": "Let us know you sent a payment and an admin will confirm it once they see it in the bank account.",
+      "amount": "Amount Paid",
+      "note": "Note (e.g. transfer reference)",
+      "uploadReceipt": "Upload Receipt (optional)",
+      "submit": "Submit",
+      "iVePaid": "I've Paid",
+      "pendingNotice": "Your payment claim from {date} is under review — we'll confirm it shortly.",
+      "messages": {
+        "submitted": "Payment claim submitted. An admin will review it shortly.",
+        "submitError": "Failed to submit payment claim."
+      }
     }
   },
   "$vuetify": {
@@ -1383,6 +1421,9 @@
       },
       "tenant": {
         "registered": "New tenant registered: {tenant} ({plan} plan)"
+      },
+      "payment": {
+        "claimed": "{tenant} says they have paid — review the claim"
       }
     },
     "message": "Message",

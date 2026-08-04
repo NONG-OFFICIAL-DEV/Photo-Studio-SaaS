@@ -56,3 +56,11 @@ export const uploadAdminKhqrImageApi = (file) => {
   formData.append('khqr_image', file)
   return http.post('/v1/admin/platform-settings/khqr', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
 }
+
+export const getAdminPaymentClaimsApi = (params = {}) => http.get('/v1/admin/payment-claims', { params })
+
+export const confirmAdminPaymentClaimApi = (claimId, billingCycle) =>
+  http.post(`/v1/admin/payment-claims/${claimId}/confirm`, { billing_cycle: billingCycle })
+
+export const rejectAdminPaymentClaimApi = (claimId, note) =>
+  http.post(`/v1/admin/payment-claims/${claimId}/reject`, { note })

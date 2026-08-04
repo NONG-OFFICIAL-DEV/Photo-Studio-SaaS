@@ -6,12 +6,15 @@ use App\Enums\BillingCycle;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Billing\ChangePlanRequest;
 use App\Http\Requests\Billing\RenewSubscriptionRequest;
+use App\Http\Requests\Billing\SubmitPaymentClaimRequest;
+use App\Http\Resources\PaymentConfirmationResource;
 use App\Http\Resources\PlanResource;
 use App\Http\Resources\PlatformSettingResource;
 use App\Http\Resources\SubscriptionPaymentResource;
 use App\Http\Resources\SubscriptionResource;
 use App\Models\Plan;
 use App\Models\PlatformSetting;
+use App\Services\PaymentConfirmationService;
 use App\Services\SubscriptionService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -27,8 +30,10 @@ class BillingController extends Controller
 {
     use ApiResponse;
 
-    public function __construct(protected SubscriptionService $subscriptions)
-    {
+    public function __construct(
+        protected SubscriptionService $subscriptions,
+        protected PaymentConfirmationService $paymentConfirmations,
+    ) {
     }
 
     public function show(Request $request): JsonResponse
@@ -37,12 +42,33 @@ class BillingController extends Controller
 
         $tenant = $request->user()->tenant;
         $subscription = $tenant->activeSubscription()->with('plan')->firstOrFail();
+        $pendingClaim = $this->paymentConfirmations->pendingFor($tenant);
 
         return $this->success([
             'subscription' => new SubscriptionResource($subscription),
             'usage' => $this->subscriptions->usage($tenant),
             'payment_info' => new PlatformSettingResource(PlatformSetting::current()),
+            'pending_payment_claim' => $pendingClaim ? new PaymentConfirmationResource($pendingClaim) : null,
         ]);
+    }
+
+    public function submitPaymentClaim(SubmitPaymentClaimRequest $request): JsonResponse
+    {
+        $tenant = $request->user()->tenant;
+
+        if ($this->paymentConfirmations->pendingFor($tenant)) {
+            return $this->error('You already have a payment claim under review.', 422, [], 'PAYMENT_CLAIM_ALREADY_PENDING');
+        }
+
+        $claim = $this->paymentConfirmations->submit(
+            $tenant,
+            $request->user(),
+            $request->validated('claimed_amount'),
+            $request->validated('note'),
+            $request->file('receipt'),
+        );
+
+        return $this->created(new PaymentConfirmationResource($claim), 'Payment claim submitted. An admin will review it shortly.');
     }
 
     public function plans(Request $request): JsonResponse

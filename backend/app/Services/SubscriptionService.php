@@ -404,8 +404,16 @@ class SubscriptionService
             ->get();
     }
 
+    /**
+     * withoutGlobalScopes() is required here, not defensive decoration —
+     * this can run inside a tenant-scoped HTTP request (e.g. a tenant's own
+     * self-service renew()), where TenantScope is active and would
+     * otherwise silently filter every super admin out (they all have
+     * tenant_id = null, so a scope constraining to "the current tenant"
+     * matches none of them).
+     */
     protected function superAdmins(): Collection
     {
-        return User::query()->where('is_super_admin', true)->get();
+        return User::withoutGlobalScopes()->where('is_super_admin', true)->get();
     }
 }
