@@ -32,6 +32,16 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Production sits behind Cloudflare, which terminates TLS and
+        // forwards to the origin over plain HTTP — without this, Laravel
+        // sees that internal http:// hop as the "real" request and
+        // mis-detects scheme/host, breaking anything that depends on an
+        // exact URL match (signed links like email verification, which
+        // fail with "Invalid signature." when the scheme used to generate
+        // the link doesn't match what's used to validate it). '*' rather
+        // than a fixed IP list because Cloudflare's edge IPs rotate.
+        $middleware->trustProxies(at: '*');
+
         $middleware->api(prepend: [
             \Illuminate\Http\Middleware\HandleCors::class,
         ]);
