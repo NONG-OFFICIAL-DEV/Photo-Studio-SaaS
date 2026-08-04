@@ -6,6 +6,8 @@ use App\DTO\RegisterTenantData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterTenantRequest;
+use App\Http\Requests\Auth\UpdateEmailRequest;
+use App\Http\Requests\Auth\UpdatePasswordRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\AuthService;
@@ -60,6 +62,21 @@ class AuthController extends Controller
         $this->loadUserRoleContext($user);
 
         return $this->success(new UserResource($user), 'Current user fetched.');
+    }
+
+    public function updateEmail(UpdateEmailRequest $request): JsonResponse
+    {
+        $user = $this->authService->updateEmail($request->user(), $request->string('email')->toString());
+        $this->loadUserRoleContext($user);
+
+        return $this->success(new UserResource($user), 'Email updated. Please verify your new email address.');
+    }
+
+    public function updatePassword(UpdatePasswordRequest $request): JsonResponse
+    {
+        $this->authService->updatePassword($request->user(), $request->string('password')->toString());
+
+        return $this->success(null, 'Password updated successfully.');
     }
 
     protected function withAuthPayload(array $payload): array

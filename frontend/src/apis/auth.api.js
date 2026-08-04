@@ -15,3 +15,7 @@ export const forgotPasswordApi = payload => http.post('/v1/auth/password/forgot'
 export const resetPasswordApi = payload => http.post('/v1/auth/password/reset', payload)
 
 export const resendVerificationApi = () => http.post('/v1/auth/email/resend')
+
+export const updateEmailApi = payload => http.put('/v1/auth/email', payload)
+
+export const updatePasswordApi = payload => http.put('/v1/auth/password', payload)

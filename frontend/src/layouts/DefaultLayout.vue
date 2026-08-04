@@ -6,6 +6,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
 import NotificationBell from '@/components/common/NotificationBell.vue'
 import NotificationPreferencesDialog from '@/components/common/NotificationPreferencesDialog.vue'
+import AccountSettingsDialog from '@/components/common/AccountSettingsDialog.vue'
 
 const { t, te } = useI18n()
 const route = useRoute()
@@ -13,6 +14,7 @@ const router = useRouter()
 const auth = useAuthStore()
 const appStore = useAppStore()
 const notificationPreferencesDialog = ref(false)
+const accountSettingsDialog = ref(false)
 
 const subscriptionMessage = computed(() => {
   const blocked = appStore.subscriptionBlocked
@@ -357,6 +359,14 @@ function toggleLocale() {
               @click="notificationPreferencesDialog = true"
             />
 
+            <v-list-item
+              prepend-icon="mdi-account-cog-outline"
+              :title="t('account.dialogTitle')"
+              rounded="md"
+              class="mx-1 my-1"
+              @click="accountSettingsDialog = true"
+            />
+
             <v-divider class="my-1" />
 
             <!-- Language Selector Toggle -->
@@ -511,6 +521,7 @@ function toggleLocale() {
   </v-main>
 
   <NotificationPreferencesDialog v-model="notificationPreferencesDialog" />
+  <AccountSettingsDialog v-model="accountSettingsDialog" />
 </template>
 
 <style scoped>

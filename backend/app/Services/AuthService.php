@@ -199,6 +199,27 @@ class AuthService
         );
     }
 
+    /**
+     * Changing your own login email is a fresh, unverified identity claim
+     * — resets email_verified_at and fires a new verification email,
+     * exactly like a brand-new registration would, rather than trusting
+     * that whoever typed the new address actually owns it.
+     */
+    public function updateEmail(User $user, string $email): User
+    {
+        $user->forceFill(['email' => $email, 'email_verified_at' => null])->save();
+        $user->sendEmailVerificationNotification();
+
+        return $user->fresh();
+    }
+
+    public function updatePassword(User $user, string $password): User
+    {
+        $user->forceFill(['password' => Hash::make($password)])->save();
+
+        return $user->fresh();
+    }
+
     protected function tokenPayload(User $user, string $token, ?int $ttlMinutes = null): array
     {
         return [

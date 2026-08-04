@@ -71,6 +71,8 @@ Route::prefix('auth')->name('auth.')->group(function () {
         Route::post('/refresh', [AuthController::class, 'refresh']);
         Route::get('/me', [AuthController::class, 'me']);
         Route::post('/email/resend', [EmailVerificationController::class, 'resend']);
+        Route::put('/email', [AuthController::class, 'updateEmail']);
+        Route::put('/password', [AuthController::class, 'updatePassword']);
     });
 });
 

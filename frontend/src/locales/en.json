@@ -1382,5 +1382,21 @@
       "saveError": "Failed to update notification preferences.",
       "telegramLinkError": "Failed to start the Telegram connection."
     }
+  },
+  "account": {
+    "dialogTitle": "Account Settings",
+    "changeEmail": "Change Email",
+    "changePassword": "Change Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmNewPassword": "Confirm New Password",
+    "updateEmail": "Update Email",
+    "updatePassword": "Update Password",
+    "messages": {
+      "emailUpdated": "Email updated. Please verify your new email address.",
+      "emailUpdateError": "Failed to update email.",
+      "passwordUpdated": "Password updated successfully.",
+      "passwordUpdateError": "Failed to update password."
+    }
   }
 }

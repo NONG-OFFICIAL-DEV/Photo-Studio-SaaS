@@ -52,6 +52,20 @@ export const resetPasswordSchema = yup.object({
     .oneOf([yup.ref('password')], () => t('validation.passwordMatch')),
 })
 
+export const updateEmailSchema = yup.object({
+  current_password: yup.string().required(),
+  email: yup.string().required().email(),
+})
+
+export const updatePasswordSchema = yup.object({
+  current_password: yup.string().required(),
+  password: passwordRule,
+  password_confirmation: yup
+    .string()
+    .required()
+    .oneOf([yup.ref('password')], () => t('validation.passwordMatch')),
+})
+
 export const customerSchema = yup.object({
   name: yup.string().required().max(255),
   email: yup.string().nullable().email(),
