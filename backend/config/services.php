@@ -35,4 +35,15 @@ return [
         ],
     ],
 
+    /*
+     * A single platform-wide bot for admin/system notifications (subscription
+     * events, new tenant signups, ...) — completely separate from the bot
+     * each tenant connects in Settings to message their own customers.
+     */
+    'platform_telegram' => [
+        'bot_token' => env('PLATFORM_TELEGRAM_BOT_TOKEN'),
+        'bot_username' => env('PLATFORM_TELEGRAM_BOT_USERNAME'),
+        'webhook_secret' => env('PLATFORM_TELEGRAM_WEBHOOK_SECRET'),
+    ],
+
 ];

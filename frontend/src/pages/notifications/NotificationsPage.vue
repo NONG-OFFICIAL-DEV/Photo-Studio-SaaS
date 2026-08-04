@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import AppToolbar from '@/components/common/AppToolbar.vue'
 import AppTable from '@/components/common/AppTable.vue'
+import NotificationPreferencesDialog from '@/components/common/NotificationPreferencesDialog.vue'
 import {
   getNotificationsApi,
   markAllNotificationsReadApi,
@@ -18,6 +19,7 @@ const { icon, color, message } = useNotificationDisplay()
 
 const tableRef = ref(null)
 const unreadCount = ref(0)
+const preferencesDialog = ref(false)
 
 const headers = [
   { title: '', key: 'severity', sortable: false, width: 40 },
@@ -52,6 +54,9 @@ async function handleMarkAllRead() {
   <div>
     <AppToolbar :title="t('notifications.title')">
       <template #actions>
+        <v-btn variant="text" prepend-icon="mdi-tune-vertical" @click="preferencesDialog = true">
+          {{ t('notifications.preferences.title') }}
+        </v-btn>
         <v-btn
           v-if="unreadCount > 0"
           variant="tonal"
@@ -88,5 +93,7 @@ async function handleMarkAllRead() {
         </v-btn>
       </template>
     </AppTable>
+
+    <NotificationPreferencesDialog v-model="preferencesDialog" />
   </div>
 </template>

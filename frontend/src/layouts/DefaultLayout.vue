@@ -5,12 +5,14 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
 import NotificationBell from '@/components/common/NotificationBell.vue'
+import NotificationPreferencesDialog from '@/components/common/NotificationPreferencesDialog.vue'
 
 const { t, te } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 const appStore = useAppStore()
+const notificationPreferencesDialog = ref(false)
 
 const subscriptionMessage = computed(() => {
   const blocked = appStore.subscriptionBlocked
@@ -347,6 +349,14 @@ function toggleLocale() {
               to="/billing"
             />
 
+            <v-list-item
+              prepend-icon="mdi-tune-vertical"
+              :title="t('notifications.preferences.title')"
+              rounded="md"
+              class="mx-1 my-1"
+              @click="notificationPreferencesDialog = true"
+            />
+
             <v-divider class="my-1" />
 
             <!-- Language Selector Toggle -->
@@ -499,6 +509,8 @@ function toggleLocale() {
       <router-view />
     </v-container>
   </v-main>
+
+  <NotificationPreferencesDialog v-model="notificationPreferencesDialog" />
 </template>
 
 <style scoped>

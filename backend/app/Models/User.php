@@ -26,11 +26,21 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmailContrac
         'tenant_id', 'name', 'email', 'phone', 'password', 'avatar_path',
         'locale', 'status', 'is_super_admin', 'last_login_at', 'last_login_ip',
         'pay_type', 'base_pay', 'commission_rate',
+        'notification_channels', 'telegram_chat_id', 'telegram_link_token', 'telegram_linked_at',
     ];
 
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    /**
+     * A channel with no explicit preference yet defaults to "on" for mail
+     * and system (so a brand-new user isn't silently opted out of alerts
+     * they never chose to mute), and "off" for telegram — that one can
+     * never default to on regardless of preference, since it also requires
+     * an actual linked chat_id (see wantsChannel()).
+     */
+    public const DEFAULT_NOTIFICATION_CHANNELS = ['mail' => true, 'system' => true, 'telegram' => false];
 
     protected function casts(): array
     {
@@ -43,7 +53,26 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmailContrac
             'base_pay' => 'decimal:2',
             'commission_rate' => 'decimal:2',
             'status' => UserStatus::class,
+            'notification_channels' => 'array',
+            'telegram_linked_at' => 'datetime',
         ];
+    }
+
+    public function notificationChannelPreferences(): array
+    {
+        return array_merge(self::DEFAULT_NOTIFICATION_CHANNELS, $this->notification_channels ?? []);
+    }
+
+    public function hasTelegramLinked(): bool
+    {
+        return (bool) $this->telegram_chat_id;
+    }
+
+    public function wantsChannel(string $channel): bool
+    {
+        $wants = (bool) ($this->notificationChannelPreferences()[$channel] ?? false);
+
+        return $channel === 'telegram' ? $wants && $this->hasTelegramLinked() : $wants;
     }
 
     public function attendanceRecords(): HasMany

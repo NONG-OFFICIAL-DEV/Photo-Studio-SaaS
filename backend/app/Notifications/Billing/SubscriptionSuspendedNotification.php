@@ -4,7 +4,9 @@ namespace App\Notifications\Billing;
 
 use App\Models\Subscription;
 use App\Models\User;
+use App\Notifications\Concerns\NotifiesViaPreferredChannels;
 use App\Notifications\Concerns\ResolvesBillingLink;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 /**
@@ -15,7 +17,7 @@ use Illuminate\Notifications\Notification;
  */
 class SubscriptionSuspendedNotification extends Notification
 {
-    use ResolvesBillingLink;
+    use NotifiesViaPreferredChannels, ResolvesBillingLink;
 
     public function __construct(protected Subscription $subscription, protected ?User $actor)
     {
@@ -23,7 +25,7 @@ class SubscriptionSuspendedNotification extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return $this->preferredChannels($notifiable);
     }
 
     public function toDatabase(object $notifiable): array
@@ -42,5 +44,23 @@ class SubscriptionSuspendedNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return $this->toDatabase($notifiable);
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        $tenant = $this->subscription->tenant?->name ?? 'A tenant';
+
+        return (new MailMessage)
+            ->subject("Subscription suspended — {$tenant}")
+            ->greeting('Subscription suspended')
+            ->line("{$tenant}'s subscription has been suspended.")
+            ->action('View Billing', $this->billingUrl($notifiable));
+    }
+
+    public function toTelegram(object $notifiable): string
+    {
+        $tenant = $this->subscription->tenant?->name ?? 'A tenant';
+
+        return "🚫 {$tenant}'s subscription has been suspended.";
     }
 }

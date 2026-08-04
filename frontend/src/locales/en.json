@@ -1363,6 +1363,24 @@
     },
     "message": "Message",
     "date": "Date",
-    "open": "Open"
+    "open": "Open",
+    "preferences": {
+      "title": "Notification Channels",
+      "subtitle": "Choose how you want to be notified about billing and account events.",
+      "system": "In-app (System)",
+      "systemHint": "Show in the notification bell and this page.",
+      "mail": "Email",
+      "mailHint": "Send to your account email address.",
+      "telegram": "Telegram",
+      "telegramHint": "Connect your Telegram account to receive alerts there.",
+      "telegramLinked": "Your Telegram account is connected.",
+      "telegramUnavailable": "The Telegram channel is not available yet.",
+      "connectTelegram": "Connect Telegram",
+      "disconnectTelegram": "Disconnect Telegram",
+      "refreshStatus": "I've connected — refresh status",
+      "saved": "Notification preferences updated.",
+      "saveError": "Failed to update notification preferences.",
+      "telegramLinkError": "Failed to start the Telegram connection."
+    }
   }
 }

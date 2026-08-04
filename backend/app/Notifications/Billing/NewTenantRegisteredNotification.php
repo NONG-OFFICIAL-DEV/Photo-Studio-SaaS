@@ -3,6 +3,8 @@
 namespace App\Notifications\Billing;
 
 use App\Models\Tenant;
+use App\Notifications\Concerns\NotifiesViaPreferredChannels;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 /**
@@ -12,13 +14,15 @@ use Illuminate\Notifications\Notification;
  */
 class NewTenantRegisteredNotification extends Notification
 {
+    use NotifiesViaPreferredChannels;
+
     public function __construct(protected Tenant $tenant, protected ?string $planName)
     {
     }
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return $this->preferredChannels($notifiable);
     }
 
     public function toDatabase(object $notifiable): array
@@ -36,5 +40,21 @@ class NewTenantRegisteredNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return $this->toDatabase($notifiable);
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        $url = rtrim(config('app.frontend_url'), '/').'/admin/tenants';
+
+        return (new MailMessage)
+            ->subject("New tenant registered: {$this->tenant->name}")
+            ->greeting('New signup')
+            ->line("{$this->tenant->name} just registered".($this->planName ? " on the {$this->planName} plan." : '.'))
+            ->action('View Tenants', $url);
+    }
+
+    public function toTelegram(object $notifiable): string
+    {
+        return "🆕 New tenant registered: {$this->tenant->name}".($this->planName ? " ({$this->planName} plan)" : '');
     }
 }

@@ -3,7 +3,9 @@
 namespace App\Notifications\Billing;
 
 use App\Models\Subscription;
+use App\Notifications\Concerns\NotifiesViaPreferredChannels;
 use App\Notifications\Concerns\ResolvesBillingLink;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 /**
@@ -15,7 +17,7 @@ use Illuminate\Notifications\Notification;
  */
 class SubscriptionExpiredNotification extends Notification
 {
-    use ResolvesBillingLink;
+    use NotifiesViaPreferredChannels, ResolvesBillingLink;
 
     public function __construct(protected Subscription $subscription)
     {
@@ -23,7 +25,7 @@ class SubscriptionExpiredNotification extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return $this->preferredChannels($notifiable);
     }
 
     public function toDatabase(object $notifiable): array
@@ -42,5 +44,25 @@ class SubscriptionExpiredNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return $this->toDatabase($notifiable);
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        $tenant = $this->subscription->tenant?->name ?? 'A tenant';
+        $plan = $this->subscription->plan?->name ?? 'their';
+
+        return (new MailMessage)
+            ->subject("Subscription expired — {$tenant}")
+            ->greeting('Subscription expired')
+            ->line("{$tenant}'s {$plan} plan has expired.")
+            ->action('View Billing', $this->billingUrl($notifiable));
+    }
+
+    public function toTelegram(object $notifiable): string
+    {
+        $tenant = $this->subscription->tenant?->name ?? 'A tenant';
+        $plan = $this->subscription->plan?->name ?? 'their';
+
+        return "❌ {$tenant}'s {$plan} plan has expired.";
     }
 }

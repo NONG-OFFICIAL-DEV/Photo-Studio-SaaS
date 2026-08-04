@@ -27,11 +27,13 @@ use App\Http\Controllers\Api\V1\Inventory\InventoryMovementController;
 use App\Http\Controllers\Api\V1\Invoice\InvoiceController;
 use App\Http\Controllers\Api\V1\Invoice\PaymentController;
 use App\Http\Controllers\Api\V1\NotificationController;
+use App\Http\Controllers\Api\V1\NotificationPreferencesController;
 use App\Http\Controllers\Api\V1\Order\EditingTaskController;
 use App\Http\Controllers\Api\V1\Order\OrderController;
 use App\Http\Controllers\Api\V1\Package\PackageController;
 use App\Http\Controllers\Api\V1\Payroll\PayrollEntryController;
 use App\Http\Controllers\Api\V1\PlanLimitController;
+use App\Http\Controllers\Api\V1\PlatformTelegramWebhookController;
 use App\Http\Controllers\Api\V1\Report\ReportController;
 use App\Http\Controllers\Api\V1\Service\ServiceAddOnController;
 use App\Http\Controllers\Api\V1\Service\ServiceCategoryController;
@@ -82,6 +84,11 @@ Route::middleware('auth:api')->prefix('notifications')->name('notifications.')->
     Route::get('/unread-count', [NotificationController::class, 'unreadCount']);
     Route::post('/read-all', [NotificationController::class, 'markAllRead']);
     Route::post('/{id}/read', [NotificationController::class, 'markRead']);
+
+    Route::get('/preferences', [NotificationPreferencesController::class, 'show']);
+    Route::put('/preferences', [NotificationPreferencesController::class, 'update']);
+    Route::post('/telegram/link', [NotificationPreferencesController::class, 'linkTelegram']);
+    Route::post('/telegram/unlink', [NotificationPreferencesController::class, 'unlinkTelegram']);
 });
 
 /*
@@ -329,6 +336,14 @@ Route::get('/invoices/{invoice}/public-pdf', [InvoiceController::class, 'publicP
  */
 Route::post('/webhooks/telegram/{tenant}', [TelegramWebhookController::class, 'handle'])
     ->name('webhooks.telegram');
+
+/*
+ * Same reasoning as the tenant webhook above, but for the single
+ * platform-wide admin bot (see config('services.platform_telegram')) —
+ * authenticity verified inside PlatformTelegramWebhookController.
+ */
+Route::post('/webhooks/telegram-platform', [PlatformTelegramWebhookController::class, 'handle'])
+    ->name('webhooks.telegram-platform');
 
 /*
  * Tenant self-service billing. Deliberately OUTSIDE `subscription.active` —

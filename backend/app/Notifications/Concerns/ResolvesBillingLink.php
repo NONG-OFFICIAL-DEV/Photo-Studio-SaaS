@@ -16,4 +16,16 @@ trait ResolvesBillingLink
             ? ['name' => 'admin-tenants']
             : ['name' => 'billing'];
     }
+
+    /**
+     * Same destination as billingLink(), but as an absolute URL — for
+     * channels (mail, Telegram) that need a real clickable link rather
+     * than a frontend-router route name.
+     */
+    protected function billingUrl(object $notifiable): string
+    {
+        $path = $notifiable->is_super_admin ? '/admin/tenants' : '/billing';
+
+        return rtrim(config('app.frontend_url'), '/').$path;
+    }
 }
