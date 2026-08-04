@@ -76,19 +76,19 @@ export const noteSchema = yup.object({
 })
 
 export const bookingSchema = yup.object({
-  customer_id: yup.string().required('Customer is required'),
+  customer_id: yup.string().required(() => t('validation.customerRequired')),
   assigned_user_id: yup.string().nullable(),
-  type: yup.string().required('Type is required'),
+  type: yup.string().required(() => t('validation.typeRequired')),
   title: yup.string().nullable().max(255),
   notes: yup.string().nullable().max(2000),
   location_type: yup.string().required().oneOf(['studio', 'on_location']),
   location_address: yup.string().nullable().when('location_type', {
     is: 'on_location',
-    then: schema => schema.required('Address is required for on-location bookings').max(1000),
+    then: schema => schema.required(() => t('validation.addressRequiredOnLocation')).max(1000),
   }),
-  starts_at: yup.string().required('Start date/time is required'),
-  ends_at: yup.string().required('End date/time is required')
-    .test('after-start', 'End must be after start', function (value) {
+  starts_at: yup.string().required(() => t('validation.startDateTimeRequired')),
+  ends_at: yup.string().required(() => t('validation.endDateTimeRequired'))
+    .test('after-start', () => t('validation.endAfterStart'), function (value) {
       return !value || !this.parent.starts_at || new Date(value) > new Date(this.parent.starts_at)
     }),
 })
@@ -102,9 +102,9 @@ export const serviceSchema = yup.object({
   name: yup.string().required().max(255),
   description: yup.string().nullable().max(2000),
   deliverables: yup.string().nullable().max(2000),
-  price: yup.number().typeError('Price must be a number').required().min(0),
+  price: yup.number().typeError(() => t('validation.priceNumber')).required().min(0),
   pricing_unit: yup.string().required().oneOf(['fixed', 'per_hour', 'per_person', 'per_photo']),
-  duration_minutes: yup.number().typeError('Must be a number').nullable().min(1),
+  duration_minutes: yup.number().typeError(() => t('validation.mustBeNumber')).nullable().min(1),
   is_active: yup.boolean(),
 })
 
@@ -116,13 +116,13 @@ export const serviceCategorySchema = yup.object({
 export const serviceAddOnSchema = yup.object({
   name: yup.string().required().max(255),
   description: yup.string().nullable().max(1000),
-  price: yup.number().typeError('Price must be a number').required().min(0),
+  price: yup.number().typeError(() => t('validation.priceNumber')).required().min(0),
 })
 
 export const orderSchema = yup.object({
-  customer_id: yup.string().required('Customer is required'),
+  customer_id: yup.string().required(() => t('validation.customerRequired')),
   booking_id: yup.string().nullable(),
-  discount_amount: yup.number().typeError('Must be a number').nullable().min(0),
+  discount_amount: yup.number().typeError(() => t('validation.mustBeNumber')).nullable().min(0),
   notes: yup.string().nullable().max(2000),
 })
 
@@ -134,12 +134,12 @@ export const packageSchema = yup.object({
   name: yup.string().required().max(255),
   description: yup.string().nullable().max(2000),
   discount_type: yup.string().nullable(),
-  discount_value: yup.number().typeError('Must be a number').nullable().min(0)
+  discount_value: yup.number().typeError(() => t('validation.mustBeNumber')).nullable().min(0)
     .when('discount_type', {
       is: 'percent',
-      then: schema => schema.max(100, 'A percent discount cannot exceed 100'),
+      then: schema => schema.max(100, () => t('validation.percentDiscountMax')),
     }),
-  override_price: yup.number().typeError('Must be a number').nullable().min(0),
+  override_price: yup.number().typeError(() => t('validation.mustBeNumber')).nullable().min(0),
   is_active: yup.boolean(),
 })
 
@@ -148,35 +148,35 @@ export const expenseCategorySchema = yup.object({
 })
 
 export const attendanceSchema = yup.object({
-  user_id: yup.string().required('Employee is required'),
-  date: yup.string().required('Date is required'),
+  user_id: yup.string().required(() => t('validation.employeeRequired')),
+  date: yup.string().required(() => t('validation.dateRequired')),
   status: yup.string().required(),
   reason: yup.string().nullable().max(1000),
 })
 
 export const commissionEntrySchema = yup.object({
-  user_id: yup.string().required('Employee is required'),
+  user_id: yup.string().required(() => t('validation.employeeRequired')),
   order_id: yup.string().nullable(),
-  amount: yup.number().typeError('Must be a number').required().min(0.01),
-  earned_date: yup.string().required('Date is required'),
+  amount: yup.number().typeError(() => t('validation.mustBeNumber')).required().min(0.01),
+  earned_date: yup.string().required(() => t('validation.dateRequired')),
   notes: yup.string().nullable().max(2000),
 })
 
 export const payrollEntrySchema = yup.object({
-  user_id: yup.string().required('Employee is required'),
+  user_id: yup.string().required(() => t('validation.employeeRequired')),
   period_label: yup.string().required().max(255),
-  period_start: yup.string().required('Start date is required'),
-  period_end: yup.string().required('End date is required'),
-  base_pay: yup.number().typeError('Must be a number').nullable().min(0),
-  commission_total: yup.number().typeError('Must be a number').nullable().min(0),
-  deductions: yup.number().typeError('Must be a number').nullable().min(0),
+  period_start: yup.string().required(() => t('validation.startDateRequired')),
+  period_end: yup.string().required(() => t('validation.endDateRequired')),
+  base_pay: yup.number().typeError(() => t('validation.mustBeNumber')).nullable().min(0),
+  commission_total: yup.number().typeError(() => t('validation.mustBeNumber')).nullable().min(0),
+  deductions: yup.number().typeError(() => t('validation.mustBeNumber')).nullable().min(0),
   notes: yup.string().nullable().max(2000),
 })
 
 export const employmentSchema = yup.object({
   pay_type: yup.string().required(),
-  base_pay: yup.number().typeError('Must be a number').nullable().min(0),
-  commission_rate: yup.number().typeError('Must be a number').nullable().min(0).max(100),
+  base_pay: yup.number().typeError(() => t('validation.mustBeNumber')).nullable().min(0),
+  commission_rate: yup.number().typeError(() => t('validation.mustBeNumber')).nullable().min(0).max(100),
 })
 
 export const employeeSchema = yup.object({
@@ -186,14 +186,14 @@ export const employeeSchema = yup.object({
   password: passwordRule,
   role: yup.string().required(),
   pay_type: yup.string().required(),
-  base_pay: yup.number().typeError('Must be a number').nullable().min(0),
-  commission_rate: yup.number().typeError('Must be a number').nullable().min(0).max(100),
+  base_pay: yup.number().typeError(() => t('validation.mustBeNumber')).nullable().min(0),
+  commission_rate: yup.number().typeError(() => t('validation.mustBeNumber')).nullable().min(0).max(100),
 })
 
 export const expenseSchema = yup.object({
   category_id: yup.string().nullable(),
-  amount: yup.number().typeError('Must be a number').required().min(0.01),
-  expense_date: yup.string().required('Expense date is required'),
+  amount: yup.number().typeError(() => t('validation.mustBeNumber')).required().min(0.01),
+  expense_date: yup.string().required(() => t('validation.expenseDateRequired')),
   vendor: yup.string().nullable().max(255),
   payment_method: yup.string().required(),
   notes: yup.string().nullable().max(2000),
@@ -204,13 +204,13 @@ export const inventoryItemSchema = yup.object({
   sku: yup.string().nullable().max(100),
   unit: yup.string().required().max(50),
   category: yup.string().nullable().max(100),
-  reorder_threshold: yup.number().typeError('Must be a number').nullable().min(0),
+  reorder_threshold: yup.number().typeError(() => t('validation.mustBeNumber')).nullable().min(0),
   is_active: yup.boolean(),
 })
 
 export const inventoryMovementSchema = yup.object({
   type: yup.string().required(),
-  quantity: yup.number().typeError('Must be a number').required().min(0.01),
+  quantity: yup.number().typeError(() => t('validation.mustBeNumber')).required().min(0.01),
   reason: yup.string().nullable().max(1000),
   moved_at: yup.string().nullable(),
 })
@@ -220,19 +220,19 @@ export const albumSchema = yup.object({
   customer_id: yup.string().nullable(),
   order_id: yup.string().nullable(),
   description: yup.string().nullable().max(2000),
-  expected_photo_count: yup.number().typeError('Must be a number').nullable().min(0),
+  expected_photo_count: yup.number().typeError(() => t('validation.mustBeNumber')).nullable().min(0),
 })
 
 export const invoiceSchema = yup.object({
   customer_id: yup.string().nullable().when('order_id', {
     is: val => !val,
-    then: schema => schema.required('Customer is required unless created from an order'),
+    then: schema => schema.required(() => t('validation.customerRequiredUnlessOrder')),
   }),
   order_id: yup.string().nullable(),
   issue_date: yup.string().nullable(),
   due_date: yup.string().nullable(),
-  discount_amount: yup.number().typeError('Must be a number').nullable().min(0),
-  tax_rate: yup.number().typeError('Must be a number').nullable().min(0).max(100),
+  discount_amount: yup.number().typeError(() => t('validation.mustBeNumber')).nullable().min(0),
+  tax_rate: yup.number().typeError(() => t('validation.mustBeNumber')).nullable().min(0).max(100),
   notes: yup.string().nullable().max(2000),
 })
 
@@ -241,7 +241,7 @@ export const voidInvoiceSchema = yup.object({
 })
 
 export const paymentSchema = yup.object({
-  amount: yup.number().typeError('Must be a number').required().min(0.01),
+  amount: yup.number().typeError(() => t('validation.mustBeNumber')).required().min(0.01),
   method: yup.string().required(),
   paid_at: yup.string().nullable(),
   reference: yup.string().nullable().max(255),
@@ -251,12 +251,12 @@ export const paymentSchema = yup.object({
 const hexColor = yup
   .string()
   .nullable()
-  .matches(/^#[0-9A-Fa-f]{6}$/, { excludeEmptyString: true, message: 'Must be a hex color like #6750A4' })
+  .matches(/^#[0-9A-Fa-f]{6}$/, { excludeEmptyString: true, message: () => t('validation.hexColor') })
 
 const timeOfDay = yup
   .string()
   .nullable()
-  .matches(/^([01]\d|2[0-3]):[0-5]\d$/, { excludeEmptyString: true, message: 'Must be a time like 09:00' })
+  .matches(/^([01]\d|2[0-3]):[0-5]\d$/, { excludeEmptyString: true, message: () => t('validation.timeOfDay') })
 
 export const settingsSchema = yup.object({
   name: yup.string().required().max(255),
@@ -266,8 +266,8 @@ export const settingsSchema = yup.object({
   currency: yup.string().required().length(3).uppercase(),
   timezone: yup.string().required().max(100),
   invoice_prefix: yup.string().nullable().max(20),
-  default_tax_rate: yup.number().typeError('Must be a number').nullable().min(0).max(100),
-  default_due_days: yup.number().typeError('Must be a number').nullable().integer().min(0).max(365),
+  default_tax_rate: yup.number().typeError(() => t('validation.mustBeNumber')).nullable().min(0).max(100),
+  default_due_days: yup.number().typeError(() => t('validation.mustBeNumber')).nullable().integer().min(0).max(365),
   invoice_footer: yup.string().nullable().max(2000),
   primary_color: hexColor,
   secondary_color: hexColor,
@@ -278,18 +278,18 @@ export const planSchema = yup.object({
   name: yup.string().required().max(255),
   code: yup.string().required().max(100),
   description: yup.string().nullable().max(2000),
-  price_monthly: yup.number().typeError('Must be a number').nullable().min(0),
-  price_quarterly: yup.number().typeError('Must be a number').nullable().min(0),
-  price_yearly: yup.number().typeError('Must be a number').nullable().min(0),
-  max_users: yup.number().typeError('Must be a number').nullable().integer().min(1),
-  storage_limit_gb: yup.number().typeError('Must be a number').nullable().integer().min(0),
-  monthly_order_limit: yup.number().typeError('Must be a number').nullable().integer().min(0),
-  trial_days: yup.number().typeError('Must be a number').nullable().integer().min(0),
+  price_monthly: yup.number().typeError(() => t('validation.mustBeNumber')).nullable().min(0),
+  price_quarterly: yup.number().typeError(() => t('validation.mustBeNumber')).nullable().min(0),
+  price_yearly: yup.number().typeError(() => t('validation.mustBeNumber')).nullable().min(0),
+  max_users: yup.number().typeError(() => t('validation.mustBeNumber')).nullable().integer().min(1),
+  storage_limit_gb: yup.number().typeError(() => t('validation.mustBeNumber')).nullable().integer().min(0),
+  monthly_order_limit: yup.number().typeError(() => t('validation.mustBeNumber')).nullable().integer().min(0),
+  trial_days: yup.number().typeError(() => t('validation.mustBeNumber')).nullable().integer().min(0),
   has_watermark_gallery: yup.boolean(),
   has_online_gallery: yup.boolean(),
   has_reports: yup.boolean(),
   has_api_access: yup.boolean(),
   has_telegram: yup.boolean(),
   is_active: yup.boolean(),
-  sort_order: yup.number().typeError('Must be a number').nullable().integer().min(0),
+  sort_order: yup.number().typeError(() => t('validation.mustBeNumber')).nullable().integer().min(0),
 })

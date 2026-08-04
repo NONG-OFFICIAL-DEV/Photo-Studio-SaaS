@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { Form as VeeForm } from 'vee-validate'
 import { useI18n } from 'vue-i18n'
 
@@ -18,7 +18,7 @@ import { useI18n } from 'vue-i18n'
  * via the standard HTML `<button type="submit" form="...">` association
  * instead (see any *FormDialog.vue for the pattern).
  */
-defineProps({
+const props = defineProps({
   schema: { type: Object, required: true },
   initialValues: { type: Object, default: () => ({}) },
   id: { type: String, default: undefined },
@@ -34,6 +34,19 @@ const formRef = ref(null)
 
 watch(locale, () => {
   Object.keys(formRef.value?.errors || {}).forEach(field => formRef.value.validateField(field))
+})
+
+// Fields here are wired via setFieldValue rather than <Field>/useField, so
+// vee-validate only creates a path-state for a field the first time it's
+// touched. Until then, whole-form validation can't find its exact path and
+// falls back to a prefix match against whichever other field IS registered
+// (e.g. "password" for the untouched "password_confirmation"), attaching
+// that field's errors to the wrong input. Registering every schema field's
+// path-state up front avoids the fallback entirely.
+onMounted(() => {
+  Object.entries(props.initialValues).forEach(([field, value]) => {
+    formRef.value?.setFieldValue(field, value, false)
+  })
 })
 </script>
 
