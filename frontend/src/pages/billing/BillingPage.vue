@@ -18,6 +18,7 @@ const loading = ref(true)
 const subscription = ref(null)
 const usage = ref(null)
 const payments = ref([])
+const paymentInfo = ref(null)
 
 const renewDialog = ref(false)
 const changePlanDialog = ref(false)
@@ -55,6 +56,7 @@ async function load() {
     const [{ data: billing }, { data: paymentsData }] = await Promise.all([getBillingApi(), getBillingPaymentsApi()])
     subscription.value = billing.data.subscription
     usage.value = billing.data.usage
+    paymentInfo.value = billing.data.payment_info
     payments.value = paymentsData.data
   } finally {
     loading.value = false
@@ -64,6 +66,8 @@ async function load() {
 onMounted(load)
 
 const isCancelled = computed(() => Boolean(subscription.value?.cancelled_at))
+const hasPaymentInfo = computed(() =>
+  Boolean(paymentInfo.value?.khqr_image_url || paymentInfo.value?.bank_name))
 const endsAtLabel = computed(() => {
   const date =
     subscription.value?.status === 'trial'
@@ -193,6 +197,37 @@ async function confirmResumeSubscription() {
           </v-card>
         </v-col>
       </v-row>
+
+      <v-card v-if="hasPaymentInfo" variant="flat" border rounded="lg" class="mt-4">
+        <v-card-title>{{ t('billingPage.howToPay.title') }}</v-card-title>
+        <v-card-subtitle class="text-wrap">{{ t('billingPage.howToPay.subtitle') }}</v-card-subtitle>
+        <v-card-text>
+          <v-row>
+            <v-col v-if="paymentInfo.khqr_image_url" cols="12" sm="4" class="text-center">
+              <v-img :src="paymentInfo.khqr_image_url" max-width="220" class="mx-auto border rounded-lg" />
+            </v-col>
+            <v-col cols="12" sm="8">
+              <v-list density="compact" class="mb-2">
+                <v-list-item v-if="paymentInfo.bank_name">
+                  <v-list-item-title class="text-caption text-medium-emphasis">{{ t('billingPage.howToPay.bankName') }}</v-list-item-title>
+                  <v-list-item-subtitle class="text-body-1 font-weight-medium">{{ paymentInfo.bank_name }}</v-list-item-subtitle>
+                </v-list-item>
+                <v-list-item v-if="paymentInfo.bank_account_name">
+                  <v-list-item-title class="text-caption text-medium-emphasis">{{ t('billingPage.howToPay.accountName') }}</v-list-item-title>
+                  <v-list-item-subtitle class="text-body-1 font-weight-medium">{{ paymentInfo.bank_account_name }}</v-list-item-subtitle>
+                </v-list-item>
+                <v-list-item v-if="paymentInfo.bank_account_number">
+                  <v-list-item-title class="text-caption text-medium-emphasis">{{ t('billingPage.howToPay.accountNumber') }}</v-list-item-title>
+                  <v-list-item-subtitle class="text-body-1 font-weight-medium">{{ paymentInfo.bank_account_number }}</v-list-item-subtitle>
+                </v-list-item>
+              </v-list>
+              <p v-if="paymentInfo.payment_instructions" class="text-body-2 text-medium-emphasis text-wrap">
+                {{ paymentInfo.payment_instructions }}
+              </p>
+            </v-col>
+          </v-row>
+        </v-card-text>
+      </v-card>
 
       <v-card variant="flat" border rounded="lg" class="mt-4">
         <v-card-title>{{ t('billingPage.paymentHistory') }}</v-card-title>

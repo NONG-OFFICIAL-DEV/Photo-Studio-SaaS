@@ -5,6 +5,7 @@ namespace Tests\Feature\Billing;
 use App\Enums\SubscriptionStatus;
 use App\Enums\TenantRole;
 use App\Models\Plan;
+use App\Models\PlatformSetting;
 use App\Models\Subscription;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\CreatesTenantUsers;
@@ -24,7 +25,19 @@ class BillingTest extends TestCase
 
         $response->assertJsonPath('data.subscription.status', 'active')
             ->assertJsonPath('data.subscription.plan.code', 'test_plan')
-            ->assertJsonStructure(['data' => ['subscription' => ['id', 'is_usable'], 'usage' => ['users_count', 'orders_this_month_count']]]);
+            ->assertJsonStructure(['data' => ['subscription' => ['id', 'is_usable'], 'usage' => ['users_count', 'orders_this_month_count'], 'payment_info' => ['khqr_image_url', 'bank_name', 'bank_account_name', 'bank_account_number', 'payment_instructions']]]);
+    }
+
+    public function test_billing_includes_the_platforms_payment_details(): void
+    {
+        [, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+        PlatformSetting::current()->update(['bank_name' => 'ABA Bank', 'bank_account_number' => '000123456']);
+
+        $this->actingAsUser($owner)
+            ->getJson('/api/v1/billing')
+            ->assertOk()
+            ->assertJsonPath('data.payment_info.bank_name', 'ABA Bank')
+            ->assertJsonPath('data.payment_info.bank_account_number', '000123456');
     }
 
     public function test_a_manager_cannot_view_billing(): void

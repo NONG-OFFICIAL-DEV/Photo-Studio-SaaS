@@ -7,9 +7,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Billing\ChangePlanRequest;
 use App\Http\Requests\Billing\RenewSubscriptionRequest;
 use App\Http\Resources\PlanResource;
+use App\Http\Resources\PlatformSettingResource;
 use App\Http\Resources\SubscriptionPaymentResource;
 use App\Http\Resources\SubscriptionResource;
 use App\Models\Plan;
+use App\Models\PlatformSetting;
 use App\Services\SubscriptionService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -39,6 +41,7 @@ class BillingController extends Controller
         return $this->success([
             'subscription' => new SubscriptionResource($subscription),
             'usage' => $this->subscriptions->usage($tenant),
+            'payment_info' => new PlatformSettingResource(PlatformSetting::current()),
         ]);
     }
 

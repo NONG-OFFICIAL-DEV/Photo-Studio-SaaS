@@ -27,6 +27,22 @@ const emailError = ref('')
 const savingPassword = ref(false)
 const passwordError = ref('')
 
+/*
+ * A 422 here is always a Laravel FormRequest failure: the generic top-level
+ * `message` is just "The given data was invalid." (see bootstrap/app.php's
+ * ValidationException handler) — the actual reason (e.g. "The current
+ * password is incorrect.") lives under meta.errors.<field>. Prefer that
+ * specific message when present, since translateApiMessage alone would
+ * otherwise show the unhelpful generic one.
+ */
+function firstFieldError(error, fields) {
+  const errors = error?.response?.data?.meta?.errors
+  for (const field of fields) {
+    if (errors?.[field]?.[0]) return errors[field][0]
+  }
+  return null
+}
+
 async function handleUpdateEmail(values, { resetForm }) {
   savingEmail.value = true
   emailError.value = ''
@@ -36,7 +52,8 @@ async function handleUpdateEmail(values, { resetForm }) {
     appStore.notify(t('account.messages.emailUpdated'))
     resetForm({ values: { current_password: '', email: values.email } })
   } catch (error) {
-    emailError.value = translateApiMessage(error, 'account.messages.emailUpdateError')
+    emailError.value = firstFieldError(error, ['current_password', 'email'])
+      ?? translateApiMessage(error, 'account.messages.emailUpdateError')
   } finally {
     savingEmail.value = false
   }
@@ -50,7 +67,8 @@ async function handleUpdatePassword(values, { resetForm }) {
     appStore.notify(t('account.messages.passwordUpdated'))
     resetForm({ values: { current_password: '', password: '', password_confirmation: '' } })
   } catch (error) {
-    passwordError.value = translateApiMessage(error, 'account.messages.passwordUpdateError')
+    passwordError.value = firstFieldError(error, ['current_password', 'password'])
+      ?? translateApiMessage(error, 'account.messages.passwordUpdateError')
   } finally {
     savingPassword.value = false
   }

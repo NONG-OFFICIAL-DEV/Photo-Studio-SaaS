@@ -177,6 +177,12 @@ export const routes = [
         component: () => import('@/pages/notifications/NotificationsPage.vue'),
         meta: { titleKey: 'notifications.title' },
       },
+      {
+        path: 'payment-settings',
+        name: 'admin-payment-settings',
+        component: () => import('@/pages/admin/AdminPaymentSettingsPage.vue'),
+        meta: { titleKey: 'admin.menu.paymentSettings' },
+      },
     ],
   },
   {

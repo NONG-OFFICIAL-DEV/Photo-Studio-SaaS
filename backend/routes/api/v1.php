@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\Admin\AdminAnalyticsController;
 use App\Http\Controllers\Api\V1\Admin\AdminAuditController;
 use App\Http\Controllers\Api\V1\Admin\AdminPlanController;
+use App\Http\Controllers\Api\V1\Admin\AdminPlatformSettingController;
 use App\Http\Controllers\Api\V1\Admin\AdminRolePermissionController;
 use App\Http\Controllers\Api\V1\Admin\AdminTenantController;
 use App\Http\Controllers\Api\V1\Admin\AdminTenantRolePermissionController;
@@ -415,5 +416,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth:api', 'super-admin'])-
     Route::prefix('role-permissions')->name('role-permissions.')->group(function () {
         Route::get('/', [AdminRolePermissionController::class, 'index']);
         Route::put('/{role}', [AdminRolePermissionController::class, 'update']);
+    });
+
+    Route::prefix('platform-settings')->name('platform-settings.')->group(function () {
+        Route::get('/', [AdminPlatformSettingController::class, 'show']);
+        Route::put('/', [AdminPlatformSettingController::class, 'update']);
+        Route::post('/khqr', [AdminPlatformSettingController::class, 'uploadKhqr']);
     });
 });

@@ -926,7 +926,8 @@
       "plans": "គម្រោង",
       "audit": "សវនកម្ម",
       "rolePermissions": "សិទ្ធិតួនាទី",
-      "revenueReport": "របាយការណ៍ចំណូល"
+      "revenueReport": "របាយការណ៍ចំណូល",
+      "paymentSettings": "ការកំណត់ការទូទាត់"
     },
     "analytics": {
       "title": "ការវិភាគវេទិកា",
@@ -1071,6 +1072,22 @@
         "quarter": "3ខែចុងក្រោយ",
         "year": "12ខែចុងក្រោយ"
       }
+    },
+    "paymentSettings": {
+      "title": "ការកំណត់ការទូទាត់",
+      "subtitle": "កូដ KHQR និងព័ត៌មានធនាគារដែលស្ទូឌីយោប្រើដើម្បីបង់ការជាវរបស់ពួកគេតាមការផ្ទេរប្រាក់ធនាគារដោយផ្ទាល់។",
+      "uploadKhqr": "ផ្ទុករូបភាព KHQR",
+      "khqrHint": "ផ្ទុករូបភាព KHQR ដែលបានបង្កើតពីកម្មវិធីធនាគាររបស់អ្នក។",
+      "bankName": "ឈ្មោះធនាគារ",
+      "bankAccountName": "ឈ្មោះគណនី",
+      "bankAccountNumber": "លេខគណនី",
+      "paymentInstructions": "សេចក្តីណែនាំការទូទាត់",
+      "messages": {
+        "saved": "ការកំណត់ការទូទាត់ត្រូវបានធ្វើបច្ចុប្បន្នភាពដោយជោគជ័យ។",
+        "saveError": "បរាជ័យក្នុងការធ្វើបច្ចុប្បន្នភាពការកំណត់ការទូទាត់។",
+        "khqrUploaded": "រូបភាព KHQR ត្រូវបានផ្ទុកឡើងដោយជោគជ័យ។",
+        "khqrUploadError": "បរាជ័យក្នុងការផ្ទុករូបភាព KHQR។"
+      }
     }
   },
   "auditPage": {
@@ -1155,7 +1172,14 @@
     "cycleNotAvailable": "មិនអាចប្រើបាននៅលើវដ្តទូទាត់នេះទេ",
     "savePercent": "សន្សំ {percent}%",
     "savePercentHint": "សន្សំបានរហូតដល់ {percent}% ជាមួយវដ្តទូទាត់នេះ។",
-    "perMonthEquivalent": "≈ {amount}/ខែ"
+    "perMonthEquivalent": "≈ {amount}/ខែ",
+    "howToPay": {
+      "title": "របៀបបង់ប្រាក់",
+      "subtitle": "ស្កេនកូដ KHQR ឬផ្ទេរប្រាក់ទៅគណនីធនាគារខាងក្រោម រួចរង់ចាំការបញ្ជាក់។",
+      "bankName": "ធនាគារ",
+      "accountName": "ឈ្មោះគណនី",
+      "accountNumber": "លេខគណនី"
+    }
   },
   "$vuetify": {
     "badge": "ស្លាកសញ្ញា",

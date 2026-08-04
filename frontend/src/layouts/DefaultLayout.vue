@@ -196,6 +196,7 @@ const adminMenuItems = [
   { title: t('admin.menu.plans'), icon: 'mdi-shape-outline', to: { name: 'admin-plans' } },
   { title: t('admin.menu.audit'), icon: 'mdi-shield-search', to: { name: 'admin-audit' } },
   { title: t('admin.menu.rolePermissions'), icon: 'mdi-shield-account-outline', to: { name: 'admin-role-permissions' } },
+  { title: t('admin.menu.paymentSettings'), icon: 'mdi-qrcode', to: { name: 'admin-payment-settings' } },
 ]
 
 /*

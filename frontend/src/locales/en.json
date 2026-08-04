@@ -926,7 +926,8 @@
       "plans": "Plans",
       "audit": "Audit",
       "rolePermissions": "Role Permissions",
-      "revenueReport": "Revenue Report"
+      "revenueReport": "Revenue Report",
+      "paymentSettings": "Payment Settings"
     },
     "analytics": {
       "title": "Platform Analytics",
@@ -1071,6 +1072,22 @@
         "quarter": "Last 3 Months",
         "year": "Last 12 Months"
       }
+    },
+    "paymentSettings": {
+      "title": "Payment Settings",
+      "subtitle": "The KHQR code and bank details tenants use to pay their subscription by manual bank transfer.",
+      "uploadKhqr": "Upload KHQR Image",
+      "khqrHint": "Upload a KHQR image generated from your own bank app.",
+      "bankName": "Bank Name",
+      "bankAccountName": "Account Name",
+      "bankAccountNumber": "Account Number",
+      "paymentInstructions": "Payment Instructions",
+      "messages": {
+        "saved": "Payment settings updated successfully.",
+        "saveError": "Failed to update payment settings.",
+        "khqrUploaded": "KHQR image uploaded successfully.",
+        "khqrUploadError": "Failed to upload KHQR image."
+      }
     }
   },
   "auditPage": {
@@ -1155,7 +1172,14 @@
     "cycleNotAvailable": "Not available on this billing cycle",
     "savePercent": "Save {percent}%",
     "savePercentHint": "Save up to {percent}% with this billing cycle.",
-    "perMonthEquivalent": "≈ {amount}/mo"
+    "perMonthEquivalent": "≈ {amount}/mo",
+    "howToPay": {
+      "title": "How to Pay",
+      "subtitle": "Scan the KHQR code or transfer to the bank account below, then wait for confirmation.",
+      "bankName": "Bank",
+      "accountName": "Account Name",
+      "accountNumber": "Account Number"
+    }
   },
   "$vuetify": {
     "badge": "Badge",

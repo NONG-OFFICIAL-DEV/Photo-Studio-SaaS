@@ -46,3 +46,13 @@ export const getAdminTenantRolePermissionsApi = tenantId => http.get(`/v1/admin/
 
 export const updateAdminTenantRolePermissionsApi = (tenantId, role, permissions) =>
   http.put(`/v1/admin/tenants/${tenantId}/role-permissions/${role}`, { permissions })
+
+export const getAdminPlatformSettingsApi = () => http.get('/v1/admin/platform-settings')
+
+export const updateAdminPlatformSettingsApi = payload => http.put('/v1/admin/platform-settings', payload)
+
+export const uploadAdminKhqrImageApi = (file) => {
+  const formData = new FormData()
+  formData.append('khqr_image', file)
+  return http.post('/v1/admin/platform-settings/khqr', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+}

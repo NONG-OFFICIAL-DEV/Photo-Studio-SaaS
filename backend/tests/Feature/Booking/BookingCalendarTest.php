@@ -23,11 +23,19 @@ class BookingCalendarTest extends TestCase
             'ends_at' => now()->addDays(5)->setTime(12, 0),
         ]);
 
+        // The queried range's end (endOfMonth of next month) varies with
+        // today's date — anywhere from ~28 to ~62 days out depending on
+        // where "now" falls in the current month and how long the current/
+        // next months are. A fixed +40 days was sometimes still INSIDE that
+        // range (e.g. early in a 31-day month followed by another long
+        // month), making this assertion fail depending on the day it ran.
+        // +3 months is comfortably beyond the range's upper bound regardless
+        // of the date.
         Booking::factory()->create([
             'tenant_id' => $tenant->id,
             'title' => 'Out Of Range',
-            'starts_at' => now()->addDays(40)->setTime(10, 0),
-            'ends_at' => now()->addDays(40)->setTime(12, 0),
+            'starts_at' => now()->addMonths(3)->setTime(10, 0),
+            'ends_at' => now()->addMonths(3)->setTime(12, 0),
         ]);
 
         $response = $this->actingAsUser($owner)->getJson(
