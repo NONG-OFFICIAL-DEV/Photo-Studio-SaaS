@@ -880,7 +880,8 @@
     "totalCount": "Total Count",
     "totalValue": "Total Value",
     "count": "Count",
-    "value": "Value"
+    "value": "Value",
+    "trend": "Trend"
   },
   "settingsPage": {
     "title": "Settings",
@@ -890,7 +891,8 @@
       "invoice": "Invoice",
       "theme": "Theme",
       "telegram": "Telegram",
-      "data": "Data"
+      "data": "Data",
+      "reminders": "Reminders"
     },
     "fields": {
       "currency": "Currency",
@@ -902,7 +904,9 @@
       "primaryColor": "Primary color",
       "secondaryColor": "Secondary color",
       "attendanceStartTime": "Expected start time",
-      "qrPayment": "Payment QR code"
+      "qrPayment": "Payment QR code",
+      "bookingRemindersEnabled": "Booking reminders",
+      "invoiceRemindersEnabled": "Invoice payment reminders"
     },
     "actions": {
       "save": "Save changes",
@@ -931,7 +935,9 @@
       "saveError": "Could not save settings.",
       "logoUpdated": "Logo updated successfully.",
       "qrPaymentUpdated": "QR code updated successfully."
-    }
+    },
+    "bookingRemindersHint": "Automatically remind the assigned photographer and the customer 24 hours before a confirmed booking.",
+    "invoiceRemindersHint": "Automatically remind you and the customer when an invoice is due soon or becomes overdue."
   },
   "admin": {
     "panelName": "Platform Admin",
@@ -1439,6 +1445,13 @@
       },
       "payment": {
         "claimed": "{tenant} says they have paid — review the claim"
+      },
+      "booking": {
+        "upcoming": "Upcoming booking with {customer} on {date}"
+      },
+      "invoice": {
+        "due_soon": "Invoice {invoiceNumber} for {customer} (${balance}) is due on {date}",
+        "overdue": "Invoice {invoiceNumber} for {customer} (${balance}) is overdue"
       }
     },
     "message": "Message",

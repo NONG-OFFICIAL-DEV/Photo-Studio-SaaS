@@ -880,7 +880,8 @@
     "totalCount": "ចំនួនសរុប",
     "totalValue": "តម្លៃសរុប",
     "count": "ចំនួន",
-    "value": "តម្លៃ"
+    "value": "តម្លៃ",
+    "trend": "ទំនោរ"
   },
   "settingsPage": {
     "title": "ការកំណត់",
@@ -890,7 +891,8 @@
       "invoice": "វិក្កយបត្រ",
       "theme": "រូបរាង",
       "telegram": "Telegram",
-      "data": "ទិន្នន័យ"
+      "data": "ទិន្នន័យ",
+      "reminders": "ការរំលឹក"
     },
     "fields": {
       "currency": "រូបិយប័ណ្ណ",
@@ -902,7 +904,9 @@
       "primaryColor": "ពណ៌ចម្បង",
       "secondaryColor": "ពណ៌រង",
       "attendanceStartTime": "ម៉ោងចាប់ផ្តើមការងារ",
-      "qrPayment": "កូដ QR ទូទាត់ប្រាក់"
+      "qrPayment": "កូដ QR ទូទាត់ប្រាក់",
+      "bookingRemindersEnabled": "ការរំលឹកការណាត់ជួប",
+      "invoiceRemindersEnabled": "ការរំលឹកការទូទាត់វិក្កយបត្រ"
     },
     "actions": {
       "save": "រក្សាទុកការផ្លាស់ប្តូរ",
@@ -931,7 +935,9 @@
       "saveError": "មិនអាចរក្សាទុកការកំណត់បានទេ។",
       "logoUpdated": "បានកែប្រែឡូហ្គោដោយជោគជ័យ។",
       "qrPaymentUpdated": "បានកែប្រែកូដ QR ដោយជោគជ័យ។"
-    }
+    },
+    "bookingRemindersHint": "រំលឹកអ្នកថតរូបដែលបានចាត់តាំង និងអតិថិជនដោយស្វ័យប្រវត្តិ 24 ម៉ោងមុនការណាត់ជួបដែលបានបញ្ជាក់។",
+    "invoiceRemindersHint": "រំលឹកអ្នក និងអតិថិជនដោយស្វ័យប្រវត្តិនៅពេលវិក្កយបត្រជិតដល់កាលកំណត់ ឬហួសកាលកំណត់។"
   },
   "admin": {
     "panelName": "អ្នកគ្រប់គ្រងវេទិកា",
@@ -1439,6 +1445,13 @@
       },
       "payment": {
         "claimed": "{tenant} បានប្រាប់ថាបានបង់ប្រាក់ — សូមពិនិត្យការទាមទារនេះ"
+      },
+      "booking": {
+        "upcoming": "ការណាត់ជួបនាពេលខាងមុខជាមួយ {customer} នៅថ្ងៃ {date}"
+      },
+      "invoice": {
+        "due_soon": "វិក្កយបត្រ {invoiceNumber} សម្រាប់ {customer} (${balance}) ត្រូវបង់នៅថ្ងៃ {date}",
+        "overdue": "វិក្កយបត្រ {invoiceNumber} សម្រាប់ {customer} (${balance})ហួសកាលកំណត់ហើយ"
       }
     },
     "message": "សារ",

@@ -1,7 +1,8 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDatePicker from '@/components/common/AppDatePicker.vue'
+import ReportTrendChart from '@/components/reports/ReportTrendChart.vue'
 import { getExpenseReportApi, exportExpenseReportApi } from '@/apis/report.api'
 import { formatCurrency } from '@/utils/currencyFormat'
 
@@ -23,6 +24,11 @@ async function load() {
 }
 
 onMounted(load)
+
+const chartLabels = computed(() => (report.value?.breakdown ?? []).map((row) => row.period))
+const chartDatasets = computed(() => [
+  { label: t('reports.total'), data: (report.value?.breakdown ?? []).map((row) => row.total) },
+])
 
 async function exportReport(format) {
   const { data } = await exportExpenseReportApi({ date_from: dateFrom.value, date_to: dateTo.value, format })
@@ -58,6 +64,13 @@ async function exportReport(format) {
       <v-card variant="flat" border rounded="lg" class="pa-4 mb-4">
         <div class="text-caption text-medium-emphasis">{{ t('reports.total') }}</div>
         <div class="text-h6 font-weight-bold">{{ formatCurrency(report.total) }}</div>
+      </v-card>
+
+      <v-card variant="flat" border rounded="lg" class="mb-4">
+        <v-card-title>{{ t('reports.trend') }}</v-card-title>
+        <v-card-text style="height: 280px">
+          <ReportTrendChart :labels="chartLabels" :datasets="chartDatasets" :value-formatter="formatCurrency" />
+        </v-card-text>
       </v-card>
 
       <v-card variant="flat" border rounded="lg" class="pa-4">

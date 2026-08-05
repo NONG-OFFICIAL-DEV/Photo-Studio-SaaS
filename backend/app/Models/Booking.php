@@ -22,7 +22,7 @@ class Booking extends Model
     protected $fillable = [
         'tenant_id', 'customer_id', 'assigned_user_id', 'type', 'title', 'notes',
         'location_type', 'location_address', 'starts_at', 'ends_at',
-        'status', 'cancelled_reason', 'created_by',
+        'status', 'cancelled_reason', 'created_by', 'reminder_sent_at',
     ];
 
     protected function casts(): array
@@ -33,6 +33,7 @@ class Booking extends Model
             'status' => BookingStatus::class,
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',
+            'reminder_sent_at' => 'datetime',
         ];
     }
 

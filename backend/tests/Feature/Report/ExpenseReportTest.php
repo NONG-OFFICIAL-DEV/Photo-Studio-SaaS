@@ -32,5 +32,11 @@ class ExpenseReportTest extends TestCase
 
         $uncategorizedRow = collect($response->json('data.by_category'))->firstWhere('category', 'Uncategorized');
         $this->assertEquals(50, $uncategorizedRow['amount']);
+
+        $breakdown = collect($response->json('data.breakdown'))->keyBy('period');
+        $this->assertEquals(1200, $breakdown['2026-07-01']['total']);
+        $this->assertEquals(50, $breakdown['2026-07-15']['total']);
+        // The June expense is outside the range and must not leak into it.
+        $this->assertFalse($breakdown->has('2026-06-01'));
     }
 }

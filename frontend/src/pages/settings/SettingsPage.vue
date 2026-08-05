@@ -52,6 +52,8 @@ const initialValues = computed(() => ({
   primary_color: tenant.value?.settings?.primary_color ?? '',
   secondary_color: tenant.value?.settings?.secondary_color ?? '',
   attendance_expected_start_time: tenant.value?.settings?.attendance_expected_start_time ?? '09:00',
+  booking_reminders_enabled: tenant.value?.settings?.booking_reminders_enabled ?? true,
+  invoice_reminders_enabled: tenant.value?.settings?.invoice_reminders_enabled ?? true,
 }))
 
 async function load() {
@@ -174,6 +176,7 @@ async function disconnectTelegram() {
       <v-tab value="company">{{ t('settingsPage.tabs.company') }}</v-tab>
       <v-tab value="invoice">{{ t('settingsPage.tabs.invoice') }}</v-tab>
       <v-tab value="theme">{{ t('settingsPage.tabs.theme') }}</v-tab>
+      <v-tab value="reminders">{{ t('settingsPage.tabs.reminders') }}</v-tab>
       <v-tab value="telegram">{{ t('settingsPage.tabs.telegram') }}</v-tab>
       <v-tab value="data">{{ t('settingsPage.tabs.data') }}</v-tab>
     </v-tabs>
@@ -361,6 +364,30 @@ async function disconnectTelegram() {
                     </v-col>
                   </v-row>
                   <p class="text-body-2 text-medium-emphasis mb-0">{{ t('settingsPage.themeHint') }}</p>
+                </v-card-text>
+              </v-card>
+            </v-window-item>
+
+            <v-window-item value="reminders">
+              <v-card variant="outlined">
+                <v-card-text>
+                  <v-switch
+                    :model-value="values.booking_reminders_enabled"
+                    :label="t('settingsPage.fields.bookingRemindersEnabled')"
+                    :hint="t('settingsPage.bookingRemindersHint')"
+                    persistent-hint
+                    color="primary"
+                    class="mb-4"
+                    @update:model-value="setFieldValue('booking_reminders_enabled', $event)"
+                  />
+                  <v-switch
+                    :model-value="values.invoice_reminders_enabled"
+                    :label="t('settingsPage.fields.invoiceRemindersEnabled')"
+                    :hint="t('settingsPage.invoiceRemindersHint')"
+                    persistent-hint
+                    color="primary"
+                    @update:model-value="setFieldValue('invoice_reminders_enabled', $event)"
+                  />
                 </v-card-text>
               </v-card>
             </v-window-item>

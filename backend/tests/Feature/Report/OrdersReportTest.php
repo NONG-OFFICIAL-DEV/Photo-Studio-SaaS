@@ -30,5 +30,10 @@ class OrdersReportTest extends TestCase
         $deliveredRow = collect($response->json('data.by_status'))->firstWhere('status', 'delivered');
         $this->assertSame(2, $deliveredRow['count']);
         $this->assertEquals(800, $deliveredRow['value']);
+
+        $breakdown = collect($response->json('data.breakdown'))->keyBy('period');
+        $this->assertSame(1, $breakdown['2026-07-05']['count']);
+        $this->assertEquals(500, $breakdown['2026-07-05']['value']);
+        $this->assertFalse($breakdown->has('2026-08-01'));
     }
 }

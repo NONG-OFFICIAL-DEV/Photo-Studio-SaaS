@@ -36,6 +36,10 @@ export function useNotificationDisplay() {
       plan: n.plan_name,
       days: n.days_left,
       amount: n.amount,
+      customer: n.customer_name,
+      date: n.date,
+      invoiceNumber: n.invoice_number,
+      balance: n.balance,
     })
   }
 

@@ -286,6 +286,8 @@ export const settingsSchema = yup.object({
   primary_color: hexColor,
   secondary_color: hexColor,
   attendance_expected_start_time: timeOfDay,
+  booking_reminders_enabled: yup.boolean(),
+  invoice_reminders_enabled: yup.boolean(),
 })
 
 export const planSchema = yup.object({

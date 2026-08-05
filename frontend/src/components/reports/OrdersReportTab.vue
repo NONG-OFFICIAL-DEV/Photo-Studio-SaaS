@@ -1,7 +1,8 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDatePicker from '@/components/common/AppDatePicker.vue'
+import ReportTrendChart from '@/components/reports/ReportTrendChart.vue'
 import { getOrdersReportApi, exportOrdersReportApi } from '@/apis/report.api'
 import { formatCurrency } from '@/utils/currencyFormat'
 
@@ -23,6 +24,11 @@ async function load() {
 }
 
 onMounted(load)
+
+const chartLabels = computed(() => (report.value?.breakdown ?? []).map((row) => row.period))
+const chartDatasets = computed(() => [
+  { label: t('reports.totalValue'), data: (report.value?.breakdown ?? []).map((row) => row.value) },
+])
 
 async function exportReport(format) {
   const { data } = await exportOrdersReportApi({ date_from: dateFrom.value, date_to: dateTo.value, format })
@@ -73,6 +79,13 @@ async function exportReport(format) {
           </v-card>
         </v-col>
       </v-row>
+
+      <v-card variant="flat" border rounded="lg" class="mb-4">
+        <v-card-title>{{ t('reports.trend') }}</v-card-title>
+        <v-card-text style="height: 280px">
+          <ReportTrendChart :labels="chartLabels" :datasets="chartDatasets" :value-formatter="formatCurrency" />
+        </v-card-text>
+      </v-card>
 
       <v-card variant="flat" border rounded="lg" class="pa-4">
         <v-table density="compact">

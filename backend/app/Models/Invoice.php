@@ -22,6 +22,7 @@ class Invoice extends Model
         'tenant_id', 'customer_id', 'order_id', 'invoice_number', 'status',
         'issue_date', 'due_date', 'subtotal', 'discount_amount', 'tax_rate',
         'tax_amount', 'total', 'amount_paid', 'notes', 'voided_reason', 'created_by',
+        'due_soon_reminder_sent_at', 'overdue_reminder_sent_at',
     ];
 
     protected function casts(): array
@@ -36,6 +37,8 @@ class Invoice extends Model
             'tax_amount' => 'decimal:2',
             'total' => 'decimal:2',
             'amount_paid' => 'decimal:2',
+            'due_soon_reminder_sent_at' => 'datetime',
+            'overdue_reminder_sent_at' => 'datetime',
         ];
     }
 

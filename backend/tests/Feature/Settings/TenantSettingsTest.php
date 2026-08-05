@@ -23,7 +23,26 @@ class TenantSettingsTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.settings.invoice_prefix', 'INV-')
             ->assertJsonPath('data.settings.default_tax_rate', 0)
-            ->assertJsonPath('data.settings.default_due_days', 14);
+            ->assertJsonPath('data.settings.default_due_days', 14)
+            ->assertJsonPath('data.settings.booking_reminders_enabled', true)
+            ->assertJsonPath('data.settings.invoice_reminders_enabled', true);
+    }
+
+    public function test_owner_can_disable_reminders(): void
+    {
+        [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+
+        $this->actingAsUser($owner)
+            ->putJson('/api/v1/settings', [
+                'booking_reminders_enabled' => false,
+                'invoice_reminders_enabled' => false,
+            ])
+            ->assertOk()
+            ->assertJsonPath('data.settings.booking_reminders_enabled', false)
+            ->assertJsonPath('data.settings.invoice_reminders_enabled', false);
+
+        $this->assertFalse($tenant->fresh()->setting('booking_reminders_enabled'));
+        $this->assertFalse($tenant->fresh()->setting('invoice_reminders_enabled'));
     }
 
     public function test_an_owner_with_an_unverified_email_cannot_update_settings(): void

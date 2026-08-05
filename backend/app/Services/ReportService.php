@@ -30,12 +30,19 @@ class ReportService
     /**
      * Grouped by day when the range is a month or less (for a readable
      * daily trend), otherwise by month (so a year-long range doesn't
-     * return hundreds of daily rows).
+     * return hundreds of daily rows). Shared by every *Breakdown() method
+     * below so all four reports switch granularity at the same threshold.
      */
-    protected function revenueBreakdown(string $dateFrom, string $dateTo): array
+    protected function periodFormat(string $dateFrom, string $dateTo): string
     {
         $groupByMonth = Carbon::parse($dateFrom)->diffInDays(Carbon::parse($dateTo)) > 31;
-        $format = $groupByMonth ? 'YYYY-MM' : 'YYYY-MM-DD';
+
+        return $groupByMonth ? 'YYYY-MM' : 'YYYY-MM-DD';
+    }
+
+    protected function revenueBreakdown(string $dateFrom, string $dateTo): array
+    {
+        $format = $this->periodFormat($dateFrom, $dateTo);
 
         $invoiced = Invoice::whereBetween('issue_date', [$dateFrom, $dateTo])
             ->selectRaw("to_char(issue_date, '{$format}') as period, SUM(total) as total")
@@ -76,7 +83,22 @@ class ReportService
                 'label' => $case->label(),
                 'count' => (int) ($byStatus[$case->value] ?? 0),
             ])->all(),
+            'breakdown' => $this->bookingsBreakdown($dateFrom, $dateTo),
         ];
+    }
+
+    protected function bookingsBreakdown(string $dateFrom, string $dateTo): array
+    {
+        $format = $this->periodFormat($dateFrom, $dateTo);
+        $rangeEnd = Carbon::parse($dateTo)->endOfDay();
+
+        return Booking::whereBetween('starts_at', [$dateFrom, $rangeEnd])
+            ->selectRaw("to_char(starts_at, '{$format}') as period, COUNT(*) as count")
+            ->groupBy('period')
+            ->orderBy('period')
+            ->get()
+            ->map(fn ($row) => ['period' => $row->period, 'count' => (int) $row->count])
+            ->all();
     }
 
     public function orders(string $dateFrom, string $dateTo): array
@@ -103,7 +125,21 @@ class ReportService
                     'value' => round((float) ($row->value ?? 0), 2),
                 ];
             })->all(),
+            'breakdown' => $this->ordersBreakdown($dateFrom, $rangeEnd),
         ];
+    }
+
+    protected function ordersBreakdown(string $dateFrom, Carbon $rangeEnd): array
+    {
+        $format = $this->periodFormat($dateFrom, $rangeEnd->toDateString());
+
+        return Order::whereBetween('created_at', [$dateFrom, $rangeEnd])
+            ->selectRaw("to_char(created_at, '{$format}') as period, COUNT(*) as count, SUM(total) as value")
+            ->groupBy('period')
+            ->orderBy('period')
+            ->get()
+            ->map(fn ($row) => ['period' => $row->period, 'count' => (int) $row->count, 'value' => round((float) $row->value, 2)])
+            ->all();
     }
 
     public function expenses(string $dateFrom, string $dateTo): array
@@ -123,6 +159,20 @@ class ReportService
                 'category' => $row->category,
                 'amount' => round((float) $row->total, 2),
             ])->all(),
+            'breakdown' => $this->expensesBreakdown($dateFrom, $dateTo),
         ];
+    }
+
+    protected function expensesBreakdown(string $dateFrom, string $dateTo): array
+    {
+        $format = $this->periodFormat($dateFrom, $dateTo);
+
+        return Expense::whereBetween('expense_date', [$dateFrom, $dateTo])
+            ->selectRaw("to_char(expense_date, '{$format}') as period, SUM(amount) as total")
+            ->groupBy('period')
+            ->orderBy('period')
+            ->get()
+            ->map(fn ($row) => ['period' => $row->period, 'total' => round((float) $row->total, 2)])
+            ->all();
     }
 }

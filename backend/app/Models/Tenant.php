@@ -33,6 +33,8 @@ class Tenant extends Model
         'primary_color' => null,
         'secondary_color' => null,
         'attendance_expected_start_time' => '09:00',
+        'booking_reminders_enabled' => true,
+        'invoice_reminders_enabled' => true,
     ];
 
     protected function casts(): array

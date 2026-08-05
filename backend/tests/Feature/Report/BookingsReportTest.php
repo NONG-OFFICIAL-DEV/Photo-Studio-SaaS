@@ -31,5 +31,14 @@ class BookingsReportTest extends TestCase
 
         $completedRow = collect($response->json('data.by_status'))->firstWhere('status', 'completed');
         $this->assertSame(2, $completedRow['count']);
+
+        // Daily breakdown for a trend chart — one row per day something
+        // happened, and the Aug 1 booking (outside the range) must not
+        // leak into it.
+        $breakdown = collect($response->json('data.breakdown'))->keyBy('period');
+        $this->assertSame(1, $breakdown['2026-07-05']['count']);
+        $this->assertSame(1, $breakdown['2026-07-10']['count']);
+        $this->assertSame(1, $breakdown['2026-07-15']['count']);
+        $this->assertFalse($breakdown->has('2026-08-01'));
     }
 }

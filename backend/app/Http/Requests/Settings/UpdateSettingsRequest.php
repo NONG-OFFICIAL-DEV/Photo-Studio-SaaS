@@ -34,6 +34,10 @@ class UpdateSettingsRequest extends FormRequest
 
             // Attendance
             'attendance_expected_start_time' => ['nullable', 'date_format:H:i'],
+
+            // Reminders
+            'booking_reminders_enabled' => ['sometimes', 'boolean'],
+            'invoice_reminders_enabled' => ['sometimes', 'boolean'],
         ];
     }
 }
