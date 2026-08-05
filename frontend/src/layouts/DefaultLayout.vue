@@ -187,7 +187,7 @@ const visibleTenantGroups = computed(() =>
  * menu instead of the permission-filtered tenant menu above. Few enough
  * items that it stays a single flat main menu rather than being grouped too.
  */
-const adminMenuItems = [
+const adminMenuItems =  computed(()=>[
   { title: t('admin.menu.analytics'), icon: 'mdi-view-dashboard-outline', to: { name: 'admin-analytics' } },
   { title: t('admin.menu.tenants'), icon: 'mdi-domain', to: { name: 'admin-tenants' } },
   { title: t('admin.menu.revenueReport'), icon: 'mdi-chart-line', to: { name: 'admin-revenue-report' } },
@@ -196,7 +196,7 @@ const adminMenuItems = [
   { title: t('admin.menu.rolePermissions'), icon: 'mdi-shield-account-outline', to: { name: 'admin-role-permissions' } },
   { title: t('admin.menu.paymentSettings'), icon: 'mdi-qrcode', to: { name: 'admin-payment-settings' } },
   { title: t('admin.menu.paymentClaims'), icon: 'mdi-cash-check', to: { name: 'admin-payment-claims' } },
-]
+])
 
 /*
  * Custom collapsible groups instead of Vuetify's <v-list-group> — that
@@ -344,6 +344,7 @@ function toggleLocale() {
           <!-- Quick Actions & Links -->
           <v-list density="comfortable" class="py-1">
             <v-list-item
+              v-if="!auth.isSuperAdmin"
               prepend-icon="mdi-cash-multiple"
               :title="t('menu.billing')"
               rounded="md"
