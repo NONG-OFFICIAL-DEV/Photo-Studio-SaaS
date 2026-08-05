@@ -32,6 +32,37 @@ class InventoryItemCrudTest extends TestCase
         $this->assertDatabaseHas('inventory_items', ['id' => $response->json('data.id'), 'tenant_id' => $tenant->id]);
     }
 
+    public function test_it_creates_an_inventory_item_with_an_initial_quantity(): void
+    {
+        [, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+
+        $response = $this->actingAsUser($owner)
+            ->postJson('/api/v1/inventory-items', [
+                'name' => 'Photo Paper (A4)',
+                'unit' => 'sheet',
+                'initial_quantity' => 100,
+            ])
+            ->assertCreated()
+            ->assertJsonPath('data.quantity_on_hand', 100);
+
+        $item = \App\Models\InventoryItem::find($response->json('data.id'));
+        $this->assertSame(1, $item->movements()->count());
+        $this->assertSame('Initial stock', $item->movements()->first()->reason);
+    }
+
+    public function test_it_creates_an_inventory_item_without_an_initial_quantity(): void
+    {
+        [, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+
+        $response = $this->actingAsUser($owner)
+            ->postJson('/api/v1/inventory-items', ['name' => 'Photo Paper (A4)', 'unit' => 'sheet'])
+            ->assertCreated()
+            ->assertJsonPath('data.quantity_on_hand', 0);
+
+        $item = \App\Models\InventoryItem::find($response->json('data.id'));
+        $this->assertSame(0, $item->movements()->count());
+    }
+
     public function test_sku_is_unique_per_tenant(): void
     {
         [, $owner] = $this->createTenantWithUser(TenantRole::Owner);

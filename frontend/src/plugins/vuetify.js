@@ -64,6 +64,7 @@ export default createVuetify({
   defaults: {
     VBtn: { rounded: 'lg' },
     VCard: { rounded: 'lg' },
+    VCombobox: { variant: 'outlined', density: 'comfortable' },
     VTextField: { variant: 'outlined', density: 'comfortable' },
     VSelect: { variant: 'outlined', density: 'comfortable' },
     VAutocomplete: { variant: 'outlined', density: 'comfortable' },

@@ -220,6 +220,7 @@ export const inventoryItemSchema = yup.object({
   category: yup.string().nullable().max(100),
   reorder_threshold: yup.number().typeError(() => t('validation.mustBeNumber')).nullable().min(0),
   is_active: yup.boolean(),
+  initial_quantity: yup.number().typeError(() => t('validation.mustBeNumber')).nullable().min(0),
 })
 
 export const inventoryMovementSchema = yup.object({

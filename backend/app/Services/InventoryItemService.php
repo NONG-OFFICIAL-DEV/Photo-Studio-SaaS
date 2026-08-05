@@ -23,12 +23,37 @@ class InventoryItemService extends BaseService
         return $this->items->paginateServer($filters);
     }
 
+    /**
+     * initial_quantity is never written to quantity_on_hand directly —
+     * it becomes the item's first stock_in movement, same as any other
+     * stock addition, so the audit trail still fully explains the balance
+     * (see recalculateQuantity()).
+     */
     public function create(array $data, ?User $creator = null): InventoryItem
     {
-        return $this->items->create([
-            ...$data,
-            'created_by' => $creator?->id,
-        ]);
+        $initialQuantity = round((float) ($data['initial_quantity'] ?? 0), 2);
+        unset($data['initial_quantity']);
+
+        return DB::transaction(function () use ($data, $initialQuantity, $creator) {
+            $item = $this->items->create([
+                ...$data,
+                'created_by' => $creator?->id,
+            ]);
+
+            if ($initialQuantity > 0) {
+                $item->movements()->create([
+                    'type' => MovementType::StockIn,
+                    'quantity' => $initialQuantity,
+                    'reason' => 'Initial stock',
+                    'moved_at' => now()->toDateString(),
+                    'recorded_by' => $creator?->id,
+                ]);
+
+                $this->recalculateQuantity($item);
+            }
+
+            return $item->fresh();
+        });
     }
 
     public function update(InventoryItem $item, array $data): InventoryItem

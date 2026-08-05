@@ -747,6 +747,21 @@
       "saveError": "Unable to save item.",
       "deletedSuccess": "Item deleted successfully.",
       "movementRecorded": "Stock movement recorded successfully."
+    },
+    "initialQuantity": "Initial quantity",
+    "initialQuantityHint": "Starting stock on hand — leave blank to start at 0 and add stock later.",
+    "unitHint": "Pick one, or type your own (e.g. cartridge, ream).",
+    "units": {
+      "piece": "pcs",
+      "box": "box",
+      "pack": "pack",
+      "roll": "roll",
+      "sheet": "sheet",
+      "bottle": "bottle",
+      "set": "set",
+      "kilogram": "kg",
+      "liter": "L",
+      "meter": "m"
     }
   },
   "attendance": {
