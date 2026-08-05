@@ -30,7 +30,7 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmailContrac
     ];
 
     protected $hidden = [
-        'password', 'remember_token',
+        'password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes',
     ];
 
     /**
@@ -55,7 +55,15 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmailContrac
             'status' => UserStatus::class,
             'notification_channels' => 'array',
             'telegram_linked_at' => 'datetime',
+            'two_factor_secret' => 'encrypted',
+            'two_factor_recovery_codes' => 'encrypted:array',
+            'two_factor_confirmed_at' => 'datetime',
         ];
+    }
+
+    public function hasTwoFactorEnabled(): bool
+    {
+        return $this->two_factor_confirmed_at !== null;
     }
 
     public function notificationChannelPreferences(): array

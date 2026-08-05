@@ -23,6 +23,7 @@ class UserResource extends JsonResource
             'base_pay' => $this->base_pay !== null ? (float) $this->base_pay : null,
             'commission_rate' => $this->commission_rate !== null ? (float) $this->commission_rate : null,
             'is_super_admin' => $this->is_super_admin,
+            'two_factor_enabled' => $this->hasTwoFactorEnabled(),
             'email_verified_at' => $this->email_verified_at,
             'last_login_at' => $this->last_login_at,
             'roles' => $this->whenLoaded('roles', fn () => $this->roles->pluck('name')),

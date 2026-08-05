@@ -19,3 +19,11 @@ export const resendVerificationApi = () => http.post('/v1/auth/email/resend')
 export const updateEmailApi = payload => http.put('/v1/auth/email', payload)
 
 export const updatePasswordApi = payload => http.put('/v1/auth/password', payload)
+
+export const verifyTwoFactorApi = payload => http.post('/v1/auth/two-factor/verify', payload)
+
+export const setupTwoFactorApi = () => http.post('/v1/auth/two-factor/setup')
+
+export const confirmTwoFactorApi = payload => http.post('/v1/auth/two-factor/confirm', payload)
+
+export const disableTwoFactorApi = payload => http.post('/v1/auth/two-factor/disable', payload)

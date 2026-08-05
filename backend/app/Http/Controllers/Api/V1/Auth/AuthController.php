@@ -8,6 +8,7 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterTenantRequest;
 use App\Http\Requests\Auth\UpdateEmailRequest;
 use App\Http\Requests\Auth\UpdatePasswordRequest;
+use App\Http\Requests\Auth\VerifyTwoFactorRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\AuthService;
@@ -37,6 +38,20 @@ class AuthController extends Controller
             $request->string('email')->toString(),
             $request->string('password')->toString(),
             $request->boolean('remember'),
+        );
+
+        if (isset($payload['requires_two_factor'])) {
+            return $this->success($payload, 'Two-factor authentication code required.');
+        }
+
+        return $this->success($this->withAuthPayload($payload), 'Logged in successfully.');
+    }
+
+    public function verifyTwoFactor(VerifyTwoFactorRequest $request): JsonResponse
+    {
+        $payload = $this->authService->verifyTwoFactor(
+            $request->string('two_factor_token')->toString(),
+            $request->string('code')->toString(),
         );
 
         return $this->success($this->withAuthPayload($payload), 'Logged in successfully.');

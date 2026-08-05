@@ -100,7 +100,10 @@ http.interceptors.response.use(
       return Promise.reject(error)
     }
 
-    if (config.url?.includes('/v1/auth/login')) {
+    // Both endpoints legitimately 401 on bad input while the caller holds
+    // no valid token yet (bad password / wrong 2FA code) — that's not an
+    // expired session, so don't try to "refresh" a token that never existed.
+    if (config.url?.includes('/v1/auth/login') || config.url?.includes('/v1/auth/two-factor/verify')) {
       return Promise.reject(error)
     }
 

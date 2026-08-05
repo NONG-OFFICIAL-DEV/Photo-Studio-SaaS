@@ -128,6 +128,12 @@ export const routes = [
         component: () => import('@/pages/notifications/NotificationsPage.vue'),
         meta: { titleKey: 'notifications.title' },
       },
+      {
+        path: 'account-settings',
+        name: 'account-settings',
+        component: () => import('@/pages/account/AccountSettingsPage.vue'),
+        meta: { titleKey: 'account.dialogTitle' },
+      },
     ],
   },
   {
@@ -176,6 +182,12 @@ export const routes = [
         name: 'admin-notifications',
         component: () => import('@/pages/notifications/NotificationsPage.vue'),
         meta: { titleKey: 'notifications.title' },
+      },
+      {
+        path: 'account-settings',
+        name: 'admin-account-settings',
+        component: () => import('@/pages/account/AccountSettingsPage.vue'),
+        meta: { titleKey: 'account.dialogTitle' },
       },
       {
         path: 'payment-settings',

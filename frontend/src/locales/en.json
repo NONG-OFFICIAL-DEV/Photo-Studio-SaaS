@@ -74,7 +74,10 @@
     "TELEGRAM_WEBHOOK_FAILED": "The bot token works, but Telegram could not reach this server to register the webhook. Make sure this app is deployed behind a public HTTPS domain, then try again.",
     "TELEGRAM_NOT_CONFIGURED": "Connect a Telegram bot in Settings first.",
     "TELEGRAM_CUSTOMER_NOT_LINKED": "This customer has not connected Telegram yet.",
-    "TELEGRAM_SEND_FAILED": "Failed to send via Telegram."
+    "TELEGRAM_SEND_FAILED": "Failed to send via Telegram.",
+    "INVALID_TWO_FACTOR_CODE": "The code you entered is incorrect.",
+    "TWO_FACTOR_CHALLENGE_EXPIRED": "This login attempt has expired. Please log in again.",
+    "TWO_FACTOR_NOT_STARTED": "Start two-factor setup before confirming a code."
   },
   "common": {
     "save": "Save",
@@ -228,6 +231,18 @@
       "editing": "Track editing jobs from queue to delivery",
       "orders": "Turn bookings into projects and invoices instantly",
       "customers": "Keep every client profile, tag, and history in one place"
+    },
+    "twoFactor": {
+      "title": "Two-factor verification",
+      "subtitle": "Enter the 6-digit code from your authenticator app.",
+      "codeLabel": "Authentication code",
+      "codeHint": "You can also enter one of your recovery codes.",
+      "verify": "Verify",
+      "backToLogin": "Back to login",
+      "verifyError": "That code was not accepted. Please try again.",
+      "recoveryCodeLabel": "Recovery code",
+      "useRecoveryCodeInstead": "Use a recovery code instead",
+      "useCodeInstead": "Use an authenticator code instead"
     }
   },
   "validation": {
@@ -1462,6 +1477,24 @@
       "emailUpdateError": "Failed to update email.",
       "passwordUpdated": "Password updated successfully.",
       "passwordUpdateError": "Failed to update password."
+    },
+    "twoFactor": {
+      "title": "Two-Factor Authentication",
+      "description": "Add an extra layer of security to your super admin account with a 6-digit code from an authenticator app.",
+      "enabledNotice": "Two-factor authentication is enabled on your account.",
+      "enable": "Enable Two-Factor Authentication",
+      "disable": "Disable Two-Factor Authentication",
+      "scanHint": "Scan this QR code with Google Authenticator, Authy, or a similar app, then enter the code it generates.",
+      "manualEntry": "Or enter this key manually",
+      "confirm": "Confirm & Enable",
+      "recoveryCodesHint": "Save these recovery codes somewhere safe. Each one can be used once to sign in if you lose access to your authenticator app.",
+      "savedRecoveryCodes": "I've saved these codes",
+      "messages": {
+        "setupError": "Failed to start two-factor setup.",
+        "confirmError": "Failed to confirm the code.",
+        "disabled": "Two-factor authentication disabled.",
+        "disableError": "Failed to disable two-factor authentication."
+      }
     }
   }
 }

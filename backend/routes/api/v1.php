@@ -44,6 +44,7 @@ use App\Http\Controllers\Api\V1\Settings\TelegramSettingsController;
 use App\Http\Controllers\Api\V1\Settings\TenantSettingsController;
 use App\Http\Controllers\Api\V1\Telegram\TelegramActivityController;
 use App\Http\Controllers\Api\V1\Telegram\TelegramWebhookController;
+use App\Http\Controllers\Api\V1\Auth\TwoFactorAuthController;
 use App\Http\Controllers\Api\V1\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -59,6 +60,7 @@ Route::prefix('auth')->name('auth.')->group(function () {
     Route::middleware('throttle:auth')->group(function () {
         Route::post('/register', [AuthController::class, 'register']);
         Route::post('/login', [AuthController::class, 'login']);
+        Route::post('/two-factor/verify', [AuthController::class, 'verifyTwoFactor']);
         Route::post('/password/forgot', [PasswordResetController::class, 'sendResetLink']);
         Route::post('/password/reset', [PasswordResetController::class, 'reset']);
     });
@@ -75,6 +77,12 @@ Route::prefix('auth')->name('auth.')->group(function () {
         Route::post('/email/resend', [EmailVerificationController::class, 'resend']);
         Route::put('/email', [AuthController::class, 'updateEmail']);
         Route::put('/password', [AuthController::class, 'updatePassword']);
+
+        Route::prefix('two-factor')->name('two-factor.')->group(function () {
+            Route::post('/setup', [TwoFactorAuthController::class, 'setup']);
+            Route::post('/confirm', [TwoFactorAuthController::class, 'confirm']);
+            Route::post('/disable', [TwoFactorAuthController::class, 'disable']);
+        });
     });
 });
 

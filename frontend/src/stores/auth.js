@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
-import { registerApi, loginApi, logoutApi, meApi } from '@/apis/auth.api'
+import { registerApi, loginApi, logoutApi, meApi, verifyTwoFactorApi } from '@/apis/auth.api'
 import { getToken, setToken } from '@/apis/api'
 
 export const useAuthStore = defineStore('auth', () => {
@@ -32,9 +32,24 @@ export const useAuthStore = defineStore('auth', () => {
     return data
   }
 
+  /**
+   * When the account has two-factor enabled, the API responds with
+   * `requires_two_factor` + a short-lived `two_factor_token` instead of a
+   * session — no access_token exists yet, so applySession is skipped and
+   * the caller (Login.vue) shows a code-entry step, then calls
+   * verifyTwoFactor() to actually complete the login.
+   */
   async function login(payload) {
     const { data } = await loginApi(payload)
-    applySession(data.data, Boolean(payload.remember))
+    if (!data.data.requires_two_factor) {
+      applySession(data.data, Boolean(payload.remember))
+    }
+    return data
+  }
+
+  async function verifyTwoFactor({ two_factor_token, code, remember = false }) {
+    const { data } = await verifyTwoFactorApi({ two_factor_token, code })
+    applySession(data.data, remember)
     return data
   }
 
@@ -95,6 +110,7 @@ export const useAuthStore = defineStore('auth', () => {
     hasFeature,
     register,
     login,
+    verifyTwoFactor,
     logout,
     fetchMe,
     initialize,

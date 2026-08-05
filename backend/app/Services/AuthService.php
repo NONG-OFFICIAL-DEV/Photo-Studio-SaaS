@@ -17,20 +17,30 @@ use App\Repositories\Contracts\TenantRepositoryInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 use Spatie\Permission\PermissionRegistrar;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthService
 {
+    /**
+     * How long a "password verified, waiting on the 2FA code" challenge
+     * stays valid. Short on purpose — this token alone identifies which
+     * account is about to be logged into.
+     */
+    protected const TWO_FACTOR_CHALLENGE_TTL_MINUTES = 5;
+
     public function __construct(
         protected UserRepositoryInterface $users,
         protected TenantRepositoryInterface $tenants,
         protected ProvisionTenantRolesAction $provisionTenantRoles,
         protected SecurityEventLogger $securityEvents,
+        protected TwoFactorAuthService $twoFactor,
     ) {
     }
 
@@ -121,6 +131,20 @@ class AuthService
             throw new InvalidCredentialsException('This account has been deactivated.', 'ACCOUNT_DEACTIVATED');
         }
 
+        if ($user->hasTwoFactorEnabled()) {
+            // Password is correct, but don't hand out the access token
+            // yet — invalidate the one attempt() just minted (it was
+            // never sent to the client) and issue a short-lived challenge
+            // token instead. The real token is only minted after
+            // verifyTwoFactor() confirms the code.
+            JWTAuth::setToken($token)->invalidate();
+
+            return [
+                'requires_two_factor' => true,
+                'two_factor_token' => $this->storeTwoFactorChallenge($user),
+            ];
+        }
+
         $this->securityEvents->loginAttempt($email, $user, true, null, request());
 
         $user->forceFill([
@@ -129,6 +153,50 @@ class AuthService
         ])->save();
 
         return $this->tokenPayload($user, $token, $ttlMinutes);
+    }
+
+    /**
+     * Completes a login that was paused by hasTwoFactorEnabled() above.
+     * Accepts either a live TOTP code or a recovery code (verifyCode()
+     * tries both) — the challenge token proves the password step already
+     * passed, so this only needs to check possession of the second factor.
+     */
+    public function verifyTwoFactor(string $challengeToken, string $code): array
+    {
+        $userId = Cache::pull("two_factor_challenge:{$challengeToken}");
+
+        if (! $userId) {
+            throw new InvalidCredentialsException('This login attempt has expired. Please log in again.', 'TWO_FACTOR_CHALLENGE_EXPIRED');
+        }
+
+        /** @var User|null $user */
+        $user = User::withoutGlobalScopes()->find($userId);
+
+        if (! $user || ! $this->twoFactor->verifyCode($user, $code)) {
+            // Put the challenge back so a mistyped code doesn't force a
+            // fresh login — the user still has the rest of the TTL to retry.
+            Cache::put("two_factor_challenge:{$challengeToken}", $userId, now()->addMinutes(self::TWO_FACTOR_CHALLENGE_TTL_MINUTES));
+            throw new InvalidCredentialsException('The code you entered is incorrect.', 'INVALID_TWO_FACTOR_CODE');
+        }
+
+        $token = JWTAuth::fromUser($user);
+
+        $this->securityEvents->loginAttempt($user->email, $user, true, null, request());
+
+        $user->forceFill([
+            'last_login_at' => now(),
+            'last_login_ip' => request()->ip(),
+        ])->save();
+
+        return $this->tokenPayload($user, $token);
+    }
+
+    protected function storeTwoFactorChallenge(User $user): string
+    {
+        $token = Str::random(40);
+        Cache::put("two_factor_challenge:{$token}", $user->id, now()->addMinutes(self::TWO_FACTOR_CHALLENGE_TTL_MINUTES));
+
+        return $token;
     }
 
     public function logout(): void

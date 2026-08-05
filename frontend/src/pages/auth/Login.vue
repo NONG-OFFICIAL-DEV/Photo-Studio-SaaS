@@ -18,35 +18,113 @@ const loading = ref(false)
 const errorMessage = ref('')
 const showPassword = ref(false)
 
+// Set once a login response comes back with requires_two_factor — switches
+// the page into the code-entry step instead of navigating away.
+const twoFactorToken = ref(null)
+const rememberPending = ref(false)
+const twoFactorCode = ref('')
+const useRecoveryCode = ref(false)
+
+function goToDestination() {
+  appStore.notify(t('auth.loginSuccess'))
+  const fallback = auth.isSuperAdmin ? { name: 'admin-analytics' } : { name: 'dashboard' }
+  router.push(route.query.redirect || fallback)
+}
+
 async function onSubmit(values) {
   loading.value = true
   errorMessage.value = ''
 
   try {
-    await auth.login(values)
-    appStore.notify(t('auth.loginSuccess'))
-    const fallback = auth.isSuperAdmin ? { name: 'admin-analytics' } : { name: 'dashboard' }
-    router.push(route.query.redirect || fallback)
+    const response = await auth.login(values)
+    if (response.data.requires_two_factor) {
+      twoFactorToken.value = response.data.two_factor_token
+      rememberPending.value = Boolean(values.remember)
+    } else {
+      goToDestination()
+    }
   } catch (error) {
     errorMessage.value = translateApiMessage(error, 'auth.loginError')
   } finally {
     loading.value = false
   }
 }
+
+async function onSubmitTwoFactor() {
+  loading.value = true
+  errorMessage.value = ''
+
+  try {
+    await auth.verifyTwoFactor({
+      two_factor_token: twoFactorToken.value,
+      code: twoFactorCode.value,
+      remember: rememberPending.value,
+    })
+    goToDestination()
+  } catch (error) {
+    errorMessage.value = translateApiMessage(error, 'auth.twoFactor.verifyError')
+  } finally {
+    loading.value = false
+  }
+}
+
+function backToLogin() {
+  twoFactorToken.value = null
+  twoFactorCode.value = ''
+  useRecoveryCode.value = false
+  errorMessage.value = ''
+}
 </script>
 
 <template>
   <div>
-    <div class="mb-8">
+    <div v-if="!twoFactorToken" class="mb-8">
       <h1 class="text-h4 font-weight-bold mb-2">{{ t('auth.loginTitle') }}</h1>
       <p class="text-body-2 text-medium-emphasis">{{ t('auth.loginSubtitle') }}</p>
+    </div>
+    <div v-else class="mb-8">
+      <h1 class="text-h4 font-weight-bold mb-2">{{ t('auth.twoFactor.title') }}</h1>
+      <p class="text-body-2 text-medium-emphasis">{{ t('auth.twoFactor.subtitle') }}</p>
     </div>
 
     <v-alert v-if="errorMessage" type="error" variant="tonal" rounded="lg" class="mb-6" closable @click:close="errorMessage = ''">
       {{ errorMessage }}
     </v-alert>
 
-    <AppForm :schema="loginSchema" :initial-values="{ email: '', password: '', remember: false }" @submit="onSubmit">
+    <form v-if="twoFactorToken" @submit.prevent="onSubmitTwoFactor">
+      <v-otp-input
+        v-if="!useRecoveryCode"
+        v-model="twoFactorCode"
+        length="6"
+        autofocus
+        class="mb-2"
+        :disabled="loading"
+        @finish="onSubmitTwoFactor"
+      />
+      <v-text-field
+        v-else
+        v-model="twoFactorCode"
+        :label="t('auth.twoFactor.recoveryCodeLabel')"
+        autofocus
+        class="mb-2"
+      />
+      <p class="text-body-2 text-medium-emphasis text-center mb-6">{{ t('auth.twoFactor.codeHint') }}</p>
+
+      <v-btn type="submit" color="primary" block size="large" :loading="loading" :disabled="!twoFactorCode" class="auth-submit">
+        {{ t('auth.twoFactor.verify') }}
+      </v-btn>
+
+      <div class="text-center mt-6 d-flex flex-column ga-2">
+        <a href="#" class="text-body-2 font-weight-medium auth-link" @click.prevent="useRecoveryCode = !useRecoveryCode; twoFactorCode = ''">
+          {{ useRecoveryCode ? t('auth.twoFactor.useCodeInstead') : t('auth.twoFactor.useRecoveryCodeInstead') }}
+        </a>
+        <a href="#" class="text-body-2 font-weight-medium auth-link" @click.prevent="backToLogin">
+          {{ t('auth.twoFactor.backToLogin') }}
+        </a>
+      </div>
+    </form>
+
+    <AppForm v-else :schema="loginSchema" :initial-values="{ email: '', password: '', remember: false }" @submit="onSubmit">
       <template #default="{ errors, values, setFieldValue }">
         <v-text-field
           :model-value="values.email"
