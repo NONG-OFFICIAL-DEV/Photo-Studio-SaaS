@@ -122,7 +122,7 @@ const canPay = computed(() => auth.hasPermission('payroll.pay'))
           <v-btn v-if="canPay && item.status === 'draft'" size="small" variant="tonal" color="success" class="mr-1" :loading="actionLoading" @click="markPaid(item)">
             {{ t('payroll.markPaid') }}
           </v-btn>
-          <v-btn v-if="canDelete && item.status === 'draft'" icon="mdi-trash-can-outline" size="small" variant="text" @click="askDelete(item)" />
+          <v-btn v-if="canDelete && item.status === 'draft'" icon="mdi-trash-can-outline" size="small" variant="text" color="error" @click="askDelete(item)" />
         </template>
       </AppTable>
     </v-card>

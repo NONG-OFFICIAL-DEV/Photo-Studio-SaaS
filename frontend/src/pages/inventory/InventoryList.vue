@@ -115,9 +115,9 @@ const canDelete = computed(() => auth.hasPermission('inventory.delete'))
         </template>
 
         <template #[`item.actions`]="{ item }">
-          <v-btn icon="mdi-eye-outline" size="small" variant="text" @click="openDetail(item)" />
-          <v-btn v-if="canUpdate" icon="mdi-pencil-outline" size="small" variant="text" @click="openEdit(item)" />
-          <v-btn v-if="canDelete" icon="mdi-trash-can-outline" size="small" variant="text" @click="askDelete(item)" />
+          <v-btn icon="mdi-eye-outline" size="small" variant="text" color="info" @click="openDetail(item)" />
+          <v-btn v-if="canUpdate" icon="mdi-pencil-outline" size="small" variant="text" color="primary" @click="openEdit(item)" />
+          <v-btn v-if="canDelete" icon="mdi-trash-can-outline" size="small" variant="text" color="error" @click="askDelete(item)" />
         </template>
       </AppTable>
     </v-card>

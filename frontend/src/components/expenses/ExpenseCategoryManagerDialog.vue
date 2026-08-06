@@ -71,7 +71,7 @@ async function confirmDeleteCategory() {
     <v-list density="compact">
       <v-list-item v-for="category in categoriesStore.categories" :key="category.id" :title="category.name">
         <template #append>
-          <v-btn icon="mdi-delete-outline" size="small" variant="text" @click="askDelete(category)" />
+          <v-btn icon="mdi-delete-outline" size="small" variant="text" color="error" @click="askDelete(category)" />
         </template>
       </v-list-item>
     </v-list>

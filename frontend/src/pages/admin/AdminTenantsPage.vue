@@ -157,12 +157,14 @@ async function confirmToggle() {
               />
               <v-list-item
                 v-if="item.is_active"
+                class="text-warning"
                 :title="t('admin.tenants.actions.suspend')"
                 prepend-icon="mdi-account-cancel-outline"
                 @click="askSuspend(item)"
               />
               <v-list-item
                 v-else
+                class="text-success"
                 :title="t('admin.tenants.actions.activate')"
                 prepend-icon="mdi-account-check-outline"
                 @click="askActivate(item)"

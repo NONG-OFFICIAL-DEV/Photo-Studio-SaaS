@@ -123,7 +123,7 @@ const canCreate = computed(() => auth.hasPermission('orders.create'))
         </template>
 
         <template #[`item.actions`]="{ item }">
-          <v-btn icon="mdi-eye-outline" size="small" variant="text" @click="openDetail(item)" />
+          <v-btn icon="mdi-eye-outline" size="small" variant="text" color="info" @click="openDetail(item)" />
         </template>
       </AppTable>
     </v-card>

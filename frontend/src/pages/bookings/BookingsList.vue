@@ -210,7 +210,7 @@ const canCreateOrder = computed(() => auth.hasPermission('orders.create'))
               <v-btn icon="mdi-dots-vertical" size="small" variant="text" v-bind="menuProps" />
             </template>
             <v-list density="compact">
-              <v-list-item v-if="canUpdate" :title="t('common.edit')" prepend-icon="mdi-pencil-outline" @click="openEdit(item)" />
+              <v-list-item v-if="canUpdate" class="text-primary" :title="t('common.edit')" prepend-icon="mdi-pencil-outline" @click="openEdit(item)" />
               <v-list-item
                 v-if="canCreateOrder && !['cancelled', 'no_show'].includes(item.status)"
                 :title="t('bookings.actions.createOrder')"
@@ -219,17 +219,19 @@ const canCreateOrder = computed(() => auth.hasPermission('orders.create'))
               />
               <v-list-item
                 v-if="canUpdate && ['pending', 'confirmed'].includes(item.status)"
+                class="text-warning"
                 :title="t('bookings.actions.markNoShow')"
                 prepend-icon="mdi-account-off-outline"
                 @click="runAction('noShow', item)"
               />
               <v-list-item
                 v-if="canCancel && !['cancelled', 'completed', 'no_show'].includes(item.status)"
+                class="text-warning"
                 :title="t('common.cancel')"
                 prepend-icon="mdi-calendar-remove-outline"
                 @click="openCancel(item)"
               />
-              <v-list-item v-if="canDelete" :title="t('common.delete')" prepend-icon="mdi-delete-outline" @click="askDelete(item)" />
+              <v-list-item v-if="canDelete" class="text-error" :title="t('common.delete')" prepend-icon="mdi-delete-outline" @click="askDelete(item)" />
             </v-list>
           </v-menu>
         </template>

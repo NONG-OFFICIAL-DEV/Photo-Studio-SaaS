@@ -939,7 +939,7 @@
       "botTokenPlaceholder": "123456789:AAExampleTokenFromBotFather",
       "connect": "ភ្ជាប់",
       "disconnect": "ផ្តាច់",
-      "connectedAs": "បានភ្ជាប់ជា @{username}",
+      "connectedAs": "បានភ្ជាប់ជាមួយ {'@'}{username}",
       "connectedHint": "អតិថិជនដែលបានភ្ជាប់ឥឡូវអាចទទួលរូបថត និងវិក្កយបត្រដោយផ្ទាល់តាម Telegram — មិនចាំបាច់មានតំណភ្ជាប់វិចិត្រសាល ឬកម្មវិធីថ្មីទេ។",
       "connectError": "មិនអាចភ្ជាប់ Telegram bot បានទេ។",
       "connectedSuccess": "បានភ្ជាប់ Telegram bot ជាស្ថាពរ។",

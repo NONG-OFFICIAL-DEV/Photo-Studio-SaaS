@@ -110,9 +110,9 @@ const canSend = computed(() => auth.hasPermission('packages.send'))
         </template>
 
         <template #[`item.actions`]="{ item }">
-          <v-btn v-if="canSend" icon="mdi-send-outline" size="small" variant="text" @click="openTelegramSend(item)" />
-          <v-btn v-if="canUpdate" icon="mdi-pencil-outline" size="small" variant="text" @click="openEdit(item)" />
-          <v-btn v-if="canDelete" icon="mdi-trash-can-outline" size="small" variant="text" @click="askDelete(item)" />
+          <v-btn v-if="canSend" icon="mdi-send-outline" size="small" variant="text" color="secondary" @click="openTelegramSend(item)" />
+          <v-btn v-if="canUpdate" icon="mdi-pencil-outline" size="small" variant="text" color="primary" @click="openEdit(item)" />
+          <v-btn v-if="canDelete" icon="mdi-trash-can-outline" size="small" variant="text" color="error" @click="askDelete(item)" />
         </template>
       </AppTable>
     </v-card>

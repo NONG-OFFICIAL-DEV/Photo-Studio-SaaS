@@ -98,7 +98,7 @@ const canManage = computed(() => auth.hasPermission('attendance.manage'))
         </template>
 
         <template #[`item.actions`]="{ item }">
-          <v-btn v-if="canManage" icon="mdi-trash-can-outline" size="small" variant="text" @click="askDelete(item)" />
+          <v-btn v-if="canManage" icon="mdi-trash-can-outline" size="small" variant="text" color="error" @click="askDelete(item)" />
         </template>
       </AppTable>
     </v-card>

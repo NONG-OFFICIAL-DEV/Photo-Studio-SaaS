@@ -86,7 +86,7 @@ async function confirmDeletePlan() {
         </template>
 
         <template #[`item.actions`]="{ item }">
-          <v-btn icon="mdi-pencil-outline" variant="text" size="small" @click="openEdit(item)" />
+          <v-btn icon="mdi-pencil-outline" variant="text" size="small" color="primary" @click="openEdit(item)" />
           <v-btn icon="mdi-delete-outline" variant="text" size="small" color="error" @click="askDelete(item)" />
         </template>
       </AppTable>

@@ -130,7 +130,7 @@ const atUserLimit = computed(() => limits.value.max_users !== null && limits.val
         </template>
 
         <template #[`item.actions`]="{ item }">
-          <v-btn v-if="canUpdate" icon="mdi-pencil-outline" size="small" variant="text" @click="openEdit(item)" />
+          <v-btn v-if="canUpdate" icon="mdi-pencil-outline" size="small" variant="text" color="primary" @click="openEdit(item)" />
           <v-btn
             v-if="canDeactivate && item.status === 'active' && item.id !== auth.user?.id"
             icon="mdi-account-off-outline"

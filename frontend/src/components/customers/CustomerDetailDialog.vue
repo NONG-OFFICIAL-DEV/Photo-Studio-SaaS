@@ -232,7 +232,7 @@ async function unlinkTelegram() {
           <v-list-item-title>{{ note.note }}</v-list-item-title>
           <v-list-item-subtitle>{{ note.author }} &middot; {{ formatDate(note.created_at) }}</v-list-item-subtitle>
           <template #append>
-            <v-btn icon="mdi-delete-outline" size="small" variant="text" @click="removeNote(note.id)" />
+            <v-btn icon="mdi-delete-outline" size="small" variant="text" color="error" @click="removeNote(note.id)" />
           </template>
         </v-list-item>
       </v-list>

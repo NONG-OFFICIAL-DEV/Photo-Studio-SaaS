@@ -225,7 +225,7 @@ const canImport = computed(() => auth.hasPermission('customers.import'))
         <template #[`item.actions`]="{ item }">
           <v-btn
             :text="item.telegram_connected ? t('customers.telegram.connected') : t('customers.telegram.generateLink')"
-            color="blue"
+            color="secondary"
             size="small"
             variant="outlined"
             :class="{ 'text-medium-emphasis': !item.telegram_connected }"
@@ -239,12 +239,13 @@ const canImport = computed(() => auth.hasPermission('customers.import'))
             variant="text"
             @click="toggleFavorite(item)"
           />
-          <v-btn v-if="canUpdate" icon="mdi-pencil-outline" size="small" variant="text" @click="openEdit(item)" />
+          <v-btn v-if="canUpdate" icon="mdi-pencil-outline" size="small" variant="text" color="primary" @click="openEdit(item)" />
           <v-btn
             v-if="canUpdate && !item.is_blacklisted"
             icon="mdi-account-cancel-outline"
             size="small"
             variant="text"
+            color="warning"
             @click="openBlacklist(item)"
           />
           <v-btn
@@ -252,9 +253,10 @@ const canImport = computed(() => auth.hasPermission('customers.import'))
             icon="mdi-account-check-outline"
             size="small"
             variant="text"
+            color="success"
             @click="unblacklist(item)"
           />
-          <v-btn v-if="canDelete" icon="mdi-delete-outline" size="small" variant="text" @click="askDelete(item)" />
+          <v-btn v-if="canDelete" icon="mdi-delete-outline" size="small" variant="text" color="error" @click="askDelete(item)" />
         </template>
       </AppTable>
     </v-card>

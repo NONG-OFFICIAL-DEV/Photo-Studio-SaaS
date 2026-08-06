@@ -157,7 +157,7 @@ const canDelete = computed(() => auth.hasPermission('albums.delete'))
             <v-btn v-if="item.status === 'ready'" size="small" variant="tonal" color="success" class="mr-1" @click="runAction('deliver', item)">
               {{ t('albums.actions.deliver') }}
             </v-btn>
-            <v-btn v-if="!['delivered', 'archived'].includes(item.status)" size="small" variant="text" class="mr-1" @click="runAction('archive', item)">
+            <v-btn v-if="!['delivered', 'archived'].includes(item.status)" size="small" variant="text" color="warning" class="mr-1" @click="runAction('archive', item)">
               {{ t('albums.actions.archive') }}
             </v-btn>
             <v-tooltip
@@ -170,15 +170,16 @@ const canDelete = computed(() => auth.hasPermission('albums.delete'))
                     icon="mdi-send-outline"
                     size="small"
                     variant="text"
+                    color="secondary"
                     :disabled="!item.customer.telegram_connected"
                     @click="openTelegramSend(item)"
                   />
                 </span>
               </template>
             </v-tooltip>
-            <v-btn icon="mdi-pencil-outline" size="small" variant="text" @click="openEdit(item)" />
+            <v-btn icon="mdi-pencil-outline" size="small" variant="text" color="primary" @click="openEdit(item)" />
           </template>
-          <v-btn v-if="canDelete" icon="mdi-trash-can-outline" size="small" variant="text"  color="error" @click="askDelete(item)" />
+          <v-btn v-if="canDelete" icon="mdi-trash-can-outline" size="small" variant="text" color="error" @click="askDelete(item)" />
         </template>
       </AppTable>
     </v-card>

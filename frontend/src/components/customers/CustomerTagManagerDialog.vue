@@ -96,7 +96,7 @@ async function confirmDeleteTag() {
         </template>
         <v-list-item-title class="ml-2">{{ tag.name }}</v-list-item-title>
         <template #append>
-          <v-btn icon="mdi-delete-outline" size="small" variant="text" @click="askDelete(tag)" />
+          <v-btn icon="mdi-delete-outline" size="small" variant="text" color="error" @click="askDelete(tag)" />
         </template>
       </v-list-item>
     </v-list>

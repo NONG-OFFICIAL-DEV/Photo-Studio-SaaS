@@ -939,7 +939,7 @@
       "botTokenPlaceholder": "123456789:AAExampleTokenFromBotFather",
       "connect": "Connect",
       "disconnect": "Disconnect",
-      "connectedAs": "Connected as @{username}",
+      "connectedAs": "Connected as{'@'}{username}",
       "connectedHint": "Customers who connect can now receive photos and invoices directly in Telegram — no gallery link, no new app.",
       "connectError": "Could not connect the Telegram bot.",
       "connectedSuccess": "Telegram bot connected.",
