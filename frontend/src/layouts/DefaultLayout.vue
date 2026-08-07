@@ -184,18 +184,49 @@ const visibleTenantGroups = computed(() =>
 /*
  * Super admins have no tenant_id and no tenant RBAC — they operate only
  * inside /admin/* routes, so they get a completely different (unfiltered)
- * menu instead of the permission-filtered tenant menu above. Few enough
- * items that it stays a single flat main menu rather than being grouped too.
+ * menu instead of the permission-filtered tenant menu above. Analytics is
+ * the admin "dashboard" and stays a standalone link; everything else folds
+ * into the same collapsible-group pattern as the tenant menu below.
  */
-const adminMenuItems =  computed(()=>[
-  { title: t('admin.menu.analytics'), icon: 'mdi-view-dashboard-outline', to: { name: 'admin-analytics' } },
-  { title: t('admin.menu.tenants'), icon: 'mdi-domain', to: { name: 'admin-tenants' } },
-  { title: t('admin.menu.revenueReport'), icon: 'mdi-chart-line', to: { name: 'admin-revenue-report' } },
-  { title: t('admin.menu.plans'), icon: 'mdi-shape-outline', to: { name: 'admin-plans' } },
-  { title: t('admin.menu.audit'), icon: 'mdi-shield-search', to: { name: 'admin-audit' } },
-  { title: t('admin.menu.rolePermissions'), icon: 'mdi-shield-account-outline', to: { name: 'admin-role-permissions' } },
-  { title: t('admin.menu.paymentSettings'), icon: 'mdi-qrcode', to: { name: 'admin-payment-settings' } },
-  { title: t('admin.menu.paymentClaims'), icon: 'mdi-cash-check', to: { name: 'admin-payment-claims' } },
+const adminDashboardItem = computed(() => ({
+  title: t('admin.menu.analytics'),
+  icon: 'mdi-view-dashboard-outline',
+  to: { name: 'admin-analytics' },
+}))
+
+const adminMenuGroups = computed(() => [
+  {
+    value: 'admin-tenants',
+    header: t('admin.menu.groups.tenants'),
+    icon: 'mdi-domain',
+    items: [
+      { title: t('admin.menu.tenants'), icon: 'mdi-domain', to: { name: 'admin-tenants' } },
+      { title: t('admin.menu.plans'), icon: 'mdi-shape-outline', to: { name: 'admin-plans' } },
+    ],
+  },
+  {
+    value: 'admin-billing',
+    header: t('admin.menu.groups.billing'),
+    icon: 'mdi-cash-multiple',
+    items: [
+      { title: t('admin.menu.revenueReport'), icon: 'mdi-chart-line', to: { name: 'admin-revenue-report' } },
+      { title: t('admin.menu.paymentSettings'), icon: 'mdi-qrcode', to: { name: 'admin-payment-settings' } },
+      { title: t('admin.menu.paymentClaims'), icon: 'mdi-cash-check', to: { name: 'admin-payment-claims' } },
+    ],
+  },
+  {
+    value: 'admin-security',
+    header: t('admin.menu.groups.security'),
+    icon: 'mdi-shield-lock-outline',
+    items: [
+      { title: t('admin.menu.audit'), icon: 'mdi-shield-search', to: { name: 'admin-audit' } },
+      {
+        title: t('admin.menu.rolePermissions'),
+        icon: 'mdi-shield-account-outline',
+        to: { name: 'admin-role-permissions' },
+      },
+    ],
+  },
 ])
 
 /*
@@ -225,7 +256,8 @@ function isGroupActive(group) {
 watch(
   () => route.name,
   () => {
-    const activeGroup = visibleTenantGroups.value.find((group) => isGroupActive(group))
+    const groups = auth.isSuperAdmin ? adminMenuGroups.value : visibleTenantGroups.value
+    const activeGroup = groups.find((group) => isGroupActive(group))
     openGroups.value = activeGroup ? [activeGroup.value] : []
   },
   { immediate: true },
@@ -439,14 +471,47 @@ function toggleLocale() {
     -->
     <v-list v-if="auth.isSuperAdmin" nav density="comfortable" class="nav-list">
       <v-list-item
-        v-for="item in adminMenuItems"
-        :key="item.title"
-        :to="item.to"
+        :to="adminDashboardItem.to"
         exact
-        :prepend-icon="item.icon"
-        :title="item.title"
+        :prepend-icon="adminDashboardItem.icon"
+        :title="adminDashboardItem.title"
         rounded="lg"
       />
+
+      <div v-for="group in adminMenuGroups" :key="group.value">
+        <v-list-item
+          :active="isGroupActive(group)"
+          :prepend-icon="group.icon"
+          :title="group.header"
+          rounded="lg"
+          @click="toggleGroup(group.value)"
+        >
+          <template #append>
+            <v-icon
+              size="18"
+              icon="mdi-chevron-down"
+              class="nav-chevron"
+              :class="{ 'nav-chevron--open': isGroupOpen(group.value) }"
+            />
+          </template>
+        </v-list-item>
+
+        <v-expand-transition>
+          <div v-show="isGroupOpen(group.value)" class="nav-submenu">
+            <v-list-item
+              v-for="item in group.items"
+              :key="item.title"
+              :to="item.to"
+              exact
+              :prepend-icon="item.icon"
+              :title="item.title"
+              rounded="lg"
+              density="compact"
+              class="nav-subitem"
+            />
+          </div>
+        </v-expand-transition>
+      </div>
     </v-list>
 
     <v-list v-else nav density="comfortable" class="nav-list">

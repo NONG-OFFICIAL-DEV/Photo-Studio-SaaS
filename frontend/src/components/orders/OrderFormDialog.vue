@@ -347,7 +347,13 @@ const subtotal = computed(() => computeSubtotal())
               <v-list-item v-bind="itemProps">
                 <template #append>
                   <v-icon
-                    :icon="item.raw.type === 'service' ? 'mdi-tag-multiple-outline' : 'mdi-plus-box-multiple-outline'"
+                    :icon="
+                      item.raw.type === 'service'
+                        ? 'mdi-tag-multiple-outline'
+                        : item.raw.type === 'package'
+                          ? 'mdi-package-variant'
+                          : 'mdi-plus-box-multiple-outline'
+                    "
                     size="16"
                     class="me-1"
                   />
