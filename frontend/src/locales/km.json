@@ -122,7 +122,9 @@
     },
     "toggleLanguage": "ប្តូរភាសា",
     "toggleTheme": "ប្តូរស្បែក",
-    "addNewItem": "បន្ថែម {item} ថ្មី"
+    "addNewItem": "បន្ថែម {item} ថ្មី",
+    "discardChanges": "បោះបង់ការផ្លាស់ប្តូរ?",
+    "discardChangesMessage": "អ្នកមានការផ្លាស់ប្តូរដែលមិនទាន់រក្សាទុក។ តើអ្នកប្រាកដថាចង់បោះបង់ការផ្លាស់ប្តូរទាំងនោះឬ?"
   },
   "fields": {
     "name": "ឈ្មោះ",
@@ -423,7 +425,7 @@
     "itemType": {
       "service": "សេវាកម្ម",
       "addon": "សេវាបន្ថែម",
-      "package":"កញ្ចប់"
+      "package": "កញ្ចប់"
     },
     "pricingUnits": {
       "fixed": "តម្លៃថេរ",

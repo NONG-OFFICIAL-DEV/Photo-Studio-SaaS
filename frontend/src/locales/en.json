@@ -122,7 +122,9 @@
     },
     "toggleLanguage": "Toggle language",
     "toggleTheme": "Toggle theme",
-    "addNewItem": "Add new {item}"
+    "addNewItem": "Add new {item}",
+    "discardChanges": "Discard changes?",
+    "discardChangesMessage": "You have unsaved changes. Are you sure you want to discard them?"
   },
   "fields": {
     "name": "Name",
@@ -423,7 +425,7 @@
     "itemType": {
       "service": "Service",
       "addon": "Add-on",
-      "package":"Package"
+      "package": "Package"
     },
     "pricingUnits": {
       "fixed": "Fixed Price",

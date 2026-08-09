@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import AppConfirmDialog from '@/components/common/AppConfirmDialog.vue'
 
 const props = defineProps({
   catalog: { type: Object, required: true },
@@ -91,6 +92,16 @@ function discard() {
   editedPermissions.value[activeRole.value] = [...(savedPermissions.value[activeRole.value] ?? [])]
 }
 
+// The plain Cancel button used to call discard() directly — a stray
+// click silently threw away every unchecked/checked box on this tab
+// with no way back. Now it opens this confirmation first.
+const discardConfirmOpen = ref(false)
+
+function confirmDiscard() {
+  discard()
+  discardConfirmOpen.value = false
+}
+
 defineExpose({ markSaved })
 </script>
 
@@ -132,11 +143,21 @@ defineExpose({ markSaved })
       <v-divider class="mb-4" />
 
       <div class="d-flex justify-end ga-2">
-        <v-btn variant="text" :disabled="!isDirty || saving" @click="discard">{{ t('common.cancel') }}</v-btn>
+        <v-btn variant="text" :disabled="!isDirty || saving" @click="discardConfirmOpen = true">
+          {{ t('common.cancel') }}
+        </v-btn>
         <v-btn color="primary" variant="flat" :disabled="!isDirty" :loading="saving" @click="save">
           {{ t('common.save') }}
         </v-btn>
       </div>
     </v-card>
+
+    <AppConfirmDialog
+      v-model="discardConfirmOpen"
+      color="error"
+      :title="t('common.discardChanges')"
+      :message="t('common.discardChangesMessage')"
+      @confirm="confirmDiscard"
+    />
   </div>
 </template>
