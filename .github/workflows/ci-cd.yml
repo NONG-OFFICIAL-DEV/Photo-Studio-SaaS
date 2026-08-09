@@ -81,8 +81,11 @@ jobs:
             echo ">>> Pulling latest images"
             docker compose pull
 
+            echo ">>> Stopping old containers"
+            docker compose down --remove-orphans
+
             echo ">>> Starting containers"
-            docker compose up -d --remove-orphans --force-recreate
+            docker compose up -d
 
             echo ">>> Running migrations"
             docker exec photo_studio_backend php artisan migrate --force
