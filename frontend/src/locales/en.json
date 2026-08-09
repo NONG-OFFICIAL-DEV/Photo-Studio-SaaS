@@ -422,7 +422,8 @@
     "pricingUnit": "Pricing Unit",
     "itemType": {
       "service": "Service",
-      "addon": "Add-on"
+      "addon": "Add-on",
+      "package":"Package"
     },
     "pricingUnits": {
       "fixed": "Fixed Price",
@@ -964,7 +965,12 @@
       "rolePermissions": "Role Permissions",
       "revenueReport": "Revenue Report",
       "paymentSettings": "Payment Settings",
-      "paymentClaims": "Payment Claims"
+      "paymentClaims": "Payment Claims",
+      "groups": {
+        "tenants": "Tenants",
+        "billing": "Billing",
+        "security": "Security"
+      }
     },
     "analytics": {
       "title": "Platform Analytics",

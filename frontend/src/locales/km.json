@@ -422,7 +422,8 @@
     "pricingUnit": "ឯកតាតម្លៃ",
     "itemType": {
       "service": "សេវាកម្ម",
-      "addon": "សេវាបន្ថែម"
+      "addon": "សេវាបន្ថែម",
+      "package":"កញ្ចប់"
     },
     "pricingUnits": {
       "fixed": "តម្លៃថេរ",
@@ -964,7 +965,12 @@
       "rolePermissions": "សិទ្ធិតួនាទី",
       "revenueReport": "របាយការណ៍ចំណូល",
       "paymentSettings": "ការកំណត់ការទូទាត់",
-      "paymentClaims": "ការទាមទារបង់ប្រាក់"
+      "paymentClaims": "ការទាមទារបង់ប្រាក់",
+      "groups": {
+        "tenants": "ស្ទូឌីយោ",
+        "billing": "ការទូទាត់",
+        "security": "សុវត្ថិភាព"
+      }
     },
     "analytics": {
       "title": "ការវិភាគវេទិកា",

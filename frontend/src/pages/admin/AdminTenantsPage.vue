@@ -146,6 +146,7 @@ async function confirmToggle() {
             </template>
             <v-list density="compact" min-width="220">
               <v-list-item
+                class="text-teal"
                 :title="t('admin.tenants.actions.manageSubscription')"
                 prepend-icon="mdi-credit-card-outline"
                 @click="openSubscriptionDialog(item)"
