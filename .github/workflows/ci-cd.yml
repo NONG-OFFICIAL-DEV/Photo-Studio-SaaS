@@ -93,3 +93,6 @@ jobs:
             echo ">>> Discovering packages and optimizing"
             docker exec photo_studio_backend php artisan package:discover --ansi
             docker exec photo_studio_backend php artisan optimize
+
+            echo ">>> Pruning unused Docker images"
+            docker image prune -a --force
