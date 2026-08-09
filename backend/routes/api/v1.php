@@ -34,6 +34,7 @@ use App\Http\Controllers\Api\V1\Order\EditingTaskController;
 use App\Http\Controllers\Api\V1\Order\OrderController;
 use App\Http\Controllers\Api\V1\Package\PackageController;
 use App\Http\Controllers\Api\V1\Payroll\PayrollEntryController;
+use App\Http\Controllers\Api\V1\PlanController;
 use App\Http\Controllers\Api\V1\PlanLimitController;
 use App\Http\Controllers\Api\V1\PlatformTelegramWebhookController;
 use App\Http\Controllers\Api\V1\Report\ReportController;
@@ -54,6 +55,13 @@ Route::get('/ping', fn () => response()->json([
     'data' => ['version' => 'v1'],
     'meta' => [],
 ]));
+
+/*
+ * Public, unauthenticated — for a pricing/marketing page (this app's own
+ * or a separate website) to display active plans. No API key needed:
+ * this is the same data a visitor would see on a pricing page anyway.
+ */
+Route::get('/plans', [PlanController::class, 'index'])->name('plans.public');
 
 Route::prefix('auth')->name('auth.')->group(function () {
     // Guest
