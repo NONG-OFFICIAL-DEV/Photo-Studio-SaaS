@@ -226,7 +226,7 @@ const canCreateOrder = computed(() => auth.hasPermission('orders.create'))
               />
               <v-list-item
                 v-if="canCancel && !['cancelled', 'completed', 'no_show'].includes(item.status)"
-                class="text-warning"
+                class="text-error"
                 :title="t('common.cancel')"
                 prepend-icon="mdi-calendar-remove-outline"
                 @click="openCancel(item)"

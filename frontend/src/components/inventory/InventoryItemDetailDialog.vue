@@ -181,7 +181,7 @@ const canAdjustStock = computed(() => auth.hasPermission('inventory.adjust-stock
             />
           </v-col>
           <v-col cols="6" sm="6">
-            <AppDatePicker v-model="movement.moved_at" :label="t('inventory.movedAt')" />
+            <AppDatePicker v-model="movement.moved_at" :label="t('inventory.movedAt')" density="compact"/>
           </v-col>
           <v-col cols="6" sm="6">
             <v-textarea v-model="movement.reason" :label="t('fields.reason')" rows="3" density="compact" hide-details />

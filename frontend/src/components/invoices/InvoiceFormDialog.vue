@@ -421,25 +421,27 @@ async function onSubmit(values) {
 
         <template v-if="fromOrder">
           <div class="text-subtitle-2 mb-2">{{ t('invoices.itemsFromOrder') }}</div>
-          <v-table v-if="orderPreview" density="compact" class="mb-4">
-            <thead>
-              <tr>
-                <th>{{ t('fields.name') }}</th>
-                <th>{{ t('fields.unitPrice') }}</th>
-                <th>{{ t('fields.quantity') }}</th>
-                <th>{{ t('fields.total') }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="orderItem in orderPreview.items" :key="orderItem.id">
-                <td>{{ orderItem.name }}</td>
-                <td>${{ orderItem.unit_price }}</td>
-                <td>{{ orderItem.quantity }}</td>
-                <td>${{ orderItem.line_total }}</td>
-              </tr>
-            </tbody>
-          </v-table>
-          <div v-else class="text-body-2 text-medium-emphasis mb-4">{{ t('invoices.selectOrderPrompt') }}</div>
+          <v-card variant="tonal">
+            <v-table v-if="orderPreview" density="compact" class="mb-4" border>
+              <thead>
+                <tr>
+                  <th>{{ t('fields.name') }}</th>
+                  <th>{{ t('fields.unitPrice') }}</th>
+                  <th>{{ t('fields.quantity') }}</th>
+                  <th>{{ t('fields.total') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="orderItem in orderPreview.items" :key="orderItem.id">
+                  <td>{{ orderItem.name }}</td>
+                  <td>${{ orderItem.unit_price }}</td>
+                  <td>{{ orderItem.quantity }}</td>
+                  <td>${{ orderItem.line_total }}</td>
+                </tr>
+              </tbody>
+            </v-table>
+            <div v-else class="text-body-2 text-medium-emphasis ma-4">{{ t('invoices.selectOrderPrompt') }}</div>
+          </v-card>
         </template>
 
         <template v-else>
@@ -481,54 +483,54 @@ async function onSubmit(values) {
               t('orders.customItem')
             }}</v-btn>
           </div>
-
-          <v-table class="mb-4">
-            <thead>
-              <tr>
-                <th>{{ t('fields.name') }}</th>
-                <th style="width: 120px">{{ t('fields.unitPrice') }}</th>
-                <th style="width: 90px">{{ t('fields.quantity') }}</th>
-                <th style="width: 100px">{{ t('fields.total') }}</th>
-                <th style="width: 40px" />
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(item, index) in items" :key="index">
-                <td>
-                  <span v-if="item.readonly">{{ item.name }}</span>
-                  <v-text-field
-                    v-else
-                    v-model="item.name"
-                    density="compact"
-                    hide-details
-                    :placeholder="t('orders.itemNamePlaceholder')"
-                  />
-                </td>
-                <td>
-                  <span v-if="item.readonly">${{ item.unit_price }}</span>
-                  <v-text-field
-                    v-else
-                    v-model.number="item.unit_price"
-                    type="number"
-                    step="0.01"
-                    density="compact"
-                    hide-details
-                  />
-                </td>
-                <td>
-                  <v-text-field v-model.number="item.quantity" type="number" min="1" density="compact" hide-details />
-                </td>
-                <td>{{ formatCurrency(lineTotal(item)) }}</td>
-                <td>
-                  <v-btn icon="mdi-close" size="x-small" class="bg-error" variant="text" @click="removeItem(index)" />
-                </td>
-              </tr>
-              <tr v-if="!items.length">
-                <td colspan="5" class="text-center text-medium-emphasis py-4">{{ t('orders.noItemsYet') }}</td>
-              </tr>
-            </tbody>
-          </v-table>
-
+          <v-card variant="tonal">
+            <v-table class="mb-4">
+              <thead>
+                <tr>
+                  <th>{{ t('fields.name') }}</th>
+                  <th style="width: 120px">{{ t('fields.unitPrice') }}</th>
+                  <th style="width: 90px">{{ t('fields.quantity') }}</th>
+                  <th style="width: 100px">{{ t('fields.total') }}</th>
+                  <th style="width: 40px" />
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(item, index) in items" :key="index">
+                  <td>
+                    <span v-if="item.readonly">{{ item.name }}</span>
+                    <v-text-field
+                      v-else
+                      v-model="item.name"
+                      density="compact"
+                      hide-details
+                      :placeholder="t('orders.itemNamePlaceholder')"
+                    />
+                  </td>
+                  <td>
+                    <span v-if="item.readonly">${{ item.unit_price }}</span>
+                    <v-text-field
+                      v-else
+                      v-model.number="item.unit_price"
+                      type="number"
+                      step="0.01"
+                      density="compact"
+                      hide-details
+                    />
+                  </td>
+                  <td>
+                    <v-text-field v-model.number="item.quantity" type="number" min="1" density="compact" hide-details />
+                  </td>
+                  <td>{{ formatCurrency(lineTotal(item)) }}</td>
+                  <td>
+                    <v-btn icon="mdi-close" size="x-small" class="bg-error" variant="text" @click="removeItem(index)" />
+                  </td>
+                </tr>
+                <tr v-if="!items.length">
+                  <td colspan="5" class="text-center text-medium-emphasis py-4">{{ t('orders.noItemsYet') }}</td>
+                </tr>
+              </tbody>
+            </v-table>
+          </v-card>
           <div v-if="availableOptionalAddons.length" class="mb-4">
             <div class="text-body-2 text-medium-emphasis mb-1">{{ t('packages.optionalAddonsAvailable') }}</div>
             <v-checkbox
@@ -542,7 +544,7 @@ async function onSubmit(values) {
             />
           </div>
         </template>
-
+        <v-divider class="my-4" />
         <v-row>
           <v-col cols="12" sm="6">
             <v-textarea

@@ -103,22 +103,22 @@ const EDITING_STATUS_LABELS = computed(() => ({
         </div>
         <AppStatusChip :status="order.status" :map="STATUS_MAP" />
       </div>
-
-      <v-table density="compact" class="mb-4">
-        <thead>
-          <tr><th>{{ t('fields.name') }}</th><th>{{ t('fields.unitPrice') }}</th><th>{{ t('fields.quantity') }}</th><th>{{ t('fields.total') }}</th></tr>
-        </thead>
-        <tbody>
-          <tr v-for="item in order.items" :key="item.id">
-            <td>{{ item.name }}</td>
-            <td>${{ item.unit_price }}</td>
-            <td>{{ item.quantity }}</td>
-            <td>${{ item.line_total }}</td>
-          </tr>
-        </tbody>
-      </v-table>
-
-      <div class="d-flex justify-end mb-4">
+      <v-card variant="tonal">
+        <v-table density="compact" class="mb-4">
+          <thead>
+            <tr><th>{{ t('fields.name') }}</th><th>{{ t('fields.unitPrice') }}</th><th>{{ t('fields.quantity') }}</th><th>{{ t('fields.total') }}</th></tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in order.items" :key="item.id">
+              <td>{{ item.name }}</td>
+              <td>${{ item.unit_price }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>${{ item.line_total }}</td>
+            </tr>
+          </tbody>
+        </v-table>
+      </v-card>
+      <div class="d-flex justify-end mb-4 mt-4">
         <div style="min-width: 220px">
           <div class="d-flex justify-space-between text-body-2">
             <span>{{ t('fields.subtotal') }}</span><span>${{ order.subtotal }}</span>
@@ -126,12 +126,12 @@ const EDITING_STATUS_LABELS = computed(() => ({
           <div class="d-flex justify-space-between text-body-2">
             <span>{{ t('fields.discount') }}</span><span>-${{ order.discount_amount }}</span>
           </div>
+          <v-divider class="my-2" />
           <div class="d-flex justify-space-between text-h6">
             <span>{{ t('fields.total') }}</span><span>${{ order.total }}</span>
           </div>
         </div>
       </div>
-
       <v-alert v-if="order.status === 'cancelled'" type="error" variant="tonal" density="compact" class="mb-4">
         {{ order.cancelled_reason }}
       </v-alert>

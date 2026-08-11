@@ -367,41 +367,41 @@ const subtotal = computed(() => computeSubtotal())
           <v-btn icon="mdi-plus" variant="tonal" @click="addCatalogItem" />
           <v-btn variant="outlined" prepend-icon="mdi-pencil-plus-outline" @click="addCustomItem">{{ t('orders.customItem') }}</v-btn>
         </div>
-
-        <v-table  class="mb-4">
-          <thead>
-            <tr>
-              <th>{{ t('fields.name') }}</th>
-              <th style="width: 120px">{{ t('fields.unitPrice') }}</th>
-              <th style="width: 90px">{{ t('fields.quantity') }}</th>
-              <th style="width: 100px">{{ t('fields.total') }}</th>
-              <th style="width: 40px" />
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(item, index) in items" :key="index">
-              <td>
-                <span v-if="item.readonly">{{ item.name }}</span>
-                <v-text-field v-else v-model="item.name" density="compact" hide-details :placeholder="t('orders.itemNamePlaceholder')" />
-              </td>
-              <td>
-                <span v-if="item.readonly">${{ item.unit_price }}</span>
-                <v-text-field v-else v-model.number="item.unit_price" type="number" step="0.01" density="compact" hide-details />
-              </td>
-              <td>
-                <v-text-field v-model.number="item.quantity" type="number" min="1" density="compact" hide-details />
-              </td>
-              <td>{{ formatCurrency(lineTotal(item)) }}</td>
-              <td>
-                <v-btn icon="mdi-close" size="small" variant="text" @click="removeItem(index)" />
-              </td>
-            </tr>
-            <tr v-if="!items.length">
-              <td colspan="5" class="text-center text-medium-emphasis py-4">{{ t('orders.noItemsYet') }}</td>
-            </tr>
-          </tbody>
-        </v-table>
-
+        <v-card variant="tonal">
+          <v-table  class="mb-4">
+            <thead>
+              <tr>
+                <th>{{ t('fields.name') }}</th>
+                <th style="width: 120px">{{ t('fields.unitPrice') }}</th>
+                <th style="width: 90px">{{ t('fields.quantity') }}</th>
+                <th style="width: 100px">{{ t('fields.total') }}</th>
+                <th style="width: 40px" />
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(item, index) in items" :key="index">
+                <td>
+                  <span v-if="item.readonly">{{ item.name }}</span>
+                  <v-text-field v-else v-model="item.name" density="compact" hide-details :placeholder="t('orders.itemNamePlaceholder')" />
+                </td>
+                <td>
+                  <span v-if="item.readonly">${{ item.unit_price }}</span>
+                  <v-text-field v-else v-model.number="item.unit_price" type="number" step="0.01" density="compact" hide-details />
+                </td>
+                <td>
+                  <v-text-field v-model.number="item.quantity" type="number" min="1" density="compact" hide-details />
+                </td>
+                <td>{{ formatCurrency(lineTotal(item)) }}</td>
+                <td>
+                  <v-btn icon="mdi-close" size="small" variant="text" @click="removeItem(index)" />
+                </td>
+              </tr>
+              <tr v-if="!items.length">
+                <td colspan="5" class="text-center text-medium-emphasis py-4">{{ t('orders.noItemsYet') }}</td>
+              </tr>
+            </tbody>
+          </v-table>
+        </v-card>
         <div v-if="availableOptionalAddons.length" class="mb-4">
           <div class="text-body-2 text-medium-emphasis mb-1">{{ t('packages.optionalAddonsAvailable') }}</div>
           <v-checkbox
@@ -415,7 +415,7 @@ const subtotal = computed(() => computeSubtotal())
           />
         </div>
 
-        <v-row>
+        <v-row class="mt-4">
           <v-col cols="12" sm="6">
             <v-textarea :model-value="values.notes" :label="t('fields.notes')" rows="2" :error-messages="errors.notes" @update:model-value="setFieldValue('notes', $event)" />
           </v-col>
