@@ -33,6 +33,9 @@ function authorizer(channel) {
 export function connectEcho() {
   if (echo) return echo
 
+  // TODO(debug): remove once live-push delivery is confirmed working in prod.
+  Pusher.logToConsole = true
+
   echo = new Echo({
     broadcaster: 'reverb',
     key: import.meta.env.VITE_REVERB_APP_KEY,
@@ -42,6 +45,13 @@ export function connectEcho() {
     forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'http') === 'https',
     enabledTransports: ['ws', 'wss'],
     authorizer,
+  })
+
+  echo.connector.pusher.connection.bind('state_change', (states) => {
+    console.log('[echo] connection state:', states.previous, '->', states.current)
+  })
+  echo.connector.pusher.connection.bind('error', (err) => {
+    console.error('[echo] connection error:', err)
   })
 
   return echo
