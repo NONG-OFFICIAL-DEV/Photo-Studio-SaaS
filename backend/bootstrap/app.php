@@ -31,6 +31,10 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+    // Not passed as `channels:` above — that registers /broadcasting/auth
+    // under the default `web` (session/CSRF) middleware, which this JWT-only
+    // API has no guard for. Registered instead in AppServiceProvider::boot()
+    // under `auth:api`, matching how every other authenticated route works.
     ->withMiddleware(function (Middleware $middleware): void {
         // Production sits behind Cloudflare, which terminates TLS and
         // forwards to the origin over plain HTTP — without this, Laravel

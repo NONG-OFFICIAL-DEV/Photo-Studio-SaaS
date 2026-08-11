@@ -11,6 +11,7 @@ import {
 import { formatDateTime } from '@/utils/dateFormat'
 import { useNotificationDisplay } from '@/composables/useNotificationDisplay'
 import { useAuthStore } from '@/stores/auth'
+import { getEcho } from '@/plugins/echo'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -62,15 +63,42 @@ function handleViewAll() {
   router.push({ name: auth.isSuperAdmin ? 'admin-notifications' : 'notifications' })
 }
 
+/*
+ * Pushed the instant a new row lands on the backend (see
+ * AppServiceProvider::configureNotificationBroadcast() + App\Events\
+ * NotificationCreated) — only prepend to the visible list if the dropdown
+ * is already open and has loaded something, otherwise just bump the badge
+ * and let the next menu-open do a normal fetchRecent().
+ */
+function handleLiveNotification(payload) {
+  unreadCount.value += 1
+  if (menuOpen.value) {
+    notifications.value = [payload, ...notifications.value]
+  }
+}
+
 let pollHandle = null
+let channelName = null
 
 onMounted(() => {
   fetchUnreadCount()
-  pollHandle = window.setInterval(fetchUnreadCount, 60000)
+  // Real-time push (see handleLiveNotification) makes this a fallback for
+  // a dropped/never-established socket, not the primary delivery path —
+  // hence the long interval instead of the old 60s poll.
+  pollHandle = window.setInterval(fetchUnreadCount, 5 * 60 * 1000)
+
+  const echo = getEcho()
+  if (echo && auth.user?.id) {
+    channelName = `App.Models.User.${auth.user.id}`
+    echo.private(channelName).listen('.notification.created', handleLiveNotification)
+  }
 })
 
 onUnmounted(() => {
   window.clearInterval(pollHandle)
+  if (channelName) {
+    getEcho()?.leave(channelName)
+  }
 })
 </script>
 

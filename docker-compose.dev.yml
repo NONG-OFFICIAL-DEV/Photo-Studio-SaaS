@@ -73,6 +73,16 @@ services:
     <<: *backend-common
     command: php artisan horizon
 
+  # Reverb speaks its own WebSocket protocol directly (not HTTP-via-nginx),
+  # so it gets its own exposed port rather than routing through the nginx
+  # service above — the frontend connects straight to it (see frontend's
+  # VITE_REVERB_* env vars).
+  reverb:
+    <<: *backend-common
+    command: php artisan reverb:start --host=0.0.0.0
+    ports:
+      - '${REVERB_PORT:-8080}:8080'
+
   scheduler:
     <<: *backend-common
     # Laravel's scheduler is designed to run every minute via cron; this
@@ -86,6 +96,10 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_API_BASE_URL: ${FRONTEND_API_BASE_URL:-http://localhost:8000/api}
+        VITE_REVERB_APP_KEY: ${REVERB_APP_KEY}
+        VITE_REVERB_HOST: ${FRONTEND_REVERB_HOST:-localhost}
+        VITE_REVERB_PORT: ${REVERB_PORT:-8080}
+        VITE_REVERB_SCHEME: ${REVERB_SCHEME:-http}
     restart: unless-stopped
     ports:
       - '5173:80'

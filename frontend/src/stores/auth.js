@@ -2,6 +2,7 @@ import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { registerApi, loginApi, logoutApi, meApi, verifyTwoFactorApi } from '@/apis/auth.api'
 import { getToken, setToken } from '@/apis/api'
+import { connectEcho, disconnectEcho } from '@/plugins/echo'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref(null)
@@ -65,6 +66,7 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const { data } = await meApi()
       user.value = data.data
+      connectEcho()
     } catch {
       clearSession()
     } finally {
@@ -89,11 +91,13 @@ export const useAuthStore = defineStore('auth', () => {
     setToken(payload.access_token, remember)
     user.value = payload.user
     initialized.value = true
+    connectEcho()
   }
 
   function clearSession() {
     setToken(null)
     user.value = null
+    disconnectEcho()
   }
 
   return {

@@ -41,6 +41,27 @@ services:
       - web
       - internal_photo_studio
 
+  # Speaks its own WebSocket protocol directly to browsers — needs a
+  # publicly reachable port/host of its own (see backend/.env's REVERB_*
+  # and frontend's VITE_REVERB_* build args), not just internal-network
+  # access like horizon/scheduler above. The exposed port here assumes
+  # nothing else in front of it does the TLS/WSS termination — adjust to
+  # match however this host's reverse proxy is actually set up.
+  reverb:
+    image: nongdev/photo-studio-backend:latest
+    container_name: photo_studio_reverb
+    restart: always
+    command: php artisan reverb:start --host=0.0.0.0
+    ports:
+      - "8080:8080"
+    volumes:
+      - photo_studio_storage:/var/www/html/storage
+    env_file:
+      - ./backend/.env
+    networks:
+      - web
+      - internal_photo_studio
+
   scheduler:
     image: nongdev/photo-studio-backend:latest
     container_name: photo_studio_scheduler

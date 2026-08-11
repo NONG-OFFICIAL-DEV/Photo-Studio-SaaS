@@ -46,6 +46,10 @@ jobs:
         run: |
           docker build \
             --build-arg VITE_API_BASE_URL=${{ secrets.APP_API_BASE_URL }} \
+            --build-arg VITE_REVERB_APP_KEY=${{ secrets.REVERB_APP_KEY }} \
+            --build-arg VITE_REVERB_HOST=${{ secrets.REVERB_HOST }} \
+            --build-arg VITE_REVERB_PORT=${{ secrets.REVERB_PORT }} \
+            --build-arg VITE_REVERB_SCHEME=${{ secrets.REVERB_SCHEME }} \
             -t $IMAGE_FRONTEND:latest \
             -t $IMAGE_FRONTEND:$IMAGE_TAG \
             ./frontend
