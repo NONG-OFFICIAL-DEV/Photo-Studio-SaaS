@@ -318,7 +318,7 @@ const hasFooterActions = computed(() => canSend.value || canDownloadPdf.value ||
             />
           </v-col>
           <v-col cols="6" sm="6">
-            <AppDatePicker v-model="payment.paid_at" :label="t('invoices.paidAt')" />
+            <AppDatePicker v-model="payment.paid_at" :label="t('invoices.paidAt')" density="compact"/>
           </v-col>
           <v-col cols="6" sm="6">
             <v-text-field v-model="payment.reference" :label="t('invoices.reference')" density="compact" hide-details />
@@ -336,6 +336,7 @@ const hasFooterActions = computed(() => canSend.value || canDownloadPdf.value ||
       </v-btn>
       <v-btn
         v-if="canDownloadPdf"
+        color="pdf"
         variant="outlined"
         prepend-icon="mdi-file-pdf-box"
         :loading="pdfLoading"
@@ -346,13 +347,13 @@ const hasFooterActions = computed(() => canSend.value || canDownloadPdf.value ||
       <v-tooltip v-if="canShareTelegram && !customerTelegramConnected" :text="t('invoices.telegramNotLinkedHint')">
         <template #activator="{ props: tooltipProps }">
           <span v-bind="tooltipProps">
-            <v-btn variant="outlined" prepend-icon="mdi-send" disabled>{{ t('invoices.sendViaTelegram') }}</v-btn>
+            <v-btn color="telegram" variant="outlined" prepend-icon="mdi-send" disabled>{{ t('invoices.sendViaTelegram') }}</v-btn>
           </span>
         </template>
       </v-tooltip>
       <v-menu v-else-if="canShareTelegram">
         <template #activator="{ props: menuProps }">
-          <v-btn variant="outlined" prepend-icon="mdi-send" :loading="telegramLoading" v-bind="menuProps">
+          <v-btn color="telegram" variant="outlined" prepend-icon="mdi-send" :loading="telegramLoading" v-bind="menuProps">
             {{ t('invoices.sendViaTelegram') }}
           </v-btn>
         </template>

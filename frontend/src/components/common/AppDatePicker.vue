@@ -7,6 +7,7 @@ const props = defineProps({
   label: { type: String, default: '' },
   displayFormat: { type: String, default: 'dd/MM/yyyy' },
   clearable: { type: Boolean, default: true },
+  density: { type: String, default: 'comfortable' },
   errorMessages: { type: [String, Array], default: () => [] },
 })
 
@@ -41,6 +42,7 @@ const displayText = computed(() => (dateValue.value ? format(dateValue.value, pr
         :label="label"
         :clearable="clearable"
         :error-messages="errorMessages"
+        :density="density"
         prepend-inner-icon="mdi-calendar"
         readonly
         @click:clear="emit('update:modelValue', null)"

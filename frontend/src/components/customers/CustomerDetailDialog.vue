@@ -175,7 +175,7 @@ async function unlinkTelegram() {
             >
               {{ t('customers.telegram.unlink') }}
             </v-btn>
-            <v-btn v-else size="small" variant="tonal" :loading="telegramLoading" @click="generateTelegramLink">
+            <v-btn v-else size="small"  variant="tonal" :loading="telegramLoading" @click="generateTelegramLink">
               {{ t('customers.telegram.generateLink') }}
             </v-btn>
           </div>

@@ -125,7 +125,7 @@ const canImport = computed(() => auth.hasPermission('customers.import'))
         }}</v-btn>
         <v-menu v-if="canExport">
           <template #activator="{ props: menuProps }">
-            <v-btn variant="outlined" prepend-icon="mdi-download" v-bind="menuProps">{{
+            <v-btn variant="outlined" prepend-icon="mdi-download" color="excel" v-bind="menuProps">{{
               t('customers.actions.export')
             }}</v-btn>
           </template>
@@ -225,9 +225,8 @@ const canImport = computed(() => auth.hasPermission('customers.import'))
         <template #[`item.actions`]="{ item }">
           <v-btn
             :text="item.telegram_connected ? t('customers.telegram.connected') : t('customers.telegram.generateLink')"
-            color="secondary"
-            size="small"
-            variant="outlined"
+            :color="item.telegram_connected ? 'success' : 'secondary'"            size="small"
+            :variant="item.telegram_connected ? 'tonal' : 'outlined'"
             :class="{ 'text-medium-emphasis': !item.telegram_connected }"
             append-icon="mdi-send-circle-outline"
             @click="openDetail(item)"

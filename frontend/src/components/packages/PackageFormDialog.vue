@@ -237,46 +237,46 @@ async function onSubmit(values) {
           </v-select>
           <v-btn icon="mdi-plus" variant="tonal" @click="addComponent" />
         </div>
-
-        <v-table class="mb-4">
-          <thead>
-            <tr>
-              <th>{{ t('fields.name') }}</th>
-              <th style="width: 120px">{{ t('fields.unitPrice') }}</th>
-              <th style="width: 90px">{{ t('fields.quantity') }}</th>
-              <th style="width: 100px">{{ t('fields.total') }}</th>
-              <th style="width: 110px">{{ t('packages.optional') }}</th>
-              <th style="width: 40px" />
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(component, index) in components" :key="index">
-              <td>{{ component.name }}</td>
-              <td>{{ formatCurrency(component.unit_price) }}</td>
-              <td>
-                <v-text-field
-                  v-model.number="component.quantity"
-                  type="number"
-                  min="1"
-                  density="compact"
-                  hide-details
-                />
-              </td>
-              <td>{{ formatCurrency(lineTotal(component)) }}</td>
-              <td>
-                <v-checkbox v-model="component.is_optional" density="compact" hide-details />
-              </td>
-              <td>
-                <v-btn icon="mdi-close" class="bg-red" size="x-small" variant="text" @click="removeComponent(index)" />
-              </td>
-            </tr>
-            <tr v-if="!components.length">
-              <td colspan="6" class="text-center text-medium-emphasis py-4">{{ t('packages.noComponentsYet') }}</td>
-            </tr>
-          </tbody>
-        </v-table>
-
-        <v-row>
+        <v-card variant="tonal">
+          <v-table class="mb-4">
+            <thead>
+              <tr>
+                <th>{{ t('fields.name') }}</th>
+                <th style="width: 120px">{{ t('fields.unitPrice') }}</th>
+                <th style="width: 90px">{{ t('fields.quantity') }}</th>
+                <th style="width: 100px">{{ t('fields.total') }}</th>
+                <th style="width: 110px">{{ t('packages.optional') }}</th>
+                <th style="width: 40px" />
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(component, index) in components" :key="index">
+                <td>{{ component.name }}</td>
+                <td>{{ formatCurrency(component.unit_price) }}</td>
+                <td>
+                  <v-text-field
+                    v-model.number="component.quantity"
+                    type="number"
+                    min="1"
+                    density="compact"
+                    hide-details
+                  />
+                </td>
+                <td>{{ formatCurrency(lineTotal(component)) }}</td>
+                <td>
+                  <v-checkbox v-model="component.is_optional" density="compact" hide-details />
+                </td>
+                <td>
+                  <v-btn icon="mdi-close" class="bg-red" size="x-small" variant="text" @click="removeComponent(index)" />
+                </td>
+              </tr>
+              <tr v-if="!components.length">
+                <td colspan="6" class="text-center text-medium-emphasis py-4">{{ t('packages.noComponentsYet') }}</td>
+              </tr>
+            </tbody>
+          </v-table>
+        </v-card>
+        <v-row class="mt-4">
           <v-col cols="12" sm="4">
             <v-select
               :model-value="values.discount_type"
