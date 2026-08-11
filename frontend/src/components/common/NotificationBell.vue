@@ -90,16 +90,7 @@ onMounted(() => {
   const echo = getEcho()
   if (echo && auth.user?.id) {
     channelName = `App.Models.User.${auth.user.id}`
-    echo
-      .private(channelName)
-      .listen('.notification.created', handleLiveNotification)
-      // TODO(debug): remove once live-push delivery is confirmed working in prod.
-      .error((error) => console.error('[echo] private channel subscription error:', error))
-  } else {
-    console.warn('[echo] notification bell mounted with no echo instance or user id', {
-      hasEcho: Boolean(echo),
-      userId: auth.user?.id,
-    })
+    echo.private(channelName).listen('.notification.created', handleLiveNotification)
   }
 })
 
