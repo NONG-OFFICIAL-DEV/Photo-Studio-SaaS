@@ -930,7 +930,8 @@
       "save": "Save changes",
       "uploadLogo": "Upload logo",
       "uploadQrPayment": "Upload QR code",
-      "exportData": "Export all my data"
+      "exportData": "Export all my data",
+      "resetTheme": "Reset to default"
     },
     "themeHint": "These colors replace the default theme across the whole app for your team.",
     "attendanceStartTimeHint": "Clock-ins after this time are marked Late.",

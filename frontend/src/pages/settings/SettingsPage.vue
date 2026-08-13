@@ -84,6 +84,11 @@ async function onSubmit(values) {
   }
 }
 
+function resetTheme(setFieldValue) {
+  setFieldValue('primary_color', '')
+  setFieldValue('secondary_color', '')
+}
+
 function triggerLogoUpload() {
   logoInput.value?.click()
 }
@@ -363,7 +368,15 @@ async function disconnectTelegram() {
                       </div>
                     </v-col>
                   </v-row>
-                  <p class="text-body-2 text-medium-emphasis mb-0">{{ t('settingsPage.themeHint') }}</p>
+                  <p class="text-body-2 text-medium-emphasis mb-4">{{ t('settingsPage.themeHint') }}</p>
+                  <v-btn
+                    variant="outlined"
+                    size="small"
+                    prepend-icon="mdi-restore"
+                    @click="resetTheme(setFieldValue)"
+                  >
+                    {{ t('settingsPage.actions.resetTheme') }}
+                  </v-btn>
                 </v-card-text>
               </v-card>
             </v-window-item>
