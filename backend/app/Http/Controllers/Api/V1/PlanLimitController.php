@@ -34,6 +34,8 @@ class PlanLimitController extends Controller
             'users_count' => $usage['users_count'],
             'monthly_order_limit' => $plan?->monthly_order_limit,
             'orders_this_month_count' => $usage['orders_this_month_count'],
+            'max_branches' => $plan?->max_branches,
+            'branches_count' => $usage['branches_count'],
         ]);
     }
 }

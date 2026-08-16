@@ -6,6 +6,7 @@ use App\Enums\BillingCycle;
 use App\Enums\SubscriptionStatus;
 use App\Enums\TenantRole;
 use App\Exceptions\ApiException;
+use App\Models\Branch;
 use App\Models\Order;
 use App\Models\Plan;
 use App\Models\Subscription;
@@ -40,6 +41,7 @@ class SubscriptionService
                 ->where('tenant_id', $tenant->id)
                 ->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])
                 ->count(),
+            'branches_count' => Branch::query()->where('tenant_id', $tenant->id)->count(),
         ];
     }
 
@@ -69,6 +71,28 @@ class SubscriptionService
 
         if ($currentCount >= $maxUsers) {
             throw new ApiException(422, "Your plan allows up to {$maxUsers} users. Upgrade your plan to add more employees.", 'USER_LIMIT_REACHED', ['maxUsers' => $maxUsers]);
+        }
+    }
+
+    /**
+     * Guards Branch::create() the same way assertCanAddUser() guards
+     * User::create() — a null max_branches means unlimited. Counts ALL
+     * non-trashed branches regardless of is_active: deactivating a branch
+     * does not free a quota slot, only deleting one does (mirrors
+     * assertCanAddUser's "deactivated employees still count" behavior).
+     */
+    public function assertCanAddBranch(Tenant $tenant): void
+    {
+        $maxBranches = $tenant->activeSubscription?->plan?->max_branches;
+
+        if ($maxBranches === null) {
+            return;
+        }
+
+        $currentCount = Branch::query()->where('tenant_id', $tenant->id)->count();
+
+        if ($currentCount >= $maxBranches) {
+            throw new ApiException(422, "Your plan allows up to {$maxBranches} branches. Upgrade your plan to add more locations.", 'BRANCH_LIMIT_REACHED', ['maxBranches' => $maxBranches]);
         }
     }
 

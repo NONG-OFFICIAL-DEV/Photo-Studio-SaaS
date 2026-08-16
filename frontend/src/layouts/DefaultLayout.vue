@@ -581,6 +581,24 @@ function toggleLocale() {
       </div>
     </v-alert>
 
+    <v-alert
+      v-if="!appStore.subscriptionBlocked && auth.subscriptionExpiringSoon"
+      type="warning"
+      variant="tonal"
+      rounded="0"
+      density="comfortable"
+      border="start"
+      class="subscription-banner"
+    >
+      <div class="d-flex flex-wrap align-center justify-space-between ga-3">
+        <span class="font-weight-medium">{{ t('subscriptionBanner.expiringSoon', { days: auth.subscriptionDaysLeft }) }}</span>
+        <v-btn v-if="canManageBilling" color="warning" variant="flat" size="small" :to="{ name: 'billing' }">
+          {{ t('subscriptionBanner.cta') }}
+        </v-btn>
+        <span v-else class="text-caption text-medium-emphasis">{{ t('subscriptionBanner.askOwner') }}</span>
+      </div>
+    </v-alert>
+
     <v-container fluid>
       <router-view />
     </v-container>

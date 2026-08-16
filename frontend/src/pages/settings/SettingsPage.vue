@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import AppToolbar from '@/components/common/AppToolbar.vue'
 import AppForm from '@/components/common/AppForm.vue'
 import AppApiErrorAlert from '@/components/common/AppApiErrorAlert.vue'
+import BranchesTab from '@/pages/settings/BranchesTab.vue'
 import { settingsSchema } from '@/utils/validators'
 import {
   getSettingsApi,
@@ -179,6 +180,7 @@ async function disconnectTelegram() {
 
     <v-tabs v-model="tab" class="mb-4">
       <v-tab value="company">{{ t('settingsPage.tabs.company') }}</v-tab>
+      <v-tab v-if="auth.hasPermission('branches.view')" value="branches">{{ t('settingsPage.tabs.branches') }}</v-tab>
       <v-tab value="invoice">{{ t('settingsPage.tabs.invoice') }}</v-tab>
       <v-tab value="theme">{{ t('settingsPage.tabs.theme') }}</v-tab>
       <v-tab value="reminders">{{ t('settingsPage.tabs.reminders') }}</v-tab>
@@ -464,9 +466,13 @@ async function disconnectTelegram() {
                 </v-card-text>
               </v-card>
             </v-window-item>
+
+            <v-window-item v-if="auth.hasPermission('branches.view')" value="branches">
+              <BranchesTab />
+            </v-window-item>
           </v-window>
 
-          <div v-if="!['data', 'telegram'].includes(tab)" class="d-flex justify-end mt-4">
+          <div v-if="!['data', 'telegram', 'branches'].includes(tab)" class="d-flex justify-end mt-4">
             <v-btn type="submit" color="primary" :loading="saving">{{ t('settingsPage.actions.save') }}</v-btn>
           </div>
         </template>

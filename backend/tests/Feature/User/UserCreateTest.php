@@ -108,7 +108,7 @@ class UserCreateTest extends TestCase
     {
         [$tenant, ] = $this->createTenantWithUser(TenantRole::Owner);
         $viewer = $this->addUserToTenant($tenant, TenantRole::Viewer);
-        $tenant->activeSubscription->plan->update(['max_users' => 5, 'monthly_order_limit' => 20]);
+        $tenant->activeSubscription->plan->update(['max_users' => 5, 'monthly_order_limit' => 20, 'max_branches' => 3]);
 
         $response = $this->actingAsUser($viewer)->getJson('/api/v1/plan-limits')->assertOk();
 
@@ -116,5 +116,7 @@ class UserCreateTest extends TestCase
         $response->assertJsonPath('data.users_count', 2);
         $response->assertJsonPath('data.monthly_order_limit', 20);
         $response->assertJsonPath('data.orders_this_month_count', 0);
+        $response->assertJsonPath('data.max_branches', 3);
+        $response->assertJsonPath('data.branches_count', 0);
     }
 }

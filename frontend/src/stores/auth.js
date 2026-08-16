@@ -14,6 +14,31 @@ export const useAuthStore = defineStore('auth', () => {
   const tenant = computed(() => user.value?.tenant ?? null)
   const isSuperAdmin = computed(() => Boolean(user.value?.is_super_admin))
   const plan = computed(() => tenant.value?.subscription?.plan ?? null)
+  const subscription = computed(() => tenant.value?.subscription ?? null)
+
+  // Picks the date that actually determines when access lapses for the
+  // subscription's current status — mirrors SubscriptionService's own
+  // trial_ends_at vs current_period_ends_at branching. null for any other
+  // status (already unusable, or no relevant date to warn about).
+  const subscriptionDaysLeft = computed(() => {
+    const sub = subscription.value
+    if (!sub) return null
+
+    const endsAt = sub.status === 'trial' ? sub.trial_ends_at : sub.status === 'active' ? sub.current_period_ends_at : null
+    if (!endsAt) return null
+
+    const diffMs = new Date(endsAt) - new Date()
+    return Math.max(0, Math.ceil(diffMs / 86400000))
+  })
+
+  // 7-day window, deliberately wider than the backend's 3-day
+  // subscriptions:notify-expiring sweep — this banner is a persistent,
+  // low-friction nudge seen on every page load, so a longer lead time
+  // gives more room to act before the harder email/Telegram warning and
+  // the eventual hard block.
+  const subscriptionExpiringSoon = computed(() =>
+    Boolean(subscription.value?.is_usable) && subscriptionDaysLeft.value !== null && subscriptionDaysLeft.value <= 7
+  )
 
   function hasRole(role) {
     return roles.value.includes(role)
@@ -109,6 +134,9 @@ export const useAuthStore = defineStore('auth', () => {
     tenant,
     isSuperAdmin,
     plan,
+    subscription,
+    subscriptionDaysLeft,
+    subscriptionExpiringSoon,
     hasRole,
     hasPermission,
     hasFeature,

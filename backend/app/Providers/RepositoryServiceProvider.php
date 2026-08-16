@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Repositories\Contracts\AlbumRepositoryInterface;
 use App\Repositories\Contracts\AttendanceRecordRepositoryInterface;
 use App\Repositories\Contracts\BookingRepositoryInterface;
+use App\Repositories\Contracts\BranchRepositoryInterface;
 use App\Repositories\Contracts\CommissionEntryRepositoryInterface;
 use App\Repositories\Contracts\CustomerRepositoryInterface;
 use App\Repositories\Contracts\CustomerTagRepositoryInterface;
@@ -26,6 +27,7 @@ use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Repositories\Eloquent\AlbumRepository;
 use App\Repositories\Eloquent\AttendanceRecordRepository;
 use App\Repositories\Eloquent\BookingRepository;
+use App\Repositories\Eloquent\BranchRepository;
 use App\Repositories\Eloquent\CommissionEntryRepository;
 use App\Repositories\Eloquent\CustomerRepository;
 use App\Repositories\Eloquent\CustomerTagRepository;
@@ -63,6 +65,7 @@ class RepositoryServiceProvider extends ServiceProvider
         CustomerRepositoryInterface::class => CustomerRepository::class,
         CustomerTagRepositoryInterface::class => CustomerTagRepository::class,
         BookingRepositoryInterface::class => BookingRepository::class,
+        BranchRepositoryInterface::class => BranchRepository::class,
         ServiceRepositoryInterface::class => ServiceRepository::class,
         ServiceCategoryRepositoryInterface::class => ServiceCategoryRepository::class,
         ServiceAddOnRepositoryInterface::class => ServiceAddOnRepository::class,

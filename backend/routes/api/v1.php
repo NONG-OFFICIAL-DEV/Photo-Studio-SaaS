@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\V1\Billing\BillingController;
 use App\Http\Controllers\Api\V1\Auth\EmailVerificationController;
 use App\Http\Controllers\Api\V1\Auth\PasswordResetController;
 use App\Http\Controllers\Api\V1\Booking\BookingController;
+use App\Http\Controllers\Api\V1\BranchController;
 use App\Http\Controllers\Api\V1\Commission\CommissionEntryController;
 use App\Http\Controllers\Api\V1\Customer\CustomerController;
 use App\Http\Controllers\Api\V1\Customer\CustomerNoteController;
@@ -125,6 +126,8 @@ Route::middleware(['auth:api', 'tenant', 'subscription.active'])->group(function
     Route::post('/users/{user}/reactivate', [UserController::class, 'reactivate'])->middleware('email.verified')->name('users.reactivate');
 
     Route::get('/plan-limits', [PlanLimitController::class, 'show'])->name('plan-limits.show');
+
+    Route::apiResource('branches', BranchController::class)->except(['show']);
 
     Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
 

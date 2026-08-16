@@ -40,6 +40,7 @@ return [
         'commissions' => ['commissions.view', 'commissions.record', 'commissions.delete'],
         'payroll' => ['payroll.view', 'payroll.create', 'payroll.update', 'payroll.delete', 'payroll.pay'],
         'reports' => ['reports.view', 'reports.export'],
+        'branches' => ['branches.view', 'branches.create', 'branches.update', 'branches.delete'],
     ],
 
     /*
@@ -76,12 +77,14 @@ return [
             'commissions.view', 'commissions.record', 'commissions.delete',
             'payroll.view', 'payroll.create', 'payroll.update', 'payroll.delete', 'payroll.pay',
             'reports.view', 'reports.export',
+            'branches.view', 'branches.create', 'branches.update', 'branches.delete',
         ],
         TenantRole::Photographer->value => [
             'dashboard.view', 'customers.view', 'bookings.view', 'bookings.update', 'services.view', 'packages.view', 'orders.view',
             'albums.view', 'albums.create', 'albums.update',
             'inventory.view', 'inventory.adjust-stock',
             'attendance.clock',
+            'branches.view',
         ],
         TenantRole::Editor->value => [
             'dashboard.view', 'customers.view', 'bookings.view', 'services.view', 'packages.view', 'orders.view', 'editing.view', 'editing.update',
@@ -108,11 +111,13 @@ return [
             'albums.view', 'invoices.view',
             'inventory.view',
             'attendance.clock',
+            'branches.view',
         ],
         TenantRole::Viewer->value => [
             'dashboard.view', 'customers.view', 'bookings.view', 'services.view', 'packages.view', 'orders.view', 'editing.view',
             'albums.view', 'invoices.view',
             'expenses.view', 'inventory.view',
+            'branches.view',
         ],
     ],
 ];

@@ -19,6 +19,7 @@ class PlanResource extends JsonResource
             'price_quarterly' => (float) $this->price_quarterly,
             'price_yearly' => (float) $this->price_yearly,
             'max_users' => $this->max_users,
+            'max_branches' => $this->max_branches,
             'storage_limit_gb' => $this->storage_limit_gb,
             'monthly_order_limit' => $this->monthly_order_limit,
             'has_watermark_gallery' => $this->has_watermark_gallery,

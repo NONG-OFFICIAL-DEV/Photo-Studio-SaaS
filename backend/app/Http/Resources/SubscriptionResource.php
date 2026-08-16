@@ -29,6 +29,7 @@ class SubscriptionResource extends JsonResource
                 'price_quarterly' => $this->plan->price_quarterly !== null ? (float) $this->plan->price_quarterly : null,
                 'price_yearly' => $this->plan->price_yearly !== null ? (float) $this->plan->price_yearly : null,
                 'max_users' => $this->plan->max_users,
+                'max_branches' => $this->plan->max_branches,
                 'storage_limit_gb' => $this->plan->storage_limit_gb,
                 'monthly_order_limit' => $this->plan->monthly_order_limit,
                 'has_watermark_gallery' => $this->plan->has_watermark_gallery,

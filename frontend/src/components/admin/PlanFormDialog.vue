@@ -33,6 +33,7 @@ const initialValues = computed(() => ({
   price_quarterly: props.plan?.price_quarterly ?? null,
   price_yearly: props.plan?.price_yearly ?? null,
   max_users: props.plan?.max_users ?? null,
+  max_branches: props.plan?.max_branches ?? null,
   storage_limit_gb: props.plan?.storage_limit_gb ?? null,
   monthly_order_limit: props.plan?.monthly_order_limit ?? null,
   trial_days: props.plan?.trial_days ?? 14,
@@ -96,6 +97,9 @@ async function onSubmit(values) {
 
           <v-col cols="12" sm="4">
             <v-text-field :model-value="values.max_users" type="number" :label="t('admin.plans.fields.maxUsers')" :error-messages="errors.max_users" @update:model-value="setFieldValue('max_users', $event)" />
+          </v-col>
+          <v-col cols="12" sm="4">
+            <v-text-field :model-value="values.max_branches" type="number" :label="t('admin.plans.fields.maxBranches')" :error-messages="errors.max_branches" @update:model-value="setFieldValue('max_branches', $event)" />
           </v-col>
           <v-col cols="12" sm="4">
             <v-text-field :model-value="values.storage_limit_gb" type="number" :label="t('admin.plans.fields.storageLimitGb')" :error-messages="errors.storage_limit_gb" @update:model-value="setFieldValue('storage_limit_gb', $event)" />

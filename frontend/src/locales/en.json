@@ -33,6 +33,7 @@
     "TENANT_SUSPENDED": "This studio account has been suspended by the platform.",
     "PLAN_FEATURE_NOT_INCLUDED": "This feature isn't included in your current plan. Upgrade to unlock it.",
     "USER_LIMIT_REACHED": "Your plan allows up to {maxUsers} users. Upgrade your plan to add more employees.",
+    "BRANCH_LIMIT_REACHED": "Your plan allows up to {maxBranches} branches. Upgrade your plan to add more locations.",
     "BILLING_CYCLE_NOT_AVAILABLE": "\"{plan}\" isn't available on a {cycle} billing cycle.",
     "PLAN_HAS_NOTHING_TO_RENEW": "\"{plan}\" is a free plan and has nothing to renew — choose a paid plan first.",
     "PLAN_NOT_AVAILABLE": "This plan is not available.",
@@ -191,7 +192,8 @@
   },
   "subscriptionBanner": {
     "cta": "Go to Billing",
-    "askOwner": "Ask your studio owner to resolve this."
+    "askOwner": "Ask your studio owner to resolve this.",
+    "expiringSoon": "Your subscription ends in {days} day(s)."
   },
   "auth": {
     "login": "Login",
@@ -693,6 +695,26 @@
       "sentAt": "Sent At"
     }
   },
+  "branches": {
+    "title": "Branches",
+    "subtitle": "Manage this studio's physical locations.",
+    "newBranch": "New Branch",
+    "editBranch": "Edit Branch",
+    "deleteTitle": "Delete branch?",
+    "deleteMessage": "This will remove '{name}' from your locations.",
+    "fields": {
+      "address": "Address",
+      "phone": "Phone",
+      "status": "Status"
+    },
+    "messages": {
+      "createdSuccess": "Branch created successfully.",
+      "updatedSuccess": "Branch updated successfully.",
+      "deletedSuccess": "Branch deleted successfully.",
+      "saveError": "Unable to save branch.",
+      "deleteError": "Unable to delete branch."
+    }
+  },
   "expenses": {
     "title": "Expenses",
     "subtitle": "Track studio costs — rent, utilities, supplies, and more.",
@@ -910,7 +932,8 @@
       "theme": "Theme",
       "telegram": "Telegram",
       "data": "Data",
-      "reminders": "Reminders"
+      "reminders": "Reminders",
+      "branches": "Branches"
     },
     "fields": {
       "currency": "Currency",
@@ -1049,6 +1072,7 @@
         "priceQuarterly": "Quarterly Price",
         "priceYearly": "Yearly Price",
         "maxUsers": "Max Users",
+        "maxBranches": "Max Branches",
         "storageLimitGb": "Storage Limit (GB)",
         "monthlyOrderLimit": "Monthly Project Limit",
         "trialDays": "Trial Days",

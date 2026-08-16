@@ -22,6 +22,7 @@ class UpdatePlanRequest extends FormRequest
             'price_quarterly' => ['nullable', 'numeric', 'min:0'],
             'price_yearly' => ['nullable', 'numeric', 'min:0'],
             'max_users' => ['nullable', 'integer', 'min:1'],
+            'max_branches' => ['nullable', 'integer', 'min:1'],
             'storage_limit_gb' => ['nullable', 'integer', 'min:0'],
             'monthly_order_limit' => ['nullable', 'integer', 'min:0'],
             'has_watermark_gallery' => ['boolean'],
