@@ -29,6 +29,10 @@ class StoreBookingRequest extends FormRequest
                 'nullable', 'uuid',
                 Rule::exists('users', 'id')->where('tenant_id', $this->user()->tenant_id),
             ],
+            'branch_id' => [
+                'nullable', 'uuid',
+                Rule::exists('branches', 'id')->where('tenant_id', $this->user()->tenant_id),
+            ],
             'type' => ['required', Rule::in(array_column(BookingType::cases(), 'value'))],
             'title' => ['nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string', 'max:2000'],

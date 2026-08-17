@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 
 class InventoryItemService extends BaseService
 {
-    public function __construct(protected InventoryItemRepositoryInterface $items)
+    public function __construct(protected InventoryItemRepositoryInterface $items, protected BranchResolutionService $branches)
     {
         parent::__construct($items);
     }
@@ -34,9 +34,12 @@ class InventoryItemService extends BaseService
         $initialQuantity = round((float) ($data['initial_quantity'] ?? 0), 2);
         unset($data['initial_quantity']);
 
-        return DB::transaction(function () use ($data, $initialQuantity, $creator) {
+        $branchId = $this->branches->resolveForCreate($creator->tenant, $data['branch_id'] ?? null);
+
+        return DB::transaction(function () use ($data, $branchId, $initialQuantity, $creator) {
             $item = $this->items->create([
                 ...$data,
+                'branch_id' => $branchId,
                 'created_by' => $creator?->id,
             ]);
 

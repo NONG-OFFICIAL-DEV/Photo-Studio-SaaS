@@ -92,6 +92,7 @@ export const noteSchema = yup.object({
 export const bookingSchema = yup.object({
   customer_id: yup.string().required(() => t('validation.customerRequired')),
   assigned_user_id: yup.string().nullable(),
+  branch_id: yup.string().nullable(),
   type: yup.string().required(() => t('validation.typeRequired')),
   title: yup.string().nullable().max(255),
   notes: yup.string().nullable().max(2000),
@@ -198,6 +199,7 @@ export const employeeSchema = yup.object({
   email: yup.string().required().email(),
   phone: yup.string().nullable().max(30),
   password: passwordRule,
+  branch_id: yup.string().nullable(),
   role: yup.string().required(),
   pay_type: yup.string().required(),
   base_pay: yup.number().typeError(() => t('validation.mustBeNumber')).nullable().min(0),
@@ -215,6 +217,7 @@ export const expenseSchema = yup.object({
 
 export const inventoryItemSchema = yup.object({
   name: yup.string().required().max(255),
+  branch_id: yup.string().nullable(),
   sku: yup.string().nullable().max(100),
   unit: yup.string().required().max(50),
   category: yup.string().nullable().max(100),

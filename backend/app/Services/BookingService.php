@@ -12,7 +12,7 @@ use Illuminate\Support\Carbon;
 
 class BookingService extends BaseService
 {
-    public function __construct(protected BookingRepositoryInterface $bookings)
+    public function __construct(protected BookingRepositoryInterface $bookings, protected BranchResolutionService $branches)
     {
         parent::__construct($bookings);
     }
@@ -29,8 +29,10 @@ class BookingService extends BaseService
 
     public function create(array $data, ?User $creator = null): Booking
     {
+        $branchId = $this->branches->resolveForCreate($creator->tenant, $data['branch_id'] ?? null);
+
         /** @var Booking $booking */
-        $booking = $this->bookings->create([...$data, 'created_by' => $creator?->id]);
+        $booking = $this->bookings->create([...$data, 'branch_id' => $branchId, 'created_by' => $creator?->id]);
 
         return $booking->load('customer', 'assignedUser');
     }

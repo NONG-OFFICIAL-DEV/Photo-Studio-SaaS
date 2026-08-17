@@ -9,6 +9,7 @@ import { createBookingApi, updateBookingApi } from '@/apis/booking.api'
 import { getCustomersApi } from '@/apis/customer.api'
 import { getUsersApi } from '@/apis/user.api'
 import { useAppStore } from '@/stores/app'
+import { useBranchStore } from '@/stores/branches'
 import { translateApiMessage } from '@/utils/apiMessages'
 
 const props = defineProps({
@@ -20,6 +21,7 @@ const emit = defineEmits(['update:modelValue', 'saved'])
 
 const { t } = useI18n()
 const appStore = useAppStore()
+const branchStore = useBranchStore()
 
 const loading = ref(false)
 const errorMessage = ref('')
@@ -72,6 +74,7 @@ const endTime = ref('11:00')
 const initialValues = computed(() => ({
   customer_id: props.booking?.customer?.id ?? null,
   assigned_user_id: props.booking?.assigned_user?.id ?? null,
+  branch_id: props.booking?.branch_id ?? null,
   type: props.booking?.type ?? null,
   title: props.booking?.title ?? '',
   notes: props.booking?.notes ?? '',
@@ -111,6 +114,8 @@ watch(() => props.modelValue, async (open) => {
 
   const { data } = await getUsersApi()
   users.value = data.data
+
+  branchStore.fetch()
 })
 
 /**
@@ -222,6 +227,17 @@ async function onSubmit(values) {
               item-value="id"
               :items="users"
               @update:model-value="setFieldValue('assigned_user_id', $event)"
+            />
+          </v-col>
+          <v-col v-if="branchStore.branches.length > 1" cols="12" sm="6">
+            <v-select
+              :model-value="values.branch_id"
+              :label="`${t('fields.branch')} *`"
+              item-title="name"
+              item-value="id"
+              :items="branchStore.branches"
+              :error-messages="errors.branch_id"
+              @update:model-value="setFieldValue('branch_id', $event)"
             />
           </v-col>
           <v-col cols="6" sm="6">

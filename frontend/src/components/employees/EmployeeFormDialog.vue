@@ -7,6 +7,7 @@ import AppApiErrorAlert from '@/components/common/AppApiErrorAlert.vue'
 import { employeeSchema } from '@/utils/validators'
 import { createUserApi } from '@/apis/user.api'
 import { useAppStore } from '@/stores/app'
+import { useBranchStore } from '@/stores/branches'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -16,6 +17,7 @@ const emit = defineEmits(['update:modelValue', 'saved'])
 
 const { t } = useI18n()
 const appStore = useAppStore()
+const branchStore = useBranchStore()
 
 const loading = ref(false)
 const submitError = ref(null)
@@ -40,6 +42,7 @@ const initialValues = {
   email: '',
   phone: '',
   password: '',
+  branch_id: null,
   role: 'viewer',
   pay_type: 'salary',
   base_pay: null,
@@ -47,7 +50,10 @@ const initialValues = {
 }
 
 watch(() => props.modelValue, (open) => {
-  if (open) submitError.value = null
+  if (open) {
+    submitError.value = null
+    branchStore.fetch()
+  }
 })
 
 async function onSubmit(values) {
@@ -93,6 +99,17 @@ async function onSubmit(values) {
               :hint="t('employees.passwordHint')"
               persistent-hint
               @update:model-value="setFieldValue('password', $event)"
+            />
+          </v-col>
+          <v-col v-if="branchStore.branches.length > 1" cols="12">
+            <v-select
+              :model-value="values.branch_id"
+              :label="`${t('fields.branch')} *`"
+              :items="branchStore.branches"
+              item-title="name"
+              item-value="id"
+              :error-messages="errors.branch_id"
+              @update:model-value="setFieldValue('branch_id', $event)"
             />
           </v-col>
           <v-col cols="12">

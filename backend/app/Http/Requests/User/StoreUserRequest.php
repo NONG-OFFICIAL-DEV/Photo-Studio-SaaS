@@ -26,6 +26,10 @@ class StoreUserRequest extends FormRequest
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')],
             'phone' => ['nullable', 'string', 'max:30'],
             'password' => ['required', 'string', 'min:8'],
+            'branch_id' => [
+                'nullable', 'uuid',
+                Rule::exists('branches', 'id')->where('tenant_id', $this->user()->tenant_id),
+            ],
             'role' => ['required', Rule::in($assignableRoles)],
             'pay_type' => ['nullable', Rule::enum(PayType::class)],
             'base_pay' => ['nullable', 'numeric', 'min:0'],

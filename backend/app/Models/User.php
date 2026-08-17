@@ -23,7 +23,7 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmailContrac
     use BelongsToTenant, HasFactory, HasRoles, HasUuids, MustVerifyEmail, Notifiable, SoftDeletes;
 
     protected $fillable = [
-        'tenant_id', 'name', 'email', 'phone', 'password', 'avatar_path',
+        'tenant_id', 'branch_id', 'name', 'email', 'phone', 'password', 'avatar_path',
         'locale', 'status', 'is_super_admin', 'last_login_at', 'last_login_ip',
         'pay_type', 'base_pay', 'commission_rate',
         'notification_channels', 'telegram_chat_id', 'telegram_link_token', 'telegram_linked_at',

@@ -10,6 +10,7 @@ use App\Http\Requests\User\StoreUserRequest;
 use App\Http\Requests\User\UpdateUserEmploymentRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Services\BranchResolutionService;
 use App\Services\SubscriptionService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -20,7 +21,7 @@ class UserController extends Controller
 {
     use ApiResponse;
 
-    public function __construct(protected SubscriptionService $subscriptions)
+    public function __construct(protected SubscriptionService $subscriptions, protected BranchResolutionService $branches)
     {
     }
 
@@ -56,8 +57,11 @@ class UserController extends Controller
 
         $this->subscriptions->assertCanAddUser($tenant);
 
+        $branchId = $this->branches->resolveForCreate($tenant, $request->validated('branch_id'));
+
         $user = User::create([
             'tenant_id' => $tenant->id,
+            'branch_id' => $branchId,
             'name' => $request->validated('name'),
             'email' => $request->validated('email'),
             'phone' => $request->validated('phone'),

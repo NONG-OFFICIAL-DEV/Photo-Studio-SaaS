@@ -16,6 +16,10 @@ class UpdateInventoryItemRequest extends FormRequest
     {
         return [
             'name' => ['sometimes', 'required', 'string', 'max:255'],
+            'branch_id' => [
+                'sometimes', 'nullable', 'uuid',
+                Rule::exists('branches', 'id')->where('tenant_id', $this->user()->tenant_id),
+            ],
             'sku' => [
                 'nullable', 'string', 'max:100',
                 Rule::unique('inventory_items', 'sku')

@@ -17,6 +17,10 @@ class StoreInventoryItemRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
+            'branch_id' => [
+                'nullable', 'uuid',
+                Rule::exists('branches', 'id')->where('tenant_id', $this->user()->tenant_id),
+            ],
             'sku' => [
                 'nullable', 'string', 'max:100',
                 Rule::unique('inventory_items', 'sku')->where('tenant_id', $this->user()->tenant_id),

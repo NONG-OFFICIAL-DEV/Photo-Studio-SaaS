@@ -20,7 +20,7 @@ class Booking extends Model
     use BelongsToTenant, HasFactory, HasUuids, LogsActivity, SoftDeletes;
 
     protected $fillable = [
-        'tenant_id', 'customer_id', 'assigned_user_id', 'type', 'title', 'notes',
+        'tenant_id', 'branch_id', 'customer_id', 'assigned_user_id', 'type', 'title', 'notes',
         'location_type', 'location_address', 'starts_at', 'ends_at',
         'status', 'cancelled_reason', 'created_by', 'reminder_sent_at',
     ];

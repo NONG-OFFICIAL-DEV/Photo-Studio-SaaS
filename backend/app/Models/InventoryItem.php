@@ -18,7 +18,7 @@ class InventoryItem extends Model
     use BelongsToTenant, HasFactory, HasUuids, LogsActivity, SoftDeletes;
 
     protected $fillable = [
-        'tenant_id', 'name', 'sku', 'unit', 'category',
+        'tenant_id', 'branch_id', 'name', 'sku', 'unit', 'category',
         'quantity_on_hand', 'reorder_threshold', 'is_active', 'created_by',
     ];
 

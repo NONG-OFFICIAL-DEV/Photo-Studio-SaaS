@@ -5,17 +5,19 @@ import PlanLimitAlert from '@/components/common/PlanLimitAlert.vue'
 import AppStatusChip from '@/components/common/AppStatusChip.vue'
 import AppConfirmDialog from '@/components/common/AppConfirmDialog.vue'
 import BranchFormDialog from '@/components/settings/BranchFormDialog.vue'
-import { getBranchesApi, deleteBranchApi } from '@/apis/branch.api'
+import { deleteBranchApi } from '@/apis/branch.api'
 import { getPlanLimitsApi } from '@/apis/plan-limit.api'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
+import { useBranchStore } from '@/stores/branches'
 import { translateApiMessage } from '@/utils/apiMessages'
 
 const { t } = useI18n()
 const auth = useAuthStore()
 const appStore = useAppStore()
+const branchStore = useBranchStore()
 
-const branches = ref([])
+const branches = computed(() => branchStore.branches)
 const loading = ref(false)
 const limits = ref({ max_branches: null, branches_count: 0 })
 
@@ -30,11 +32,10 @@ const headers = computed(() => [
 async function load() {
   loading.value = true
   try {
-    const [{ data: branchesData }, { data: limitsData }] = await Promise.all([
-      getBranchesApi(),
+    const [, { data: limitsData }] = await Promise.all([
+      branchStore.fetch(true),
       getPlanLimitsApi(),
     ])
-    branches.value = branchesData.data
     limits.value = limitsData.data
   } finally {
     loading.value = false

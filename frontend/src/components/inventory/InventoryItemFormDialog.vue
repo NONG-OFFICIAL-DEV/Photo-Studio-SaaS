@@ -6,6 +6,7 @@ import AppForm from '@/components/common/AppForm.vue'
 import { inventoryItemSchema } from '@/utils/validators'
 import { createInventoryItemApi, updateInventoryItemApi } from '@/apis/inventory.api'
 import { useAppStore } from '@/stores/app'
+import { useBranchStore } from '@/stores/branches'
 import { translateApiMessage } from '@/utils/apiMessages'
 
 const props = defineProps({
@@ -17,6 +18,7 @@ const emit = defineEmits(['update:modelValue', 'saved'])
 
 const { t } = useI18n()
 const appStore = useAppStore()
+const branchStore = useBranchStore()
 
 const loading = ref(false)
 const errorMessage = ref('')
@@ -44,6 +46,7 @@ const UNIT_OPTIONS = computed(() => [
 
 const initialValues = computed(() => ({
   name: props.item?.name ?? '',
+  branch_id: props.item?.branch_id ?? null,
   sku: props.item?.sku ?? '',
   unit: props.item?.unit ?? '',
   category: props.item?.category ?? '',
@@ -53,7 +56,10 @@ const initialValues = computed(() => ({
 }))
 
 watch(() => props.modelValue, (open) => {
-  if (open) errorMessage.value = ''
+  if (open) {
+    errorMessage.value = ''
+    branchStore.fetch()
+  }
 })
 
 async function onSubmit(values) {
@@ -107,6 +113,17 @@ async function onSubmit(values) {
           </v-col>
           <v-col cols="12" sm="4">
             <v-text-field :model-value="values.reorder_threshold" :label="t('inventory.reorderThreshold')" type="number" step="0.01" :error-messages="errors.reorder_threshold" @update:model-value="setFieldValue('reorder_threshold', $event)" />
+          </v-col>
+          <v-col v-if="branchStore.branches.length > 1" cols="12" sm="4">
+            <v-select
+              :model-value="values.branch_id"
+              :label="`${t('fields.branch')} *`"
+              :items="branchStore.branches"
+              item-title="name"
+              item-value="id"
+              :error-messages="errors.branch_id"
+              @update:model-value="setFieldValue('branch_id', $event)"
+            />
           </v-col>
           <v-col v-if="!isEdit" cols="12" sm="4">
             <v-text-field
