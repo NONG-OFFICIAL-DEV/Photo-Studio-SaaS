@@ -1,9 +1,11 @@
 <script setup>
 import { computed, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import * as yup from 'yup'
 import AppDialog from '@/components/common/AppDialog.vue'
 import AppForm from '@/components/common/AppForm.vue'
 import AppDatePicker from '@/components/common/AppDatePicker.vue'
+import AppTimePicker from '@/components/common/AppTimePicker.vue'
 import { bookingSchema } from '@/utils/validators'
 import { createBookingApi, updateBookingApi } from '@/apis/booking.api'
 import { getCustomersApi } from '@/apis/customer.api'
@@ -50,6 +52,18 @@ const BOOKING_TYPES = computed(() => [
 
 const isEdit = computed(() => Boolean(props.booking?.id))
 const title = computed(() => (isEdit.value ? t('bookings.editBooking') : t('bookings.newBooking')))
+
+const hasMultipleBranches = computed(() => branchStore.branches.length > 1)
+
+// branch_id is only meaningful (and only shown) once a tenant has more than
+// one branch — below that the backend auto-assigns it, so the field stays
+// optional in the base schema and is upgraded to required here rather than
+// in bookingSchema itself, which has no access to the tenant's branch count.
+const formSchema = computed(() => (
+  hasMultipleBranches.value
+    ? bookingSchema.shape({ branch_id: yup.string().required(() => t('validation.branchRequired')) })
+    : bookingSchema
+))
 
 function splitDateTime(iso) {
   if (!iso) return { date: null, time: '' }
@@ -182,7 +196,7 @@ async function onSubmit(values) {
   <AppDialog :model-value="modelValue" :title="title" max-width="640" @update:model-value="emit('update:modelValue', $event)">
     <v-alert v-if="errorMessage" type="error" variant="tonal" class="mb-4">{{ errorMessage }}</v-alert>
 
-    <AppForm :id="formId" :schema="bookingSchema" :initial-values="initialValues" @submit="onSubmit">
+    <AppForm :id="formId" :schema="formSchema" :initial-values="initialValues" @submit="onSubmit">
       <template #default="{ errors, values, setFieldValue }">
         <v-row>  
           <v-col cols="6">
@@ -229,7 +243,7 @@ async function onSubmit(values) {
               @update:model-value="setFieldValue('assigned_user_id', $event)"
             />
           </v-col>
-          <v-col v-if="branchStore.branches.length > 1" cols="12" sm="6">
+          <v-col v-if="hasMultipleBranches" cols="12" sm="12">
             <v-select
               :model-value="values.branch_id"
               :label="`${t('fields.branch')} *`"
@@ -248,9 +262,8 @@ async function onSubmit(values) {
             />
           </v-col>
           <v-col cols="6" sm="6">
-            <v-text-field
+            <AppTimePicker
               :model-value="startTime"
-              type="time"
               :label="`${t('fields.startTime')} *`"
               @update:model-value="(val) => { startTime = val; setFieldValue('starts_at', combineDateTime(startDate, val)) }"
             />
@@ -263,9 +276,8 @@ async function onSubmit(values) {
             />
           </v-col>
           <v-col cols="6" sm="6">
-            <v-text-field
+            <AppTimePicker
               :model-value="endTime"
-              type="time"
               :label="`${t('fields.endTime')} *`"
               @update:model-value="(val) => { endTime = val; setFieldValue('ends_at', combineDateTime(endDate, val)) }"
             />

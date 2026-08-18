@@ -259,6 +259,7 @@
     "passwordMatch": "Passwords must match.",
     "passwordStrength": "Password must contain upper, lower case letters and a number.",
     "customerRequired": "Customer is required.",
+    "branchRequired": "Branch is required.",
     "employeeRequired": "Employee is required.",
     "typeRequired": "Type is required.",
     "addressRequiredOnLocation": "Address is required for on-location bookings.",

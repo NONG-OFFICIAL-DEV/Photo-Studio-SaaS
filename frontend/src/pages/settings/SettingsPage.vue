@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import AppToolbar from '@/components/common/AppToolbar.vue'
 import AppForm from '@/components/common/AppForm.vue'
 import AppApiErrorAlert from '@/components/common/AppApiErrorAlert.vue'
+import AppTimePicker from '@/components/common/AppTimePicker.vue'
 import BranchesTab from '@/pages/settings/BranchesTab.vue'
 import { settingsSchema } from '@/utils/validators'
 import {
@@ -241,12 +242,12 @@ async function disconnectTelegram() {
                       <v-text-field :model-value="values.timezone" :label="`${t('settingsPage.fields.timezone')} *`" :error-messages="errors.timezone" @update:model-value="setFieldValue('timezone', $event)" />
                     </v-col>
                     <v-col cols="12" sm="6">
-                      <v-text-field
+                      <AppTimePicker
                         :model-value="values.attendance_expected_start_time"
-                        type="time"
                         :label="t('settingsPage.fields.attendanceStartTime')"
                         :hint="t('settingsPage.attendanceStartTimeHint')"
                         persistent-hint
+                        clearable
                         :error-messages="errors.attendance_expected_start_time"
                         @update:model-value="setFieldValue('attendance_expected_start_time', $event)"
                       />
