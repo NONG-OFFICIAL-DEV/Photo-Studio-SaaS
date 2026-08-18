@@ -207,6 +207,13 @@ export const employmentSchema = yup.object({
   commission_rate: yup.number().typeError(() => t('validation.mustBeNumber')).nullable().min(0).max(100),
 })
 
+export const employeeProfileSchema = yup.object({
+  name: yup.string().required().max(255),
+  email: yup.string().required().email(),
+  phone: yup.string().nullable().max(30),
+  role: yup.string().required(),
+})
+
 export const employeeSchema = yup.object({
   name: yup.string().required().max(255),
   email: yup.string().required().email(),

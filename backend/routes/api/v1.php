@@ -122,6 +122,7 @@ Route::middleware(['auth:api', 'tenant', 'subscription.active'])->group(function
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::post('/users', [UserController::class, 'store'])->middleware('email.verified')->name('users.store');
     Route::put('/users/{user}', [UserController::class, 'update'])->middleware('email.verified')->name('users.update');
+    Route::put('/users/{user}/profile', [UserController::class, 'updateProfile'])->middleware('email.verified')->name('users.update-profile');
     Route::post('/users/{user}/deactivate', [UserController::class, 'deactivate'])->middleware('email.verified')->name('users.deactivate');
     Route::post('/users/{user}/reactivate', [UserController::class, 'reactivate'])->middleware('email.verified')->name('users.reactivate');
 

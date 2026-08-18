@@ -8,6 +8,7 @@ use App\Enums\UserStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\StoreUserRequest;
 use App\Http\Requests\User\UpdateUserEmploymentRequest;
+use App\Http\Requests\User\UpdateUserProfileRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\BranchResolutionService;
@@ -86,6 +87,46 @@ class UserController extends Controller
         $user->update($request->validated());
 
         return $this->success(new UserResource($user->fresh()), 'Employee profile updated successfully.');
+    }
+
+    /**
+     * Name/email/phone/role — the "later phase" this controller's own
+     * older docblocks pointed to. Kept as a separate endpoint from
+     * update() (pay fields) rather than merging them, so the
+     * already-working, already-tested pay-profile flow stays untouched.
+     */
+    public function updateProfile(UpdateUserProfileRequest $request, User $user): JsonResponse
+    {
+        $role = $request->validated('role');
+
+        // Demoting the sole remaining active Owner away from Owner would
+        // leave the studio with zero fully-privileged accounts — the same
+        // guard deactivate() already applies to deactivation, extended to
+        // role changes.
+        if ($role && $role !== TenantRole::Owner->value
+            && $user->hasRole(TenantRole::Owner->value)
+            && $this->activeOwnerCount($user->tenant_id) <= 1
+        ) {
+            return $this->error('A studio must have at least one active owner.', 422, [], 'CANNOT_CHANGE_LAST_OWNERS_ROLE');
+        }
+
+        $email = $request->validated('email');
+
+        // A new email address is a fresh, unverified identity claim,
+        // regardless of who typed it in — same behavior as the
+        // self-service email change (AuthService::updateEmail()).
+        if ($email && $email !== $user->email) {
+            $user->forceFill(['email' => $email, 'email_verified_at' => null])->save();
+            $user->sendEmailVerificationNotification();
+        }
+
+        $user->fill($request->safe()->only(['name', 'phone']))->save();
+
+        if ($role) {
+            $user->syncRoles([$role]);
+        }
+
+        return $this->success(new UserResource($user->fresh('roles')), 'Employee profile updated successfully.');
     }
 
     /**

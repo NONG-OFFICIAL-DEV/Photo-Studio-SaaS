@@ -742,6 +742,8 @@ docker compose exec backend php artisan key:generate
 docker compose exec backend php artisan jwt:secret
 docker compose exec backend php artisan migrate --seed
 ```
+create new permission for tenant
+```php artisan permissions:sync-tenants```
 
 Services: `nginx` (backend API, :8000), `frontend` (:5173), `postgres`
 (:5432), `redis` (:6379), `horizon` (queue dashboard at `/horizon`,
@@ -795,3 +797,4 @@ Pinia stores, and tests, same as Phase 1.
 16–17. Not yet defined
 18. ~~Audit (audit log, activity log, login history, API logs, security events)~~ ✅
 19. ~~Subscription Lifecycle (tenant billing self-service + Super Admin override, simulated payments, auto-expiry)~~ ✅
+

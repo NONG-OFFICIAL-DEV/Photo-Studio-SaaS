@@ -6,6 +6,8 @@ export const createUserApi = payload => http.post('/v1/users', payload)
 
 export const updateUserEmploymentApi = (id, payload) => http.put(`/v1/users/${id}`, payload)
 
+export const updateUserProfileApi = (id, payload) => http.put(`/v1/users/${id}/profile`, payload)
+
 export const deactivateUserApi = id => http.post(`/v1/users/${id}/deactivate`)
 
 export const reactivateUserApi = id => http.post(`/v1/users/${id}/reactivate`)
