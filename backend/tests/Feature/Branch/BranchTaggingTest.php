@@ -63,6 +63,18 @@ class BranchTaggingTest extends TestCase
         $response->assertCreated()->assertJsonPath('data.branch_id', $downtown->id);
     }
 
+    public function test_booking_branch_id_is_auto_assigned_to_the_only_active_branch_when_another_is_inactive(): void
+    {
+        [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+        $customer = Customer::factory()->create(['tenant_id' => $tenant->id]);
+        $active = Branch::create(['tenant_id' => $tenant->id, 'name' => 'Main Studio']);
+        Branch::create(['tenant_id' => $tenant->id, 'name' => 'Closed Branch', 'is_active' => false]);
+
+        $response = $this->actingAsUser($owner)->postJson('/api/v1/bookings', $this->bookingPayload($customer->id));
+
+        $response->assertCreated()->assertJsonPath('data.branch_id', $active->id);
+    }
+
     public function test_booking_rejects_a_branch_id_belonging_to_another_tenant(): void
     {
         [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
@@ -122,6 +134,17 @@ class BranchTaggingTest extends TestCase
         $response->assertStatus(422)->assertJsonPath('code', 'BRANCH_REQUIRED');
     }
 
+    public function test_inventory_item_branch_id_is_auto_assigned_to_the_only_active_branch_when_another_is_inactive(): void
+    {
+        [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+        $active = Branch::create(['tenant_id' => $tenant->id, 'name' => 'Main Studio']);
+        Branch::create(['tenant_id' => $tenant->id, 'name' => 'Closed Branch', 'is_active' => false]);
+
+        $response = $this->actingAsUser($owner)->postJson('/api/v1/inventory-items', $this->inventoryItemPayload());
+
+        $response->assertCreated()->assertJsonPath('data.branch_id', $active->id);
+    }
+
     private function inventoryItemPayload(): array
     {
         return ['name' => 'Photo Paper (A4)', 'unit' => 'sheet'];
@@ -157,6 +180,17 @@ class BranchTaggingTest extends TestCase
         $response = $this->actingAsUser($owner)->postJson('/api/v1/users', $this->staffPayload());
 
         $response->assertStatus(422)->assertJsonPath('code', 'BRANCH_REQUIRED');
+    }
+
+    public function test_staff_branch_id_is_auto_assigned_to_the_only_active_branch_when_another_is_inactive(): void
+    {
+        [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+        $active = Branch::create(['tenant_id' => $tenant->id, 'name' => 'Main Studio']);
+        Branch::create(['tenant_id' => $tenant->id, 'name' => 'Closed Branch', 'is_active' => false]);
+
+        $response = $this->actingAsUser($owner)->postJson('/api/v1/users', $this->staffPayload());
+
+        $response->assertCreated()->assertJsonPath('data.branch_id', $active->id);
     }
 
     private function staffPayload(): array
