@@ -3,6 +3,7 @@
 namespace Tests\Feature\Branch;
 
 use App\Enums\TenantRole;
+use App\Models\Branch;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\CreatesTenantUsers;
 use Tests\TestCase;
@@ -79,5 +80,29 @@ class BranchTest extends TestCase
         $this->actingAsUser($owner)
             ->postJson('/api/v1/branches', ['name' => 'Room To Grow'])
             ->assertCreated();
+    }
+
+    public function test_the_branch_list_excludes_inactive_branches_by_default(): void
+    {
+        [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+        Branch::create(['tenant_id' => $tenant->id, 'name' => 'Active Branch']);
+        Branch::create(['tenant_id' => $tenant->id, 'name' => 'Closed Branch', 'is_active' => false]);
+
+        $response = $this->actingAsUser($owner)->getJson('/api/v1/branches')->assertOk();
+        $names = collect($response->json('data'))->pluck('name');
+
+        $this->assertContains('Active Branch', $names);
+        $this->assertNotContains('Closed Branch', $names);
+    }
+
+    public function test_the_branch_list_includes_inactive_branches_when_requested(): void
+    {
+        [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+        Branch::create(['tenant_id' => $tenant->id, 'name' => 'Closed Branch', 'is_active' => false]);
+
+        $response = $this->actingAsUser($owner)->getJson('/api/v1/branches?include_inactive=1')->assertOk();
+        $names = collect($response->json('data'))->pluck('name');
+
+        $this->assertContains('Closed Branch', $names);
     }
 }

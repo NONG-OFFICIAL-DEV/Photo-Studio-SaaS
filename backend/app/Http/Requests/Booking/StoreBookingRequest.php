@@ -38,7 +38,10 @@ class StoreBookingRequest extends FormRequest
             'notes' => ['nullable', 'string', 'max:2000'],
             'location_type' => ['required', Rule::in(array_column(LocationType::cases(), 'value'))],
             'location_address' => ['required_if:location_type,on_location', 'nullable', 'string', 'max:1000'],
-            'starts_at' => ['required', 'date'],
+            // Create-time only — editing an existing booking (UpdateBookingRequest)
+            // deliberately allows past dates, since correcting/backfilling an
+            // already-recorded booking is a legitimate edit, not a new booking.
+            'starts_at' => ['required', 'date', 'after_or_equal:today'],
             'ends_at' => ['required', 'date', 'after:starts_at'],
         ];
     }

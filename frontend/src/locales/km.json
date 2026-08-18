@@ -264,6 +264,7 @@
     "typeRequired": "ត្រូវការជ្រើសរើសប្រភេទ។",
     "addressRequiredOnLocation": "ត្រូវការអាសយដ្ឋានសម្រាប់ការកក់នៅក្រៅទីតាំង។",
     "startDateTimeRequired": "ត្រូវការកាលបរិច្ឆេទ/ម៉ោងចាប់ផ្តើម។",
+    "startDateNotInPast": "កាលបរិច្ឆេទចាប់ផ្តើមមិនអាចជាថ្ងៃកន្លងទៅបានទេ។",
     "endDateTimeRequired": "ត្រូវការកាលបរិច្ឆេទ/ម៉ោងបញ្ចប់។",
     "endAfterStart": "ពេលបញ្ចប់ត្រូវតែក្រោយពេលចាប់ផ្តើម។",
     "mustBeNumber": "ត្រូវតែជាលេខ។",
@@ -381,6 +382,7 @@
     "deleteConfirmMessage": "សកម្មភាពនេះនឹងលុបការកក់សម្រាប់ '{name}'។",
     "types": {
       "wedding": "អាពាហ៍ពិពាហ៍",
+      "graduation": "បញ្ចប់ការសិក្សា",
       "portrait": "រូបភាពបុគ្គល",
       "family": "គ្រួសារ",
       "product": "ផលិតផល",

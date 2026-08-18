@@ -1,6 +1,6 @@
 import http from './api'
 
-export const getBranchesApi = () => http.get('/v1/branches')
+export const getBranchesApi = params => http.get('/v1/branches', { params })
 
 export const createBranchApi = payload => http.post('/v1/branches', payload)
 

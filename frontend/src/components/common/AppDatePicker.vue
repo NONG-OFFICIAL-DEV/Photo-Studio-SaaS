@@ -9,6 +9,8 @@ const props = defineProps({
   clearable: { type: Boolean, default: true },
   density: { type: String, default: 'comfortable' },
   errorMessages: { type: [String, Array], default: () => [] },
+  min: { type: [String, Date, null], default: null },
+  max: { type: [String, Date, null], default: null },
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -48,6 +50,6 @@ const displayText = computed(() => (dateValue.value ? format(dateValue.value, pr
         @click:clear="emit('update:modelValue', null)"
       />
     </template>
-    <v-date-picker v-model="dateValue" show-adjacent-months hide-header color="primary"/>
+    <v-date-picker v-model="dateValue" :min="min" :max="max" show-adjacent-months hide-header color="primary"/>
   </v-menu>
 </template>

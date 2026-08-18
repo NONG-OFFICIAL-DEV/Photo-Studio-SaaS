@@ -40,6 +40,7 @@ const STATUS_MAP = computed(() => ({
 
 const TYPE_LABELS = computed(() => ({
   wedding: t('bookings.types.wedding'),
+  graduation: t('bookings.types.graduation'),
   portrait: t('bookings.types.portrait'),
   family: t('bookings.types.family'),
   product: t('bookings.types.product'),

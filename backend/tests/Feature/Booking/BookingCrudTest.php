@@ -51,6 +51,36 @@ class BookingCrudTest extends TestCase
             ->assertJsonPath('meta.errors.ends_at.0', 'The ends at field must be a date after starts at.');
     }
 
+    public function test_creating_a_booking_with_a_past_start_date_is_rejected(): void
+    {
+        [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+        $customer = Customer::factory()->create(['tenant_id' => $tenant->id]);
+
+        $this->actingAsUser($owner)
+            ->postJson('/api/v1/bookings', [
+                'customer_id' => $customer->id,
+                'type' => 'wedding',
+                'location_type' => 'studio',
+                'starts_at' => now()->subDay()->toIso8601String(),
+                'ends_at' => now()->subDay()->addHours(2)->toIso8601String(),
+            ])
+            ->assertStatus(422)
+            ->assertJsonPath('meta.errors.starts_at.0', 'The starts at field must be a date after or equal to today.');
+    }
+
+    public function test_updating_a_booking_to_a_past_start_date_is_still_allowed(): void
+    {
+        [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+        $booking = Booking::factory()->create(['tenant_id' => $tenant->id]);
+
+        $this->actingAsUser($owner)
+            ->putJson("/api/v1/bookings/{$booking->id}", [
+                'starts_at' => now()->subWeek()->toIso8601String(),
+                'ends_at' => now()->subWeek()->addHours(2)->toIso8601String(),
+            ])
+            ->assertOk();
+    }
+
     public function test_on_location_bookings_require_an_address(): void
     {
         [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);

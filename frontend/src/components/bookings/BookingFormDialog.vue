@@ -6,7 +6,7 @@ import AppDialog from '@/components/common/AppDialog.vue'
 import AppForm from '@/components/common/AppForm.vue'
 import AppDatePicker from '@/components/common/AppDatePicker.vue'
 import AppTimePicker from '@/components/common/AppTimePicker.vue'
-import { bookingSchema } from '@/utils/validators'
+import { bookingSchema, bookingCreateSchema } from '@/utils/validators'
 import { createBookingApi, updateBookingApi } from '@/apis/booking.api'
 import { getCustomersApi } from '@/apis/customer.api'
 import { getUsersApi } from '@/apis/user.api'
@@ -42,6 +42,7 @@ const lastSelectedCustomerName = ref(null)
 
 const BOOKING_TYPES = computed(() => [
   { title: t('bookings.types.wedding'), value: 'wedding' },
+  { title: t('bookings.types.graduation'), value: 'graduation' },
   { title: t('bookings.types.portrait'), value: 'portrait' },
   { title: t('bookings.types.family'), value: 'family' },
   { title: t('bookings.types.product'), value: 'product' },
@@ -55,15 +56,25 @@ const title = computed(() => (isEdit.value ? t('bookings.editBooking') : t('book
 
 const hasMultipleBranches = computed(() => branchStore.branches.length > 1)
 
+// Disables past days in the start-date picker on create only — matches
+// the backend's create-only past-date guard (see formSchema below).
+const minStartDate = computed(() => (isEdit.value ? null : new Date(new Date().toDateString())))
+
 // branch_id is only meaningful (and only shown) once a tenant has more than
 // one branch — below that the backend auto-assigns it, so the field stays
 // optional in the base schema and is upgraded to required here rather than
 // in bookingSchema itself, which has no access to the tenant's branch count.
-const formSchema = computed(() => (
-  hasMultipleBranches.value
-    ? bookingSchema.shape({ branch_id: yup.string().required(() => t('validation.branchRequired')) })
-    : bookingSchema
-))
+//
+// The past-date guard only applies on create (bookingCreateSchema) —
+// editing an existing booking allows past dates, matching
+// StoreBookingRequest vs UpdateBookingRequest on the backend.
+const formSchema = computed(() => {
+  const base = isEdit.value ? bookingSchema : bookingCreateSchema
+
+  return hasMultipleBranches.value
+    ? base.shape({ branch_id: yup.string().required(() => t('validation.branchRequired')) })
+    : base
+})
 
 function splitDateTime(iso) {
   if (!iso) return { date: null, time: '' }
@@ -258,6 +269,7 @@ async function onSubmit(values) {
             <AppDatePicker
               :model-value="startDate"
               :label="`${t('fields.startDate')} *`"
+              :min="minStartDate"
               @update:model-value="(val) => { startDate = val; setFieldValue('starts_at', combineDateTime(val, startTime)) }"
             />
           </v-col>

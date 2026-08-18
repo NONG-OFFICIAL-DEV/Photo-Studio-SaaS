@@ -5,7 +5,7 @@ import PlanLimitAlert from '@/components/common/PlanLimitAlert.vue'
 import AppStatusChip from '@/components/common/AppStatusChip.vue'
 import AppConfirmDialog from '@/components/common/AppConfirmDialog.vue'
 import BranchFormDialog from '@/components/settings/BranchFormDialog.vue'
-import { deleteBranchApi } from '@/apis/branch.api'
+import { getBranchesApi, deleteBranchApi } from '@/apis/branch.api'
 import { getPlanLimitsApi } from '@/apis/plan-limit.api'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
@@ -15,9 +15,14 @@ import { translateApiMessage } from '@/utils/apiMessages'
 const { t } = useI18n()
 const auth = useAuthStore()
 const appStore = useAppStore()
+// Only used here to invalidate the shared active-only cache (used by the
+// Booking/InventoryItem/Employee branch pickers) after a change — this
+// tab needs the full list including inactive branches to manage them, a
+// different filter than the pickers, so it fetches its own list below
+// rather than reading branchStore.branches directly.
 const branchStore = useBranchStore()
 
-const branches = computed(() => branchStore.branches)
+const branches = ref([])
 const loading = ref(false)
 const limits = ref({ max_branches: null, branches_count: 0 })
 
@@ -32,11 +37,13 @@ const headers = computed(() => [
 async function load() {
   loading.value = true
   try {
-    const [, { data: limitsData }] = await Promise.all([
-      branchStore.fetch(true),
+    const [{ data: branchesData }, { data: limitsData }] = await Promise.all([
+      getBranchesApi({ include_inactive: 1 }),
       getPlanLimitsApi(),
     ])
+    branches.value = branchesData.data
     limits.value = limitsData.data
+    branchStore.invalidate()
   } finally {
     loading.value = false
   }

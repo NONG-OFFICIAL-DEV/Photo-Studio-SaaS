@@ -25,7 +25,7 @@ class BranchController extends Controller
     {
         abort_unless($request->user()->can('branches.view'), 403);
 
-        return $this->success(BranchResource::collection($this->branches->all()));
+        return $this->success(BranchResource::collection($this->branches->all($request->boolean('include_inactive'))));
     }
 
     /**

@@ -108,6 +108,19 @@ export const bookingSchema = yup.object({
     }),
 })
 
+// Create-only variant — editing an existing booking allows past dates
+// (correcting/backfilling an already-recorded booking is a legitimate
+// edit, not a new booking), matching StoreBookingRequest vs
+// UpdateBookingRequest on the backend.
+export const bookingCreateSchema = bookingSchema.shape({
+  starts_at: yup.string().required(() => t('validation.startDateTimeRequired'))
+    .test('not-in-past', () => t('validation.startDateNotInPast'), value => {
+      if (!value) return true
+      const today = new Date(new Date().toDateString())
+      return new Date(value) >= today
+    }),
+})
+
 export const cancelBookingSchema = yup.object({
   reason: yup.string().required().max(1000),
 })

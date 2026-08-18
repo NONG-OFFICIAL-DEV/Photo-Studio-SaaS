@@ -264,6 +264,7 @@
     "typeRequired": "Type is required.",
     "addressRequiredOnLocation": "Address is required for on-location bookings.",
     "startDateTimeRequired": "Start date/time is required.",
+    "startDateNotInPast": "Start date cannot be in the past.",
     "endDateTimeRequired": "End date/time is required.",
     "endAfterStart": "End must be after start.",
     "mustBeNumber": "Must be a number.",
@@ -381,6 +382,7 @@
     "deleteConfirmMessage": "This will remove the booking for '{name}'.",
     "types": {
       "wedding": "Wedding",
+      "graduation": "Graduation",
       "portrait": "Portrait",
       "family": "Family",
       "product": "Product",
