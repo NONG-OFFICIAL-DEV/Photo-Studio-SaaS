@@ -377,7 +377,7 @@ class SubscriptionService
         return $subscription->cancelled_at ? SubscriptionStatus::Cancelled : SubscriptionStatus::Expired;
     }
 
-    protected function priceForCycle(Plan $plan, BillingCycle $cycle): ?float
+    public function priceForCycle(Plan $plan, BillingCycle $cycle): ?float
     {
         $price = match ($cycle) {
             BillingCycle::Monthly => $plan->price_monthly,

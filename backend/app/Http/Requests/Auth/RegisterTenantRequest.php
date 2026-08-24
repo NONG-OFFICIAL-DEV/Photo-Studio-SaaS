@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Enums\BillingCycle;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
 class RegisterTenantRequest extends FormRequest
@@ -22,6 +24,7 @@ class RegisterTenantRequest extends FormRequest
             'phone' => ['nullable', 'string', 'max:30'],
             'password' => ['required', 'confirmed', Password::min(8)->mixedCase()->numbers()],
             'plan_code' => ['nullable', 'string', 'exists:plans,code'],
+            'billing_cycle' => ['nullable', Rule::in(array_column(BillingCycle::cases(), 'value'))],
         ];
     }
 }

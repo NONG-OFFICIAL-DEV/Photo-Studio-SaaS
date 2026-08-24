@@ -7,6 +7,7 @@ use App\DTO\RegisterTenantData;
 use App\Enums\BillingCycle;
 use App\Enums\SubscriptionStatus;
 use App\Enums\TenantRole;
+use App\Exceptions\ApiException;
 use App\Exceptions\InvalidCredentialsException;
 use App\Models\Plan;
 use App\Models\Subscription;
@@ -41,6 +42,7 @@ class AuthService
         protected ProvisionTenantRolesAction $provisionTenantRoles,
         protected SecurityEventLogger $securityEvents,
         protected TwoFactorAuthService $twoFactor,
+        protected SubscriptionService $subscriptions,
     ) {
     }
 
@@ -63,17 +65,45 @@ class AuthService
                 ? Plan::where('code', $data->planCode)->firstOrFail()
                 : Plan::where('code', 'free_trial')->firstOrFail();
 
-            $trialDays = max($plan->trial_days, 1);
+            $cycle = $data->billingCycle ? BillingCycle::from($data->billingCycle) : BillingCycle::Monthly;
 
-            Subscription::create([
-                'tenant_id' => $tenant->id,
-                'plan_id' => $plan->id,
-                'status' => SubscriptionStatus::Trial,
-                'billing_cycle' => BillingCycle::Monthly,
-                'trial_ends_at' => now()->addDays($trialDays),
-                'current_period_start' => now(),
-                'current_period_ends_at' => now()->addDays($trialDays),
-            ]);
+            // trial_days is honored as-is — 0 is a real, valid value (every
+            // paid plan is seeded with 0), not floored up to 1. free_trial's
+            // own trial_days (14) is what actually grants the trial for a
+            // registration with no plan chosen.
+            if ($plan->trial_days > 0) {
+                Subscription::create([
+                    'tenant_id' => $tenant->id,
+                    'plan_id' => $plan->id,
+                    'status' => SubscriptionStatus::Trial,
+                    'billing_cycle' => $cycle,
+                    'trial_ends_at' => now()->addDays($plan->trial_days),
+                    'current_period_start' => null,
+                    'current_period_ends_at' => null,
+                ]);
+            } else {
+                // 0-day trial means "start paying now" (simulated, same as
+                // every other billing action in this app) — mirrors
+                // SubscriptionService::changePlan()'s own guard so a
+                // plan/cycle combo with no price fails registration loudly
+                // instead of creating a subscription that can never be
+                // renewed later.
+                $amount = $this->subscriptions->priceForCycle($plan, $cycle);
+
+                if ($amount === null) {
+                    throw new ApiException(422, "\"{$plan->name}\" isn't available on a {$cycle->value} billing cycle.", 'BILLING_CYCLE_NOT_AVAILABLE', ['plan' => $plan->name, 'cycle' => $cycle->value]);
+                }
+
+                Subscription::create([
+                    'tenant_id' => $tenant->id,
+                    'plan_id' => $plan->id,
+                    'status' => SubscriptionStatus::Active,
+                    'billing_cycle' => $cycle,
+                    'amount' => $amount,
+                    'current_period_start' => now(),
+                    'current_period_ends_at' => now()->addMonths($cycle->months()),
+                ]);
+            }
 
             $this->provisionTenantRoles->execute($tenant);
 

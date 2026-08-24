@@ -73,6 +73,71 @@ class RegistrationTest extends TestCase
         $this->assertTrue($subscription->trial_ends_at->diffInDays(now()) <= 7);
     }
 
+    public function test_registering_against_a_zero_trial_day_plan_starts_an_active_subscription_immediately(): void
+    {
+        $plan = Plan::where('code', 'enterprise')->firstOrFail();
+        $this->assertSame(0, $plan->trial_days);
+
+        $this->postJson('/api/v1/auth/register', [
+            'studio_name' => 'Enterprise Studio',
+            'owner_name' => 'Owner Three',
+            'email' => 'owner3@example.test',
+            'password' => 'Passw0rd123',
+            'password_confirmation' => 'Passw0rd123',
+            'plan_code' => 'enterprise',
+        ])->assertCreated();
+
+        $tenant = Tenant::where('name', 'Enterprise Studio')->firstOrFail();
+        $subscription = $tenant->subscriptions()->firstOrFail();
+
+        $this->assertSame($plan->id, $subscription->plan_id);
+        $this->assertSame('active', $subscription->status->value);
+        $this->assertSame('monthly', $subscription->billing_cycle->value);
+        $this->assertEquals(39, (float) $subscription->amount);
+        $this->assertNull($subscription->trial_ends_at);
+        $this->assertNotNull($subscription->current_period_start);
+        $this->assertTrue($subscription->current_period_ends_at->isSameDay(now()->addMonth()));
+    }
+
+    public function test_registering_with_an_explicit_billing_cycle_prices_and_periods_it_correctly(): void
+    {
+        $this->postJson('/api/v1/auth/register', [
+            'studio_name' => 'Quarterly Studio',
+            'owner_name' => 'Owner Four',
+            'email' => 'owner4@example.test',
+            'password' => 'Passw0rd123',
+            'password_confirmation' => 'Passw0rd123',
+            'plan_code' => 'professional',
+            'billing_cycle' => 'quarterly',
+        ])->assertCreated();
+
+        $tenant = Tenant::where('name', 'Quarterly Studio')->firstOrFail();
+        $subscription = $tenant->subscriptions()->firstOrFail();
+
+        $this->assertSame('quarterly', $subscription->billing_cycle->value);
+        $this->assertEquals(40.50, (float) $subscription->amount);
+        $this->assertTrue($subscription->current_period_ends_at->isSameDay(now()->addMonths(3)));
+    }
+
+    public function test_registering_with_a_billing_cycle_the_plan_does_not_price_is_rejected(): void
+    {
+        Plan::where('code', 'starter')->update(['price_quarterly' => null]);
+
+        $this->postJson('/api/v1/auth/register', [
+            'studio_name' => 'No Quarterly Studio',
+            'owner_name' => 'Owner Five',
+            'email' => 'owner5@example.test',
+            'password' => 'Passw0rd123',
+            'password_confirmation' => 'Passw0rd123',
+            'plan_code' => 'starter',
+            'billing_cycle' => 'quarterly',
+        ])
+            ->assertStatus(422)
+            ->assertJsonPath('code', 'BILLING_CYCLE_NOT_AVAILABLE');
+
+        $this->assertDatabaseMissing('tenants', ['name' => 'No Quarterly Studio']);
+    }
+
     public function test_every_super_admin_is_notified_of_the_new_tenant(): void
     {
         $superAdmin = User::factory()->create(['is_super_admin' => true, 'tenant_id' => null]);

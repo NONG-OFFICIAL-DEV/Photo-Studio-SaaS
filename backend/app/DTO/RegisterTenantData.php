@@ -15,6 +15,7 @@ final readonly class RegisterTenantData
         public ?string $phone,
         public string $password,
         public ?string $planCode,
+        public ?string $billingCycle,
     ) {
     }
 
@@ -30,6 +31,7 @@ final readonly class RegisterTenantData
             phone: $data['phone'] ?? null,
             password: $data['password'],
             planCode: $data['plan_code'] ?? null,
+            billingCycle: $data['billing_cycle'] ?? null,
         );
     }
 }
