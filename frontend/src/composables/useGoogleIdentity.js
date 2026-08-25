@@ -28,25 +28,42 @@ function loadGoogleScript() {
   return scriptPromise
 }
 
+// Module-scoped so google.accounts.id.initialize() runs exactly once for the
+// whole app session — not once per mounted page. Google logs a warning (and
+// only keeps the last registration) if initialize() is called again for the
+// same client, which used to happen every time the user switched between the
+// Login and Register pages (each is a separate component instance with its
+// own local "have I called this yet" guard). The credential callback still
+// needs to change per page (Login vs Register handle it differently), so
+// that part stays swappable via this module-level ref instead of going
+// through a second real initialize() call.
+let initPromise = null
+let currentCredentialHandler = null
+
 export function useGoogleIdentity() {
   /**
-   * Registers the client ID + credential callback. Google warns (and logs)
-   * if this is called more than once for the same client, so callers
-   * should call it exactly once per mounted page — see renderButton() for
-   * the part that's safe (and meant) to call repeatedly.
+   * Registers the client ID + credential callback (google.accounts.id
+   * .initialize() itself only ever runs once — see module-level comment
+   * above). Safe to call from every page that needs the Google button;
+   * each call just updates which page's callback receives the credential.
    */
   async function initialize(onCredential) {
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
     if (!clientId) return null
 
-    const google = await loadGoogleScript()
+    currentCredentialHandler = onCredential
 
-    google.accounts.id.initialize({
-      client_id: clientId,
-      callback: (response) => onCredential(response.credential),
-    })
+    if (!initPromise) {
+      initPromise = loadGoogleScript().then((google) => {
+        google.accounts.id.initialize({
+          client_id: clientId,
+          callback: (response) => currentCredentialHandler?.(response.credential),
+        })
+        return google
+      })
+    }
 
-    return google
+    return initPromise
   }
 
   /**

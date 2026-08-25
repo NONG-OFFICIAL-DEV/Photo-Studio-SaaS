@@ -332,6 +332,7 @@ export const planSchema = yup.object({
   has_api_access: yup.boolean(),
   has_telegram: yup.boolean(),
   is_active: yup.boolean(),
+  feature_labels: yup.object().nullable(),
   sort_order: yup.number().typeError(() => t('validation.mustBeNumber')).nullable().integer().min(0),
 })
 

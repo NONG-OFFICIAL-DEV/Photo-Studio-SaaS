@@ -29,6 +29,7 @@ class PlanResource extends JsonResource
             'has_telegram' => $this->has_telegram,
             'trial_days' => $this->trial_days,
             'is_active' => $this->is_active,
+            'feature_labels' => $this->feature_labels ?? [],
             'sort_order' => $this->sort_order,
             'subscriptions_count' => $this->whenCounted('subscriptions'),
         ];

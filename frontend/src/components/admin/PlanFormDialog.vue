@@ -18,6 +18,28 @@ const emit = defineEmits(['update:modelValue', 'saved'])
 const { t } = useI18n()
 const appStore = useAppStore()
 
+// Matches Plan::FEATURE_KEYS on the backend — the set of features an admin
+// can write public-facing marketing copy for (shown on the external pricing
+// site), in both languages. A blank cell just means that feature line isn't
+// shown for this plan; there's no auto-generated fallback text.
+const FEATURE_KEYS = [
+  { key: 'max_users', label: 'admin.plans.fields.maxUsers' },
+  { key: 'storage_limit_gb', label: 'admin.plans.fields.storageLimitGb' },
+  { key: 'monthly_order_limit', label: 'admin.plans.fields.monthlyOrderLimit' },
+  { key: 'has_online_gallery', label: 'admin.plans.fields.hasOnlineGallery' },
+  { key: 'has_reports', label: 'admin.plans.fields.hasReports' },
+  { key: 'has_telegram', label: 'admin.plans.fields.hasTelegram' },
+  { key: 'has_api_access', label: 'admin.plans.fields.hasApiAccess' },
+  { key: 'has_watermark_gallery', label: 'admin.plans.fields.hasWatermarkGallery' },
+]
+
+function updateFeatureLabel(values, setFieldValue, featureKey, lang, text) {
+  setFieldValue('feature_labels', {
+    ...values.feature_labels,
+    [featureKey]: { ...values.feature_labels?.[featureKey], [lang]: text },
+  })
+}
+
 const loading = ref(false)
 const errorMessage = ref('')
 const formId = useId()
@@ -43,6 +65,7 @@ const initialValues = computed(() => ({
   has_api_access: props.plan?.has_api_access ?? false,
   has_telegram: props.plan?.has_telegram ?? false,
   is_active: props.plan?.is_active ?? true,
+  feature_labels: props.plan?.feature_labels ?? {},
   sort_order: props.plan?.sort_order ?? 0,
 }))
 
@@ -163,6 +186,36 @@ async function onSubmit(values) {
                   :label="t('admin.plans.fields.hasTelegram')"
                   hide-details
                   @update:model-value="setFieldValue('has_telegram', $event)"
+                />
+              </v-col>
+            </v-row>
+          </v-col>
+
+          <v-col cols="12">
+            <v-divider class="mb-4" />
+            <div class="text-subtitle-2 mb-1">{{ t('admin.plans.featureLabelsTitle') }}</div>
+            <p class="text-caption text-medium-emphasis mb-4">{{ t('admin.plans.featureLabelsHint') }}</p>
+
+            <v-row v-for="feature in FEATURE_KEYS" :key="feature.key" class="mb-1" dense>
+              <v-col cols="12" sm="3" class="d-flex align-center text-body-2">
+                {{ t(feature.label) }}
+              </v-col>
+              <v-col cols="12" sm="4">
+                <v-text-field
+                  :model-value="values.feature_labels?.[feature.key]?.en"
+                  prefix="EN"
+                  density="compact"
+                  hide-details
+                  @update:model-value="updateFeatureLabel(values, setFieldValue, feature.key, 'en', $event)"
+                />
+              </v-col>
+              <v-col cols="12" sm="5">
+                <v-text-field
+                  :model-value="values.feature_labels?.[feature.key]?.km"
+                  prefix="KM"
+                  density="compact"
+                  hide-details
+                  @update:model-value="updateFeatureLabel(values, setFieldValue, feature.key, 'km', $event)"
                 />
               </v-col>
             </v-row>

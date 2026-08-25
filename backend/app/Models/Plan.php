@@ -17,7 +17,16 @@ class Plan extends Model
         'price_monthly', 'price_quarterly', 'price_yearly',
         'max_users', 'max_branches', 'storage_limit_gb', 'monthly_order_limit',
         'has_watermark_gallery', 'has_online_gallery', 'has_reports', 'has_api_access', 'has_telegram',
-        'trial_days', 'is_active', 'sort_order',
+        'trial_days', 'is_active', 'feature_labels', 'sort_order',
+    ];
+
+    /**
+     * Feature keys an admin can attach public-facing marketing copy to, in
+     * both supported languages — see feature_labels() below.
+     */
+    public const FEATURE_KEYS = [
+        'max_users', 'storage_limit_gb', 'monthly_order_limit',
+        'has_online_gallery', 'has_reports', 'has_telegram', 'has_api_access', 'has_watermark_gallery',
     ];
 
     protected function casts(): array
@@ -32,6 +41,7 @@ class Plan extends Model
             'has_api_access' => 'boolean',
             'has_telegram' => 'boolean',
             'is_active' => 'boolean',
+            'feature_labels' => 'array',
         ];
     }
 

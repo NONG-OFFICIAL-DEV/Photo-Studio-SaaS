@@ -21,6 +21,10 @@ const errorMessage = ref('')
 const showPassword = ref(false)
 const pendingGoogleIdToken = ref(null)
 const googleButtonLoading = ref(true)
+// Register starts collapsed to just Studio Name + Google, so first-time
+// visitors aren't greeted by all 6 fields at once — clicking "continue with
+// email instead" reveals the rest for people who don't want Google.
+const showEmailForm = ref(false)
 
 async function onSubmit(values) {
   loading.value = true
@@ -124,72 +128,86 @@ function handleStudioNameInput(value, setFieldValue, values) {
       @submit="onSubmit"
     >
       <template #default="{ errors, values, setFieldValue }">
-        <div class="auth-row-split mb-4">
-          <v-text-field
-            :model-value="values.studio_name"
-            :label="t('auth.studioName')"
-            prepend-inner-icon="mdi-domain"
-            :error-messages="errors.studio_name"
-            hide-details="auto"
-            @update:model-value="handleStudioNameInput($event, setFieldValue, values)"
-          />
-
-          <v-text-field :model-value="values.owner_name" :label="t('auth.ownerName')" prepend-inner-icon="mdi-account-outline" :error-messages="errors.owner_name" hide-details="auto" @update:model-value="setFieldValue('owner_name', $event)" />
-        </div>
+        <v-text-field
+          :model-value="values.studio_name"
+          :label="t('auth.studioName')"
+          prepend-inner-icon="mdi-domain"
+          :error-messages="errors.studio_name"
+          class="mb-4"
+          @update:model-value="handleStudioNameInput($event, setFieldValue, values)"
+        />
 
         <div class="google-button-slot mb-4">
           <v-skeleton-loader v-if="googleButtonLoading" type="ossein" width="350" height="40" />
           <div v-show="!googleButtonLoading" :ref="(el) => onGoogleButtonMount(el, values)"></div>
         </div>
 
-        <div class="d-flex align-center ga-3 mb-6">
-          <v-divider />
-          <span class="text-caption text-medium-emphasis text-no-wrap">{{ t('auth.orFillInDetails') }}</span>
-          <v-divider />
+        <div v-if="!showEmailForm" class="text-center mb-2">
+          <v-btn variant="text" color="primary" class="text-none" @click="showEmailForm = true">
+            {{ t('auth.continueWithEmail') }}
+          </v-btn>
         </div>
 
-        <v-text-field
-          :model-value="values.email"
-          :label="t('auth.email')"
-          type="email"
-          autocomplete="username"
-          prepend-inner-icon="mdi-email-outline"
-          :error-messages="errors.email"
-          class="mb-4"
-          @update:model-value="setFieldValue('email', $event)"
-        />
+        <v-expand-transition>
+          <div v-if="showEmailForm">
+            <div class="d-flex align-center ga-3 mb-6 mt-2">
+              <v-divider />
+              <span class="text-caption text-medium-emphasis text-no-wrap">{{ t('auth.orContinueWith') }}</span>
+              <v-divider />
+            </div>
 
-        <v-text-field :model-value="values.phone" :label="t('auth.phone')" prepend-inner-icon="mdi-phone-outline" :error-messages="errors.phone" class="mb-4" @update:model-value="setFieldValue('phone', $event)" />
+            <v-text-field :model-value="values.owner_name" :label="t('auth.ownerName')" prepend-inner-icon="mdi-account-outline" :error-messages="errors.owner_name" class="mb-4" @update:model-value="setFieldValue('owner_name', $event)" />
 
-        <div class="auth-row-split mb-4">
-          <v-text-field
-            :model-value="values.password"
-            :label="t('auth.password')"
-            :type="showPassword ? 'text' : 'password'"
-            autocomplete="new-password"
-            prepend-inner-icon="mdi-lock-outline"
-            :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
-            :error-messages="errors.password"
-            hide-details="auto"
-            @update:model-value="setFieldValue('password', $event)"
-            @click:append-inner="showPassword = !showPassword"
-          />
-        </div>
+            <v-text-field
+              :model-value="values.email"
+              :label="t('auth.email')"
+              type="email"
+              autocomplete="username"
+              prepend-inner-icon="mdi-email-outline"
+              :error-messages="errors.email"
+              class="mb-4"
+              @update:model-value="setFieldValue('email', $event)"
+            />
 
-        <v-text-field
-          :model-value="values.password_confirmation"
-          :label="t('auth.confirmPassword')"
-          :type="showPassword ? 'text' : 'password'"
-          autocomplete="new-password"
-          prepend-inner-icon="mdi-lock-check-outline"
-          :error-messages="errors.password_confirmation"
-          hide-details="auto"
-          @update:model-value="setFieldValue('password_confirmation', $event)"
-        />
+            <!--
+              Phone is intentionally commented out, not deleted — kept out of
+              the signup form to reduce field count, but the schema/backend
+              still accept it as optional so this can be re-enabled (or moved
+              to a post-signup profile step) without other changes.
+              <v-text-field :model-value="values.phone" :label="t('auth.phone')" prepend-inner-icon="mdi-phone-outline" :error-messages="errors.phone" class="mb-4" @update:model-value="setFieldValue('phone', $event)" />
+            -->
 
-        <v-btn type="submit" color="primary" block size="large" :loading="loading" class="auth-submit mt-2">
-          {{ t('auth.createAccount') }}
-        </v-btn>
+            <div class="auth-row-split mb-4">
+              <v-text-field
+                :model-value="values.password"
+                :label="t('auth.password')"
+                :type="showPassword ? 'text' : 'password'"
+                autocomplete="new-password"
+                prepend-inner-icon="mdi-lock-outline"
+                :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+                :error-messages="errors.password"
+                hide-details="auto"
+                @update:model-value="setFieldValue('password', $event)"
+                @click:append-inner="showPassword = !showPassword"
+              />
+            </div>
+
+            <v-text-field
+              :model-value="values.password_confirmation"
+              :label="t('auth.confirmPassword')"
+              :type="showPassword ? 'text' : 'password'"
+              autocomplete="new-password"
+              prepend-inner-icon="mdi-lock-check-outline"
+              :error-messages="errors.password_confirmation"
+              class="mb-4"
+              @update:model-value="setFieldValue('password_confirmation', $event)"
+            />
+
+            <v-btn type="submit" color="primary" block size="large" :loading="loading" class="auth-submit mt-2">
+              {{ t('auth.createAccount') }}
+            </v-btn>
+          </div>
+        </v-expand-transition>
 
         <div class="text-center mt-6 text-body-2 text-medium-emphasis">
           {{ t('auth.alreadyHaveAccount') }}
