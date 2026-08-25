@@ -20,7 +20,6 @@ const loading = ref(false)
 const errorMessage = ref('')
 const showPassword = ref(false)
 const pendingGoogleIdToken = ref(null)
-const googleButtonLoading = ref(true)
 // Register starts collapsed to just Studio Name + Google, so first-time
 // visitors aren't greeted by all 6 fields at once — clicking "continue with
 // email instead" reveals the rest for people who don't want Google.
@@ -75,14 +74,11 @@ async function submitGoogleRegistration(idToken, studioName, phone) {
 // whenever the app's language changes, so the button's own text stays in
 // sync — but NOT on every re-render (e.g. typing in other fields also
 // re-renders this component via reactive `t()` calls), guarded by
-// `lastRenderedLocale`. The container keeps a fixed height and a brief
-// spinner covers the swap (see template) so this reads as a small loading
-// blip instead of the layout jumping.
+// `lastRenderedLocale`.
 let lastRenderedLocale = null
 async function onGoogleButtonMount(el, values) {
   if (!el || lastRenderedLocale === locale.value) return
   lastRenderedLocale = locale.value
-  googleButtonLoading.value = true
 
   googleClient ??= await initialize((idToken) => {
     if (values.studio_name) {
@@ -95,9 +91,6 @@ async function onGoogleButtonMount(el, values) {
   })
 
   renderButton(el, googleClient, { locale: locale.value })
-  window.setTimeout(() => {
-    googleButtonLoading.value = false
-  }, 250)
 }
 
 function handleStudioNameInput(value, setFieldValue, values) {
@@ -138,8 +131,7 @@ function handleStudioNameInput(value, setFieldValue, values) {
         />
 
         <div class="google-button-slot mb-4">
-          <v-skeleton-loader v-if="googleButtonLoading" type="ossein" width="350" height="40" />
-          <div v-show="!googleButtonLoading" :ref="(el) => onGoogleButtonMount(el, values)"></div>
+          <div :ref="(el) => onGoogleButtonMount(el, values)"></div>
         </div>
 
         <div v-if="!showEmailForm" class="text-center mb-2">
