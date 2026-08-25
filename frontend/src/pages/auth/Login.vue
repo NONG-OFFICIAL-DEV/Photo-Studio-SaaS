@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import AppForm from '@/components/common/AppForm.vue'
@@ -7,16 +7,20 @@ import { loginSchema } from '@/utils/validators'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
 import { translateApiMessage } from '@/utils/apiMessages'
+import { useGoogleIdentity } from '@/composables/useGoogleIdentity'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const router = useRouter()
 const route = useRoute()
 const auth = useAuthStore()
 const appStore = useAppStore()
+const { initialize, renderButton } = useGoogleIdentity()
+let googleClient = null
 
 const loading = ref(false)
 const errorMessage = ref('')
 const showPassword = ref(false)
+const googleButtonRef = ref(null)
 
 // Set once a login response comes back with requires_two_factor — switches
 // the page into the code-entry step instead of navigating away.
@@ -74,6 +78,36 @@ function backToLogin() {
   useRecoveryCode.value = false
   errorMessage.value = ''
 }
+
+async function handleGoogleCredential(idToken) {
+  loading.value = true
+  errorMessage.value = ''
+
+  try {
+    const response = await auth.loginWithGoogle(idToken)
+    if (response.data.requires_registration) {
+      errorMessage.value = t('auth.googleAccountNotRegistered')
+    } else {
+      goToDestination()
+    }
+  } catch (error) {
+    errorMessage.value = translateApiMessage(error, 'auth.googleSignInError')
+  } finally {
+    loading.value = false
+  }
+}
+
+// initialize() runs exactly once (Google warns/logs if called again);
+// renderButton() re-renders whenever the app's language changes, so the
+// button's own text updates live without needing a page reload.
+watch(
+  locale,
+  async () => {
+    googleClient ??= await initialize(handleGoogleCredential)
+    renderButton(googleButtonRef.value, googleClient, { locale: locale.value })
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
@@ -124,7 +158,17 @@ function backToLogin() {
       </div>
     </form>
 
-    <AppForm v-else :schema="loginSchema" :initial-values="{ email: '', password: '', remember: false }" @submit="onSubmit">
+    <template v-if="!twoFactorToken">
+      <div ref="googleButtonRef" class="d-flex justify-center mb-4"></div>
+
+      <div class="d-flex align-center ga-3 mb-6">
+        <v-divider />
+        <span class="text-caption text-medium-emphasis text-no-wrap">{{ t('auth.orContinueWith') }}</span>
+        <v-divider />
+      </div>
+    </template>
+
+    <AppForm v-if="!twoFactorToken" :schema="loginSchema" :initial-values="{ email: '', password: '', remember: false }" @submit="onSubmit">
       <template #default="{ errors, values, setFieldValue }">
         <v-text-field
           :model-value="values.email"

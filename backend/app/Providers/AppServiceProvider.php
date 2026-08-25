@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Events\NotificationCreated;
 use App\Models\User;
+use App\Services\Google\GoogleIdTokenVerifier;
+use App\Services\Google\GoogleIdTokenVerifierInterface;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Auth\Notifications\ResetPassword;
@@ -21,7 +23,7 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        //
+        $this->app->bind(GoogleIdTokenVerifierInterface::class, GoogleIdTokenVerifier::class);
     }
 
     public function boot(): void

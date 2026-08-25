@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Actions\ProvisionTenantRolesAction;
+use App\DTO\GoogleRegisterData;
+use App\DTO\GoogleUserPayload;
 use App\DTO\RegisterTenantData;
 use App\Enums\BillingCycle;
 use App\Enums\SubscriptionStatus;
@@ -13,11 +15,11 @@ use App\Models\Plan;
 use App\Models\Subscription;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Models\UserOauthProvider;
 use App\Notifications\Billing\NewTenantRegisteredNotification;
 use App\Repositories\Contracts\TenantRepositoryInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -43,8 +45,7 @@ class AuthService
         protected SecurityEventLogger $securityEvents,
         protected TwoFactorAuthService $twoFactor,
         protected SubscriptionService $subscriptions,
-    ) {
-    }
+    ) {}
 
     /**
      * Creates a new tenant (photography studio) with its Owner user,
@@ -54,58 +55,7 @@ class AuthService
     public function register(RegisterTenantData $data): array
     {
         return DB::transaction(function () use ($data) {
-            $tenant = $this->tenants->create([
-                'name' => $data->studioName,
-                'slug' => $data->slug,
-                'email' => $data->email,
-                'phone' => $data->phone,
-            ]);
-
-            $plan = $data->planCode
-                ? Plan::where('code', $data->planCode)->firstOrFail()
-                : Plan::where('code', 'free_trial')->firstOrFail();
-
-            $cycle = $data->billingCycle ? BillingCycle::from($data->billingCycle) : BillingCycle::Monthly;
-
-            // trial_days is honored as-is — 0 is a real, valid value (every
-            // paid plan is seeded with 0), not floored up to 1. free_trial's
-            // own trial_days (14) is what actually grants the trial for a
-            // registration with no plan chosen.
-            if ($plan->trial_days > 0) {
-                Subscription::create([
-                    'tenant_id' => $tenant->id,
-                    'plan_id' => $plan->id,
-                    'status' => SubscriptionStatus::Trial,
-                    'billing_cycle' => $cycle,
-                    'trial_ends_at' => now()->addDays($plan->trial_days),
-                    'current_period_start' => null,
-                    'current_period_ends_at' => null,
-                ]);
-            } else {
-                // 0-day trial means "start paying now" (simulated, same as
-                // every other billing action in this app) — mirrors
-                // SubscriptionService::changePlan()'s own guard so a
-                // plan/cycle combo with no price fails registration loudly
-                // instead of creating a subscription that can never be
-                // renewed later.
-                $amount = $this->subscriptions->priceForCycle($plan, $cycle);
-
-                if ($amount === null) {
-                    throw new ApiException(422, "\"{$plan->name}\" isn't available on a {$cycle->value} billing cycle.", 'BILLING_CYCLE_NOT_AVAILABLE', ['plan' => $plan->name, 'cycle' => $cycle->value]);
-                }
-
-                Subscription::create([
-                    'tenant_id' => $tenant->id,
-                    'plan_id' => $plan->id,
-                    'status' => SubscriptionStatus::Active,
-                    'billing_cycle' => $cycle,
-                    'amount' => $amount,
-                    'current_period_start' => now(),
-                    'current_period_ends_at' => now()->addMonths($cycle->months()),
-                ]);
-            }
-
-            $this->provisionTenantRoles->execute($tenant);
+            [$tenant, $plan] = $this->provisionTenant($data->studioName, $data->slug, $data->email, $data->phone, $data->planCode, $data->billingCycle);
 
             /** @var User $user */
             $user = $this->users->create([
@@ -121,15 +71,186 @@ class AuthService
 
             event(new Registered($user));
 
-            $superAdmins = User::query()->where('is_super_admin', true)->get();
-            if ($superAdmins->isNotEmpty()) {
-                Notification::send($superAdmins, new NewTenantRegisteredNotification($tenant, $plan->name));
-            }
+            $this->notifySuperAdminsOfNewTenant($tenant, $plan->name);
 
             $token = JWTAuth::fromUser($user);
 
             return $this->tokenPayload($user->fresh(), $token);
         });
+    }
+
+    /**
+     * Logs in an existing Google-linked user, links Google to an existing
+     * password account with an already-verified matching email, or —
+     * given $registration — provisions a brand-new tenant the same way
+     * register() does. With no existing match and no $registration, signals
+     * the caller (AuthController::googleAuth()) to prompt for studio details
+     * via `{requires_registration: true}` rather than erroring.
+     */
+    public function registerOrLoginWithGoogle(GoogleUserPayload $google, ?GoogleRegisterData $registration = null): array
+    {
+        return DB::transaction(function () use ($google, $registration) {
+            $isNewUser = false;
+
+            $oauth = UserOauthProvider::where('provider', 'google')
+                ->where('provider_user_id', $google->sub)
+                ->first();
+
+            if ($oauth) {
+                /** @var User $user */
+                $user = $oauth->user;
+            } else {
+                /** @var User|null $user */
+                $user = User::where('email', $google->email)->first();
+
+                if ($user) {
+                    // Google verified this email, but our own system never
+                    // did for this account — don't let a bare Google claim
+                    // silently take over a pre-existing password account
+                    // (users.email is globally unique, not per-tenant).
+                    // Require the real owner to log in with their password
+                    // first and link Google from settings instead.
+                    if (! $user->email_verified_at) {
+                        throw new ApiException(409, 'An account with this email already exists. Please log in with your password first, then connect Google from your account settings.', 'REQUIRES_LOGIN_TO_LINK');
+                    }
+
+                    UserOauthProvider::create([
+                        'user_id' => $user->id,
+                        'provider' => 'google',
+                        'provider_user_id' => $google->sub,
+                    ]);
+                } elseif ($registration) {
+                    $isNewUser = true;
+
+                    [$tenant, $plan] = $this->provisionTenant(
+                        $registration->studioName,
+                        $registration->slug,
+                        $google->email,
+                        $registration->phone,
+                        $registration->planCode,
+                        $registration->billingCycle,
+                    );
+
+                    $user = $this->users->create([
+                        'tenant_id' => $tenant->id,
+                        'name' => $google->name ?: $google->email,
+                        'email' => $google->email,
+                        'phone' => $registration->phone,
+                        // Google-only account — this hash is never used to
+                        // log in; updatePassword() lets the owner set a real
+                        // one later with no extra backend work needed.
+                        'password' => Hash::make(Str::random(40)),
+                    ]);
+
+                    $user->forceFill(['email_verified_at' => now()])->save();
+
+                    app(PermissionRegistrar::class)->setPermissionsTeamId($tenant->id);
+                    $user->assignRole(TenantRole::Owner->value);
+
+                    $this->notifySuperAdminsOfNewTenant($tenant, $plan->name);
+
+                    UserOauthProvider::create([
+                        'user_id' => $user->id,
+                        'provider' => 'google',
+                        'provider_user_id' => $google->sub,
+                    ]);
+                } else {
+                    return ['requires_registration' => true];
+                }
+            }
+
+            // A brand-new signup is active by definition (same as register(),
+            // which never checks this either) — only a *pre-existing* user
+            // resolved above can actually be deactivated.
+            if (! $isNewUser && ! $user->isActive()) {
+                throw new InvalidCredentialsException('This account has been deactivated.', 'ACCOUNT_DEACTIVATED');
+            }
+
+            $user->forceFill([
+                'last_login_at' => now(),
+                'last_login_ip' => request()->ip(),
+            ])->save();
+
+            $token = JWTAuth::fromUser($user);
+
+            return $this->tokenPayload($user->fresh(), $token);
+        });
+    }
+
+    /**
+     * Creates the tenant, resolves its plan/subscription (honoring an
+     * explicit plan/billing cycle or defaulting to a free_trial), and
+     * provisions its baseline RBAC roles. Shared by register() and the
+     * new-signup branch of registerOrLoginWithGoogle() so the trial/pricing
+     * logic only lives in one place.
+     *
+     * @return array{0: Tenant, 1: Plan}
+     */
+    protected function provisionTenant(string $studioName, ?string $slug, string $email, ?string $phone, ?string $planCode, ?string $billingCycle): array
+    {
+        $tenant = $this->tenants->create([
+            'name' => $studioName,
+            'slug' => $slug,
+            'email' => $email,
+            'phone' => $phone,
+        ]);
+
+        $plan = $planCode
+            ? Plan::where('code', $planCode)->firstOrFail()
+            : Plan::where('code', 'free_trial')->firstOrFail();
+
+        $cycle = $billingCycle ? BillingCycle::from($billingCycle) : BillingCycle::Monthly;
+
+        // trial_days is honored as-is — 0 is a real, valid value (every
+        // paid plan is seeded with 0), not floored up to 1. free_trial's
+        // own trial_days (14) is what actually grants the trial for a
+        // registration with no plan chosen.
+        if ($plan->trial_days > 0) {
+            Subscription::create([
+                'tenant_id' => $tenant->id,
+                'plan_id' => $plan->id,
+                'status' => SubscriptionStatus::Trial,
+                'billing_cycle' => $cycle,
+                'trial_ends_at' => now()->addDays($plan->trial_days),
+                'current_period_start' => null,
+                'current_period_ends_at' => null,
+            ]);
+        } else {
+            // 0-day trial means "start paying now" (simulated, same as
+            // every other billing action in this app) — mirrors
+            // SubscriptionService::changePlan()'s own guard so a
+            // plan/cycle combo with no price fails registration loudly
+            // instead of creating a subscription that can never be
+            // renewed later.
+            $amount = $this->subscriptions->priceForCycle($plan, $cycle);
+
+            if ($amount === null) {
+                throw new ApiException(422, "\"{$plan->name}\" isn't available on a {$cycle->value} billing cycle.", 'BILLING_CYCLE_NOT_AVAILABLE', ['plan' => $plan->name, 'cycle' => $cycle->value]);
+            }
+
+            Subscription::create([
+                'tenant_id' => $tenant->id,
+                'plan_id' => $plan->id,
+                'status' => SubscriptionStatus::Active,
+                'billing_cycle' => $cycle,
+                'amount' => $amount,
+                'current_period_start' => now(),
+                'current_period_ends_at' => now()->addMonths($cycle->months()),
+            ]);
+        }
+
+        $this->provisionTenantRoles->execute($tenant);
+
+        return [$tenant, $plan];
+    }
+
+    protected function notifySuperAdminsOfNewTenant(Tenant $tenant, ?string $planName = null): void
+    {
+        $superAdmins = User::query()->where('is_super_admin', true)->get();
+
+        if ($superAdmins->isNotEmpty()) {
+            Notification::send($superAdmins, new NewTenantRegisteredNotification($tenant, $planName));
+        }
     }
 
     public function login(string $email, string $password, bool $remember = false): array

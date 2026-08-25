@@ -98,6 +98,11 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmailContrac
         return $this->hasMany(PayrollEntry::class);
     }
 
+    public function oauthProviders(): HasMany
+    {
+        return $this->hasMany(UserOauthProvider::class);
+    }
+
     public function isActive(): bool
     {
         return $this->status === UserStatus::Active;

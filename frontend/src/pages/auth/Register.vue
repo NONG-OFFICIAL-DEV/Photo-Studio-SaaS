@@ -7,15 +7,19 @@ import { registerSchema } from '@/utils/validators'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
 import { translateApiMessage } from '@/utils/apiMessages'
+import { useGoogleIdentity } from '@/composables/useGoogleIdentity'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const router = useRouter()
 const auth = useAuthStore()
 const appStore = useAppStore()
+const { initialize, renderButton } = useGoogleIdentity()
+let googleClient = null
 
 const loading = ref(false)
 const errorMessage = ref('')
 const showPassword = ref(false)
+const pendingGoogleIdToken = ref(null)
 
 async function onSubmit(values) {
   loading.value = true
@@ -29,6 +33,68 @@ async function onSubmit(values) {
     errorMessage.value = translateApiMessage(error, 'auth.registerError')
   } finally {
     loading.value = false
+  }
+}
+
+/**
+ * Google can't supply a studio name, so the Google button lives inside the
+ * same form as the "Studio Name" field — clicking it stores the credential
+ * and, if a studio name is already typed, submits immediately; otherwise it
+ * waits (the credential is submitted the moment the name field gets one).
+ */
+async function submitGoogleRegistration(idToken, studioName, phone) {
+  loading.value = true
+  errorMessage.value = ''
+
+  try {
+    await auth.registerWithGoogle({
+      id_token: idToken,
+      studio_name: studioName,
+      phone: phone || null,
+    })
+    appStore.notify(t('auth.registerSuccess'))
+    router.push({ name: 'dashboard' })
+  } catch (error) {
+    errorMessage.value = translateApiMessage(error, 'auth.googleSignInError')
+    pendingGoogleIdToken.value = null
+  } finally {
+    loading.value = false
+  }
+}
+
+// `values` is vee-validate's reactive object, mutated in place across
+// renders — reading values.studio_name/phone inside this closure at click
+// time (not at render time it was created) always sees the latest typed
+// value, so initialize() only needs to be called once. renderButton() is
+// re-called (not just once ever) whenever the app's language changes, so
+// the button's own text updates live — but NOT on every re-render (e.g.
+// typing in other fields also re-renders this component via reactive
+// `t()` calls), or the button would flicker/re-mount constantly.
+let lastRenderedLocale = null
+async function onGoogleButtonMount(el, values) {
+  if (!el || lastRenderedLocale === locale.value) return
+  lastRenderedLocale = locale.value
+
+  googleClient ??= await initialize((idToken) => {
+    if (values.studio_name) {
+      submitGoogleRegistration(idToken, values.studio_name, values.phone)
+    } else {
+      // Held until the studio name field is filled in (see
+      // handleStudioNameInput below) — Google can't supply one.
+      pendingGoogleIdToken.value = idToken
+    }
+  })
+
+  renderButton(el, googleClient, { locale: locale.value })
+}
+
+function handleStudioNameInput(value, setFieldValue, values) {
+  setFieldValue('studio_name', value)
+
+  if (pendingGoogleIdToken.value) {
+    const idToken = pendingGoogleIdToken.value
+    pendingGoogleIdToken.value = null
+    submitGoogleRegistration(idToken, value, values.phone)
   }
 }
 </script>
@@ -51,9 +117,24 @@ async function onSubmit(values) {
     >
       <template #default="{ errors, values, setFieldValue }">
         <div class="auth-row-split mb-4">
-          <v-text-field :model-value="values.studio_name" :label="t('auth.studioName')" prepend-inner-icon="mdi-domain" :error-messages="errors.studio_name" hide-details="auto" @update:model-value="setFieldValue('studio_name', $event)" />
+          <v-text-field
+            :model-value="values.studio_name"
+            :label="t('auth.studioName')"
+            prepend-inner-icon="mdi-domain"
+            :error-messages="errors.studio_name"
+            hide-details="auto"
+            @update:model-value="handleStudioNameInput($event, setFieldValue, values)"
+          />
 
           <v-text-field :model-value="values.owner_name" :label="t('auth.ownerName')" prepend-inner-icon="mdi-account-outline" :error-messages="errors.owner_name" hide-details="auto" @update:model-value="setFieldValue('owner_name', $event)" />
+        </div>
+
+        <div :ref="(el) => onGoogleButtonMount(el, values)" class="d-flex justify-center mb-4"></div>
+
+        <div class="d-flex align-center ga-3 mb-6">
+          <v-divider />
+          <span class="text-caption text-medium-emphasis text-no-wrap">{{ t('auth.orFillInDetails') }}</span>
+          <v-divider />
         </div>
 
         <v-text-field

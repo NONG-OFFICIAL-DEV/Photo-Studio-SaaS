@@ -36,6 +36,16 @@ return [
     ],
 
     /*
+     * "Sign in with Google" — the frontend gets a signed ID token from
+     * Google Identity Services and hands it to the backend to verify. Only
+     * the client ID is needed (used as the `aud` check on the ID token); no
+     * client secret, since there's no authorization-code exchange here.
+     */
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+    ],
+
+    /*
      * A single platform-wide bot for admin/system notifications (subscription
      * events, new tenant signups, ...) — completely separate from the bot
      * each tenant connects in Settings to message their own customers.

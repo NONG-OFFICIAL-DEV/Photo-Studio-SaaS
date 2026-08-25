@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
-import { registerApi, loginApi, logoutApi, meApi, verifyTwoFactorApi } from '@/apis/auth.api'
+import { registerApi, loginApi, logoutApi, meApi, verifyTwoFactorApi, googleAuthApi, googleRegisterApi } from '@/apis/auth.api'
 import { getToken, setToken } from '@/apis/api'
 import { connectEcho, disconnectEcho } from '@/plugins/echo'
 
@@ -79,6 +79,26 @@ export const useAuthStore = defineStore('auth', () => {
     return data
   }
 
+  /**
+   * Login/link only — if this Google account has no matching user yet, the
+   * API responds with `requires_registration: true` instead of a session,
+   * so applySession is skipped and the caller prompts for studio details
+   * (then calls registerWithGoogle) instead of erroring.
+   */
+  async function loginWithGoogle(idToken) {
+    const { data } = await googleAuthApi({ id_token: idToken })
+    if (!data.data.requires_registration) {
+      applySession(data.data, true)
+    }
+    return data
+  }
+
+  async function registerWithGoogle(payload) {
+    const { data } = await googleRegisterApi(payload)
+    applySession(data.data, true)
+    return data
+  }
+
   async function logout() {
     try {
       await logoutApi()
@@ -142,6 +162,8 @@ export const useAuthStore = defineStore('auth', () => {
     hasFeature,
     register,
     login,
+    loginWithGoogle,
+    registerWithGoogle,
     verifyTwoFactor,
     logout,
     fetchMe,

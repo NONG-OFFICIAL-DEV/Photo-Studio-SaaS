@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers\Api\V1\Auth;
 
+use App\DTO\GoogleRegisterData;
 use App\DTO\RegisterTenantData;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\GoogleAuthRequest;
+use App\Http\Requests\Auth\GoogleRegisterRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterTenantRequest;
 use App\Http\Requests\Auth\UpdateEmailRequest;
@@ -12,6 +15,7 @@ use App\Http\Requests\Auth\VerifyTwoFactorRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\AuthService;
+use App\Services\Google\GoogleIdTokenVerifierInterface;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -21,15 +25,41 @@ class AuthController extends Controller
 {
     use ApiResponse;
 
-    public function __construct(protected AuthService $authService)
-    {
-    }
+    public function __construct(
+        protected AuthService $authService,
+        protected GoogleIdTokenVerifierInterface $googleVerifier,
+    ) {}
 
     public function register(RegisterTenantRequest $request): JsonResponse
     {
         $payload = $this->authService->register(RegisterTenantData::fromRequest($request));
 
         return $this->created($this->withAuthPayload($payload), 'Studio registered successfully. Please verify your email.');
+    }
+
+    /**
+     * Login/link only — if this Google account has no matching user yet,
+     * responds with `requires_registration: true` (not an error) so the
+     * frontend can prompt for studio details and call googleRegister().
+     */
+    public function googleAuth(GoogleAuthRequest $request): JsonResponse
+    {
+        $google = $this->googleVerifier->verify($request->string('id_token')->toString());
+        $payload = $this->authService->registerOrLoginWithGoogle($google);
+
+        if (isset($payload['requires_registration'])) {
+            return $this->success($payload, 'This Google account is not registered yet.');
+        }
+
+        return $this->success($this->withAuthPayload($payload), 'Logged in successfully.');
+    }
+
+    public function googleRegister(GoogleRegisterRequest $request): JsonResponse
+    {
+        $google = $this->googleVerifier->verify($request->string('id_token')->toString());
+        $payload = $this->authService->registerOrLoginWithGoogle($google, GoogleRegisterData::fromRequest($request));
+
+        return $this->created($this->withAuthPayload($payload), 'Studio registered successfully.');
     }
 
     public function login(LoginRequest $request): JsonResponse

@@ -12,9 +12,10 @@ use App\Http\Controllers\Api\V1\Album\AlbumController;
 use App\Http\Controllers\Api\V1\Attendance\AttendanceController;
 use App\Http\Controllers\Api\V1\Audit\AuditController;
 use App\Http\Controllers\Api\V1\Auth\AuthController;
-use App\Http\Controllers\Api\V1\Billing\BillingController;
 use App\Http\Controllers\Api\V1\Auth\EmailVerificationController;
 use App\Http\Controllers\Api\V1\Auth\PasswordResetController;
+use App\Http\Controllers\Api\V1\Auth\TwoFactorAuthController;
+use App\Http\Controllers\Api\V1\Billing\BillingController;
 use App\Http\Controllers\Api\V1\Booking\BookingController;
 use App\Http\Controllers\Api\V1\BranchController;
 use App\Http\Controllers\Api\V1\Commission\CommissionEntryController;
@@ -46,7 +47,6 @@ use App\Http\Controllers\Api\V1\Settings\TelegramSettingsController;
 use App\Http\Controllers\Api\V1\Settings\TenantSettingsController;
 use App\Http\Controllers\Api\V1\Telegram\TelegramActivityController;
 use App\Http\Controllers\Api\V1\Telegram\TelegramWebhookController;
-use App\Http\Controllers\Api\V1\Auth\TwoFactorAuthController;
 use App\Http\Controllers\Api\V1\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -69,6 +69,8 @@ Route::prefix('auth')->name('auth.')->group(function () {
     Route::middleware('throttle:auth')->group(function () {
         Route::post('/register', [AuthController::class, 'register']);
         Route::post('/login', [AuthController::class, 'login']);
+        Route::post('/google', [AuthController::class, 'googleAuth']);
+        Route::post('/google/register', [AuthController::class, 'googleRegister']);
         Route::post('/two-factor/verify', [AuthController::class, 'verifyTwoFactor']);
         Route::post('/password/forgot', [PasswordResetController::class, 'sendResetLink']);
         Route::post('/password/reset', [PasswordResetController::class, 'reset']);

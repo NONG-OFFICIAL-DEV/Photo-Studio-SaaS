@@ -4,6 +4,10 @@ export const registerApi = payload => http.post('/v1/auth/register', payload)
 
 export const loginApi = payload => http.post('/v1/auth/login', payload)
 
+export const googleAuthApi = payload => http.post('/v1/auth/google', payload)
+
+export const googleRegisterApi = payload => http.post('/v1/auth/google/register', payload)
+
 export const logoutApi = () => http.post('/v1/auth/logout')
 
 export const refreshApi = () => http.post('/v1/auth/refresh')
