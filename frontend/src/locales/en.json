@@ -1079,6 +1079,8 @@
       "subscriptionsCount": "Subscriptions",
       "confirmDeleteTitle": "Delete plan?",
       "confirmDeleteMessage": "This will permanently delete \"{name}\".",
+      "featureLabelsTitle": "Public Feature Text",
+      "featureLabelsHint": "Exact wording shown for this plan on the public pricing page, in each language. Leave a field blank to hide that feature line for this plan.",
       "fields": {
         "code": "Code",
         "priceMonthly": "Monthly Price",

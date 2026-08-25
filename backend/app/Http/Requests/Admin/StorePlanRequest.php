@@ -34,6 +34,10 @@ class StorePlanRequest extends FormRequest
             'has_telegram' => ['boolean'],
             'trial_days' => ['nullable', 'integer', 'min:0'],
             'is_active' => ['boolean'],
+            'feature_labels' => ['nullable', 'array'],
+            'feature_labels.*' => ['array'],
+            'feature_labels.*.en' => ['nullable', 'string', 'max:255'],
+            'feature_labels.*.km' => ['nullable', 'string', 'max:255'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
         ];
     }
