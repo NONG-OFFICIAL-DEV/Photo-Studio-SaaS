@@ -96,6 +96,18 @@ class AuthService
                 ->where('provider_user_id', $google->sub)
                 ->first();
 
+            // An explicit registration attempt (studio name typed, hit
+            // /google/register) should never silently resolve into an
+            // existing account — that's confusing ("did it create a new
+            // studio or not?") and hides that this Google account or email
+            // already has one. Always a clear, distinct error here,
+            // whether the match is via a previously linked Google account
+            // or just a matching email — login (no $registration) is the
+            // only path that's allowed to resolve to an existing account.
+            if ($registration && ($oauth || User::where('email', $google->email)->exists())) {
+                throw new ApiException(409, 'An account with this email already exists. Please log in instead.', 'GOOGLE_ACCOUNT_ALREADY_EXISTS');
+            }
+
             if ($oauth) {
                 /** @var User $user */
                 $user = $oauth->user;

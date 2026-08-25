@@ -20,6 +20,7 @@ const loading = ref(false)
 const errorMessage = ref('')
 const showPassword = ref(false)
 const pendingGoogleIdToken = ref(null)
+const studioNameFieldRef = ref(null)
 // Register starts collapsed to just Studio Name + Google, so first-time
 // visitors aren't greeted by all 6 fields at once — clicking "continue with
 // email instead" reveals the rest for people who don't want Google.
@@ -85,8 +86,12 @@ async function onGoogleButtonMount(el, values) {
       submitGoogleRegistration(idToken, values.studio_name, values.phone)
     } else {
       // Held until the studio name field is filled in (see
-      // handleStudioNameInput below) — Google can't supply one.
+      // handleStudioNameInput below) — Google can't supply one. Without
+      // this, picking a Google account with the name field still empty
+      // looked like nothing happened at all.
       pendingGoogleIdToken.value = idToken
+      errorMessage.value = t('auth.enterStudioNameToContinueWithGoogle')
+      studioNameFieldRef.value?.focus()
     }
   })
 
@@ -96,9 +101,10 @@ async function onGoogleButtonMount(el, values) {
 function handleStudioNameInput(value, setFieldValue, values) {
   setFieldValue('studio_name', value)
 
-  if (pendingGoogleIdToken.value) {
+  if (pendingGoogleIdToken.value && value) {
     const idToken = pendingGoogleIdToken.value
     pendingGoogleIdToken.value = null
+    errorMessage.value = ''
     submitGoogleRegistration(idToken, value, values.phone)
   }
 }
@@ -122,6 +128,7 @@ function handleStudioNameInput(value, setFieldValue, values) {
     >
       <template #default="{ errors, values, setFieldValue }">
         <v-text-field
+          ref="studioNameFieldRef"
           :model-value="values.studio_name"
           :label="t('auth.studioName')"
           prepend-inner-icon="mdi-domain"

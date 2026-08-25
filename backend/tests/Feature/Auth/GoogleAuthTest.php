@@ -122,6 +122,42 @@ class GoogleAuthTest extends TestCase
         $this->assertDatabaseMissing('user_oauth_providers', ['user_id' => $user->id]);
     }
 
+    public function test_registering_with_an_email_that_already_has_an_account_is_rejected(): void
+    {
+        $tenant = Tenant::factory()->create();
+        User::factory()->create(['tenant_id' => $tenant->id, 'email' => 'existing@example.test']);
+
+        $this->fakeGoogleToken('tok-existing', 'google-sub-6', 'existing@example.test');
+
+        $this->postJson('/api/v1/auth/google/register', [
+            'id_token' => 'tok-existing',
+            'studio_name' => 'Duplicate Studio',
+        ])
+            ->assertStatus(409)
+            ->assertJsonPath('code', 'GOOGLE_ACCOUNT_ALREADY_EXISTS');
+
+        $this->assertDatabaseMissing('tenants', ['name' => 'Duplicate Studio']);
+        $this->assertDatabaseMissing('user_oauth_providers', ['provider_user_id' => 'google-sub-6']);
+    }
+
+    public function test_registering_with_an_already_linked_google_account_is_rejected(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $user = User::factory()->create(['tenant_id' => $tenant->id]);
+        UserOauthProvider::create(['user_id' => $user->id, 'provider' => 'google', 'provider_user_id' => 'google-sub-7']);
+
+        $this->fakeGoogleToken('tok-already-linked', 'google-sub-7', $user->email);
+
+        $this->postJson('/api/v1/auth/google/register', [
+            'id_token' => 'tok-already-linked',
+            'studio_name' => 'Another Studio',
+        ])
+            ->assertStatus(409)
+            ->assertJsonPath('code', 'GOOGLE_ACCOUNT_ALREADY_EXISTS');
+
+        $this->assertDatabaseMissing('tenants', ['name' => 'Another Studio']);
+    }
+
     public function test_an_unverified_google_email_is_rejected(): void
     {
         $this->fakeGoogleToken('tok-unverified-google', 'google-sub-5', 'nope@example.test', verified: false);
