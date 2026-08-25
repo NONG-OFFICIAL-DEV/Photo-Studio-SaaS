@@ -65,7 +65,8 @@ async function submitGoogleRegistration(idToken, studioName, phone) {
 // `values` is vee-validate's reactive object, mutated in place across
 // renders — reading values.studio_name/phone inside this closure at click
 // time (not at render time it was created) always sees the latest typed
-// value, so initialize() only needs to be called once. renderButton() is
+// value. initialize() is safe to call every time this fires (the underlying
+// Google call only ever fires once, see useGoogleIdentity.js); renderButton() is
 // re-called (not just once ever) whenever the app's language changes, so
 // the button's own text updates live — but NOT on every re-render (e.g.
 // typing in other fields also re-renders this component via reactive

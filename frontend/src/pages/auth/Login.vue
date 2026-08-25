@@ -97,9 +97,10 @@ async function handleGoogleCredential(idToken) {
   }
 }
 
-// initialize() runs exactly once (Google warns/logs if called again);
-// renderButton() re-renders whenever the app's language changes, so the
-// button's own text updates live without needing a page reload.
+// initialize() is safe to call on every mount (the underlying Google call
+// only ever fires once, see useGoogleIdentity.js); renderButton() re-renders
+// whenever the app's language changes, so the button's own text updates
+// live without needing a page reload.
 watch(
   locale,
   async () => {
