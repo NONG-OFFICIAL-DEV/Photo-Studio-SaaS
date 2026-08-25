@@ -20,6 +20,7 @@ const loading = ref(false)
 const errorMessage = ref('')
 const showPassword = ref(false)
 const pendingGoogleIdToken = ref(null)
+const googleButtonLoading = ref(true)
 
 async function onSubmit(values) {
   loading.value = true
@@ -66,14 +67,18 @@ async function submitGoogleRegistration(idToken, studioName, phone) {
 // renders — reading values.studio_name/phone inside this closure at click
 // time (not at render time it was created) always sees the latest typed
 // value, so initialize() only needs to be called once. renderButton() is
-// re-called (not just once ever) whenever the app's language changes, so
-// the button's own text updates live — but NOT on every re-render (e.g.
-// typing in other fields also re-renders this component via reactive
-// `t()` calls), or the button would flicker/re-mount constantly.
+// re-called (destroy + recreate — Google has no live-retranslate API)
+// whenever the app's language changes, so the button's own text stays in
+// sync — but NOT on every re-render (e.g. typing in other fields also
+// re-renders this component via reactive `t()` calls), guarded by
+// `lastRenderedLocale`. The container keeps a fixed height and a brief
+// spinner covers the swap (see template) so this reads as a small loading
+// blip instead of the layout jumping.
 let lastRenderedLocale = null
 async function onGoogleButtonMount(el, values) {
   if (!el || lastRenderedLocale === locale.value) return
   lastRenderedLocale = locale.value
+  googleButtonLoading.value = true
 
   googleClient ??= await initialize((idToken) => {
     if (values.studio_name) {
@@ -86,6 +91,9 @@ async function onGoogleButtonMount(el, values) {
   })
 
   renderButton(el, googleClient, { locale: locale.value })
+  window.setTimeout(() => {
+    googleButtonLoading.value = false
+  }, 250)
 }
 
 function handleStudioNameInput(value, setFieldValue, values) {
@@ -129,7 +137,10 @@ function handleStudioNameInput(value, setFieldValue, values) {
           <v-text-field :model-value="values.owner_name" :label="t('auth.ownerName')" prepend-inner-icon="mdi-account-outline" :error-messages="errors.owner_name" hide-details="auto" @update:model-value="setFieldValue('owner_name', $event)" />
         </div>
 
-        <div :ref="(el) => onGoogleButtonMount(el, values)" class="d-flex justify-center mb-4"></div>
+        <div class="google-button-slot mb-4">
+          <v-skeleton-loader v-if="googleButtonLoading" type="ossein" width="350" height="40" />
+          <div v-show="!googleButtonLoading" :ref="(el) => onGoogleButtonMount(el, values)"></div>
+        </div>
 
         <div class="d-flex align-center ga-3 mb-6">
           <v-divider />
@@ -190,6 +201,13 @@ function handleStudioNameInput(value, setFieldValue, values) {
 </template>
 
 <style scoped>
+.google-button-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+}
+
 .auth-row-split {
   display: flex;
   gap: 12px;

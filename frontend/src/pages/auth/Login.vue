@@ -21,6 +21,7 @@ const loading = ref(false)
 const errorMessage = ref('')
 const showPassword = ref(false)
 const googleButtonRef = ref(null)
+const googleButtonLoading = ref(true)
 
 // Set once a login response comes back with requires_two_factor — switches
 // the page into the code-entry step instead of navigating away.
@@ -97,14 +98,20 @@ async function handleGoogleCredential(idToken) {
   }
 }
 
-// initialize() runs exactly once (Google warns/logs if called again);
-// renderButton() re-renders whenever the app's language changes, so the
-// button's own text updates live without needing a page reload.
+// initialize() runs exactly once; renderButton() re-renders (destroy +
+// recreate — Google has no live-retranslate API) whenever the app's
+// language changes, so the button's own text stays in sync. The container
+// keeps a fixed height and a brief spinner covers the swap (see template)
+// so this reads as a small loading blip instead of the layout jumping.
 watch(
   locale,
   async () => {
+    googleButtonLoading.value = true
     googleClient ??= await initialize(handleGoogleCredential)
     renderButton(googleButtonRef.value, googleClient, { locale: locale.value })
+    window.setTimeout(() => {
+      googleButtonLoading.value = false
+    }, 250)
   },
   { immediate: true },
 )
@@ -159,7 +166,10 @@ watch(
     </form>
 
     <template v-if="!twoFactorToken">
-      <div ref="googleButtonRef" class="d-flex justify-center mb-4"></div>
+      <div class="google-button-slot mb-4">
+        <v-skeleton-loader v-if="googleButtonLoading" type="ossein" width="350" height="40" />
+        <div v-show="!googleButtonLoading" ref="googleButtonRef"></div>
+      </div>
 
       <div class="d-flex align-center ga-3 mb-6">
         <v-divider />
@@ -222,6 +232,13 @@ watch(
 </template>
 
 <style scoped>
+.google-button-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+}
+
 .auth-link {
   color: rgb(var(--v-theme-primary));
   text-decoration: none;
