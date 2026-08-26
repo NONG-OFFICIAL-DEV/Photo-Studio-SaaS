@@ -3,7 +3,10 @@
 namespace Tests\Feature\User;
 
 use App\Enums\TenantRole;
+use App\Models\User;
+use App\Notifications\User\EmployeeInvitedNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Tests\Concerns\CreatesTenantUsers;
 use Tests\TestCase;
 
@@ -26,6 +29,28 @@ class UserCreateTest extends TestCase
 
         $response->assertJsonPath('data.name', 'New Photographer');
         $this->assertDatabaseHas('users', ['email' => 'photographer@example.com']);
+    }
+
+    public function test_owner_can_invite_an_employee_without_a_password(): void
+    {
+        Notification::fake();
+
+        [, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+
+        $response = $this->actingAsUser($owner)
+            ->postJson('/api/v1/users', [
+                'name' => 'Invited Photographer',
+                'email' => 'invited@example.com',
+                'role' => TenantRole::Photographer->value,
+            ])
+            ->assertCreated();
+
+        $response->assertJsonPath('data.name', 'Invited Photographer');
+        $this->assertDatabaseHas('users', ['email' => 'invited@example.com']);
+        $this->assertDatabaseHas('password_reset_tokens', ['email' => 'invited@example.com']);
+
+        $invited = User::withoutGlobalScopes()->where('email', 'invited@example.com')->firstOrFail();
+        Notification::assertSentTo($invited, EmployeeInvitedNotification::class);
     }
 
     public function test_a_user_without_users_create_cannot_create_an_employee(): void
@@ -106,7 +131,7 @@ class UserCreateTest extends TestCase
 
     public function test_plan_limits_are_reachable_by_any_tenant_role(): void
     {
-        [$tenant, ] = $this->createTenantWithUser(TenantRole::Owner);
+        [$tenant] = $this->createTenantWithUser(TenantRole::Owner);
         $viewer = $this->addUserToTenant($tenant, TenantRole::Viewer);
         $tenant->activeSubscription->plan->update(['max_users' => 5, 'monthly_order_limit' => 20, 'max_branches' => 3]);
 

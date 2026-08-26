@@ -47,6 +47,17 @@ export const getAdminTenantRolePermissionsApi = tenantId => http.get(`/v1/admin/
 export const updateAdminTenantRolePermissionsApi = (tenantId, role, permissions) =>
   http.put(`/v1/admin/tenants/${tenantId}/role-permissions/${role}`, { permissions })
 
+export const getAdminTenantUsersApi = tenantId => http.get(`/v1/admin/tenants/${tenantId}/users`)
+
+export const deactivateAdminTenantUserApi = (tenantId, userId) =>
+  http.post(`/v1/admin/tenants/${tenantId}/users/${userId}/deactivate`)
+
+export const reactivateAdminTenantUserApi = (tenantId, userId) =>
+  http.post(`/v1/admin/tenants/${tenantId}/users/${userId}/reactivate`)
+
+export const sendAdminUserPasswordResetApi = (tenantId, userId) =>
+  http.post(`/v1/admin/tenants/${tenantId}/users/${userId}/reset-password`)
+
 export const getAdminPlatformSettingsApi = () => http.get('/v1/admin/platform-settings')
 
 export const updateAdminPlatformSettingsApi = payload => http.put('/v1/admin/platform-settings', payload)

@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\Admin\AdminPlatformSettingController;
 use App\Http\Controllers\Api\V1\Admin\AdminRolePermissionController;
 use App\Http\Controllers\Api\V1\Admin\AdminTenantController;
 use App\Http\Controllers\Api\V1\Admin\AdminTenantRolePermissionController;
+use App\Http\Controllers\Api\V1\Admin\AdminUserController;
 use App\Http\Controllers\Api\V1\Album\AlbumController;
 use App\Http\Controllers\Api\V1\Attendance\AttendanceController;
 use App\Http\Controllers\Api\V1\Audit\AuditController;
@@ -419,6 +420,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth:api', 'super-admin'])-
         Route::prefix('{tenant}/role-permissions')->name('role-permissions.')->group(function () {
             Route::get('/', [AdminTenantRolePermissionController::class, 'index']);
             Route::put('/{role}', [AdminTenantRolePermissionController::class, 'update']);
+        });
+
+        Route::prefix('{tenant}/users')->name('users.')->group(function () {
+            Route::get('/', [AdminUserController::class, 'index']);
+            Route::post('/{user}/deactivate', [AdminUserController::class, 'deactivate']);
+            Route::post('/{user}/reactivate', [AdminUserController::class, 'reactivate']);
+            Route::post('/{user}/reset-password', [AdminUserController::class, 'sendPasswordReset']);
         });
     });
 

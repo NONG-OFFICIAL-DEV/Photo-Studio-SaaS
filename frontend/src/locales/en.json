@@ -881,6 +881,9 @@
     "commissionRate": "Commission Rate",
     "basePay": "Base Pay",
     "passwordHint": "The employee will use this password to log in — share it with them directly.",
+    "sendInvite": "Send email invite",
+    "setPasswordNow": "Set password now",
+    "inviteHint": "We'll email the employee a link to set their own password.",
     "deactivate": "Deactivate",
     "reactivate": "Reactivate",
     "confirmDeactivateTitle": "Deactivate employee?",
@@ -902,6 +905,7 @@
       "updatedSuccess": "Employee profile updated successfully.",
       "saveError": "Unable to save employee profile.",
       "createdSuccess": "Employee created successfully.",
+      "inviteSentSuccess": "Employee created successfully. An invite email has been sent.",
       "createError": "Unable to create employee.",
       "deactivatedSuccess": "Employee deactivated successfully.",
       "deactivateError": "Unable to deactivate employee.",
@@ -1045,6 +1049,7 @@
         "activate": "Activate",
         "manageSubscription": "Manage Subscription",
         "managePermissions": "Manage Permissions",
+        "manageUsers": "Manage Users",
         "delete": "Delete"
       },
       "confirmSuspendTitle": "Suspend tenant?",
@@ -1124,6 +1129,24 @@
       "messages": {
         "savedSuccess": "This studio's role permissions were updated.",
         "saveError": "Could not save this studio's role permissions."
+      }
+    },
+    "tenantUsers": {
+      "dialogTitle": "Manage Users — {name}",
+      "lastLogin": "Last Login",
+      "actions": {
+        "sendPasswordReset": "Send Password Reset",
+        "deactivate": "Deactivate",
+        "reactivate": "Reactivate"
+      },
+      "confirmDeactivateTitle": "Deactivate employee?",
+      "confirmReactivateTitle": "Reactivate employee?",
+      "confirmMessage": "This affects \"{name}\"'s access to their studio.",
+      "messages": {
+        "deactivatedSuccess": "Employee deactivated successfully.",
+        "reactivatedSuccess": "Employee reactivated successfully.",
+        "resetLinkSent": "Password reset link sent.",
+        "actionError": "Could not complete this action."
       }
     },
     "tenantDelete": {
@@ -1507,6 +1530,9 @@
       },
       "tenant": {
         "registered": "New tenant registered: {tenant} ({plan} plan)"
+      },
+      "employee": {
+        "invited": "You've been invited to join {tenant}"
       },
       "payment": {
         "claimed": "{tenant} says they have paid — review the claim"

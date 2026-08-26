@@ -41,6 +41,7 @@ const initialValues = {
   name: '',
   email: '',
   phone: '',
+  creation_mode: 'invite',
   password: '',
   branch_id: null,
   role: 'viewer',
@@ -60,9 +61,18 @@ async function onSubmit(values) {
   loading.value = true
   submitError.value = null
 
+  // creation_mode is a frontend-only toggle, not a backend field — and in
+  // invite mode, password is left blank in the form, so it's omitted
+  // entirely rather than sent as an empty string (an absent password is
+  // exactly what tells the backend to send an invite).
+  const { creation_mode, password, ...payload } = values
+  if (creation_mode === 'password') {
+    payload.password = password
+  }
+
   try {
-    await createUserApi(values)
-    appStore.notify(t('employees.messages.createdSuccess'))
+    await createUserApi(payload)
+    appStore.notify(t(creation_mode === 'invite' ? 'employees.messages.inviteSentSuccess' : 'employees.messages.createdSuccess'))
     emit('saved')
     emit('update:modelValue', false)
   } catch (error) {
@@ -89,7 +99,21 @@ async function onSubmit(values) {
           <v-col cols="12" sm="6">
             <v-text-field :model-value="values.phone" :label="t('fields.phone')" :error-messages="errors.phone" @update:model-value="setFieldValue('phone', $event)" />
           </v-col>
-          <v-col cols="12" sm="6">
+          <v-col cols="12">
+            <v-btn-toggle
+              :model-value="values.creation_mode"
+              color="primary"
+              variant="outlined"
+              density="comfortable"
+              mandatory
+              divided
+              @update:model-value="setFieldValue('creation_mode', $event)"
+            >
+              <v-btn value="invite">{{ t('employees.sendInvite') }}</v-btn>
+              <v-btn value="password">{{ t('employees.setPasswordNow') }}</v-btn>
+            </v-btn-toggle>
+          </v-col>
+          <v-col v-if="values.creation_mode === 'password'" cols="12" sm="6">
             <v-text-field
               :model-value="values.password"
               :label="`${t('auth.password')} *`"
@@ -100,6 +124,9 @@ async function onSubmit(values) {
               persistent-hint
               @update:model-value="setFieldValue('password', $event)"
             />
+          </v-col>
+          <v-col v-else cols="12">
+            <p class="text-body-2 text-medium-emphasis">{{ t('employees.inviteHint') }}</p>
           </v-col>
           <v-col v-if="branchStore.branches.length > 1" cols="12">
             <v-select

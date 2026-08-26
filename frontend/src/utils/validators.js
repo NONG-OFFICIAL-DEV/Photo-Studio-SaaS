@@ -218,7 +218,15 @@ export const employeeSchema = yup.object({
   name: yup.string().required().max(255),
   email: yup.string().required().email(),
   phone: yup.string().nullable().max(30),
-  password: passwordRule,
+  // 'invite' (default) sends an email letting the employee set their own
+  // password — see EmployeeFormDialog.vue — so password is only required
+  // in 'password' mode.
+  creation_mode: yup.string().oneOf(['invite', 'password']).required(),
+  password: yup.string().when('creation_mode', {
+    is: 'password',
+    then: () => passwordRule,
+    otherwise: (schema) => schema.notRequired(),
+  }),
   branch_id: yup.string().nullable(),
   role: yup.string().required(),
   pay_type: yup.string().required(),

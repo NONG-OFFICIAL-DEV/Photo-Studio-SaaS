@@ -11,20 +11,21 @@ use App\Http\Requests\User\UpdateUserEmploymentRequest;
 use App\Http\Requests\User\UpdateUserProfileRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Notifications\User\EmployeeInvitedNotification;
 use App\Services\BranchResolutionService;
 use App\Services\SubscriptionService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
     use ApiResponse;
 
-    public function __construct(protected SubscriptionService $subscriptions, protected BranchResolutionService $branches)
-    {
-    }
+    public function __construct(protected SubscriptionService $subscriptions, protected BranchResolutionService $branches) {}
 
     /**
      * Tenant staff list — backs both the "assign photographer" pickers
@@ -48,9 +49,12 @@ class UserController extends Controller
     }
 
     /**
-     * Creates a new employee for the current tenant, setting their password
-     * directly (no invite-email flow — the app has no working mailer wired
-     * up yet). Blocked once the plan's max_users limit is reached.
+     * Creates a new employee for the current tenant. The owner either sets
+     * a password directly, or — if none is submitted — the employee gets a
+     * random, unusable one (same pattern as Google-only accounts in
+     * AuthService::registerOrLoginWithGoogle()) and an invite email letting
+     * them set their own via the existing password-reset flow. Blocked once
+     * the plan's max_users limit is reached.
      */
     public function store(StoreUserRequest $request): JsonResponse
     {
@@ -60,13 +64,15 @@ class UserController extends Controller
 
         $branchId = $this->branches->resolveForCreate($tenant, $request->validated('branch_id'));
 
+        $password = $request->validated('password');
+
         $user = User::create([
             'tenant_id' => $tenant->id,
             'branch_id' => $branchId,
             'name' => $request->validated('name'),
             'email' => $request->validated('email'),
             'phone' => $request->validated('phone'),
-            'password' => Hash::make($request->validated('password')),
+            'password' => Hash::make($password ?? Str::random(40)),
             'pay_type' => $request->validated('pay_type') ?? PayType::Salary->value,
             'base_pay' => $request->validated('base_pay'),
             'commission_rate' => $request->validated('commission_rate'),
@@ -74,7 +80,22 @@ class UserController extends Controller
 
         $user->assignRole($request->validated('role'));
 
-        return $this->success(new UserResource($user->fresh('roles')), 'Employee created successfully.', 201);
+        $message = 'Employee created successfully.';
+
+        if (! $password) {
+            // The callback runs instead of Laravel's default ResetPassword
+            // notification — reuses the broker's token creation/throttle
+            // logic for free while sending our own invite-flavored email
+            // through the exact same reset-password page/endpoint.
+            Password::sendResetLink(
+                ['email' => $user->email],
+                fn ($user, $token) => $user->notify(new EmployeeInvitedNotification($tenant, $token)),
+            );
+
+            $message = 'Employee created successfully. An invite email has been sent.';
+        }
+
+        return $this->success(new UserResource($user->fresh('roles')), $message, 201);
     }
 
     /**

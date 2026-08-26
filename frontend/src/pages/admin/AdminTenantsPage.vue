@@ -7,6 +7,7 @@ import AppStatusChip from '@/components/common/AppStatusChip.vue'
 import AppConfirmDialog from '@/components/common/AppConfirmDialog.vue'
 import AdminSubscriptionDialog from '@/components/admin/AdminSubscriptionDialog.vue'
 import AdminTenantRolePermissionDialog from '@/components/admin/AdminTenantRolePermissionDialog.vue'
+import AdminTenantUsersDialog from '@/components/admin/AdminTenantUsersDialog.vue'
 import AdminTenantDeleteDialog from '@/components/admin/AdminTenantDeleteDialog.vue'
 import {
   getAdminTenantsApi,
@@ -57,6 +58,14 @@ const permissionsTarget = ref(null)
 function openPermissionsDialog(tenant) {
   permissionsTarget.value = tenant
   permissionsDialog.value = true
+}
+
+const usersDialog = ref(false)
+const usersTarget = ref(null)
+
+function openUsersDialog(tenant) {
+  usersTarget.value = tenant
+  usersDialog.value = true
 }
 
 const deleteDialog = ref(false)
@@ -157,6 +166,11 @@ async function confirmToggle() {
                 @click="openPermissionsDialog(item)"
               />
               <v-list-item
+                :title="t('admin.tenants.actions.manageUsers')"
+                prepend-icon="mdi-account-multiple-outline"
+                @click="openUsersDialog(item)"
+              />
+              <v-list-item
                 v-if="item.is_active"
                 class="text-warning"
                 :title="t('admin.tenants.actions.suspend')"
@@ -199,6 +213,8 @@ async function confirmToggle() {
     />
 
     <AdminTenantRolePermissionDialog v-model="permissionsDialog" :tenant="permissionsTarget" />
+
+    <AdminTenantUsersDialog v-model="usersDialog" :tenant="usersTarget" />
 
     <AdminTenantDeleteDialog
       v-model="deleteDialog"

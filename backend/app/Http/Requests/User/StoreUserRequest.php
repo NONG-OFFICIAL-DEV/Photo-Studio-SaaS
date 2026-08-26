@@ -25,7 +25,9 @@ class StoreUserRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')],
             'phone' => ['nullable', 'string', 'max:30'],
-            'password' => ['required', 'string', 'min:8'],
+            // Absent/null means "send an invite instead" — see
+            // UserController::store().
+            'password' => ['nullable', 'string', 'min:8'],
             'branch_id' => [
                 'nullable', 'uuid',
                 Rule::exists('branches', 'id')->where('tenant_id', $this->user()->tenant_id),
