@@ -1,25 +1,27 @@
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import AppForm from '@/components/common/AppForm.vue'
+import AppGoogleIcon from '@/components/common/AppGoogleIcon.vue'
 import { registerSchema } from '@/utils/validators'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
 import { translateApiMessage } from '@/utils/apiMessages'
 import { useGoogleIdentity } from '@/composables/useGoogleIdentity'
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const router = useRouter()
 const auth = useAuthStore()
 const appStore = useAppStore()
-const { initialize, renderButton } = useGoogleIdentity()
-let googleClient = null
+const { preload, requestSignIn } = useGoogleIdentity()
+
+onMounted(preload)
 
 const loading = ref(false)
 const errorMessage = ref('')
 const showPassword = ref(false)
-const pendingGoogleIdToken = ref(null)
+const pendingGoogleCode = ref(null)
 const studioNameFieldRef = ref(null)
 // Register starts collapsed to just Studio Name + Google, so first-time
 // visitors aren't greeted by all 6 fields at once — clicking "continue with
@@ -47,13 +49,13 @@ async function onSubmit(values) {
  * and, if a studio name is already typed, submits immediately; otherwise it
  * waits (the credential is submitted the moment the name field gets one).
  */
-async function submitGoogleRegistration(idToken, studioName, phone) {
+async function submitGoogleRegistration(code, studioName, phone) {
   loading.value = true
   errorMessage.value = ''
 
   try {
     await auth.registerWithGoogle({
-      id_token: idToken,
+      code,
       studio_name: studioName,
       phone: phone || null,
     })
@@ -61,51 +63,40 @@ async function submitGoogleRegistration(idToken, studioName, phone) {
     router.push({ name: 'dashboard' })
   } catch (error) {
     errorMessage.value = translateApiMessage(error, 'auth.googleSignInError')
-    pendingGoogleIdToken.value = null
+    pendingGoogleCode.value = null
   } finally {
     loading.value = false
   }
 }
 
-// `values` is vee-validate's reactive object, mutated in place across
-// renders — reading values.studio_name/phone inside this closure at click
-// time (not at render time it was created) always sees the latest typed
-// value, so initialize() only needs to be called once. renderButton() is
-// re-called (destroy + recreate — Google has no live-retranslate API)
-// whenever the app's language changes, so the button's own text stays in
-// sync — but NOT on every re-render (e.g. typing in other fields also
-// re-renders this component via reactive `t()` calls), guarded by
-// `lastRenderedLocale`.
-let lastRenderedLocale = null
-async function onGoogleButtonMount(el, values) {
-  if (!el || lastRenderedLocale === locale.value) return
-  lastRenderedLocale = locale.value
-
-  googleClient ??= await initialize((idToken) => {
+/**
+ * `values` is vee-validate's reactive object — read directly at click time
+ * (not captured earlier), so it always reflects whatever's currently typed.
+ */
+function handleGoogleClick(values) {
+  requestSignIn((code) => {
     if (values.studio_name) {
-      submitGoogleRegistration(idToken, values.studio_name, values.phone)
+      submitGoogleRegistration(code, values.studio_name, values.phone)
     } else {
       // Held until the studio name field is filled in (see
       // handleStudioNameInput below) — Google can't supply one. Without
       // this, picking a Google account with the name field still empty
       // looked like nothing happened at all.
-      pendingGoogleIdToken.value = idToken
+      pendingGoogleCode.value = code
       errorMessage.value = t('auth.enterStudioNameToContinueWithGoogle')
       studioNameFieldRef.value?.focus()
     }
   })
-
-  renderButton(el, googleClient, { locale: locale.value })
 }
 
 function handleStudioNameInput(value, setFieldValue, values) {
   setFieldValue('studio_name', value)
 
-  if (pendingGoogleIdToken.value && value) {
-    const idToken = pendingGoogleIdToken.value
-    pendingGoogleIdToken.value = null
+  if (pendingGoogleCode.value && value) {
+    const code = pendingGoogleCode.value
+    pendingGoogleCode.value = null
     errorMessage.value = ''
-    submitGoogleRegistration(idToken, value, values.phone)
+    submitGoogleRegistration(code, value, values.phone)
   }
 }
 </script>
@@ -137,9 +128,10 @@ function handleStudioNameInput(value, setFieldValue, values) {
           @update:model-value="handleStudioNameInput($event, setFieldValue, values)"
         />
 
-        <div class="google-button-slot mb-4">
-          <div :ref="(el) => onGoogleButtonMount(el, values)"></div>
-        </div>
+        <v-btn variant="outlined" block size="large" class="mb-4 text-none" @click="handleGoogleClick(values)">
+          <AppGoogleIcon size="18" class="mr-2" />
+          {{ t('auth.createWithGoogle') }}
+        </v-btn>
 
         <div v-if="!showEmailForm" class="text-center mb-2">
           <v-btn variant="text" color="primary" class="text-none" @click="showEmailForm = true">
@@ -218,13 +210,6 @@ function handleStudioNameInput(value, setFieldValue, values) {
 </template>
 
 <style scoped>
-.google-button-slot {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 44px;
-}
-
 .auth-row-split {
   display: flex;
   gap: 12px;

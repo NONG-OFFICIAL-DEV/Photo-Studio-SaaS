@@ -1,26 +1,27 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import AppForm from '@/components/common/AppForm.vue'
+import AppGoogleIcon from '@/components/common/AppGoogleIcon.vue'
 import { loginSchema } from '@/utils/validators'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
 import { translateApiMessage } from '@/utils/apiMessages'
 import { useGoogleIdentity } from '@/composables/useGoogleIdentity'
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const router = useRouter()
 const route = useRoute()
 const auth = useAuthStore()
 const appStore = useAppStore()
-const { initialize, renderButton } = useGoogleIdentity()
-let googleClient = null
+const { preload, requestSignIn } = useGoogleIdentity()
+
+onMounted(preload)
 
 const loading = ref(false)
 const errorMessage = ref('')
 const showPassword = ref(false)
-const googleButtonRef = ref(null)
 
 // Set once a login response comes back with requires_two_factor — switches
 // the page into the code-entry step instead of navigating away.
@@ -79,12 +80,12 @@ function backToLogin() {
   errorMessage.value = ''
 }
 
-async function handleGoogleCredential(idToken) {
+async function handleGoogleCredential(code) {
   loading.value = true
   errorMessage.value = ''
 
   try {
-    const response = await auth.loginWithGoogle(idToken)
+    const response = await auth.loginWithGoogle(code)
     if (response.data.requires_registration) {
       errorMessage.value = t('auth.googleAccountNotRegistered')
     } else {
@@ -97,17 +98,9 @@ async function handleGoogleCredential(idToken) {
   }
 }
 
-// initialize() runs exactly once; renderButton() re-renders (destroy +
-// recreate — Google has no live-retranslate API) whenever the app's
-// language changes, so the button's own text stays in sync.
-watch(
-  locale,
-  async () => {
-    googleClient ??= await initialize(handleGoogleCredential)
-    renderButton(googleButtonRef.value, googleClient, { locale: locale.value })
-  },
-  { immediate: true },
-)
+function handleGoogleClick() {
+  requestSignIn(handleGoogleCredential)
+}
 </script>
 
 <template>
@@ -159,9 +152,10 @@ watch(
     </form>
 
     <template v-if="!twoFactorToken">
-      <div class="google-button-slot mb-4">
-        <div ref="googleButtonRef"></div>
-      </div>
+      <v-btn variant="outlined" block size="large" class="mb-4 text-none" @click="handleGoogleClick">
+        <AppGoogleIcon size="18" class="mr-2" />
+        {{ t('auth.loginWithGoogle') }}
+      </v-btn>
 
       <div class="d-flex align-center ga-3 mb-6">
         <v-divider />
@@ -224,13 +218,6 @@ watch(
 </template>
 
 <style scoped>
-.google-button-slot {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 44px;
-}
-
 .auth-link {
   color: rgb(var(--v-theme-primary));
   text-decoration: none;

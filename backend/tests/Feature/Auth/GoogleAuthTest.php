@@ -5,10 +5,12 @@ namespace Tests\Feature\Auth;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Models\UserOauthProvider;
+use App\Services\Google\GoogleAuthorizationCodeExchangerInterface;
 use App\Services\Google\GoogleIdTokenVerifierInterface;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\PlanSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\FakeGoogleAuthorizationCodeExchanger;
 use Tests\Support\FakeGoogleIdTokenVerifier;
 use Tests\TestCase;
 
@@ -24,6 +26,7 @@ class GoogleAuthTest extends TestCase
 
         FakeGoogleIdTokenVerifier::$claims = [];
         $this->app->bind(GoogleIdTokenVerifierInterface::class, fn () => new FakeGoogleIdTokenVerifier);
+        $this->app->bind(GoogleAuthorizationCodeExchangerInterface::class, fn () => new FakeGoogleAuthorizationCodeExchanger);
     }
 
     protected function fakeGoogleToken(string $token, string $sub, string $email, bool $verified = true, ?string $name = 'Google User'): void
@@ -40,7 +43,7 @@ class GoogleAuthTest extends TestCase
     {
         $this->fakeGoogleToken('tok-new', 'google-sub-1', 'new@example.test');
 
-        $this->postJson('/api/v1/auth/google', ['id_token' => 'tok-new'])
+        $this->postJson('/api/v1/auth/google', ['code' => 'tok-new'])
             ->assertOk()
             ->assertJsonPath('data.requires_registration', true);
 
@@ -52,7 +55,7 @@ class GoogleAuthTest extends TestCase
         $this->fakeGoogleToken('tok-new', 'google-sub-1', 'new@example.test', name: 'New Owner');
 
         $response = $this->postJson('/api/v1/auth/google/register', [
-            'id_token' => 'tok-new',
+            'code' => 'tok-new',
             'studio_name' => 'Google Studio',
         ]);
 
@@ -83,7 +86,7 @@ class GoogleAuthTest extends TestCase
 
         $this->fakeGoogleToken('tok-returning', 'google-sub-2', $user->email);
 
-        $this->postJson('/api/v1/auth/google', ['id_token' => 'tok-returning'])
+        $this->postJson('/api/v1/auth/google', ['code' => 'tok-returning'])
             ->assertOk()
             ->assertJsonPath('data.user.email', $user->email)
             ->assertJsonStructure(['data' => ['access_token', 'token_type', 'expires_in']]);
@@ -97,7 +100,7 @@ class GoogleAuthTest extends TestCase
 
         $this->fakeGoogleToken('tok-link', 'google-sub-3', 'verified@example.test');
 
-        $this->postJson('/api/v1/auth/google', ['id_token' => 'tok-link'])
+        $this->postJson('/api/v1/auth/google', ['code' => 'tok-link'])
             ->assertOk()
             ->assertJsonPath('data.user.email', 'verified@example.test');
 
@@ -115,7 +118,7 @@ class GoogleAuthTest extends TestCase
 
         $this->fakeGoogleToken('tok-unverified-local', 'google-sub-4', 'unverified@example.test');
 
-        $this->postJson('/api/v1/auth/google', ['id_token' => 'tok-unverified-local'])
+        $this->postJson('/api/v1/auth/google', ['code' => 'tok-unverified-local'])
             ->assertStatus(409)
             ->assertJsonPath('code', 'REQUIRES_LOGIN_TO_LINK');
 
@@ -130,7 +133,7 @@ class GoogleAuthTest extends TestCase
         $this->fakeGoogleToken('tok-existing', 'google-sub-6', 'existing@example.test');
 
         $this->postJson('/api/v1/auth/google/register', [
-            'id_token' => 'tok-existing',
+            'code' => 'tok-existing',
             'studio_name' => 'Duplicate Studio',
         ])
             ->assertStatus(409)
@@ -149,7 +152,7 @@ class GoogleAuthTest extends TestCase
         $this->fakeGoogleToken('tok-already-linked', 'google-sub-7', $user->email);
 
         $this->postJson('/api/v1/auth/google/register', [
-            'id_token' => 'tok-already-linked',
+            'code' => 'tok-already-linked',
             'studio_name' => 'Another Studio',
         ])
             ->assertStatus(409)
@@ -162,14 +165,14 @@ class GoogleAuthTest extends TestCase
     {
         $this->fakeGoogleToken('tok-unverified-google', 'google-sub-5', 'nope@example.test', verified: false);
 
-        $this->postJson('/api/v1/auth/google', ['id_token' => 'tok-unverified-google'])
+        $this->postJson('/api/v1/auth/google', ['code' => 'tok-unverified-google'])
             ->assertStatus(401)
             ->assertJsonPath('code', 'INVALID_GOOGLE_TOKEN');
     }
 
     public function test_an_unrecognized_id_token_is_rejected(): void
     {
-        $this->postJson('/api/v1/auth/google', ['id_token' => 'not-a-real-token'])
+        $this->postJson('/api/v1/auth/google', ['code' => 'not-a-real-token'])
             ->assertStatus(401)
             ->assertJsonPath('code', 'INVALID_GOOGLE_TOKEN');
     }

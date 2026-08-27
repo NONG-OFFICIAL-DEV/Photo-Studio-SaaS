@@ -228,6 +228,8 @@
     "alreadyHaveAccount": "Already have an account?",
     "dontHaveAccount": "Don't have an account?",
     "orContinueWith": "Or continue with",
+    "loginWithGoogle": "Login with Google",
+    "createWithGoogle": "Create with Google",
     "continueWithEmail": "Continue with email instead",
     "enterStudioNameToContinueWithGoogle": "Please enter your studio name first, then continue with Google.",
     "googleAccountNotRegistered": "This Google account isn't registered yet. Please create your studio to continue.",

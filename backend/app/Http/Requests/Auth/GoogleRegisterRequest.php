@@ -16,7 +16,7 @@ class GoogleRegisterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id_token' => ['required', 'string'],
+            'code' => ['required', 'string'],
             'studio_name' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', 'alpha_dash', 'unique:tenants,slug'],
             'phone' => ['nullable', 'string', 'max:30'],

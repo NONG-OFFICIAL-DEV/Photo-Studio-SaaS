@@ -36,13 +36,16 @@ return [
     ],
 
     /*
-     * "Sign in with Google" — the frontend gets a signed ID token from
-     * Google Identity Services and hands it to the backend to verify. Only
-     * the client ID is needed (used as the `aud` check on the ID token); no
-     * client secret, since there's no authorization-code exchange here.
+     * "Sign in with Google" — the frontend gets a one-time authorization
+     * code from a custom button (Google's OAuth2 code-client popup flow)
+     * and hands it to the backend, which exchanges it server-to-server for
+     * an ID token (GoogleAuthorizationCodeExchanger) and verifies it
+     * (GoogleIdTokenVerifier). client_secret never reaches the frontend —
+     * same trust boundary as JWT_SECRET.
      */
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
     ],
 
     /*

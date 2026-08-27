@@ -85,8 +85,8 @@ export const useAuthStore = defineStore('auth', () => {
    * so applySession is skipped and the caller prompts for studio details
    * (then calls registerWithGoogle) instead of erroring.
    */
-  async function loginWithGoogle(idToken) {
-    const { data } = await googleAuthApi({ id_token: idToken })
+  async function loginWithGoogle(code) {
+    const { data } = await googleAuthApi({ code })
     if (!data.data.requires_registration) {
       applySession(data.data, true)
     }

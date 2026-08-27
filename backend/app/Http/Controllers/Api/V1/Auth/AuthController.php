@@ -15,6 +15,7 @@ use App\Http\Requests\Auth\VerifyTwoFactorRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\AuthService;
+use App\Services\Google\GoogleAuthorizationCodeExchangerInterface;
 use App\Services\Google\GoogleIdTokenVerifierInterface;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -28,6 +29,7 @@ class AuthController extends Controller
     public function __construct(
         protected AuthService $authService,
         protected GoogleIdTokenVerifierInterface $googleVerifier,
+        protected GoogleAuthorizationCodeExchangerInterface $googleExchanger,
     ) {}
 
     public function register(RegisterTenantRequest $request): JsonResponse
@@ -44,7 +46,8 @@ class AuthController extends Controller
      */
     public function googleAuth(GoogleAuthRequest $request): JsonResponse
     {
-        $google = $this->googleVerifier->verify($request->string('id_token')->toString());
+        $idToken = $this->googleExchanger->exchange($request->string('code')->toString());
+        $google = $this->googleVerifier->verify($idToken);
         $payload = $this->authService->registerOrLoginWithGoogle($google);
 
         if (isset($payload['requires_registration'])) {
@@ -56,7 +59,8 @@ class AuthController extends Controller
 
     public function googleRegister(GoogleRegisterRequest $request): JsonResponse
     {
-        $google = $this->googleVerifier->verify($request->string('id_token')->toString());
+        $idToken = $this->googleExchanger->exchange($request->string('code')->toString());
+        $google = $this->googleVerifier->verify($idToken);
         $payload = $this->authService->registerOrLoginWithGoogle($google, GoogleRegisterData::fromRequest($request));
 
         return $this->created($this->withAuthPayload($payload), 'Studio registered successfully.');

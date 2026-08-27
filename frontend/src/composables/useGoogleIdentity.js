@@ -1,9 +1,12 @@
 /*
- * Thin wrapper around Google Identity Services (GIS) — the frontend gets a
- * signed ID token directly from Google, no server-side redirect/callback
- * dance needed. The script is injected lazily (once, shared across every
- * call site) rather than statically in index.html, so pages that never show
- * a Google button don't pay for it.
+ * Thin wrapper around Google Identity Services' OAuth2 code client — the
+ * frontend triggers a real Google popup from our own custom-styled button
+ * (not Google's rendered widget), and gets back a one-time authorization
+ * code. The backend exchanges that code server-to-server for an ID token
+ * (see GoogleAuthorizationCodeExchanger), so no client secret ever reaches
+ * the browser. The script is injected lazily (once, shared across every
+ * call site) rather than statically in index.html, so pages that never
+ * offer Google sign-in don't pay for it.
  */
 let scriptPromise = null
 
@@ -11,7 +14,7 @@ function loadGoogleScript() {
   if (scriptPromise) return scriptPromise
 
   scriptPromise = new Promise((resolve, reject) => {
-    if (window.google?.accounts?.id) {
+    if (window.google?.accounts?.oauth2) {
       resolve(window.google)
       return
     }
@@ -28,58 +31,38 @@ function loadGoogleScript() {
   return scriptPromise
 }
 
-// Module-scoped so google.accounts.id.initialize() runs exactly once for the
-// whole app session — not once per mounted page. Google logs a warning (and
-// only keeps the last registration) if initialize() is called again for the
-// same client, which used to happen every time the user switched between the
-// Login and Register pages (each is a separate component instance with its
-// own local "have I called this yet" guard). The credential callback still
-// needs to change per page (Login vs Register handle it differently), so
-// that part stays swappable via this module-level ref instead of going
-// through a second real initialize() call.
-let initPromise = null
-let currentCredentialHandler = null
-
 export function useGoogleIdentity() {
   /**
-   * Registers the client ID + credential callback (google.accounts.id
-   * .initialize() itself only ever runs once — see module-level comment
-   * above). Safe to call from every page that needs the Google button;
-   * each call just updates which page's callback receives the credential.
+   * Preloads the GIS script so it's already resolved by click time —
+   * callers should invoke this in onMounted(). Without it, requestSignIn()
+   * would need to `await` script loading *inside* the click handler,
+   * breaking the synchronous user-gesture chain the browser requires to
+   * allow the sign-in popup (a delayed popup gets silently blocked).
    */
-  async function initialize(onCredential) {
-    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
-    if (!clientId) return null
-
-    currentCredentialHandler = onCredential
-
-    if (!initPromise) {
-      initPromise = loadGoogleScript().then((google) => {
-        google.accounts.id.initialize({
-          client_id: clientId,
-          callback: (response) => currentCredentialHandler?.(response.credential),
-        })
-        return google
-      })
-    }
-
-    return initPromise
+  function preload() {
+    loadGoogleScript()
   }
 
   /**
-   * Renders the official "Continue with Google" button into `el`. Safe (and
-   * meant) to call again whenever the app's locale changes (see callers'
-   * `watch(locale, ...)`) — the button's text is drawn from `locale` fresh
-   * on each call, so re-rendering updates the language live with no page
-   * reload needed. `el.innerHTML` is cleared first so a re-render replaces
-   * the button instead of stacking a second one inside the same container.
+   * Opens Google's real sign-in popup and calls `onCode(code)` with a
+   * one-time authorization code on success. Must be called directly inside
+   * a click handler (no `await` before it) to preserve the user gesture.
    */
-  function renderButton(el, google, { text = 'continue_with', locale = 'en' } = {}) {
-    if (!el || !google) return
+  async function requestSignIn(onCode) {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
+    if (!clientId) return
 
-    el.innerHTML = ''
-    google.accounts.id.renderButton(el, { theme: 'outline', size: 'large', width: 336, text, shape: 'pill', locale })
+    const google = await loadGoogleScript()
+
+    google.accounts.oauth2.initCodeClient({
+      client_id: clientId,
+      scope: 'openid email profile',
+      ux_mode: 'popup',
+      callback: (response) => {
+        if (response.code) onCode(response.code)
+      },
+    }).requestCode()
   }
 
-  return { initialize, renderButton }
+  return { preload, requestSignIn }
 }

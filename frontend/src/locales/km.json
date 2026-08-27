@@ -228,6 +228,8 @@
     "alreadyHaveAccount": "មានគណនីរួចហើយ?",
     "dontHaveAccount": "មិនទាន់មានគណនី?",
     "orContinueWith": "ឬបន្តជាមួយ",
+    "loginWithGoogle": "ចូលប្រើប្រាស់ជាមួយ Google",
+    "createWithGoogle": "បង្កើតគណនីជាមួយ Google",
     "continueWithEmail": "ចុះឈ្មោះដោយអ៊ីមែល",
     "enterStudioNameToContinueWithGoogle": "សូមបញ្ចូលឈ្មោះស្ទូឌីយោរបស់អ្នកជាមុនសិន រួចបន្តជាមួយ Google។",
     "googleAccountNotRegistered": "គណនី Google នេះមិនទាន់បានចុះឈ្មោះនៅឡើយទេ។ សូមបង្កើតស្ទូឌីយោរបស់អ្នកដើម្បីបន្ត។",

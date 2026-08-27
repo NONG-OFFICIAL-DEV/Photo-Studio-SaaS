@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Events\NotificationCreated;
 use App\Models\User;
+use App\Services\Google\GoogleAuthorizationCodeExchanger;
+use App\Services\Google\GoogleAuthorizationCodeExchangerInterface;
 use App\Services\Google\GoogleIdTokenVerifier;
 use App\Services\Google\GoogleIdTokenVerifierInterface;
 use Illuminate\Auth\Events\Registered;
@@ -24,6 +26,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(GoogleIdTokenVerifierInterface::class, GoogleIdTokenVerifier::class);
+        $this->app->bind(GoogleAuthorizationCodeExchangerInterface::class, GoogleAuthorizationCodeExchanger::class);
     }
 
     public function boot(): void
