@@ -35,9 +35,11 @@ class StorePlanRequest extends FormRequest
             'trial_days' => ['nullable', 'integer', 'min:0'],
             'is_active' => ['boolean'],
             'feature_labels' => ['nullable', 'array'],
-            'feature_labels.*' => ['array'],
-            'feature_labels.*.en' => ['nullable', 'string', 'max:255'],
-            'feature_labels.*.km' => ['nullable', 'string', 'max:255'],
+            'feature_labels.*.key' => ['required', 'string', 'max:100'],
+            'feature_labels.*.label.en' => ['required', 'string', 'max:255'],
+            'feature_labels.*.label.km' => ['nullable', 'string', 'max:255'],
+            'feature_labels.*.value.en' => ['required', 'string', 'max:255'],
+            'feature_labels.*.value.km' => ['nullable', 'string', 'max:255'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
         ];
     }

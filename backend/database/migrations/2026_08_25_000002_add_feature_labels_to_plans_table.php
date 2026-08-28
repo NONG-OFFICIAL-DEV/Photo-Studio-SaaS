@@ -7,13 +7,15 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Admin-authored marketing copy for the public pricing page, per plan
-     * per language — e.g. {"max_users": {"en": "Up to 10 users", "km": "..."}}.
+     * Admin-authored marketing copy for the public pricing page — a freeform,
+     * independent-per-plan array of feature rows, each with its own label
+     * and value in both languages, e.g.
+     * [{"key": "...", "label": {"en": "Users", "km": "..."}, "value": {"en": "Up to 20", "km": "..."}}].
      * Deliberately not driven by a template computed from max_users/
      * storage_limit_gb/etc: the external marketing site can't be trusted to
      * reproduce every language's pluralization/wording correctly, so the
-     * admin just writes the exact sentence per plan instead. A blank/missing
-     * entry means "don't show this feature line" for that plan.
+     * admin just writes the exact rows per plan instead. An empty/missing
+     * array means "fall back to auto-derived feature text" on the display side.
      */
     public function up(): void
     {

@@ -51,6 +51,52 @@ class AdminPlanTest extends TestCase
         $this->assertDatabaseHas('plans', ['code' => 'pro']);
     }
 
+    public function test_it_creates_a_plan_with_freeform_feature_rows(): void
+    {
+        $superAdmin = $this->superAdmin();
+
+        $featureLabels = [
+            ['key' => 'users', 'label' => ['en' => 'Users', 'km' => 'អ្នកប្រើប្រាស់'], 'value' => ['en' => 'Up to 20', 'km' => 'រហូតដល់ 20']],
+            ['key' => 'storage', 'label' => ['en' => 'Storage', 'km' => 'ទំហំផ្ទុក'], 'value' => ['en' => '100 GB']],
+        ];
+
+        $response = $this->actingAsUser($superAdmin)
+            ->postJson('/api/v1/admin/plans', [
+                'name' => 'Pro',
+                'code' => 'pro',
+                'price_monthly' => 49,
+                'feature_labels' => $featureLabels,
+            ])
+            ->assertCreated();
+
+        $response->assertJsonPath('data.feature_labels.0.key', 'users')
+            ->assertJsonPath('data.feature_labels.0.label.en', 'Users')
+            ->assertJsonPath('data.feature_labels.0.value.en', 'Up to 20')
+            ->assertJsonPath('data.feature_labels.1.key', 'storage');
+
+        $plan = Plan::where('code', 'pro')->firstOrFail();
+        $this->assertCount(2, $plan->feature_labels);
+    }
+
+    public function test_a_feature_row_missing_required_text_is_rejected(): void
+    {
+        $superAdmin = $this->superAdmin();
+
+        $response = $this->actingAsUser($superAdmin)
+            ->postJson('/api/v1/admin/plans', [
+                'name' => 'Pro',
+                'code' => 'pro',
+                'price_monthly' => 49,
+                'feature_labels' => [
+                    ['key' => 'users', 'label' => ['en' => 'Users'], 'value' => ['km' => 'តម្លៃ']], // missing value.en
+                ],
+            ])
+            ->assertStatus(422);
+
+        $this->assertArrayHasKey('feature_labels.0.value.en', $response->json('meta.errors'));
+        $this->assertDatabaseMissing('plans', ['code' => 'pro']);
+    }
+
     public function test_plan_code_must_be_unique(): void
     {
         $superAdmin = $this->superAdmin();

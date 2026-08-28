@@ -18,31 +18,36 @@ const emit = defineEmits(['update:modelValue', 'saved'])
 const { t } = useI18n()
 const appStore = useAppStore()
 
-// Matches Plan::FEATURE_KEYS on the backend — the set of features an admin
-// can write public-facing marketing copy for (shown on the external pricing
-// site), in both languages. A blank cell just means that feature line isn't
-// shown for this plan; there's no auto-generated fallback text.
-const FEATURE_KEYS = [
-  { key: 'max_users', label: 'admin.plans.fields.maxUsers' },
-  { key: 'storage_limit_gb', label: 'admin.plans.fields.storageLimitGb' },
-  { key: 'monthly_order_limit', label: 'admin.plans.fields.monthlyOrderLimit' },
-  { key: 'has_online_gallery', label: 'admin.plans.fields.hasOnlineGallery' },
-  { key: 'has_reports', label: 'admin.plans.fields.hasReports' },
-  { key: 'has_telegram', label: 'admin.plans.fields.hasTelegram' },
-  { key: 'has_api_access', label: 'admin.plans.fields.hasApiAccess' },
-  { key: 'has_watermark_gallery', label: 'admin.plans.fields.hasWatermarkGallery' },
-]
+// Freeform, independent per plan — the admin adds/removes rows and types
+// both the label ("Users") and this plan's value ("Up to 20") in each
+// language. `key` is just a stable list-render key, never shown in the UI.
+function newFeatureRow() {
+  return { key: window.crypto.randomUUID(), label: { en: '', km: '' }, value: { en: '', km: '' } }
+}
 
-function updateFeatureLabel(values, setFieldValue, featureKey, lang, text) {
-  setFieldValue('feature_labels', {
-    ...values.feature_labels,
-    [featureKey]: { ...values.feature_labels?.[featureKey], [lang]: text },
-  })
+function addFeatureRow(values, setFieldValue) {
+  setFieldValue('feature_labels', [...(values.feature_labels ?? []), newFeatureRow()])
+}
+
+function removeFeatureRow(values, setFieldValue, index) {
+  setFieldValue('feature_labels', values.feature_labels.filter((_, i) => i !== index))
+}
+
+function updateFeatureRow(values, setFieldValue, index, part, lang, text) {
+  const rows = values.feature_labels.map((row, i) =>
+    i === index ? { ...row, [part]: { ...row[part], [lang]: text } } : row)
+  setFieldValue('feature_labels', rows)
 }
 
 const loading = ref(false)
 const errorMessage = ref('')
 const formId = useId()
+const activeTab = ref('details')
+// The feature-row editor shows one language's Label/Value at a time
+// (switched via this toggle) instead of 4 fields per row — both languages
+// are still stored and saved together, just edited one at a time to keep
+// each row short.
+const activeFeatureLocale = ref('en')
 
 const isEdit = computed(() => Boolean(props.plan?.id))
 const title = computed(() => (isEdit.value ? t('admin.plans.editPlan') : t('admin.plans.newPlan')))
@@ -65,7 +70,7 @@ const initialValues = computed(() => ({
   has_api_access: props.plan?.has_api_access ?? false,
   has_telegram: props.plan?.has_telegram ?? false,
   is_active: props.plan?.is_active ?? true,
-  feature_labels: props.plan?.feature_labels ?? {},
+  feature_labels: props.plan?.feature_labels ?? [],
   sort_order: props.plan?.sort_order ?? 0,
 }))
 
@@ -95,132 +100,163 @@ async function onSubmit(values) {
   <AppDialog :model-value="modelValue" :title="title" max-width="720" @update:model-value="emit('update:modelValue', $event)">
     <v-alert v-if="errorMessage" type="error" variant="tonal" class="mb-4">{{ errorMessage }}</v-alert>
 
+    <v-tabs v-model="activeTab" density="compact" class="mb-4">
+      <v-tab value="details">{{ t('admin.plans.tabs.details') }}</v-tab>
+      <v-tab value="limits">{{ t('admin.plans.tabs.limits') }}</v-tab>
+      <v-tab value="features">
+        {{ t('admin.plans.tabs.features') }}
+      </v-tab>
+    </v-tabs>
+
     <AppForm :id="formId" :schema="planSchema" :initial-values="initialValues" @submit="onSubmit">
       <template #default="{ errors, values, setFieldValue }">
-        <v-row>
-          <v-col cols="12" sm="6">
-            <v-text-field :model-value="values.name" :label="`${t('fields.name')} *`" :error-messages="errors.name" @update:model-value="setFieldValue('name', $event)" />
-          </v-col>
-          <v-col cols="12" sm="6">
-            <v-text-field :model-value="values.code" :label="`${t('admin.plans.fields.code')} *`" :error-messages="errors.code" :disabled="isEdit" @update:model-value="setFieldValue('code', $event)" />
-          </v-col>
-          <v-col cols="12">
-            <v-textarea :model-value="values.description" :label="t('fields.description')" rows="2" :error-messages="errors.description" @update:model-value="setFieldValue('description', $event)" />
-          </v-col>
-
-          <v-col cols="12" sm="4">
-            <v-text-field :model-value="values.price_monthly" type="number" :label="t('admin.plans.fields.priceMonthly')" prefix="$" :error-messages="errors.price_monthly" @update:model-value="setFieldValue('price_monthly', $event)" />
-          </v-col>
-          <v-col cols="12" sm="4">
-            <v-text-field :model-value="values.price_quarterly" type="number" :label="t('admin.plans.fields.priceQuarterly')" prefix="$" :error-messages="errors.price_quarterly" @update:model-value="setFieldValue('price_quarterly', $event)" />
-          </v-col>
-          <v-col cols="12" sm="4">
-            <v-text-field :model-value="values.price_yearly" type="number" :label="t('admin.plans.fields.priceYearly')" prefix="$" :error-messages="errors.price_yearly" @update:model-value="setFieldValue('price_yearly', $event)" />
-          </v-col>
-
-          <v-col cols="12" sm="4">
-            <v-text-field :model-value="values.max_users" type="number" :label="t('admin.plans.fields.maxUsers')" :error-messages="errors.max_users" @update:model-value="setFieldValue('max_users', $event)" />
-          </v-col>
-          <v-col cols="12" sm="4">
-            <v-text-field :model-value="values.max_branches" type="number" :label="t('admin.plans.fields.maxBranches')" :error-messages="errors.max_branches" @update:model-value="setFieldValue('max_branches', $event)" />
-          </v-col>
-          <v-col cols="12" sm="4">
-            <v-text-field :model-value="values.storage_limit_gb" type="number" :label="t('admin.plans.fields.storageLimitGb')" :error-messages="errors.storage_limit_gb" @update:model-value="setFieldValue('storage_limit_gb', $event)" />
-          </v-col>
-          <v-col cols="12" sm="4">
-            <v-text-field :model-value="values.monthly_order_limit" type="number" :label="t('admin.plans.fields.monthlyOrderLimit')" :error-messages="errors.monthly_order_limit" @update:model-value="setFieldValue('monthly_order_limit', $event)" />
-          </v-col>
-
-          <v-col cols="12" sm="4">
-            <v-text-field :model-value="values.trial_days" type="number" :label="t('admin.plans.fields.trialDays')" :error-messages="errors.trial_days" @update:model-value="setFieldValue('trial_days', $event)" />
-          </v-col>
-          <v-col cols="12" sm="4">
-            <v-text-field :model-value="values.sort_order" type="number" :label="t('admin.plans.fields.sortOrder')" :error-messages="errors.sort_order" @update:model-value="setFieldValue('sort_order', $event)" />
-          </v-col>
-          <v-col cols="12" sm="4" class="d-flex align-center">
-            <v-checkbox
-              :model-value="values.is_active"
-              :label="t('admin.plans.fields.isActive')"
-              hide-details
-              @update:model-value="setFieldValue('is_active', $event)"
-            />
-          </v-col>
-
-          <v-col cols="12">
-            <v-row>
-              <v-col cols="6" sm="3">
-                <v-checkbox
-                  :model-value="values.has_watermark_gallery"
-                  :label="t('admin.plans.fields.hasWatermarkGallery')"
-                  hide-details
-                  @update:model-value="setFieldValue('has_watermark_gallery', $event)"
-                />
+        <v-window v-model="activeTab">
+          <v-window-item value="details">
+            <v-row class="mt-2">
+              <v-col cols="12" sm="6">
+                <v-text-field :model-value="values.name" :label="`${t('fields.name')} *`" :error-messages="errors.name" @update:model-value="setFieldValue('name', $event)" />
               </v-col>
-              <v-col cols="6" sm="3">
-                <v-checkbox
-                  :model-value="values.has_online_gallery"
-                  :label="t('admin.plans.fields.hasOnlineGallery')"
-                  hide-details
-                  @update:model-value="setFieldValue('has_online_gallery', $event)"
-                />
+              <v-col cols="12" sm="6">
+                <v-text-field :model-value="values.code" :label="`${t('admin.plans.fields.code')} *`" :error-messages="errors.code" :disabled="isEdit" @update:model-value="setFieldValue('code', $event)" />
               </v-col>
-              <v-col cols="6" sm="3">
-                <v-checkbox
-                  :model-value="values.has_reports"
-                  :label="t('admin.plans.fields.hasReports')"
-                  hide-details
-                  @update:model-value="setFieldValue('has_reports', $event)"
-                />
+              <v-col cols="12">
+                <v-textarea :model-value="values.description" :label="t('fields.description')" rows="2" :error-messages="errors.description" @update:model-value="setFieldValue('description', $event)" />
               </v-col>
-              <v-col cols="6" sm="3">
-                <v-checkbox
-                  :model-value="values.has_api_access"
-                  :label="t('admin.plans.fields.hasApiAccess')"
-                  hide-details
-                  @update:model-value="setFieldValue('has_api_access', $event)"
-                />
-              </v-col>
-              <v-col cols="6" sm="3">
-                <v-checkbox
-                  :model-value="values.has_telegram"
-                  :label="t('admin.plans.fields.hasTelegram')"
-                  hide-details
-                  @update:model-value="setFieldValue('has_telegram', $event)"
-                />
-              </v-col>
-            </v-row>
-          </v-col>
 
-          <v-col cols="12">
-            <v-divider class="mb-4" />
-            <div class="text-subtitle-2 mb-1">{{ t('admin.plans.featureLabelsTitle') }}</div>
-            <p class="text-caption text-medium-emphasis mb-4">{{ t('admin.plans.featureLabelsHint') }}</p>
-
-            <v-row v-for="feature in FEATURE_KEYS" :key="feature.key" class="mb-1" dense>
-              <v-col cols="12" sm="3" class="d-flex align-center text-body-2">
-                {{ t(feature.label) }}
+              <v-col cols="12" sm="4">
+                <v-text-field :model-value="values.price_monthly" type="number" :label="t('admin.plans.fields.priceMonthly')" prefix="$" :error-messages="errors.price_monthly" @update:model-value="setFieldValue('price_monthly', $event)" />
               </v-col>
               <v-col cols="12" sm="4">
-                <v-text-field
-                  :model-value="values.feature_labels?.[feature.key]?.en"
-                  prefix="EN"
-                  density="compact"
-                  hide-details
-                  @update:model-value="updateFeatureLabel(values, setFieldValue, feature.key, 'en', $event)"
-                />
+                <v-text-field :model-value="values.price_quarterly" type="number" :label="t('admin.plans.fields.priceQuarterly')" prefix="$" :error-messages="errors.price_quarterly" @update:model-value="setFieldValue('price_quarterly', $event)" />
               </v-col>
-              <v-col cols="12" sm="5">
-                <v-text-field
-                  :model-value="values.feature_labels?.[feature.key]?.km"
-                  prefix="KM"
-                  density="compact"
+              <v-col cols="12" sm="4">
+                <v-text-field :model-value="values.price_yearly" type="number" :label="t('admin.plans.fields.priceYearly')" prefix="$" :error-messages="errors.price_yearly" @update:model-value="setFieldValue('price_yearly', $event)" />
+              </v-col>
+
+              <v-col cols="12" sm="4">
+                <v-text-field :model-value="values.trial_days" type="number" :label="t('admin.plans.fields.trialDays')" :error-messages="errors.trial_days" @update:model-value="setFieldValue('trial_days', $event)" />
+              </v-col>
+              <v-col cols="12" sm="4">
+                <v-text-field :model-value="values.sort_order" type="number" :label="t('admin.plans.fields.sortOrder')" :error-messages="errors.sort_order" @update:model-value="setFieldValue('sort_order', $event)" />
+              </v-col>
+              <v-col cols="12" sm="4" class="d-flex align-center">
+                <v-checkbox
+                  :model-value="values.is_active"
+                  :label="t('admin.plans.fields.isActive')"
                   hide-details
-                  @update:model-value="updateFeatureLabel(values, setFieldValue, feature.key, 'km', $event)"
+                  @update:model-value="setFieldValue('is_active', $event)"
                 />
               </v-col>
             </v-row>
-          </v-col>
-        </v-row>
+          </v-window-item>
+
+          <v-window-item value="limits">
+            <v-row class="mt-2">
+              <v-col cols="12" sm="6">
+                <v-text-field :model-value="values.max_users" type="number" :label="t('admin.plans.fields.maxUsers')" :error-messages="errors.max_users" @update:model-value="setFieldValue('max_users', $event)" />
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-text-field :model-value="values.max_branches" type="number" :label="t('admin.plans.fields.maxBranches')" :error-messages="errors.max_branches" @update:model-value="setFieldValue('max_branches', $event)" />
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-text-field :model-value="values.storage_limit_gb" type="number" :label="t('admin.plans.fields.storageLimitGb')" :error-messages="errors.storage_limit_gb" @update:model-value="setFieldValue('storage_limit_gb', $event)" />
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-text-field :model-value="values.monthly_order_limit" type="number" :label="t('admin.plans.fields.monthlyOrderLimit')" :error-messages="errors.monthly_order_limit" @update:model-value="setFieldValue('monthly_order_limit', $event)" />
+              </v-col>
+
+              <v-col cols="12">
+                <v-divider class="mb-2" />
+                <v-row>
+                  <v-col cols="6" sm="3">
+                    <v-checkbox
+                      :model-value="values.has_watermark_gallery"
+                      :label="t('admin.plans.fields.hasWatermarkGallery')"
+                      hide-details
+                      @update:model-value="setFieldValue('has_watermark_gallery', $event)"
+                    />
+                  </v-col>
+                  <v-col cols="6" sm="3">
+                    <v-checkbox
+                      :model-value="values.has_online_gallery"
+                      :label="t('admin.plans.fields.hasOnlineGallery')"
+                      hide-details
+                      @update:model-value="setFieldValue('has_online_gallery', $event)"
+                    />
+                  </v-col>
+                  <v-col cols="6" sm="3">
+                    <v-checkbox
+                      :model-value="values.has_reports"
+                      :label="t('admin.plans.fields.hasReports')"
+                      hide-details
+                      @update:model-value="setFieldValue('has_reports', $event)"
+                    />
+                  </v-col>
+                  <v-col cols="6" sm="3">
+                    <v-checkbox
+                      :model-value="values.has_api_access"
+                      :label="t('admin.plans.fields.hasApiAccess')"
+                      hide-details
+                      @update:model-value="setFieldValue('has_api_access', $event)"
+                    />
+                  </v-col>
+                  <v-col cols="6" sm="3">
+                    <v-checkbox
+                      :model-value="values.has_telegram"
+                      :label="t('admin.plans.fields.hasTelegram')"
+                      hide-details
+                      @update:model-value="setFieldValue('has_telegram', $event)"
+                    />
+                  </v-col>
+                </v-row>
+              </v-col>
+            </v-row>
+          </v-window-item>
+
+          <v-window-item value="features">
+            <p class="text-caption text-medium-emphasis mb-3">{{ t('admin.plans.featureLabelsHint') }}</p>
+
+            <v-btn-toggle v-model="activeFeatureLocale" mandatory density="compact" color="primary" variant="outlined" class="mb-3">
+              <v-btn value="en" size="small">EN</v-btn>
+              <v-btn value="km" size="small">KM</v-btn>
+            </v-btn-toggle>
+
+            <v-row v-for="(feature, index) in values.feature_labels ?? []" :key="feature.key" class="mb-1" dense align="center">
+              <v-col cols="5">
+                <v-text-field
+                  :model-value="feature.label[activeFeatureLocale]"
+                  :label="t('admin.plans.fields.featureLabel')"
+                  density="compact"
+                  hide-details
+                  @update:model-value="updateFeatureRow(values, setFieldValue, index, 'label', activeFeatureLocale, $event)"
+                />
+              </v-col>
+              <v-col cols="6">
+                <v-text-field
+                  :model-value="feature.value[activeFeatureLocale]"
+                  :label="t('admin.plans.fields.featureValue')"
+                  density="compact"
+                  hide-details
+                  @update:model-value="updateFeatureRow(values, setFieldValue, index, 'value', activeFeatureLocale, $event)"
+                />
+              </v-col>
+              <v-col cols="1" class="d-flex justify-end">
+                <v-btn
+                  icon="mdi-delete-outline"
+                  size="small"
+                  variant="text"
+                  color="error"
+                  :aria-label="t('admin.plans.removeFeature')"
+                  @click="removeFeatureRow(values, setFieldValue, index)"
+                />
+              </v-col>
+            </v-row>
+
+            <v-btn variant="tonal" size="small" prepend-icon="mdi-plus" class="mt-2" @click="addFeatureRow(values, setFieldValue)">
+              {{ t('admin.plans.addFeature') }}
+            </v-btn>
+          </v-window-item>
+        </v-window>
       </template>
     </AppForm>
 

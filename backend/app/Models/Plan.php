@@ -20,15 +20,6 @@ class Plan extends Model
         'trial_days', 'is_active', 'feature_labels', 'sort_order',
     ];
 
-    /**
-     * Feature keys an admin can attach public-facing marketing copy to, in
-     * both supported languages — see feature_labels() below.
-     */
-    public const FEATURE_KEYS = [
-        'max_users', 'storage_limit_gb', 'monthly_order_limit',
-        'has_online_gallery', 'has_reports', 'has_telegram', 'has_api_access', 'has_watermark_gallery',
-    ];
-
     protected function casts(): array
     {
         return [

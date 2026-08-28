@@ -1088,8 +1088,15 @@
       "subscriptionsCount": "Subscriptions",
       "confirmDeleteTitle": "Delete plan?",
       "confirmDeleteMessage": "This will permanently delete \"{name}\".",
-      "featureLabelsTitle": "Public Feature Text",
-      "featureLabelsHint": "Exact wording shown for this plan on the public pricing page, in each language. Leave a field blank to hide that feature line for this plan.",
+      "featureLabelsTitle": "Public Feature List",
+      "featureLabelsHint": "Freeform feature lines shown for this plan on the public pricing page, in each language — add as many as you like (e.g. \"Users\" / \"Up to 20\").",
+      "addFeature": "Add Feature",
+      "removeFeature": "Remove",
+      "tabs": {
+        "details": "Details",
+        "limits": "Limits & Features",
+        "features": "Public Feature List"
+      },
       "fields": {
         "code": "Code",
         "priceMonthly": "Monthly Price",
@@ -1106,7 +1113,9 @@
         "hasOnlineGallery": "Online Gallery",
         "hasReports": "Reports",
         "hasApiAccess": "API Access",
-        "hasTelegram": "Telegram Integration"
+        "hasTelegram": "Telegram Integration",
+        "featureLabel": "Label",
+        "featureValue": "Value"
       },
       "messages": {
         "createdSuccess": "Plan created successfully.",
