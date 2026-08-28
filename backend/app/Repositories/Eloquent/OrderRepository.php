@@ -40,6 +40,10 @@ class OrderRepository extends BaseRepository implements OrderRepositoryInterface
         if (! empty($filters['booking_id'])) {
             $query->where('booking_id', $filters['booking_id']);
         }
+
+        if (! empty($filters['branch_id'])) {
+            $query->where('branch_id', $filters['branch_id']);
+        }
     }
 
     protected function applySort(Builder $query, ?string $sortBy, bool|string $sortDesc = false): void

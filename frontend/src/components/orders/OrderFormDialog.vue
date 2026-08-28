@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import * as yup from 'yup'
 import AppDialog from '@/components/common/AppDialog.vue'
 import AppForm from '@/components/common/AppForm.vue'
 import { orderSchema } from '@/utils/validators'
@@ -12,6 +13,7 @@ import { getServiceAddOnsApi } from '@/apis/service-addon.api'
 import { getPackagesApi } from '@/apis/package.api'
 import { translateApiMessage } from '@/utils/apiMessages'
 import { useAppStore } from '@/stores/app'
+import { useBranchStore } from '@/stores/branches'
 import { formatDate } from '@/utils/dateFormat'
 import { formatCurrency } from '@/utils/currencyFormat'
 
@@ -27,6 +29,24 @@ const emit = defineEmits(['update:modelValue', 'saved'])
 
 const { t } = useI18n()
 const appStore = useAppStore()
+const branchStore = useBranchStore()
+
+const hasMultipleBranches = computed(() => branchStore.branches.length > 1)
+
+// Only meaningful for a standalone order (no booking_id) — a
+// booking-linked order always inherits its branch from the booking (see
+// OrderService::create() on the backend), so branch_id is only required
+// here once the tenant has multiple branches AND no booking is selected.
+const formSchema = computed(() => {
+  if (!hasMultipleBranches.value) return orderSchema
+
+  return orderSchema.shape({
+    branch_id: yup.string().nullable().when('booking_id', {
+      is: (bookingId) => !bookingId,
+      then: (schema) => schema.required(() => t('validation.branchRequired')),
+    }),
+  })
+})
 
 /*
  * A Pending booking can still be rescheduled or cancelled before the
@@ -142,6 +162,7 @@ function toggleOptionalAddon(component, checked) {
 const initialValues = computed(() => ({
   customer_id: props.presetBooking?.customer?.id ?? null,
   booking_id: props.presetBooking?.id ?? null,
+  branch_id: null,
   discount_amount: 0,
   notes: '',
 }))
@@ -152,6 +173,7 @@ watch(() => props.modelValue, (open) => {
     catalogPick.value = null
     errorMessage.value = ''
     loadCatalog()
+    branchStore.fetch()
 
     if (props.presetBooking) {
       customerOptions.value = [props.presetBooking.customer]
@@ -289,7 +311,7 @@ const subtotal = computed(() => computeSubtotal())
       {{ t('orders.errors.bookingNotConfirmed', { status: bookingStatusLabel(presetBooking.status) }) }}
     </v-alert>
 
-    <AppForm v-else :id="formId" :schema="orderSchema" :initial-values="initialValues" @submit="onSubmit">
+    <AppForm v-else :id="formId" :schema="formSchema" :initial-values="initialValues" @submit="onSubmit">
       <template #default="{ errors, values, setFieldValue }">
         <v-alert v-if="presetBooking" type="info" variant="tonal" density="compact" class="mb-4">
           {{ t('orders.creatingFromBooking', { name: presetBooking.customer?.name }) }}
@@ -325,6 +347,17 @@ const subtotal = computed(() => computeSubtotal())
               item-value="id"
               :items="bookingSelectItems"
               @update:model-value="setFieldValue('booking_id', $event)"
+            />
+          </v-col>
+          <v-col v-if="hasMultipleBranches && !values.booking_id" cols="12" sm="6">
+            <v-select
+              :model-value="values.branch_id"
+              :label="`${t('fields.branch')} *`"
+              item-title="name"
+              item-value="id"
+              :items="branchStore.branches"
+              :error-messages="errors.branch_id"
+              @update:model-value="setFieldValue('branch_id', $event)"
             />
           </v-col>
         </v-row>

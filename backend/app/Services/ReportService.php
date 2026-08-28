@@ -14,16 +14,20 @@ use Illuminate\Support\Carbon;
 
 class ReportService
 {
-    public function revenue(string $dateFrom, string $dateTo): array
+    public function revenue(string $dateFrom, string $dateTo, ?string $branchId = null): array
     {
-        $totalInvoiced = (float) Invoice::whereBetween('issue_date', [$dateFrom, $dateTo])->sum('total');
-        $totalCollected = (float) Payment::whereBetween('paid_at', [$dateFrom, $dateTo])->sum('amount');
+        $totalInvoiced = (float) Invoice::whereBetween('issue_date', [$dateFrom, $dateTo])
+            ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
+            ->sum('total');
+        $totalCollected = (float) Payment::whereBetween('paid_at', [$dateFrom, $dateTo])
+            ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
+            ->sum('amount');
 
         return [
             'total_invoiced' => round($totalInvoiced, 2),
             'total_collected' => round($totalCollected, 2),
             'outstanding' => round(max(0, $totalInvoiced - $totalCollected), 2),
-            'breakdown' => $this->revenueBreakdown($dateFrom, $dateTo),
+            'breakdown' => $this->revenueBreakdown($dateFrom, $dateTo, $branchId),
         ];
     }
 
@@ -40,16 +44,18 @@ class ReportService
         return $groupByMonth ? 'YYYY-MM' : 'YYYY-MM-DD';
     }
 
-    protected function revenueBreakdown(string $dateFrom, string $dateTo): array
+    protected function revenueBreakdown(string $dateFrom, string $dateTo, ?string $branchId = null): array
     {
         $format = $this->periodFormat($dateFrom, $dateTo);
 
         $invoiced = Invoice::whereBetween('issue_date', [$dateFrom, $dateTo])
+            ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
             ->selectRaw("to_char(issue_date, '{$format}') as period, SUM(total) as total")
             ->groupBy('period')
             ->pluck('total', 'period');
 
         $collected = Payment::whereBetween('paid_at', [$dateFrom, $dateTo])
+            ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
             ->selectRaw("to_char(paid_at, '{$format}') as period, SUM(amount) as total")
             ->groupBy('period')
             ->pluck('total', 'period');
@@ -63,10 +69,11 @@ class ReportService
         ])->all();
     }
 
-    public function bookings(string $dateFrom, string $dateTo): array
+    public function bookings(string $dateFrom, string $dateTo, ?string $branchId = null): array
     {
         $rangeEnd = Carbon::parse($dateTo)->endOfDay();
-        $query = Booking::whereBetween('starts_at', [$dateFrom, $rangeEnd]);
+        $query = Booking::whereBetween('starts_at', [$dateFrom, $rangeEnd])
+            ->when($branchId, fn ($q) => $q->where('branch_id', $branchId));
 
         $byType = (clone $query)->selectRaw('type, COUNT(*) as count')->groupBy('type')->pluck('count', 'type');
         $byStatus = (clone $query)->selectRaw('status, COUNT(*) as count')->groupBy('status')->pluck('count', 'status');
@@ -83,16 +90,17 @@ class ReportService
                 'label' => $case->label(),
                 'count' => (int) ($byStatus[$case->value] ?? 0),
             ])->all(),
-            'breakdown' => $this->bookingsBreakdown($dateFrom, $dateTo),
+            'breakdown' => $this->bookingsBreakdown($dateFrom, $dateTo, $branchId),
         ];
     }
 
-    protected function bookingsBreakdown(string $dateFrom, string $dateTo): array
+    protected function bookingsBreakdown(string $dateFrom, string $dateTo, ?string $branchId = null): array
     {
         $format = $this->periodFormat($dateFrom, $dateTo);
         $rangeEnd = Carbon::parse($dateTo)->endOfDay();
 
         return Booking::whereBetween('starts_at', [$dateFrom, $rangeEnd])
+            ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
             ->selectRaw("to_char(starts_at, '{$format}') as period, COUNT(*) as count")
             ->groupBy('period')
             ->orderBy('period')
@@ -101,10 +109,11 @@ class ReportService
             ->all();
     }
 
-    public function orders(string $dateFrom, string $dateTo): array
+    public function orders(string $dateFrom, string $dateTo, ?string $branchId = null): array
     {
         $rangeEnd = Carbon::parse($dateTo)->endOfDay();
-        $query = Order::whereBetween('created_at', [$dateFrom, $rangeEnd]);
+        $query = Order::whereBetween('created_at', [$dateFrom, $rangeEnd])
+            ->when($branchId, fn ($q) => $q->where('branch_id', $branchId));
 
         $byStatus = (clone $query)
             ->selectRaw('status, COUNT(*) as count, SUM(total) as value')
@@ -125,15 +134,16 @@ class ReportService
                     'value' => round((float) ($row->value ?? 0), 2),
                 ];
             })->all(),
-            'breakdown' => $this->ordersBreakdown($dateFrom, $rangeEnd),
+            'breakdown' => $this->ordersBreakdown($dateFrom, $rangeEnd, $branchId),
         ];
     }
 
-    protected function ordersBreakdown(string $dateFrom, Carbon $rangeEnd): array
+    protected function ordersBreakdown(string $dateFrom, Carbon $rangeEnd, ?string $branchId = null): array
     {
         $format = $this->periodFormat($dateFrom, $rangeEnd->toDateString());
 
         return Order::whereBetween('created_at', [$dateFrom, $rangeEnd])
+            ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
             ->selectRaw("to_char(created_at, '{$format}') as period, COUNT(*) as count, SUM(total) as value")
             ->groupBy('period')
             ->orderBy('period')
@@ -142,9 +152,10 @@ class ReportService
             ->all();
     }
 
-    public function expenses(string $dateFrom, string $dateTo): array
+    public function expenses(string $dateFrom, string $dateTo, ?string $branchId = null): array
     {
-        $query = Expense::whereBetween('expense_date', [$dateFrom, $dateTo]);
+        $query = Expense::whereBetween('expense_date', [$dateFrom, $dateTo])
+            ->when($branchId, fn ($q) => $q->where('branch_id', $branchId));
 
         $byCategory = (clone $query)
             ->leftJoin('expense_categories', 'expenses.category_id', '=', 'expense_categories.id')
@@ -159,15 +170,16 @@ class ReportService
                 'category' => $row->category,
                 'amount' => round((float) $row->total, 2),
             ])->all(),
-            'breakdown' => $this->expensesBreakdown($dateFrom, $dateTo),
+            'breakdown' => $this->expensesBreakdown($dateFrom, $dateTo, $branchId),
         ];
     }
 
-    protected function expensesBreakdown(string $dateFrom, string $dateTo): array
+    protected function expensesBreakdown(string $dateFrom, string $dateTo, ?string $branchId = null): array
     {
         $format = $this->periodFormat($dateFrom, $dateTo);
 
         return Expense::whereBetween('expense_date', [$dateFrom, $dateTo])
+            ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
             ->selectRaw("to_char(expense_date, '{$format}') as period, SUM(amount) as total")
             ->groupBy('period')
             ->orderBy('period')

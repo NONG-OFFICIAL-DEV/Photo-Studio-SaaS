@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import * as yup from 'yup'
 import AppDialog from '@/components/common/AppDialog.vue'
 import AppForm from '@/components/common/AppForm.vue'
 import AppDatePicker from '@/components/common/AppDatePicker.vue'
@@ -10,6 +11,7 @@ import { createExpenseApi, updateExpenseApi } from '@/apis/expense.api'
 import { createExpenseCategoryApi } from '@/apis/expense-category.api'
 import { useExpenseCategoriesStore } from '@/stores/expenseCategories'
 import { useAppStore } from '@/stores/app'
+import { useBranchStore } from '@/stores/branches'
 import { translateApiMessage } from '@/utils/apiMessages'
 
 const props = defineProps({
@@ -22,6 +24,7 @@ const emit = defineEmits(['update:modelValue', 'saved'])
 const { t } = useI18n()
 const appStore = useAppStore()
 const categoriesStore = useExpenseCategoriesStore()
+const branchStore = useBranchStore()
 
 const loading = ref(false)
 const errorMessage = ref('')
@@ -29,6 +32,14 @@ const formId = useId()
 
 const isEdit = computed(() => Boolean(props.expense?.id))
 const title = computed(() => (isEdit.value ? t('expenses.editExpense') : t('expenses.newExpense')))
+
+const hasMultipleBranches = computed(() => branchStore.branches.length > 1)
+
+const formSchema = computed(() => (
+  hasMultipleBranches.value
+    ? expenseSchema.shape({ branch_id: yup.string().required(() => t('validation.branchRequired')) })
+    : expenseSchema
+))
 
 const METHOD_ITEMS = computed(() => [
   { title: t('invoices.methods.cash'), value: 'cash' },
@@ -39,6 +50,7 @@ const METHOD_ITEMS = computed(() => [
 
 const initialValues = computed(() => ({
   category_id: props.expense?.category?.id ?? null,
+  branch_id: props.expense?.branch_id ?? null,
   amount: props.expense?.amount ?? null,
   expense_date: props.expense?.expense_date ?? new Date().toISOString().slice(0, 10),
   vendor: props.expense?.vendor ?? '',
@@ -50,6 +62,7 @@ watch(() => props.modelValue, (open) => {
   if (open) {
     errorMessage.value = ''
     categoriesStore.fetch()
+    branchStore.fetch()
   }
 })
 
@@ -91,7 +104,7 @@ async function onSubmit(values) {
   <AppDialog :model-value="modelValue" :title="title" max-width="640" @update:model-value="emit('update:modelValue', $event)">
     <v-alert v-if="errorMessage" type="error" variant="tonal" class="mb-4">{{ errorMessage }}</v-alert>
 
-    <AppForm :id="formId" :schema="expenseSchema" :initial-values="initialValues" @submit="onSubmit">
+    <AppForm :id="formId" :schema="formSchema" :initial-values="initialValues" @submit="onSubmit">
       <template #default="{ errors, values, setFieldValue }">
         <v-row>
           <v-col cols="12" sm="6">
@@ -128,6 +141,17 @@ async function onSubmit(values) {
           </v-col>
           <v-col cols="12" sm="6">
             <v-text-field :model-value="values.vendor" :label="t('expenses.vendor')" :error-messages="errors.vendor" @update:model-value="setFieldValue('vendor', $event)" />
+          </v-col>
+          <v-col v-if="hasMultipleBranches" cols="12" sm="6">
+            <v-select
+              :model-value="values.branch_id"
+              :label="`${t('fields.branch')} *`"
+              item-title="name"
+              item-value="id"
+              :items="branchStore.branches"
+              :error-messages="errors.branch_id"
+              @update:model-value="setFieldValue('branch_id', $event)"
+            />
           </v-col>
           <v-col cols="12">
             <v-textarea :model-value="values.notes" :label="t('fields.notes')" rows="2" :error-messages="errors.notes" @update:model-value="setFieldValue('notes', $event)" />

@@ -7,6 +7,7 @@ import AppApiErrorAlert from '@/components/common/AppApiErrorAlert.vue'
 import { employeeProfileSchema, employmentSchema } from '@/utils/validators'
 import { updateUserProfileApi, updateUserEmploymentApi } from '@/apis/user.api'
 import { useAppStore } from '@/stores/app'
+import { useBranchStore } from '@/stores/branches'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -17,6 +18,7 @@ const emit = defineEmits(['update:modelValue', 'saved'])
 
 const { t } = useI18n()
 const appStore = useAppStore()
+const branchStore = useBranchStore()
 
 const loading = ref(false)
 const submitError = ref(null)
@@ -50,10 +52,14 @@ const initialValues = computed(() => ({
   pay_type: props.employee?.pay_type ?? 'salary',
   base_pay: props.employee?.base_pay ?? null,
   commission_rate: props.employee?.commission_rate ?? null,
+  branch_id: props.employee?.branch_id ?? null,
 }))
 
 watch(() => props.modelValue, (open) => {
-  if (open) submitError.value = null
+  if (open) {
+    submitError.value = null
+    branchStore.fetch()
+  }
 })
 
 async function onSubmit(values) {
@@ -72,6 +78,7 @@ async function onSubmit(values) {
         pay_type: values.pay_type,
         base_pay: values.base_pay,
         commission_rate: values.commission_rate,
+        branch_id: values.branch_id,
       }),
     ])
     appStore.notify(t('employees.messages.updatedSuccess'))
@@ -133,6 +140,18 @@ async function onSubmit(values) {
           </v-col>
           <v-col cols="12" sm="4">
             <v-text-field :model-value="values.commission_rate" :label="t('employees.commissionRate')" type="number" step="0.01" suffix="%" :error-messages="errors.commission_rate" @update:model-value="setFieldValue('commission_rate', $event)" />
+          </v-col>
+          <v-col v-if="branchStore.branches.length > 1" cols="12" sm="6">
+            <v-select
+              :model-value="values.branch_id"
+              :label="t('fields.branch')"
+              clearable
+              item-title="name"
+              item-value="id"
+              :items="branchStore.branches"
+              :error-messages="errors.branch_id"
+              @update:model-value="setFieldValue('branch_id', $event)"
+            />
           </v-col>
         </v-row>
       </template>

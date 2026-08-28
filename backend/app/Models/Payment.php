@@ -18,7 +18,7 @@ class Payment extends Model
     use BelongsToTenant, HasFactory, HasUuids, LogsActivity, SoftDeletes;
 
     protected $fillable = [
-        'tenant_id', 'invoice_id', 'amount', 'method', 'paid_at', 'reference', 'notes', 'recorded_by',
+        'tenant_id', 'branch_id', 'invoice_id', 'amount', 'method', 'paid_at', 'reference', 'notes', 'recorded_by',
     ];
 
     protected function casts(): array
@@ -33,6 +33,11 @@ class Payment extends Model
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);
+    }
+
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
     }
 
     public function recordedBy(): BelongsTo

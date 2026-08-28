@@ -12,9 +12,12 @@ import InvoiceFormDialog from '@/components/invoices/InvoiceFormDialog.vue'
 import { getOrdersApi } from '@/apis/order.api'
 import { getPlanLimitsApi } from '@/apis/plan-limit.api'
 import { useAuthStore } from '@/stores/auth'
+import { useBranchStore } from '@/stores/branches'
 
 const { t } = useI18n()
 const auth = useAuthStore()
+const branchStore = useBranchStore()
+branchStore.fetch()
 const tableRef = ref(null)
 
 const limits = ref({ monthly_order_limit: null, orders_this_month_count: 0 })
@@ -41,7 +44,7 @@ const headers = computed(() => [
   { title: t('common.actions'), key: 'actions', sortable: false, align: 'end' },
 ])
 
-const filters = ref({ status: null })
+const filters = ref({ status: null, branch_id: null })
 
 async function fetchOrders(params) {
   const { data } = await getOrdersApi(params)
@@ -94,6 +97,17 @@ const canCreate = computed(() => auth.hasPermission('orders.create'))
           clearable
           density="compact"
           :items="Object.entries(STATUS_MAP).map(([value, s]) => ({ title: s.label, value }))"
+        />
+      </v-col>
+      <v-col v-if="branchStore.branches.length > 1" cols="6" sm="3">
+        <v-select
+          v-model="filters.branch_id"
+          :label="t('fields.branch')"
+          clearable
+          density="compact"
+          item-title="name"
+          item-value="id"
+          :items="branchStore.branches"
         />
       </v-col>
     </v-row>

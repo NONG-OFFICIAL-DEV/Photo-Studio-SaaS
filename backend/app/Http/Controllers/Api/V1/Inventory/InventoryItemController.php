@@ -16,16 +16,14 @@ class InventoryItemController extends Controller
 {
     use ApiResponse;
 
-    public function __construct(protected InventoryItemService $items)
-    {
-    }
+    public function __construct(protected InventoryItemService $items) {}
 
     public function index(Request $request): JsonResponse
     {
         $this->authorize('viewAny', InventoryItem::class);
 
         $paginator = $this->items->paginate($request->only([
-            'search', 'sortBy', 'sortDesc', 'page', 'perPage', 'is_active', 'category', 'low_stock',
+            'search', 'sortBy', 'sortDesc', 'page', 'perPage', 'is_active', 'category', 'low_stock', 'branch_id',
         ]));
 
         return $this->success(

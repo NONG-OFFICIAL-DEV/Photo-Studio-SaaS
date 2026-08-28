@@ -1,29 +1,32 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import AppDatePicker from '@/components/common/AppDatePicker.vue'
 import ReportTrendChart from '@/components/reports/ReportTrendChart.vue'
 import { getExpenseReportApi, exportExpenseReportApi } from '@/apis/report.api'
 import { formatCurrency } from '@/utils/currencyFormat'
 
+const props = defineProps({
+  dateFrom: { type: String, required: true },
+  dateTo: { type: String, required: true },
+  branchId: { type: String, default: null },
+})
+
 const { t } = useI18n()
 
-const dateFrom = ref(new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().slice(0, 10))
-const dateTo = ref(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().slice(0, 10))
 const loading = ref(false)
 const report = ref(null)
 
 async function load() {
   loading.value = true
   try {
-    const { data } = await getExpenseReportApi({ date_from: dateFrom.value, date_to: dateTo.value })
+    const { data } = await getExpenseReportApi({ date_from: props.dateFrom, date_to: props.dateTo, branch_id: props.branchId })
     report.value = data.data
   } finally {
     loading.value = false
   }
 }
 
-onMounted(load)
+watch(() => [props.dateFrom, props.dateTo, props.branchId], load, { immediate: true })
 
 const chartLabels = computed(() => (report.value?.breakdown ?? []).map((row) => row.period))
 const chartDatasets = computed(() => [
@@ -31,7 +34,7 @@ const chartDatasets = computed(() => [
 ])
 
 async function exportReport(format) {
-  const { data } = await exportExpenseReportApi({ date_from: dateFrom.value, date_to: dateTo.value, format })
+  const { data } = await exportExpenseReportApi({ date_from: props.dateFrom, date_to: props.dateTo, branch_id: props.branchId, format })
   const url = window.URL.createObjectURL(new Blob([data]))
   const link = document.createElement('a')
   link.href = url
@@ -39,23 +42,12 @@ async function exportReport(format) {
   link.click()
   window.URL.revokeObjectURL(url)
 }
+
+defineExpose({ exportReport })
 </script>
 
 <template>
   <div>
-    <v-row dense class="mb-2">
-      <v-col cols="6" sm="3">
-        <AppDatePicker v-model="dateFrom" :label="t('reports.dateFrom')" :clearable="false" @update:model-value="load" />
-      </v-col>
-      <v-col cols="6" sm="3">
-        <AppDatePicker v-model="dateTo" :label="t('reports.dateTo')" :clearable="false" @update:model-value="load" />
-      </v-col>
-      <v-col cols="12" sm="6" class="d-flex justify-end ga-2 align-start">
-        <v-btn color="info" variant="outlined" prepend-icon="mdi-file-delimited-outline" @click="exportReport('csv')">{{ t('reports.exportCsv') }}</v-btn>
-        <v-btn color="excel" variant="outlined" prepend-icon="mdi-file-excel-outline" @click="exportReport('xlsx')">{{ t('reports.exportExcel') }}</v-btn>
-      </v-col>
-    </v-row>
-
     <div v-if="loading" class="d-flex justify-center py-8">
       <v-progress-circular indeterminate color="primary" />
     </div>

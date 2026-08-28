@@ -37,6 +37,10 @@ class ExpenseRepository extends BaseRepository implements ExpenseRepositoryInter
         if (! empty($filters['date_to'])) {
             $query->whereDate('expense_date', '<=', $filters['date_to']);
         }
+
+        if (! empty($filters['branch_id'])) {
+            $query->where('branch_id', $filters['branch_id']);
+        }
     }
 
     protected function applySort(Builder $query, ?string $sortBy, bool|string $sortDesc = false): void

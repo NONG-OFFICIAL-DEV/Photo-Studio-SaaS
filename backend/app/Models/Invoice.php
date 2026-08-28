@@ -19,7 +19,7 @@ class Invoice extends Model
     use BelongsToTenant, HasFactory, HasUuids, LogsActivity, SoftDeletes;
 
     protected $fillable = [
-        'tenant_id', 'customer_id', 'order_id', 'invoice_number', 'status',
+        'tenant_id', 'branch_id', 'customer_id', 'order_id', 'invoice_number', 'status',
         'issue_date', 'due_date', 'subtotal', 'discount_amount', 'tax_rate',
         'tax_amount', 'total', 'amount_paid', 'notes', 'voided_reason', 'created_by',
         'due_soon_reminder_sent_at', 'overdue_reminder_sent_at',
@@ -60,6 +60,11 @@ class Invoice extends Model
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
+    }
+
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
     }
 
     public function items(): HasMany

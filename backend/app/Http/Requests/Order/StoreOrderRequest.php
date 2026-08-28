@@ -25,6 +25,13 @@ class StoreOrderRequest extends FormRequest
                 'nullable', 'uuid',
                 Rule::exists('bookings', 'id')->where('tenant_id', $this->user()->tenant_id),
             ],
+            // Only consulted when no booking_id is given — a booking-linked
+            // order always inherits its branch from the booking instead
+            // (see OrderService::create()).
+            'branch_id' => [
+                'nullable', 'uuid',
+                Rule::exists('branches', 'id')->where('tenant_id', $this->user()->tenant_id),
+            ],
             'discount_amount' => ['nullable', 'numeric', 'min:0'],
             'notes' => ['nullable', 'string', 'max:2000'],
 

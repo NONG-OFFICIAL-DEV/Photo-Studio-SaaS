@@ -19,11 +19,14 @@ import {
 import { getUsersApi } from '@/apis/user.api'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
+import { useBranchStore } from '@/stores/branches'
 import { formatDate, formatTime } from '@/utils/dateFormat'
 
 const { t } = useI18n()
 const auth = useAuthStore()
 const appStore = useAppStore()
+const branchStore = useBranchStore()
+branchStore.fetch()
 
 const tableRef = ref(null)
 const users = ref([])
@@ -58,7 +61,7 @@ const headers = computed(() => [
   { title: t('common.actions'), key: 'actions', sortable: false, align: 'end' },
 ])
 
-const filters = ref({ status: null, type: null, assigned_user_id: null })
+const filters = ref({ status: null, type: null, assigned_user_id: null, branch_id: null })
 
 async function fetchBookings(params) {
   const { data } = await getBookingsApi(params)
@@ -162,6 +165,17 @@ const canCreateOrder = computed(() => auth.hasPermission('orders.create'))
           item-title="name"
           item-value="id"
           :items="users"
+        />
+      </v-col>
+      <v-col v-if="branchStore.branches.length > 1" cols="6" sm="3">
+        <v-select
+          v-model="filters.branch_id"
+          :label="t('fields.branch')"
+          clearable
+          density="compact"
+          item-title="name"
+          item-value="id"
+          :items="branchStore.branches"
         />
       </v-col>
     </v-row>

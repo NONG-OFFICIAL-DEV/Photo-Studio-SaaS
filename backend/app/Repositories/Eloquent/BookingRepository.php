@@ -50,6 +50,10 @@ class BookingRepository extends BaseRepository implements BookingRepositoryInter
         if (! empty($filters['customer_id'])) {
             $query->where('customer_id', $filters['customer_id']);
         }
+
+        if (! empty($filters['branch_id'])) {
+            $query->where('branch_id', $filters['branch_id']);
+        }
     }
 
     protected function applySort(Builder $query, ?string $sortBy, bool|string $sortDesc = false): void

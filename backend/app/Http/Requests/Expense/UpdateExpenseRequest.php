@@ -20,6 +20,10 @@ class UpdateExpenseRequest extends FormRequest
                 'nullable', 'uuid',
                 Rule::exists('expense_categories', 'id')->where('tenant_id', $this->user()->tenant_id),
             ],
+            'branch_id' => [
+                'nullable', 'uuid',
+                Rule::exists('branches', 'id')->where('tenant_id', $this->user()->tenant_id),
+            ],
             'amount' => ['sometimes', 'required', 'numeric', 'min:0.01'],
             'expense_date' => ['sometimes', 'required', 'date'],
             'vendor' => ['nullable', 'string', 'max:255'],

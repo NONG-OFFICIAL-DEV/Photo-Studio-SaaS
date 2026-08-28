@@ -150,6 +150,12 @@ export const serviceAddOnSchema = yup.object({
 export const orderSchema = yup.object({
   customer_id: yup.string().required(() => t('validation.customerRequired')),
   booking_id: yup.string().nullable(),
+  // Only meaningful for a standalone order (no booking_id) — a
+  // booking-linked order always inherits its branch from the booking, so
+  // this stays optional in the base schema and is upgraded to required in
+  // OrderFormDialog.vue once it knows both the branch count and whether a
+  // booking is selected, the same way bookingSchema/branch_id works.
+  branch_id: yup.string().nullable(),
   discount_amount: yup.number().typeError(() => t('validation.mustBeNumber')).nullable().min(0),
   notes: yup.string().nullable().max(2000),
 })
@@ -205,6 +211,7 @@ export const employmentSchema = yup.object({
   pay_type: yup.string().required(),
   base_pay: yup.number().typeError(() => t('validation.mustBeNumber')).nullable().min(0),
   commission_rate: yup.number().typeError(() => t('validation.mustBeNumber')).nullable().min(0).max(100),
+  branch_id: yup.string().nullable(),
 })
 
 export const employeeProfileSchema = yup.object({
@@ -236,6 +243,10 @@ export const employeeSchema = yup.object({
 
 export const expenseSchema = yup.object({
   category_id: yup.string().nullable(),
+  // Standalone (no booking/order to inherit from) — required once
+  // ExpenseFormDialog.vue knows the tenant has multiple branches, the
+  // same way bookingSchema/branch_id works.
+  branch_id: yup.string().nullable(),
   amount: yup.number().typeError(() => t('validation.mustBeNumber')).required().min(0.01),
   expense_date: yup.string().required(() => t('validation.expenseDateRequired')),
   vendor: yup.string().nullable().max(255),

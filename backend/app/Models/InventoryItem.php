@@ -38,6 +38,11 @@ class InventoryItem extends Model
         return $this->hasMany(InventoryMovement::class)->latest('moved_at');
     }
 
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
+    }
+
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');

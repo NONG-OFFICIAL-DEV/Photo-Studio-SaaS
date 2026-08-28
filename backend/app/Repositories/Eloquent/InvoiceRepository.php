@@ -45,6 +45,10 @@ class InvoiceRepository extends BaseRepository implements InvoiceRepositoryInter
         if (! empty($filters['order_id'])) {
             $query->where('order_id', $filters['order_id']);
         }
+
+        if (! empty($filters['branch_id'])) {
+            $query->where('branch_id', $filters['branch_id']);
+        }
     }
 
     protected function applySort(Builder $query, ?string $sortBy, bool|string $sortDesc = false): void

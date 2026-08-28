@@ -9,10 +9,13 @@ import InventoryItemDetailDialog from '@/components/inventory/InventoryItemDetai
 import { getInventoryItemsApi, deleteInventoryItemApi } from '@/apis/inventory.api'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
+import { useBranchStore } from '@/stores/branches'
 
 const { t } = useI18n()
 const auth = useAuthStore()
 const appStore = useAppStore()
+const branchStore = useBranchStore()
+branchStore.fetch()
 const tableRef = ref(null)
 
 const headers = computed(() => [
@@ -24,7 +27,7 @@ const headers = computed(() => [
   { title: t('common.actions'), key: 'actions', sortable: false, align: 'end' },
 ])
 
-const filters = ref({ low_stock: null, is_active: null })
+const filters = ref({ low_stock: null, is_active: null, branch_id: null })
 
 async function fetchItems(params) {
   const { data } = await getInventoryItemsApi(params)
@@ -81,6 +84,17 @@ const canDelete = computed(() => auth.hasPermission('inventory.delete'))
     <v-row class="mb-2" dense>
       <v-col cols="6" sm="3">
         <v-switch v-model="filters.low_stock" :label="t('inventory.lowStockOnly')" color="warning" hide-details density="compact" />
+      </v-col>
+      <v-col v-if="branchStore.branches.length > 1" cols="6" sm="3">
+        <v-select
+          v-model="filters.branch_id"
+          :label="t('fields.branch')"
+          clearable
+          density="compact"
+          item-title="name"
+          item-value="id"
+          :items="branchStore.branches"
+        />
       </v-col>
     </v-row>
 

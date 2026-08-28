@@ -29,6 +29,10 @@ class InventoryItemRepository extends BaseRepository implements InventoryItemRep
             $query->whereNotNull('reorder_threshold')
                 ->whereColumn('quantity_on_hand', '<=', 'reorder_threshold');
         }
+
+        if (! empty($filters['branch_id'])) {
+            $query->where('branch_id', $filters['branch_id']);
+        }
     }
 
     protected function applySort(Builder $query, ?string $sortBy, bool|string $sortDesc = false): void

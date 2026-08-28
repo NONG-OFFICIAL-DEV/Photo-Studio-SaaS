@@ -23,6 +23,10 @@ class PaymentRepository extends BaseRepository implements PaymentRepositoryInter
         if (! empty($filters['invoice_id'])) {
             $query->where('invoice_id', $filters['invoice_id']);
         }
+
+        if (! empty($filters['branch_id'])) {
+            $query->where('branch_id', $filters['branch_id']);
+        }
     }
 
     protected function applySort(Builder $query, ?string $sortBy, bool|string $sortDesc = false): void

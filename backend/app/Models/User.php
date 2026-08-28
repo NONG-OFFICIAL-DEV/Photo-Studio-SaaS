@@ -10,6 +10,7 @@ use Illuminate\Auth\MustVerifyEmail;
 use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -81,6 +82,11 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmailContrac
         $wants = (bool) ($this->notificationChannelPreferences()[$channel] ?? false);
 
         return $channel === 'telegram' ? $wants && $this->hasTelegramLinked() : $wants;
+    }
+
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
     }
 
     public function attendanceRecords(): HasMany

@@ -20,7 +20,7 @@ class Order extends Model
     use BelongsToTenant, HasFactory, HasUuids, LogsActivity, SoftDeletes;
 
     protected $fillable = [
-        'tenant_id', 'customer_id', 'booking_id', 'status',
+        'tenant_id', 'branch_id', 'customer_id', 'booking_id', 'status',
         'subtotal', 'discount_amount', 'total', 'notes', 'cancelled_reason', 'created_by',
     ];
 
@@ -44,6 +44,11 @@ class Order extends Model
     public function booking(): BelongsTo
     {
         return $this->belongsTo(Booking::class);
+    }
+
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
     }
 
     public function items(): HasMany

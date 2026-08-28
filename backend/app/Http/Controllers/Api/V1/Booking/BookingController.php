@@ -18,9 +18,7 @@ class BookingController extends Controller
 {
     use ApiResponse;
 
-    public function __construct(protected BookingService $bookings)
-    {
-    }
+    public function __construct(protected BookingService $bookings) {}
 
     public function index(Request $request): JsonResponse
     {
@@ -28,7 +26,7 @@ class BookingController extends Controller
 
         $paginator = $this->bookings->paginate($request->only([
             'search', 'sortBy', 'sortDesc', 'page', 'perPage',
-            'status', 'type', 'assigned_user_id', 'customer_id',
+            'status', 'type', 'assigned_user_id', 'customer_id', 'branch_id',
         ]));
 
         return $this->success(
@@ -54,7 +52,7 @@ class BookingController extends Controller
         $bookings = $this->bookings->calendarRange(
             Carbon::parse($request->query('start')),
             Carbon::parse($request->query('end')),
-            $request->only(['status', 'type', 'assigned_user_id']),
+            $request->only(['status', 'type', 'assigned_user_id', 'branch_id']),
         );
 
         return $this->success(BookingResource::collection($bookings));

@@ -18,7 +18,7 @@ class Expense extends Model
     use BelongsToTenant, HasFactory, HasUuids, LogsActivity, SoftDeletes;
 
     protected $fillable = [
-        'tenant_id', 'category_id', 'amount', 'expense_date', 'vendor', 'payment_method', 'notes', 'created_by',
+        'tenant_id', 'branch_id', 'category_id', 'amount', 'expense_date', 'vendor', 'payment_method', 'notes', 'created_by',
     ];
 
     protected function casts(): array
@@ -35,6 +35,11 @@ class Expense extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(ExpenseCategory::class, 'category_id');
+    }
+
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
     }
 
     public function createdBy(): BelongsTo

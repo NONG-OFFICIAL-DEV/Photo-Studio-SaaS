@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\DB;
 
 class OrderService extends BaseService
 {
-    public function __construct(protected OrderRepositoryInterface $orders)
+    public function __construct(protected OrderRepositoryInterface $orders, protected BranchResolutionService $branches)
     {
         parent::__construct($orders);
     }
@@ -33,16 +33,26 @@ class OrderService extends BaseService
         $items = $data['items'] ?? [];
         unset($data['items']);
 
+        $booking = null;
         if (! empty($data['booking_id'])) {
-            $this->assertBookingIsConfirmable(Booking::query()->findOrFail($data['booking_id']));
+            $booking = Booking::query()->findOrFail($data['booking_id']);
+            $this->assertBookingIsConfirmable($booking);
         }
 
-        return DB::transaction(function () use ($data, $items, $creator) {
+        return DB::transaction(function () use ($data, $items, $creator, $booking) {
             $lines = $this->resolveLines($items);
+
+            // A booking-linked order always inherits its branch from the
+            // booking — never re-asked. Only a standalone order (no
+            // booking) falls back to the usual create-time resolution.
+            $branchId = $booking
+                ? $booking->branch_id
+                : $this->branches->resolveForCreate($creator->tenant, $data['branch_id'] ?? null);
 
             /** @var Order $order */
             $order = $this->orders->create([
                 ...$data,
+                'branch_id' => $branchId,
                 'subtotal' => $lines['subtotal'],
                 'total' => max(0, $lines['subtotal'] - ($data['discount_amount'] ?? 0)),
                 'created_by' => $creator?->id,

@@ -22,16 +22,14 @@ class InvoiceController extends Controller
 {
     use ApiResponse;
 
-    public function __construct(protected InvoiceService $invoices, protected TelegramMessageLogService $telegramLogs)
-    {
-    }
+    public function __construct(protected InvoiceService $invoices, protected TelegramMessageLogService $telegramLogs) {}
 
     public function index(Request $request): JsonResponse
     {
         $this->authorize('viewAny', Invoice::class);
 
         $paginator = $this->invoices->paginate($request->only([
-            'search', 'sortBy', 'sortDesc', 'page', 'perPage', 'status', 'customer_id', 'order_id',
+            'search', 'sortBy', 'sortDesc', 'page', 'perPage', 'status', 'customer_id', 'order_id', 'branch_id',
         ]));
 
         return $this->success(

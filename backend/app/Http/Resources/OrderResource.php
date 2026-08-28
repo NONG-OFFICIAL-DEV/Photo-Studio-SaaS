@@ -2,10 +2,11 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-/** @mixin \App\Models\Order */
+/** @mixin Order */
 class OrderResource extends JsonResource
 {
     public function toArray(Request $request): array
@@ -18,6 +19,7 @@ class OrderResource extends JsonResource
                 'phone' => $this->customer->phone,
             ]),
             'booking_id' => $this->booking_id,
+            'branch_id' => $this->branch_id,
             'status' => $this->status?->value,
             'items' => OrderItemResource::collection($this->whenLoaded('items')),
             'editing_task' => $this->whenLoaded('editingTask', fn () => $this->editingTask ? new EditingTaskResource($this->editingTask) : null),

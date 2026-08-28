@@ -18,16 +18,14 @@ class ReportController extends Controller
 {
     use ApiResponse;
 
-    public function __construct(protected ReportService $reports)
-    {
-    }
+    public function __construct(protected ReportService $reports) {}
 
     public function revenue(Request $request): JsonResponse
     {
         abort_unless($request->user()->can('reports.view'), 403);
         [$from, $to] = $this->resolveRange($request);
 
-        return $this->success($this->reports->revenue($from, $to));
+        return $this->success($this->reports->revenue($from, $to, $this->branchId($request)));
     }
 
     public function bookings(Request $request): JsonResponse
@@ -35,7 +33,7 @@ class ReportController extends Controller
         abort_unless($request->user()->can('reports.view'), 403);
         [$from, $to] = $this->resolveRange($request);
 
-        return $this->success($this->reports->bookings($from, $to));
+        return $this->success($this->reports->bookings($from, $to, $this->branchId($request)));
     }
 
     public function orders(Request $request): JsonResponse
@@ -43,7 +41,7 @@ class ReportController extends Controller
         abort_unless($request->user()->can('reports.view'), 403);
         [$from, $to] = $this->resolveRange($request);
 
-        return $this->success($this->reports->orders($from, $to));
+        return $this->success($this->reports->orders($from, $to, $this->branchId($request)));
     }
 
     public function expenses(Request $request): JsonResponse
@@ -51,14 +49,14 @@ class ReportController extends Controller
         abort_unless($request->user()->can('reports.view'), 403);
         [$from, $to] = $this->resolveRange($request);
 
-        return $this->success($this->reports->expenses($from, $to));
+        return $this->success($this->reports->expenses($from, $to, $this->branchId($request)));
     }
 
     public function exportRevenue(Request $request): BinaryFileResponse
     {
         abort_unless($request->user()->can('reports.export'), 403);
         [$from, $to] = $this->resolveRange($request);
-        $data = $this->reports->revenue($from, $to);
+        $data = $this->reports->revenue($from, $to, $this->branchId($request));
 
         return Excel::download(new RevenueReportExport($data['breakdown']), "revenue-report.{$this->format($request)}");
     }
@@ -67,7 +65,7 @@ class ReportController extends Controller
     {
         abort_unless($request->user()->can('reports.export'), 403);
         [$from, $to] = $this->resolveRange($request);
-        $data = $this->reports->bookings($from, $to);
+        $data = $this->reports->bookings($from, $to, $this->branchId($request));
 
         return Excel::download(new BookingsReportExport($data['by_status']), "bookings-report.{$this->format($request)}");
     }
@@ -76,7 +74,7 @@ class ReportController extends Controller
     {
         abort_unless($request->user()->can('reports.export'), 403);
         [$from, $to] = $this->resolveRange($request);
-        $data = $this->reports->orders($from, $to);
+        $data = $this->reports->orders($from, $to, $this->branchId($request));
 
         return Excel::download(new OrdersReportExport($data['by_status']), "orders-report.{$this->format($request)}");
     }
@@ -85,7 +83,7 @@ class ReportController extends Controller
     {
         abort_unless($request->user()->can('reports.export'), 403);
         [$from, $to] = $this->resolveRange($request);
-        $data = $this->reports->expenses($from, $to);
+        $data = $this->reports->expenses($from, $to, $this->branchId($request));
 
         return Excel::download(new ExpenseReportExport($data['by_category']), "expense-report.{$this->format($request)}");
     }
@@ -96,6 +94,11 @@ class ReportController extends Controller
         $to = $request->query('date_to') ?: now()->endOfMonth()->toDateString();
 
         return [$from, $to];
+    }
+
+    protected function branchId(Request $request): ?string
+    {
+        return $request->query('branch_id') ?: null;
     }
 
     protected function format(Request $request): string

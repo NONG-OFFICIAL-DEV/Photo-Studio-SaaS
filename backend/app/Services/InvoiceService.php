@@ -46,8 +46,12 @@ class InvoiceService extends BaseService
         $tenant = $this->tenantContext->get();
 
         return DB::transaction(function () use ($data, $items, $creator, $tenant) {
-            if ($items === null && ! empty($data['order_id'])) {
-                $order = Order::query()->with('items')->findOrFail($data['order_id']);
+            // Always inherits its branch from the linked order (never
+            // chosen directly) — fetched regardless of whether items are
+            // also being copied from it.
+            $order = ! empty($data['order_id']) ? Order::query()->with('items')->findOrFail($data['order_id']) : null;
+
+            if ($items === null && $order) {
                 $data['customer_id'] = $data['customer_id'] ?? $order->customer_id;
                 $items = $order->items->map(fn ($item) => [
                     'service_id' => $item->service_id,
@@ -72,6 +76,7 @@ class InvoiceService extends BaseService
             /** @var Invoice $invoice */
             $invoice = $this->invoices->create([
                 ...$data,
+                'branch_id' => $order?->branch_id,
                 'invoice_number' => $this->nextInvoiceNumber($tenant),
                 'issue_date' => $issueDate,
                 'due_date' => $dueDate,
@@ -330,6 +335,7 @@ class InvoiceService extends BaseService
             }
 
             $invoice->payments()->create([
+                'branch_id' => $invoice->branch_id,
                 'amount' => $amount,
                 'method' => $data['method'],
                 'paid_at' => $data['paid_at'] ?? now()->toDateString(),

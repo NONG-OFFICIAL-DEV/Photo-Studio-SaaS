@@ -16,9 +16,7 @@ class ExpenseController extends Controller
 {
     use ApiResponse;
 
-    public function __construct(protected ExpenseService $expenses)
-    {
-    }
+    public function __construct(protected ExpenseService $expenses) {}
 
     public function index(Request $request): JsonResponse
     {
@@ -26,7 +24,7 @@ class ExpenseController extends Controller
 
         $paginator = $this->expenses->paginate($request->only([
             'search', 'sortBy', 'sortDesc', 'page', 'perPage',
-            'category_id', 'payment_method', 'date_from', 'date_to',
+            'category_id', 'payment_method', 'date_from', 'date_to', 'branch_id',
         ]));
 
         return $this->success(

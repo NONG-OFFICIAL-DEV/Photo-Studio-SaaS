@@ -3,6 +3,7 @@
 namespace Tests\Feature\User;
 
 use App\Enums\TenantRole;
+use App\Models\Branch;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\CreatesTenantUsers;
 use Tests\TestCase;
@@ -47,6 +48,32 @@ class UserEmploymentUpdateTest extends TestCase
 
         $this->actingAsUser($owner)
             ->putJson("/api/v1/users/{$employee->id}", ['commission_rate' => 150])
+            ->assertStatus(422);
+    }
+
+    public function test_owner_can_reassign_an_employees_branch(): void
+    {
+        [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+        $employee = $this->addUserToTenant($tenant, TenantRole::Photographer);
+        $branch = Branch::create(['tenant_id' => $tenant->id, 'name' => 'Downtown Studio']);
+
+        $this->actingAsUser($owner)
+            ->putJson("/api/v1/users/{$employee->id}", ['branch_id' => $branch->id])
+            ->assertOk()
+            ->assertJsonPath('data.branch_id', $branch->id);
+
+        $this->assertDatabaseHas('users', ['id' => $employee->id, 'branch_id' => $branch->id]);
+    }
+
+    public function test_branch_id_from_another_tenant_is_rejected(): void
+    {
+        [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+        $employee = $this->addUserToTenant($tenant, TenantRole::Photographer);
+        [$otherTenant] = $this->createTenantWithUser(TenantRole::Owner);
+        $otherBranch = Branch::create(['tenant_id' => $otherTenant->id, 'name' => 'Other Studio']);
+
+        $this->actingAsUser($owner)
+            ->putJson("/api/v1/users/{$employee->id}", ['branch_id' => $otherBranch->id])
             ->assertStatus(422);
     }
 

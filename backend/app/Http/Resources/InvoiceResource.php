@@ -2,10 +2,11 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-/** @mixin \App\Models\Invoice */
+/** @mixin Invoice */
 class InvoiceResource extends JsonResource
 {
     public function toArray(Request $request): array
@@ -21,6 +22,7 @@ class InvoiceResource extends JsonResource
                 'telegram_connected' => (bool) $this->customer->telegram_chat_id,
             ]),
             'order_id' => $this->order_id,
+            'branch_id' => $this->branch_id,
             'issue_date' => $this->issue_date,
             'due_date' => $this->due_date,
             'items' => InvoiceItemResource::collection($this->whenLoaded('items')),

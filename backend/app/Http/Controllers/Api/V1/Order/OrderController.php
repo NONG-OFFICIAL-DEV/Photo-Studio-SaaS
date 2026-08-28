@@ -18,9 +18,7 @@ class OrderController extends Controller
 {
     use ApiResponse;
 
-    public function __construct(protected OrderService $orders)
-    {
-    }
+    public function __construct(protected OrderService $orders) {}
 
     public function index(Request $request): JsonResponse
     {
@@ -28,7 +26,7 @@ class OrderController extends Controller
 
         $paginator = $this->orders->paginate($request->only([
             'search', 'sortBy', 'sortDesc', 'page', 'perPage',
-            'status', 'customer_id', 'booking_id',
+            'status', 'customer_id', 'booking_id', 'branch_id',
         ]));
 
         return $this->success(

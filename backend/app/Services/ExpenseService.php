@@ -9,7 +9,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class ExpenseService extends BaseService
 {
-    public function __construct(protected ExpenseRepositoryInterface $expenses)
+    public function __construct(protected ExpenseRepositoryInterface $expenses, protected BranchResolutionService $branches)
     {
         parent::__construct($expenses);
     }
@@ -21,9 +21,14 @@ class ExpenseService extends BaseService
 
     public function create(array $data, ?User $creator = null): Expense
     {
+        // No booking/order chain to inherit from — resolved the same way
+        // Booking/User already are.
+        $branchId = $this->branches->resolveForCreate($creator->tenant, $data['branch_id'] ?? null);
+
         /** @var Expense $expense */
         $expense = $this->expenses->create([
             ...$data,
+            'branch_id' => $branchId,
             'created_by' => $creator?->id,
         ]);
 

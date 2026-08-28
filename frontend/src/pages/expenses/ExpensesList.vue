@@ -11,15 +11,18 @@ import { getExpensesApi, deleteExpenseApi } from '@/apis/expense.api'
 import { useExpenseCategoriesStore } from '@/stores/expenseCategories'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
+import { useBranchStore } from '@/stores/branches'
 import { formatDate } from '@/utils/dateFormat'
 
 const { t } = useI18n()
 const auth = useAuthStore()
 const appStore = useAppStore()
 const categoriesStore = useExpenseCategoriesStore()
+const branchStore = useBranchStore()
 const tableRef = ref(null)
 
 categoriesStore.fetch()
+branchStore.fetch()
 
 const headers = computed(() => [
   { title: t('expenses.expenseDate'), key: 'expense_date' },
@@ -30,7 +33,7 @@ const headers = computed(() => [
   { title: t('common.actions'), key: 'actions', sortable: false, align: 'end' },
 ])
 
-const filters = ref({ category_id: null, payment_method: null, date_from: null, date_to: null })
+const filters = ref({ category_id: null, payment_method: null, date_from: null, date_to: null, branch_id: null })
 
 async function fetchExpenses(params) {
   const { data } = await getExpensesApi(params)
@@ -98,6 +101,17 @@ const canDelete = computed(() => auth.hasPermission('expenses.delete'))
       </v-col>
       <v-col cols="6" sm="3">
         <AppDatePicker v-model="filters.date_to" :label="t('expenses.dateTo')" />
+      </v-col>
+      <v-col v-if="branchStore.branches.length > 1" cols="6" sm="3">
+        <v-select
+          v-model="filters.branch_id"
+          :label="t('fields.branch')"
+          clearable
+          density="compact"
+          item-title="name"
+          item-value="id"
+          :items="branchStore.branches"
+        />
       </v-col>
     </v-row>
 
