@@ -15,6 +15,11 @@ class SendPackageTelegramRequest extends FormRequest
     {
         return [
             'customer_id' => ['required', 'string'],
+            // Sanitized in the controller (in_array(...) ? ... : 'text'),
+            // same convention as InvoiceController::sendTelegram() — not
+            // worth a Rule::in() here since an unrecognized value just
+            // falls back to the default rather than failing validation.
+            'format' => ['nullable', 'string'],
         ];
     }
 }

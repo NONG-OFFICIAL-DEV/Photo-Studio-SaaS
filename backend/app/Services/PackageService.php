@@ -5,11 +5,16 @@ namespace App\Services;
 use App\Models\Package;
 use App\Models\User;
 use App\Repositories\Contracts\PackageRepositoryInterface;
+use App\Services\Concerns\RendersBrandedPdf;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\View;
+use Spatie\Browsershot\Browsershot;
 
 class PackageService extends BaseService
 {
+    use RendersBrandedPdf;
+
     public function __construct(protected PackageRepositoryInterface $packages)
     {
         parent::__construct($packages);
@@ -61,10 +66,10 @@ class PackageService extends BaseService
     }
 
     /**
-     * The Telegram quote message sent to a customer for a package —
-     * plain text only (no PDF/image render, unlike invoices): a package
-     * has no QR/payment step of its own, just a price and a components
-     * list, so a formatted message is the whole deliverable.
+     * The Telegram/"copy as text" quote message for a package — no
+     * QR/payment step involved (unlike invoices), just a price and a
+     * components list, so a plain formatted message is a complete
+     * deliverable on its own (see renderImage() below for the visual one).
      */
     public function packageSummaryText(Package $package): string
     {
@@ -96,6 +101,40 @@ class PackageService extends BaseService
         $lines[] = 'Interested? Reply here or contact us to book!';
 
         return implode("\n", $lines);
+    }
+
+    /**
+     * A one-image version of the package quote — for the "Copy as Image"
+     * clipboard action and the Telegram send-as-image format. No PDF
+     * counterpart: this feature deliberately stays image-only (see
+     * RendersBrandedPdf/newBrowsershot() below for the shared Browsershot
+     * setup, same pattern as InvoiceService::renderImage()).
+     */
+    public function renderImage(Package $package): string
+    {
+        return $this->newBrowsershot($package)
+            ->windowSize(794, 1123)
+            ->fullPage()
+            ->screenshot();
+    }
+
+    protected function newBrowsershot(Package $package): Browsershot
+    {
+        $package->loadMissing(['components.service', 'components.addon', 'tenant']);
+
+        $html = View::make('pdf.package', [
+            'package' => $package,
+            'logoDataUri' => $this->logoDataUri($package->tenant),
+            'khmerFontRegularDataUri' => $this->fontDataUri('NotoSansKhmer-Regular.ttf'),
+            'khmerFontBoldDataUri' => $this->fontDataUri('NotoSansKhmer-Bold.ttf'),
+        ])->render();
+
+        return Browsershot::html($html)
+            ->setNodeBinary(config('browsershot.node_binary'))
+            ->setNodeModulePath(config('browsershot.node_modules_path'))
+            ->setChromePath(config('browsershot.chrome_path'))
+            ->noSandbox()
+            ->showBackground();
     }
 
     protected function normalizeComponents(array $components): array

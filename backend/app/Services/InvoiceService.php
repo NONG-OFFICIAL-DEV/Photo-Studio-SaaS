@@ -13,6 +13,7 @@ use App\Models\ServiceAddOn;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Repositories\Contracts\InvoiceRepositoryInterface;
+use App\Services\Concerns\RendersBrandedPdf;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -22,6 +23,8 @@ use Spatie\Browsershot\Browsershot;
 
 class InvoiceService extends BaseService
 {
+    use RendersBrandedPdf;
+
     public function __construct(protected InvoiceRepositoryInterface $invoices, protected TenantContext $tenantContext)
     {
         parent::__construct($invoices);
@@ -247,28 +250,7 @@ class InvoiceService extends BaseService
     }
 
     /**
-     * Embedded as a base64 data URI rather than a plain <img src="{{ $url }}">
-     * so the tenant's logo loads the same way regardless of PDF renderer —
-     * dompdf has remote fetching disabled by default, and headless Chrome
-     * rendering an HTML string (no base URL) can't resolve a relative or
-     * even same-origin URL back to this app either. Reading straight off
-     * disk sidesteps both, and is a network round-trip fewer either way.
-     * Falls back to no logo (rather than a broken image or a failed PDF)
-     * if the tenant hasn't uploaded one, or the stored file is missing.
-     */
-    protected function logoDataUri(Tenant $tenant): ?string
-    {
-        if (! $tenant->logo_path || ! Storage::disk('public')->exists($tenant->logo_path)) {
-            return null;
-        }
-
-        $mime = Storage::disk('public')->mimeType($tenant->logo_path) ?: 'image/png';
-
-        return "data:{$mime};base64,".base64_encode(Storage::disk('public')->get($tenant->logo_path));
-    }
-
-    /**
-     * Same reasoning and fallback behavior as logoDataUri() — a tenant's
+     * Same reasoning and fallback behavior as RendersBrandedPdf::logoDataUri() — a tenant's
      * scan-to-pay QR code (e.g. KHQR), shown near the invoice footer.
      */
     protected function qrPaymentDataUri(Tenant $tenant): ?string
@@ -296,17 +278,6 @@ class InvoiceService extends BaseService
         }
 
         return Storage::disk('public')->get($tenant->qr_payment_path);
-    }
-
-    /**
-     * Same base64-data-URI reasoning as logoDataUri() — headless Chrome
-     * rendering a bare HTML string has no base URL to resolve a local
-     * file:// font path against, so the @font-face src has to be
-     * self-contained.
-     */
-    protected function fontDataUri(string $filename): string
-    {
-        return 'data:font/ttf;base64,'.base64_encode(file_get_contents(resource_path("fonts/{$filename}")));
     }
 
     public function void(Invoice $invoice, string $reason): Invoice

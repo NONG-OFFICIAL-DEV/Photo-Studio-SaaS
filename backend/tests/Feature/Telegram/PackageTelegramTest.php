@@ -7,6 +7,7 @@ use App\Models\Customer;
 use App\Models\Package;
 use App\Models\PackageComponent;
 use App\Models\Service;
+use App\Models\ServiceAddOn;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Tests\Concerns\CreatesTenantUsers;
@@ -94,7 +95,7 @@ class PackageTelegramTest extends TestCase
             'quantity' => 2,
             'is_optional' => false,
         ]);
-        $addon = \App\Models\ServiceAddOn::factory()->create(['tenant_id' => $tenant->id, 'name' => 'Drone Shots']);
+        $addon = ServiceAddOn::factory()->create(['tenant_id' => $tenant->id, 'name' => 'Drone Shots']);
         PackageComponent::create([
             'tenant_id' => $tenant->id,
             'package_id' => $package->id,
@@ -111,6 +112,47 @@ class PackageTelegramTest extends TestCase
 
         Http::assertSent(fn ($request) => str_contains($request['text'], '• Photo Session x2')
             && str_contains($request['text'], '• Drone Shots x1 (optional)'));
+    }
+
+    public function test_sending_with_format_image_calls_send_photo_instead_of_send_message(): void
+    {
+        [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+        $tenant->update(['telegram_bot_token' => '123:ABC', 'telegram_bot_username' => 'my_studio_bot']);
+        $package = Package::factory()->create(['tenant_id' => $tenant->id]);
+        $customer = Customer::factory()->create(['tenant_id' => $tenant->id, 'telegram_chat_id' => '999']);
+        Http::fake(['api.telegram.org/*/sendPhoto' => Http::response(['ok' => true, 'result' => ['message_id' => 1]])]);
+
+        $this->actingAsUser($owner)
+            ->postJson("/api/v1/packages/{$package->id}/telegram/send", ['customer_id' => $customer->id, 'format' => 'image'])
+            ->assertOk();
+
+        Http::assertSent(function ($request) {
+            if (! str_contains($request->url(), '/sendPhoto')) {
+                return false;
+            }
+
+            $chatId = collect($request->data())->firstWhere('name', 'chat_id')['contents'] ?? null;
+
+            return $chatId === '999';
+        });
+        Http::assertNotSent(fn ($request) => str_contains($request->url(), '/sendMessage'));
+
+        $this->assertDatabaseHas('telegram_message_logs', ['type' => 'package', 'format' => 'image', 'status' => 'sent']);
+    }
+
+    public function test_an_unrecognized_format_falls_back_to_text(): void
+    {
+        [$tenant, $owner] = $this->createTenantWithUser(TenantRole::Owner);
+        $tenant->update(['telegram_bot_token' => '123:ABC', 'telegram_bot_username' => 'my_studio_bot']);
+        $package = Package::factory()->create(['tenant_id' => $tenant->id]);
+        $customer = Customer::factory()->create(['tenant_id' => $tenant->id, 'telegram_chat_id' => '999']);
+        Http::fake(['api.telegram.org/*/sendMessage' => Http::response(['ok' => true, 'result' => ['message_id' => 1]])]);
+
+        $this->actingAsUser($owner)
+            ->postJson("/api/v1/packages/{$package->id}/telegram/send", ['customer_id' => $customer->id, 'format' => 'pdf'])
+            ->assertOk();
+
+        Http::assertSent(fn ($request) => str_contains($request->url(), '/sendMessage'));
     }
 
     public function test_a_role_without_packages_send_cannot_send_a_package_quote(): void

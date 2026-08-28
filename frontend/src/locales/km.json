@@ -675,6 +675,11 @@
       "sendError": "មិនអាចផ្ញើកញ្ចប់តាម Telegram បានទេ។",
       "sentSuccess": "កញ្ចប់បានផ្ញើតាម Telegram ។"
     },
+    "copyPackage": "ចម្លង",
+    "copyAsText": "ចម្លងជាអត្ថបទ",
+    "copyAsImage": "ចម្លងជារូបភាព",
+    "sendAsText": "អត្ថបទ",
+    "sendAsImage": "រូបភាព",
     "errors": {
       "needsOneComponent": "សូមបន្ថែមសមាសធាតុយ៉ាងតិចមួយទៅក្នុងកញ្ចប់។"
     },
@@ -682,7 +687,9 @@
       "createdSuccess": "បង្កើតកញ្ចប់បានជោគជ័យ។",
       "updatedSuccess": "ធ្វើបច្ចុប្បន្នភាពកញ្ចប់បានជោគជ័យ។",
       "saveError": "មិនអាចរក្សាទុកកញ្ចប់បានទេ។",
-      "deletedSuccess": "លុបកញ្ចប់បានជោគជ័យ។"
+      "deletedSuccess": "លុបកញ្ចប់បានជោគជ័យ។",
+      "copiedSuccess": "បានចម្លងទៅក្ដារតម្បៀតខ្ទាស់។",
+      "copyError": "មិនអាចចម្លងទៅក្ដារតម្បៀតខ្ទាស់បានទេ។"
     }
   },
   "telegramActivity": {

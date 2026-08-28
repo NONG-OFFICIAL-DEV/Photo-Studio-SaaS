@@ -15,14 +15,13 @@ use App\Services\TelegramService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class PackageController extends Controller
 {
     use ApiResponse;
 
-    public function __construct(protected PackageService $packages, protected TelegramMessageLogService $telegramLogs)
-    {
-    }
+    public function __construct(protected PackageService $packages, protected TelegramMessageLogService $telegramLogs) {}
 
     public function index(Request $request): JsonResponse
     {
@@ -74,12 +73,40 @@ class PackageController extends Controller
     }
 
     /**
-     * Sends the package's name/description/price/components as a plain
-     * Telegram text message — a quote/offer, not a delivery, so unlike
-     * invoices there's no PDF/image render or QR step; the message itself
-     * is the whole deliverable. $customer_id is a plain body field (not
-     * route-bound) since a Package has no customer of its own — it's
-     * picked fresh on every send.
+     * The plain quote text (same content as the Telegram "text" format) —
+     * for the frontend's "Copy as Text" clipboard action. No customer
+     * involved: a Package has no customer of its own, and this is just
+     * the generic quote content for staff to paste wherever they're
+     * already talking to a customer.
+     */
+    public function summaryText(Package $package): JsonResponse
+    {
+        $this->authorize('view', $package);
+
+        return $this->success(['text' => $this->packages->packageSummaryText($package)]);
+    }
+
+    /**
+     * The same quote rendered as a single image — for the frontend's
+     * "Copy as Image" clipboard action and the Telegram "image" format.
+     * Served inline (no Content-Disposition/download headers): the
+     * frontend fetches this purely to hand the bytes to the Clipboard
+     * API, not to save a file.
+     */
+    public function image(Package $package): Response
+    {
+        $this->authorize('view', $package);
+
+        return response($this->packages->renderImage($package), 200, ['Content-Type' => 'image/png']);
+    }
+
+    /**
+     * Sends the package's name/description/price/components to a
+     * customer via Telegram, as either a plain text message or the same
+     * content rendered as one image (no PDF format — a quote/offer, not
+     * a delivery, so there's no QR/payment step either way).
+     * $customer_id is a plain body field (not route-bound) since a
+     * Package has no customer of its own — it's picked fresh on every send.
      */
     public function sendTelegram(SendPackageTelegramRequest $request, Package $package, TelegramService $telegram): JsonResponse
     {
@@ -95,19 +122,21 @@ class PackageController extends Controller
             return $this->error('This customer has not connected Telegram yet.', 422, [], 'TELEGRAM_CUSTOMER_NOT_LINKED');
         }
 
-        $result = $telegram->sendMessage(
-            $tenant->telegram_bot_token,
-            $customer->telegram_chat_id,
-            $this->packages->packageSummaryText($package)
-        );
+        $format = $request->input('format', 'text');
+        $format = in_array($format, ['text', 'image'], true) ? $format : 'text';
+        $caption = $this->packages->packageSummaryText($package);
+
+        $result = $format === 'image'
+            ? $telegram->sendPhoto($tenant->telegram_bot_token, $customer->telegram_chat_id, $this->packages->renderImage($package), $caption)
+            : $telegram->sendMessage($tenant->telegram_bot_token, $customer->telegram_chat_id, $caption);
 
         if (! ($result['ok'] ?? false)) {
-            $this->telegramLogs->record($customer, 'package', $package->name, null, false, $result['description'] ?? 'Failed to send via Telegram.', $request->user());
+            $this->telegramLogs->record($customer, 'package', $package->name, $format, false, $result['description'] ?? 'Failed to send via Telegram.', $request->user());
 
             return $this->error('Failed to send via Telegram.', 502, [], 'TELEGRAM_SEND_FAILED');
         }
 
-        $this->telegramLogs->record($customer, 'package', $package->name, null, true, null, $request->user());
+        $this->telegramLogs->record($customer, 'package', $package->name, $format, true, null, $request->user());
 
         return $this->success(null, 'Package sent via Telegram.');
     }

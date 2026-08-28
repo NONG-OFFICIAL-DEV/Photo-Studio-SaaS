@@ -675,6 +675,11 @@
       "sendError": "Unable to send the package via Telegram.",
       "sentSuccess": "Package sent via Telegram."
     },
+    "copyPackage": "Copy",
+    "copyAsText": "Copy as Text",
+    "copyAsImage": "Copy as Image",
+    "sendAsText": "Text",
+    "sendAsImage": "Image",
     "errors": {
       "needsOneComponent": "Add at least one component to the package."
     },
@@ -682,7 +687,9 @@
       "createdSuccess": "Package created successfully.",
       "updatedSuccess": "Package updated successfully.",
       "saveError": "Unable to save package.",
-      "deletedSuccess": "Package deleted successfully."
+      "deletedSuccess": "Package deleted successfully.",
+      "copiedSuccess": "Copied to clipboard.",
+      "copyError": "Could not copy to clipboard."
     }
   },
   "telegramActivity": {

@@ -199,6 +199,8 @@ Route::middleware(['auth:api', 'tenant', 'subscription.active'])->group(function
         Route::put('/{package}', [PackageController::class, 'update']);
         Route::delete('/{package}', [PackageController::class, 'destroy']);
 
+        Route::get('/{package}/summary-text', [PackageController::class, 'summaryText']);
+        Route::get('/{package}/image', [PackageController::class, 'image']);
         Route::post('/{package}/telegram/send', [PackageController::class, 'sendTelegram'])->middleware('plan.feature:has_telegram');
     });
 

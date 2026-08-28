@@ -29,12 +29,14 @@ const selectedCustomerId = ref(null)
 const lastSelectedCustomerName = ref(null)
 const sending = ref(false)
 const submitError = ref(null)
+const format = ref('text')
 
 watch(() => props.modelValue, (open) => {
   if (open) {
     selectedCustomerId.value = null
     lastSelectedCustomerName.value = null
     submitError.value = null
+    format.value = 'text'
     loadInitialCustomers()
   }
 })
@@ -77,7 +79,7 @@ async function send() {
   sending.value = true
   submitError.value = null
   try {
-    await sendPackageTelegramApi(props.packageId, selectedCustomerId.value)
+    await sendPackageTelegramApi(props.packageId, selectedCustomerId.value, format.value)
     appStore.notify(t('packages.telegram.sentSuccess'))
     emit('update:modelValue', false)
   } catch (error) {
@@ -122,6 +124,11 @@ async function send() {
     <v-alert v-if="customerNotLinked" type="warning" variant="tonal" density="compact" class="mt-2">
       {{ t('packages.telegram.notLinkedHint') }}
     </v-alert>
+
+    <v-btn-toggle v-model="format" mandatory density="compact" color="primary" variant="outlined" class="mt-4">
+      <v-btn value="text" size="small">{{ t('packages.sendAsText') }}</v-btn>
+      <v-btn value="image" size="small">{{ t('packages.sendAsImage') }}</v-btn>
+    </v-btn-toggle>
 
     <template #actions>
       <v-btn variant="text" :disabled="sending" @click="emit('update:modelValue', false)">{{ t('common.cancel') }}</v-btn>

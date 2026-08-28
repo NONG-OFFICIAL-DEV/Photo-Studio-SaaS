@@ -6,7 +6,7 @@ import AppTable from '@/components/common/AppTable.vue'
 import AppConfirmDialog from '@/components/common/AppConfirmDialog.vue'
 import PackageFormDialog from '@/components/packages/PackageFormDialog.vue'
 import PackageTelegramSendDialog from '@/components/packages/PackageTelegramSendDialog.vue'
-import { getPackagesApi, deletePackageApi } from '@/apis/package.api'
+import { getPackagesApi, deletePackageApi, getPackageSummaryTextApi, getPackageImageApi } from '@/apis/package.api'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
 
@@ -65,6 +65,31 @@ async function confirmDeletePackage() {
   tableRef.value?.refresh()
 }
 
+// Quick one-click grab-and-paste — no customer picker, no Telegram bot
+// involved. Staff copies straight to the OS clipboard and pastes it
+// wherever they're already talking to the customer (their own Telegram,
+// WhatsApp, in person, etc). Separate from the "Send via Telegram"
+// dialog, which auto-delivers through the bot to a linked customer.
+async function copyAsText(pkg) {
+  try {
+    const { data } = await getPackageSummaryTextApi(pkg.id)
+    await window.navigator.clipboard.writeText(data.data.text)
+    appStore.notify(t('packages.messages.copiedSuccess'))
+  } catch {
+    appStore.notify(t('packages.messages.copyError'), 'error')
+  }
+}
+
+async function copyAsImage(pkg) {
+  try {
+    const { data } = await getPackageImageApi(pkg.id)
+    await window.navigator.clipboard.write([new window.ClipboardItem({ 'image/png': data })])
+    appStore.notify(t('packages.messages.copiedSuccess'))
+  } catch {
+    appStore.notify(t('packages.messages.copyError'), 'error')
+  }
+}
+
 const canCreate = computed(() => auth.hasPermission('packages.create'))
 const canUpdate = computed(() => auth.hasPermission('packages.update'))
 const canDelete = computed(() => auth.hasPermission('packages.delete'))
@@ -110,6 +135,15 @@ const canSend = computed(() => auth.hasPermission('packages.send'))
         </template>
 
         <template #[`item.actions`]="{ item }">
+          <v-menu>
+            <template #activator="{ props: menuProps }">
+              <v-btn icon="mdi-content-copy" size="small" variant="text" v-bind="menuProps" :aria-label="t('packages.copyPackage')" />
+            </template>
+            <v-list density="compact">
+              <v-list-item :title="t('packages.copyAsText')" prepend-icon="mdi-text-box-outline" @click="copyAsText(item)" />
+              <v-list-item :title="t('packages.copyAsImage')" prepend-icon="mdi-image-outline" @click="copyAsImage(item)" />
+            </v-list>
+          </v-menu>
           <v-btn v-if="canSend" icon="mdi-send-outline" size="small" variant="text" color="secondary" @click="openTelegramSend(item)" />
           <v-btn v-if="canUpdate" icon="mdi-pencil-outline" size="small" variant="text" color="primary" @click="openEdit(item)" />
           <v-btn v-if="canDelete" icon="mdi-trash-can-outline" size="small" variant="text" color="error" @click="askDelete(item)" />
