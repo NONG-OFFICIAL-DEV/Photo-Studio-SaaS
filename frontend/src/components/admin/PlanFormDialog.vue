@@ -25,6 +25,14 @@ function newFeatureRow() {
   return { key: window.crypto.randomUUID(), label: { en: '', km: '' }, value: { en: '', km: '' } }
 }
 
+// Plans saved before this feature existed may still carry the old
+// fixed-key object shape (`{ max_users: { en, km }, ... }`) instead of an
+// array of rows — treat anything that isn't already a row array as empty
+// rather than crashing the edit form on it.
+function normalizeFeatureLabels(raw) {
+  return Array.isArray(raw) ? raw : []
+}
+
 function addFeatureRow(values, setFieldValue) {
   setFieldValue('feature_labels', [...(values.feature_labels ?? []), newFeatureRow()])
 }
@@ -70,7 +78,7 @@ const initialValues = computed(() => ({
   has_api_access: props.plan?.has_api_access ?? false,
   has_telegram: props.plan?.has_telegram ?? false,
   is_active: props.plan?.is_active ?? true,
-  feature_labels: props.plan?.feature_labels ?? [],
+  feature_labels: normalizeFeatureLabels(props.plan?.feature_labels),
   sort_order: props.plan?.sort_order ?? 0,
 }))
 
@@ -224,7 +232,7 @@ async function onSubmit(values) {
             <v-row v-for="(feature, index) in values.feature_labels ?? []" :key="feature.key" class="mb-1" dense align="center">
               <v-col cols="5">
                 <v-text-field
-                  :model-value="feature.label[activeFeatureLocale]"
+                  :model-value="feature.label?.[activeFeatureLocale]"
                   :label="t('admin.plans.fields.featureLabel')"
                   density="compact"
                   hide-details
@@ -233,7 +241,7 @@ async function onSubmit(values) {
               </v-col>
               <v-col cols="6">
                 <v-text-field
-                  :model-value="feature.value[activeFeatureLocale]"
+                  :model-value="feature.value?.[activeFeatureLocale]"
                   :label="t('admin.plans.fields.featureValue')"
                   density="compact"
                   hide-details
