@@ -44,7 +44,8 @@ class UpdatePlanRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator) {
-            $catalog = PlanFeatureListing::query()->where('is_active', true)->get()->keyBy('key');
+            // See StorePlanRequest — deliberately not filtered to is_active.
+            $catalog = PlanFeatureListing::query()->get()->keyBy('key');
 
             foreach ($this->input('feature_labels', []) as $key => $value) {
                 $listing = $catalog->get($key);

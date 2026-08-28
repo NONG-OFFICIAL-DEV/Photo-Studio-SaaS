@@ -49,7 +49,15 @@ class StorePlanRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator) {
-            $catalog = PlanFeatureListing::query()->where('is_active', true)->get()->keyBy('key');
+            // Deliberately not filtered to is_active — a plan's stored
+            // feature_labels can legitimately still hold a value for a
+            // key that was later deactivated (not deleted) in the
+            // catalog. Deactivating a feature should hide it from the
+            // admin editor and the public site, not retroactively break
+            // saving any plan that already has a value for it. Only a
+            // truly nonexistent (or soft-deleted) key is "unknown" —
+            // SoftDeletes already excludes those from this query.
+            $catalog = PlanFeatureListing::query()->get()->keyBy('key');
 
             foreach ($this->input('feature_labels', []) as $key => $value) {
                 $listing = $catalog->get($key);

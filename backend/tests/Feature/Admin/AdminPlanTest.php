@@ -115,6 +115,31 @@ class AdminPlanTest extends TestCase
         $this->assertDatabaseMissing('plans', ['code' => 'pro']);
     }
 
+    public function test_a_deactivated_but_still_existing_feature_key_is_still_accepted(): void
+    {
+        // Deactivating a catalog entry hides it from the admin editor and
+        // the public site — it must not retroactively break saving a plan
+        // that already has a value stored for it (only a truly nonexistent
+        // key should be rejected).
+        $superAdmin = $this->superAdmin();
+        $boolFeature = PlanFeatureListing::factory()->create([
+            'value_type' => PlanFeatureValueType::Boolean,
+            'is_active' => false,
+        ]);
+
+        $this->actingAsUser($superAdmin)
+            ->postJson('/api/v1/admin/plans', [
+                'name' => 'Pro',
+                'code' => 'pro',
+                'price_monthly' => 49,
+                'feature_labels' => [$boolFeature->key => true],
+            ])
+            ->assertCreated();
+
+        $plan = Plan::where('code', 'pro')->firstOrFail();
+        $this->assertTrue($plan->feature_labels[$boolFeature->key]);
+    }
+
     public function test_an_unknown_feature_key_is_rejected(): void
     {
         $superAdmin = $this->superAdmin();
