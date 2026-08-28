@@ -57,6 +57,19 @@ const activeTab = ref('details')
 // each row short.
 const activeFeatureLocale = ref('en')
 
+// Every plan's feature rows are independent (no shared catalog) — the
+// marketing site's comparison table aligns rows across plans by matching
+// this exact label text, so two rows with the same label inside one plan
+// (a copy-paste mistake) silently collapse into one column downstream.
+// Flag it here instead of leaving the admin to discover it on the public
+// pricing page.
+function duplicateLabelsIn(featureLabels, lang) {
+  const labels = (featureLabels ?? [])
+    .map((row) => (row.label?.[lang] ?? '').trim().toLowerCase())
+    .filter(Boolean)
+  return [...new Set(labels.filter((label, i) => labels.indexOf(label) !== i))]
+}
+
 const isEdit = computed(() => Boolean(props.plan?.id))
 const title = computed(() => (isEdit.value ? t('admin.plans.editPlan') : t('admin.plans.newPlan')))
 
@@ -228,6 +241,16 @@ async function onSubmit(values) {
               <v-btn value="en" size="small">EN</v-btn>
               <v-btn value="km" size="small">KM</v-btn>
             </v-btn-toggle>
+
+            <v-alert
+              v-if="duplicateLabelsIn(values.feature_labels, activeFeatureLocale).length"
+              type="warning"
+              variant="tonal"
+              density="compact"
+              class="mb-3"
+            >
+              {{ t('admin.plans.duplicateFeatureLabels', { labels: duplicateLabelsIn(values.feature_labels, activeFeatureLocale).join(', ') }) }}
+            </v-alert>
 
             <v-row v-for="(feature, index) in values.feature_labels ?? []" :key="feature.key" class="mb-1" dense align="center">
               <v-col cols="5">

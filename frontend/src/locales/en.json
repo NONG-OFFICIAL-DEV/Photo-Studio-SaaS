@@ -1092,6 +1092,7 @@
       "featureLabelsHint": "Freeform feature lines shown for this plan on the public pricing page, in each language — add as many as you like (e.g. \"Users\" / \"Up to 20\").",
       "addFeature": "Add Feature",
       "removeFeature": "Remove",
+      "duplicateFeatureLabels": "Duplicate feature label(s) in this language: {labels}. The public pricing page matches rows across plans by this exact text, so duplicates within one plan will overwrite each other.",
       "tabs": {
         "details": "Details",
         "limits": "Limits & Features",
