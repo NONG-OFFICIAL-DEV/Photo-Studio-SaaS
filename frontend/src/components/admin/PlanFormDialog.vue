@@ -1,10 +1,11 @@
 <script setup>
-import { computed, ref, useId } from 'vue'
+import { computed, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDialog from '@/components/common/AppDialog.vue'
 import AppForm from '@/components/common/AppForm.vue'
 import { planSchema } from '@/utils/validators'
 import { createAdminPlanApi, updateAdminPlanApi } from '@/apis/admin.api'
+import { usePlanFeatureListingCatalogStore } from '@/stores/planFeatureListingCatalog'
 import { useAppStore } from '@/stores/app'
 import { translateApiMessage } from '@/utils/apiMessages'
 
@@ -17,58 +18,40 @@ const emit = defineEmits(['update:modelValue', 'saved'])
 
 const { t } = useI18n()
 const appStore = useAppStore()
+const catalogStore = usePlanFeatureListingCatalogStore()
 
-// Freeform, independent per plan — the admin adds/removes rows and types
-// both the label ("Users") and this plan's value ("Up to 20") in each
-// language. `key` is just a stable list-render key, never shown in the UI.
-function newFeatureRow() {
-  return { key: window.crypto.randomUUID(), label: { en: '', km: '' }, value: { en: '', km: '' } }
-}
+watch(() => props.modelValue, (open) => {
+  if (open) catalogStore.fetch()
+})
 
-// Plans saved before this feature existed may still carry the old
-// fixed-key object shape (`{ max_users: { en, km }, ... }`) instead of an
-// array of rows — treat anything that isn't already a row array as empty
-// rather than crashing the edit form on it.
+const activeFeatures = computed(() => catalogStore.items.filter((item) => item.is_active))
+
+// Plans saved before the catalog existed may still carry an old shape
+// (array-of-rows, or the original fixed-key object) instead of the current
+// object-keyed-by-PlanFeatureListing.key shape — treat anything that isn't
+// a plain object as empty rather than crashing the edit form on it.
 function normalizeFeatureLabels(raw) {
-  return Array.isArray(raw) ? raw : []
+  return raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {}
 }
 
-function addFeatureRow(values, setFieldValue) {
-  setFieldValue('feature_labels', [...(values.feature_labels ?? []), newFeatureRow()])
+function setFeatureValue(values, setFieldValue, key, value) {
+  setFieldValue('feature_labels', { ...(values.feature_labels ?? {}), [key]: value })
 }
 
-function removeFeatureRow(values, setFieldValue, index) {
-  setFieldValue('feature_labels', values.feature_labels.filter((_, i) => i !== index))
-}
-
-function updateFeatureRow(values, setFieldValue, index, part, lang, text) {
-  const rows = values.feature_labels.map((row, i) =>
-    i === index ? { ...row, [part]: { ...row[part], [lang]: text } } : row)
-  setFieldValue('feature_labels', rows)
+function updateFeatureText(values, setFieldValue, key, lang, text) {
+  const current = values.feature_labels?.[key] ?? { en: '', km: '' }
+  setFeatureValue(values, setFieldValue, key, { ...current, [lang]: text })
 }
 
 const loading = ref(false)
 const errorMessage = ref('')
 const formId = useId()
 const activeTab = ref('details')
-// The feature-row editor shows one language's Label/Value at a time
-// (switched via this toggle) instead of 4 fields per row — both languages
-// are still stored and saved together, just edited one at a time to keep
-// each row short.
+// The feature editor shows one language's value at a time (switched via
+// this toggle) for text-type catalog features — both languages are still
+// stored and saved together, just edited one at a time. Boolean-type
+// features ignore this toggle entirely (a switch has no language).
 const activeFeatureLocale = ref('en')
-
-// Every plan's feature rows are independent (no shared catalog) — the
-// marketing site's comparison table aligns rows across plans by matching
-// this exact label text, so two rows with the same label inside one plan
-// (a copy-paste mistake) silently collapse into one column downstream.
-// Flag it here instead of leaving the admin to discover it on the public
-// pricing page.
-function duplicateLabelsIn(featureLabels, lang) {
-  const labels = (featureLabels ?? [])
-    .map((row) => (row.label?.[lang] ?? '').trim().toLowerCase())
-    .filter(Boolean)
-  return [...new Set(labels.filter((label, i) => labels.indexOf(label) !== i))]
-}
 
 const isEdit = computed(() => Boolean(props.plan?.id))
 const title = computed(() => (isEdit.value ? t('admin.plans.editPlan') : t('admin.plans.newPlan')))
@@ -242,50 +225,31 @@ async function onSubmit(values) {
               <v-btn value="km" size="small">KM</v-btn>
             </v-btn-toggle>
 
-            <v-alert
-              v-if="duplicateLabelsIn(values.feature_labels, activeFeatureLocale).length"
-              type="warning"
-              variant="tonal"
-              density="compact"
-              class="mb-3"
-            >
-              {{ t('admin.plans.duplicateFeatureLabels', { labels: duplicateLabelsIn(values.feature_labels, activeFeatureLocale).join(', ') }) }}
-            </v-alert>
+            <p v-if="!activeFeatures.length" class="text-caption text-medium-emphasis">
+              {{ t('admin.plans.noFeatureListings') }}
+            </p>
 
-            <v-row v-for="(feature, index) in values.feature_labels ?? []" :key="feature.key" class="mb-1" dense align="center">
-              <v-col cols="5">
-                <v-text-field
-                  :model-value="feature.label?.[activeFeatureLocale]"
-                  :label="t('admin.plans.fields.featureLabel')"
+            <v-row v-for="item in activeFeatures" :key="item.id" class="mb-1" dense align="center">
+              <v-col cols="5" class="text-body-2">{{ item.label.en }}</v-col>
+              <v-col cols="7">
+                <v-switch
+                  v-if="item.value_type === 'boolean'"
+                  :model-value="values.feature_labels?.[item.key] ?? false"
                   density="compact"
                   hide-details
-                  @update:model-value="updateFeatureRow(values, setFieldValue, index, 'label', activeFeatureLocale, $event)"
+                  color="primary"
+                  @update:model-value="setFeatureValue(values, setFieldValue, item.key, $event)"
                 />
-              </v-col>
-              <v-col cols="6">
                 <v-text-field
-                  :model-value="feature.value?.[activeFeatureLocale]"
-                  :label="t('admin.plans.fields.featureValue')"
+                  v-else
+                  :model-value="values.feature_labels?.[item.key]?.[activeFeatureLocale] ?? ''"
                   density="compact"
                   hide-details
-                  @update:model-value="updateFeatureRow(values, setFieldValue, index, 'value', activeFeatureLocale, $event)"
-                />
-              </v-col>
-              <v-col cols="1" class="d-flex justify-end">
-                <v-btn
-                  icon="mdi-delete-outline"
-                  size="small"
-                  variant="text"
-                  color="error"
-                  :aria-label="t('admin.plans.removeFeature')"
-                  @click="removeFeatureRow(values, setFieldValue, index)"
+                  :placeholder="t('admin.plans.fields.featureValue')"
+                  @update:model-value="updateFeatureText(values, setFieldValue, item.key, activeFeatureLocale, $event)"
                 />
               </v-col>
             </v-row>
-
-            <v-btn variant="tonal" size="small" prepend-icon="mdi-plus" class="mt-2" @click="addFeatureRow(values, setFieldValue)">
-              {{ t('admin.plans.addFeature') }}
-            </v-btn>
           </v-window-item>
         </v-window>
       </template>

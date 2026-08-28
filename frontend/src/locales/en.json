@@ -279,6 +279,7 @@
     "endDateTimeRequired": "End date/time is required.",
     "endAfterStart": "End must be after start.",
     "mustBeNumber": "Must be a number.",
+    "planFeatureListingKeyFormat": "Only lowercase letters, numbers, and underscores are allowed.",
     "priceNumber": "Price must be a number.",
     "percentDiscountMax": "A percent discount cannot exceed 100.",
     "dateRequired": "Date is required.",
@@ -1088,11 +1089,8 @@
       "subscriptionsCount": "Subscriptions",
       "confirmDeleteTitle": "Delete plan?",
       "confirmDeleteMessage": "This will permanently delete \"{name}\".",
-      "featureLabelsTitle": "Public Feature List",
-      "featureLabelsHint": "Freeform feature lines shown for this plan on the public pricing page, in each language — add as many as you like (e.g. \"Users\" / \"Up to 20\").",
-      "addFeature": "Add Feature",
-      "removeFeature": "Remove",
-      "duplicateFeatureLabels": "Duplicate feature label(s) in this language: {labels}. The public pricing page matches rows across plans by this exact text, so duplicates within one plan will overwrite each other.",
+      "featureLabelsHint": "Each row below is defined once in the shared Feature Catalog and shown on the public pricing page — just fill in this plan's value for each one. Manage the catalog itself (add, edit, or remove rows) from the \"Manage Feature Catalog\" button on the Plans page.",
+      "noFeatureListings": "No feature catalog rows yet — use \"Manage Feature Catalog\" to add some.",
       "tabs": {
         "details": "Details",
         "limits": "Limits & Features",
@@ -1115,7 +1113,6 @@
         "hasReports": "Reports",
         "hasApiAccess": "API Access",
         "hasTelegram": "Telegram Integration",
-        "featureLabel": "Label",
         "featureValue": "Value"
       },
       "messages": {
@@ -1124,6 +1121,34 @@
         "deletedSuccess": "Plan deleted successfully.",
         "saveError": "Could not save plan.",
         "deleteError": "Could not delete plan."
+      }
+    },
+    "planFeatureListings": {
+      "manageCatalog": "Manage Feature Catalog",
+      "manageCatalogHint": "Defines the rows every plan can fill in a value for, shown on the public pricing page.",
+      "newFeature": "New Feature",
+      "editFeature": "Edit Feature",
+      "addFeature": "Add Feature",
+      "confirmDeleteTitle": "Delete feature?",
+      "confirmDeleteMessage": "This will permanently remove \"{label}\" from the catalog. Plans that already have a value for it keep that value stored, but it stops appearing on the public pricing page.",
+      "fields": {
+        "key": "Key",
+        "keyHint": "Lowercase letters, numbers, and underscores only — cannot be changed after creation.",
+        "labelEn": "Label (English)",
+        "labelKm": "Label (Khmer)",
+        "valueType": "Value Type",
+        "sortOrder": "Sort Order",
+        "isActive": "Active"
+      },
+      "valueTypes": {
+        "boolean": "Yes / No",
+        "text": "Text"
+      },
+      "messages": {
+        "createdSuccess": "Feature created successfully.",
+        "updatedSuccess": "Feature updated successfully.",
+        "deletedSuccess": "Feature deleted successfully.",
+        "saveError": "Could not save feature."
       }
     },
     "rolePermissions": {

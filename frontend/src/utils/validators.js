@@ -340,12 +340,23 @@ export const planSchema = yup.object({
   has_api_access: yup.boolean(),
   has_telegram: yup.boolean(),
   is_active: yup.boolean(),
-  feature_labels: yup.array().of(yup.object({
-    key: yup.string().required(),
-    label: yup.object({ en: yup.string().required(), km: yup.string().nullable() }),
-    value: yup.object({ en: yup.string().required(), km: yup.string().nullable() }),
-  })).nullable(),
+  // Object keyed by the live PlanFeatureListing catalog's `key` — shape
+  // varies per key's value_type (boolean vs {en,km} text), which yup can't
+  // express against a dynamic key set. The catalog-driven editor can only
+  // ever construct a well-shaped value per key it renders, so real
+  // structural validation happens server-side against the live catalog
+  // instead (see StorePlanRequest/UpdatePlanRequest's withValidator()).
+  feature_labels: yup.object().nullable(),
   sort_order: yup.number().typeError(() => t('validation.mustBeNumber')).nullable().integer().min(0),
+})
+
+export const planFeatureListingSchema = yup.object({
+  key: yup.string().required().max(100).matches(/^[a-z0-9_]+$/, () => t('validation.planFeatureListingKeyFormat')),
+  label_en: yup.string().required().max(255),
+  label_km: yup.string().nullable().max(255),
+  value_type: yup.string().required().oneOf(['boolean', 'text']),
+  sort_order: yup.number().typeError(() => t('validation.mustBeNumber')).nullable().integer().min(0),
+  is_active: yup.boolean(),
 })
 
 export const branchSchema = yup.object({

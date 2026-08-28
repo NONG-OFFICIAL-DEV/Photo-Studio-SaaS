@@ -2,8 +2,10 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Enums\PlanFeatureValueType;
 use App\Enums\TenantRole;
 use App\Models\Plan;
+use App\Models\PlanFeatureListing;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\CreatesTenantUsers;
@@ -51,36 +53,11 @@ class AdminPlanTest extends TestCase
         $this->assertDatabaseHas('plans', ['code' => 'pro']);
     }
 
-    public function test_it_creates_a_plan_with_freeform_feature_rows(): void
+    public function test_it_creates_a_plan_with_catalog_backed_feature_values(): void
     {
         $superAdmin = $this->superAdmin();
-
-        $featureLabels = [
-            ['key' => 'users', 'label' => ['en' => 'Users', 'km' => 'អ្នកប្រើប្រាស់'], 'value' => ['en' => 'Up to 20', 'km' => 'រហូតដល់ 20']],
-            ['key' => 'storage', 'label' => ['en' => 'Storage', 'km' => 'ទំហំផ្ទុក'], 'value' => ['en' => '100 GB']],
-        ];
-
-        $response = $this->actingAsUser($superAdmin)
-            ->postJson('/api/v1/admin/plans', [
-                'name' => 'Pro',
-                'code' => 'pro',
-                'price_monthly' => 49,
-                'feature_labels' => $featureLabels,
-            ])
-            ->assertCreated();
-
-        $response->assertJsonPath('data.feature_labels.0.key', 'users')
-            ->assertJsonPath('data.feature_labels.0.label.en', 'Users')
-            ->assertJsonPath('data.feature_labels.0.value.en', 'Up to 20')
-            ->assertJsonPath('data.feature_labels.1.key', 'storage');
-
-        $plan = Plan::where('code', 'pro')->firstOrFail();
-        $this->assertCount(2, $plan->feature_labels);
-    }
-
-    public function test_a_feature_row_missing_required_text_is_rejected(): void
-    {
-        $superAdmin = $this->superAdmin();
+        $textFeature = PlanFeatureListing::factory()->create(['value_type' => PlanFeatureValueType::Text]);
+        $boolFeature = PlanFeatureListing::factory()->create(['value_type' => PlanFeatureValueType::Boolean]);
 
         $response = $this->actingAsUser($superAdmin)
             ->postJson('/api/v1/admin/plans', [
@@ -88,12 +65,70 @@ class AdminPlanTest extends TestCase
                 'code' => 'pro',
                 'price_monthly' => 49,
                 'feature_labels' => [
-                    ['key' => 'users', 'label' => ['en' => 'Users'], 'value' => ['km' => 'តម្លៃ']], // missing value.en
+                    $textFeature->key => ['en' => 'Up to 20', 'km' => 'រហូតដល់ 20'],
+                    $boolFeature->key => true,
                 ],
+            ])
+            ->assertCreated();
+
+        $response->assertJsonPath("data.feature_labels.{$textFeature->key}.en", 'Up to 20')
+            ->assertJsonPath("data.feature_labels.{$boolFeature->key}", true);
+
+        $plan = Plan::where('code', 'pro')->firstOrFail();
+        $this->assertSame('Up to 20', $plan->feature_labels[$textFeature->key]['en']);
+        $this->assertTrue($plan->feature_labels[$boolFeature->key]);
+    }
+
+    public function test_a_text_feature_missing_the_english_value_is_rejected(): void
+    {
+        $superAdmin = $this->superAdmin();
+        $textFeature = PlanFeatureListing::factory()->create(['value_type' => PlanFeatureValueType::Text]);
+
+        $response = $this->actingAsUser($superAdmin)
+            ->postJson('/api/v1/admin/plans', [
+                'name' => 'Pro',
+                'code' => 'pro',
+                'price_monthly' => 49,
+                'feature_labels' => [$textFeature->key => ['km' => 'តម្លៃ']], // missing en
             ])
             ->assertStatus(422);
 
-        $this->assertArrayHasKey('feature_labels.0.value.en', $response->json('meta.errors'));
+        $this->assertArrayHasKey("feature_labels.{$textFeature->key}.en", $response->json('meta.errors'));
+        $this->assertDatabaseMissing('plans', ['code' => 'pro']);
+    }
+
+    public function test_a_boolean_feature_given_a_non_boolean_value_is_rejected(): void
+    {
+        $superAdmin = $this->superAdmin();
+        $boolFeature = PlanFeatureListing::factory()->create(['value_type' => PlanFeatureValueType::Boolean]);
+
+        $response = $this->actingAsUser($superAdmin)
+            ->postJson('/api/v1/admin/plans', [
+                'name' => 'Pro',
+                'code' => 'pro',
+                'price_monthly' => 49,
+                'feature_labels' => [$boolFeature->key => 'yes'],
+            ])
+            ->assertStatus(422);
+
+        $this->assertArrayHasKey("feature_labels.{$boolFeature->key}", $response->json('meta.errors'));
+        $this->assertDatabaseMissing('plans', ['code' => 'pro']);
+    }
+
+    public function test_an_unknown_feature_key_is_rejected(): void
+    {
+        $superAdmin = $this->superAdmin();
+
+        $response = $this->actingAsUser($superAdmin)
+            ->postJson('/api/v1/admin/plans', [
+                'name' => 'Pro',
+                'code' => 'pro',
+                'price_monthly' => 49,
+                'feature_labels' => ['not_a_real_key' => true],
+            ])
+            ->assertStatus(422);
+
+        $this->assertArrayHasKey('feature_labels.not_a_real_key', $response->json('meta.errors'));
         $this->assertDatabaseMissing('plans', ['code' => 'pro']);
     }
 

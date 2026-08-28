@@ -2,6 +2,9 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Enums\PlanFeatureValueType;
+use App\Models\PlanFeatureListing;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -34,13 +37,37 @@ class StorePlanRequest extends FormRequest
             'has_telegram' => ['boolean'],
             'trial_days' => ['nullable', 'integer', 'min:0'],
             'is_active' => ['boolean'],
+            // `feature_labels` is an object keyed by PlanFeatureListing.key
+            // (dynamic, admin-managed catalog) — its per-key structure can't
+            // be expressed as static wildcard rules, so it's checked in
+            // withValidator() below against the live catalog instead.
             'feature_labels' => ['nullable', 'array'],
-            'feature_labels.*.key' => ['required', 'string', 'max:100'],
-            'feature_labels.*.label.en' => ['required', 'string', 'max:255'],
-            'feature_labels.*.label.km' => ['nullable', 'string', 'max:255'],
-            'feature_labels.*.value.en' => ['required', 'string', 'max:255'],
-            'feature_labels.*.value.km' => ['nullable', 'string', 'max:255'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator) {
+            $catalog = PlanFeatureListing::query()->where('is_active', true)->get()->keyBy('key');
+
+            foreach ($this->input('feature_labels', []) as $key => $value) {
+                $listing = $catalog->get($key);
+
+                if (! $listing) {
+                    $validator->errors()->add("feature_labels.{$key}", "Unknown feature key \"{$key}\".");
+
+                    continue;
+                }
+
+                if ($listing->value_type === PlanFeatureValueType::Boolean) {
+                    if (! is_bool($value)) {
+                        $validator->errors()->add("feature_labels.{$key}", "The \"{$key}\" feature must be true or false.");
+                    }
+                } elseif (! is_array($value) || empty($value['en'])) {
+                    $validator->errors()->add("feature_labels.{$key}.en", "The \"{$key}\" feature's English value is required.");
+                }
+            }
+        });
     }
 }

@@ -6,6 +6,7 @@ import AppTable from '@/components/common/AppTable.vue'
 import AppStatusChip from '@/components/common/AppStatusChip.vue'
 import AppConfirmDialog from '@/components/common/AppConfirmDialog.vue'
 import PlanFormDialog from '@/components/admin/PlanFormDialog.vue'
+import PlanFeatureListingManagerDialog from '@/components/admin/PlanFeatureListingManagerDialog.vue'
 import { getAdminPlansApi, deleteAdminPlanApi } from '@/apis/admin.api'
 import { useAppStore } from '@/stores/app'
 import { translateApiMessage } from '@/utils/apiMessages'
@@ -32,6 +33,7 @@ async function fetchPlans(params) {
 
 const formDialog = ref(false)
 const editingPlan = ref(null)
+const catalogDialog = ref(false)
 const confirmDelete = ref(false)
 const deleteTarget = ref(null)
 const deleteLoading = ref(false)
@@ -71,6 +73,7 @@ async function confirmDeletePlan() {
   <div>
     <AppToolbar :title="t('admin.plans.title')" :subtitle="t('admin.plans.subtitle')">
       <template #actions>
+        <v-btn variant="tonal" prepend-icon="mdi-format-list-bulleted" @click="catalogDialog = true">{{ t('admin.planFeatureListings.manageCatalog') }}</v-btn>
         <v-btn color="primary" prepend-icon="mdi-plus" @click="openCreate">{{ t('admin.plans.newPlan') }}</v-btn>
       </template>
     </AppToolbar>
@@ -93,6 +96,7 @@ async function confirmDeletePlan() {
     </v-card>
 
     <PlanFormDialog v-model="formDialog" :plan="editingPlan" @saved="tableRef?.refresh()" />
+    <PlanFeatureListingManagerDialog v-model="catalogDialog" />
 
     <AppConfirmDialog
       v-model="confirmDelete"

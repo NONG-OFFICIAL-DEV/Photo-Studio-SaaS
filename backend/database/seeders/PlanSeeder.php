@@ -2,13 +2,34 @@
 
 namespace Database\Seeders;
 
+use App\Enums\PlanFeatureValueType;
 use App\Models\Plan;
+use App\Models\PlanFeatureListing;
 use Illuminate\Database\Seeder;
 
 class PlanSeeder extends Seeder
 {
     public function run(): void
     {
+        // Idempotent and self-sufficient — doesn't rely on the catalog rows
+        // the create_plan_feature_listings_table migration seeds, so this
+        // seeder still works standalone (`db:seed --class=PlanSeeder`) on a
+        // database where that migration's one-time seed was later edited
+        // or removed by an admin.
+        $catalog = [
+            ['key' => 'users', 'label_en' => 'Users', 'label_km' => 'អ្នកប្រើប្រាស់', 'value_type' => PlanFeatureValueType::Text, 'sort_order' => 0],
+            ['key' => 'storage', 'label_en' => 'Storage', 'label_km' => 'ទំហំផ្ទុក', 'value_type' => PlanFeatureValueType::Text, 'sort_order' => 1],
+            ['key' => 'orders', 'label_en' => 'Monthly Orders', 'label_km' => 'ការកម្មង់ប្រចាំខែ', 'value_type' => PlanFeatureValueType::Text, 'sort_order' => 2],
+            ['key' => 'online_gallery', 'label_en' => 'Online Client Galleries', 'label_km' => 'វិចិត្រសាលអតិថិជនអនឡាញ', 'value_type' => PlanFeatureValueType::Boolean, 'sort_order' => 3],
+            ['key' => 'reports', 'label_en' => 'Reports & Analytics', 'label_km' => 'របាយការណ៍ និងវិភាគទិន្នន័យ', 'value_type' => PlanFeatureValueType::Boolean, 'sort_order' => 4],
+            ['key' => 'telegram', 'label_en' => 'Telegram Notifications', 'label_km' => 'ការជូនដំណឹង Telegram', 'value_type' => PlanFeatureValueType::Boolean, 'sort_order' => 5],
+            ['key' => 'api_access', 'label_en' => 'API Access', 'label_km' => 'ការចូលប្រើ API', 'value_type' => PlanFeatureValueType::Boolean, 'sort_order' => 6],
+        ];
+
+        foreach ($catalog as $row) {
+            PlanFeatureListing::updateOrCreate(['key' => $row['key']], [...$row, 'is_active' => true]);
+        }
+
         $plans = [
             [
                 'code' => 'free_trial',
@@ -27,11 +48,13 @@ class PlanSeeder extends Seeder
                 'trial_days' => 14,
                 'sort_order' => 0,
                 'feature_labels' => [
-                    'max_users' => ['en' => 'Up to 2 users', 'km' => 'អ្នកប្រើប្រាស់រហូតដល់ 2'],
-                    'storage_limit_gb' => ['en' => '1 GB storage', 'km' => 'ទំហំផ្ទុក 1 GB'],
-                    'monthly_order_limit' => ['en' => '10 orders / month', 'km' => 'ការកម្មង់ 10 / ខែ'],
-                    'has_online_gallery' => ['en' => 'Online client galleries', 'km' => 'វិចិត្រសាលអតិថិជនអនឡាញ'],
-                    'has_watermark_gallery' => ['en' => 'Watermarked online gallery', 'km' => 'វិចិត្រសាលមានស្លាកទឹក'],
+                    'users' => ['en' => 'Up to 2 users', 'km' => 'អ្នកប្រើប្រាស់រហូតដល់ 2'],
+                    'storage' => ['en' => '1 GB storage', 'km' => 'ទំហំផ្ទុក 1 GB'],
+                    'orders' => ['en' => '10 orders / month', 'km' => 'ការកម្មង់ 10 / ខែ'],
+                    'online_gallery' => true,
+                    'reports' => false,
+                    'telegram' => false,
+                    'api_access' => false,
                 ],
             ],
             [
@@ -51,11 +74,13 @@ class PlanSeeder extends Seeder
                 'trial_days' => 0,
                 'sort_order' => 1,
                 'feature_labels' => [
-                    'max_users' => ['en' => 'Up to 3 users', 'km' => 'អ្នកប្រើប្រាស់រហូតដល់ 3'],
-                    'storage_limit_gb' => ['en' => '10 GB storage', 'km' => 'ទំហំផ្ទុក 10 GB'],
-                    'monthly_order_limit' => ['en' => '50 orders / month', 'km' => 'ការកម្មង់ 50 / ខែ'],
-                    'has_online_gallery' => ['en' => 'Online client galleries', 'km' => 'វិចិត្រសាលអតិថិជនអនឡាញ'],
-                    'has_watermark_gallery' => ['en' => 'Watermarked online gallery', 'km' => 'វិចិត្រសាលមានស្លាកទឹក'],
+                    'users' => ['en' => 'Up to 3 users', 'km' => 'អ្នកប្រើប្រាស់រហូតដល់ 3'],
+                    'storage' => ['en' => '10 GB storage', 'km' => 'ទំហំផ្ទុក 10 GB'],
+                    'orders' => ['en' => '50 orders / month', 'km' => 'ការកម្មង់ 50 / ខែ'],
+                    'online_gallery' => true,
+                    'reports' => false,
+                    'telegram' => false,
+                    'api_access' => false,
                 ],
             ],
             [
@@ -75,12 +100,13 @@ class PlanSeeder extends Seeder
                 'trial_days' => 0,
                 'sort_order' => 2,
                 'feature_labels' => [
-                    'max_users' => ['en' => 'Up to 10 users', 'km' => 'អ្នកប្រើប្រាស់រហូតដល់ 10'],
-                    'storage_limit_gb' => ['en' => '100 GB storage', 'km' => 'ទំហំផ្ទុក 100 GB'],
-                    'monthly_order_limit' => ['en' => '300 orders / month', 'km' => 'ការកម្មង់ 300 / ខែ'],
-                    'has_online_gallery' => ['en' => 'Online client galleries', 'km' => 'វិចិត្រសាលអតិថិជនអនឡាញ'],
-                    'has_reports' => ['en' => 'Reporting & analytics', 'km' => 'របាយការណ៍ និងវិភាគទិន្នន័យ'],
-                    'has_watermark_gallery' => ['en' => 'Watermarked online gallery', 'km' => 'វិចិត្រសាលមានស្លាកទឹក'],
+                    'users' => ['en' => 'Up to 10 users', 'km' => 'អ្នកប្រើប្រាស់រហូតដល់ 10'],
+                    'storage' => ['en' => '100 GB storage', 'km' => 'ទំហំផ្ទុក 100 GB'],
+                    'orders' => ['en' => '300 orders / month', 'km' => 'ការកម្មង់ 300 / ខែ'],
+                    'online_gallery' => true,
+                    'reports' => true,
+                    'telegram' => false,
+                    'api_access' => false,
                 ],
             ],
             [
@@ -100,13 +126,13 @@ class PlanSeeder extends Seeder
                 'trial_days' => 0,
                 'sort_order' => 3,
                 'feature_labels' => [
-                    'max_users' => ['en' => 'Unlimited users', 'km' => 'អ្នកប្រើប្រាស់គ្មានកំណត់'],
-                    'storage_limit_gb' => ['en' => 'Unlimited storage', 'km' => 'ទំហំផ្ទុកគ្មានកំណត់'],
-                    'monthly_order_limit' => ['en' => 'Unlimited orders', 'km' => 'ការកម្មង់គ្មានកំណត់'],
-                    'has_online_gallery' => ['en' => 'Online client galleries', 'km' => 'វិចិត្រសាលអតិថិជនអនឡាញ'],
-                    'has_reports' => ['en' => 'Reporting & analytics', 'km' => 'របាយការណ៍ និងវិភាគទិន្នន័យ'],
-                    'has_api_access' => ['en' => 'API access', 'km' => 'ការចូលប្រើ API'],
-                    'has_watermark_gallery' => ['en' => 'Watermarked online gallery', 'km' => 'វិចិត្រសាលមានស្លាកទឹក'],
+                    'users' => ['en' => 'Unlimited users', 'km' => 'អ្នកប្រើប្រាស់គ្មានកំណត់'],
+                    'storage' => ['en' => 'Unlimited storage', 'km' => 'ទំហំផ្ទុកគ្មានកំណត់'],
+                    'orders' => ['en' => 'Unlimited orders', 'km' => 'ការកម្មង់គ្មានកំណត់'],
+                    'online_gallery' => true,
+                    'reports' => true,
+                    'telegram' => false,
+                    'api_access' => true,
                 ],
             ],
         ];

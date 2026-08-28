@@ -2,10 +2,12 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Plan;
+use App\Services\PlanFeatureListingService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-/** @mixin \App\Models\Plan */
+/** @mixin Plan */
 class PlanResource extends JsonResource
 {
     public function toArray(Request $request): array
@@ -30,6 +32,14 @@ class PlanResource extends JsonResource
             'trial_days' => $this->trial_days,
             'is_active' => $this->is_active,
             'feature_labels' => $this->feature_labels ?? [],
+            // Resolved against the live catalog — label text, value type,
+            // and this plan's value, all pre-joined server-side so no
+            // consumer (admin form, public pricing page) has to guess at
+            // types or match rows by fuzzy text. Re-queries the catalog
+            // per plan; at this app's scale (a handful of plans) that's not
+            // worth optimizing away — revisit if this resource starts
+            // backing a much larger plan list.
+            'feature_list' => app(PlanFeatureListingService::class)->resolveForPlan($this->resource),
             'sort_order' => $this->sort_order,
             'subscriptions_count' => $this->whenCounted('subscriptions'),
         ];

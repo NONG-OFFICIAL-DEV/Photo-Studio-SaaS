@@ -37,6 +37,14 @@ export const updateAdminPlanApi = (id, payload) => http.put(`/v1/admin/plans/${i
 
 export const deleteAdminPlanApi = id => http.delete(`/v1/admin/plans/${id}`)
 
+export const getAdminPlanFeatureListingsApi = () => http.get('/v1/admin/plan-feature-listings')
+
+export const createAdminPlanFeatureListingApi = payload => http.post('/v1/admin/plan-feature-listings', payload)
+
+export const updateAdminPlanFeatureListingApi = (id, payload) => http.put(`/v1/admin/plan-feature-listings/${id}`, payload)
+
+export const deleteAdminPlanFeatureListingApi = id => http.delete(`/v1/admin/plan-feature-listings/${id}`)
+
 export const getAdminRolePermissionsApi = () => http.get('/v1/admin/role-permissions')
 
 export const updateAdminRolePermissionsApi = (role, permissions) =>

@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\V1\Admin\AdminAnalyticsController;
 use App\Http\Controllers\Api\V1\Admin\AdminAuditController;
 use App\Http\Controllers\Api\V1\Admin\AdminPaymentConfirmationController;
 use App\Http\Controllers\Api\V1\Admin\AdminPlanController;
+use App\Http\Controllers\Api\V1\Admin\AdminPlanFeatureListingController;
 use App\Http\Controllers\Api\V1\Admin\AdminPlatformSettingController;
 use App\Http\Controllers\Api\V1\Admin\AdminRolePermissionController;
 use App\Http\Controllers\Api\V1\Admin\AdminTenantController;
@@ -435,6 +436,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth:api', 'super-admin'])-
         Route::post('/', [AdminPlanController::class, 'store']);
         Route::put('/{plan}', [AdminPlanController::class, 'update']);
         Route::delete('/{plan}', [AdminPlanController::class, 'destroy']);
+    });
+
+    Route::prefix('plan-feature-listings')->name('plan-feature-listings.')->group(function () {
+        Route::get('/', [AdminPlanFeatureListingController::class, 'index']);
+        Route::post('/', [AdminPlanFeatureListingController::class, 'store']);
+        Route::put('/{planFeatureListing}', [AdminPlanFeatureListingController::class, 'update']);
+        Route::delete('/{planFeatureListing}', [AdminPlanFeatureListingController::class, 'destroy']);
     });
 
     Route::prefix('audit')->name('audit.')->group(function () {

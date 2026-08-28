@@ -16,8 +16,9 @@ use App\Repositories\Contracts\InventoryItemRepositoryInterface;
 use App\Repositories\Contracts\InvoiceRepositoryInterface;
 use App\Repositories\Contracts\OrderRepositoryInterface;
 use App\Repositories\Contracts\PackageRepositoryInterface;
-use App\Repositories\Contracts\PayrollEntryRepositoryInterface;
 use App\Repositories\Contracts\PaymentRepositoryInterface;
+use App\Repositories\Contracts\PayrollEntryRepositoryInterface;
+use App\Repositories\Contracts\PlanFeatureListingRepositoryInterface;
 use App\Repositories\Contracts\PlanRepositoryInterface;
 use App\Repositories\Contracts\ServiceAddOnRepositoryInterface;
 use App\Repositories\Contracts\ServiceCategoryRepositoryInterface;
@@ -38,8 +39,9 @@ use App\Repositories\Eloquent\InventoryItemRepository;
 use App\Repositories\Eloquent\InvoiceRepository;
 use App\Repositories\Eloquent\OrderRepository;
 use App\Repositories\Eloquent\PackageRepository;
-use App\Repositories\Eloquent\PayrollEntryRepository;
 use App\Repositories\Eloquent\PaymentRepository;
+use App\Repositories\Eloquent\PayrollEntryRepository;
+use App\Repositories\Eloquent\PlanFeatureListingRepository;
 use App\Repositories\Eloquent\PlanRepository;
 use App\Repositories\Eloquent\ServiceAddOnRepository;
 use App\Repositories\Eloquent\ServiceCategoryRepository;
@@ -82,6 +84,7 @@ class RepositoryServiceProvider extends ServiceProvider
         CommissionEntryRepositoryInterface::class => CommissionEntryRepository::class,
         PayrollEntryRepositoryInterface::class => PayrollEntryRepository::class,
         PlanRepositoryInterface::class => PlanRepository::class,
+        PlanFeatureListingRepositoryInterface::class => PlanFeatureListingRepository::class,
     ];
 
     public function register(): void
